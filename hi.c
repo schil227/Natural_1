@@ -186,7 +186,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		 *
 		 * DispachMessage sends the message out to the window
 		 */
-		if (IsDialogMessageA(g_toolbar,&Msg)) {
+		if (!IsDialogMessageA(g_toolbar,&Msg)) {
 			TranslateMessage(&Msg);
 			DispatchMessage(&Msg);
 		}
