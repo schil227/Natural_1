@@ -5,3 +5,11 @@
 #define ID_STUFF_GO 9002
 #define ID_HELP_ABOUT 9003
 #define IDD_ABOUT 9004
+#define IDD_TOOLBAR 9005
+#define ID_DIALOG_SHOW 9006
+#define ID_DIALOG_HIDE 9007
+
+#define IDC_FIRST 1000
+#define IDC_SECOND 1001
+
+

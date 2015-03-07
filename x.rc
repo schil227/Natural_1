@@ -1,6 +1,7 @@
 #include "resource.h"
 #include<windows.h>
 
+//The drop down menus of the main window
 IDR_MYMENU MENU
 BEGIN
     POPUP "&File"
@@ -14,12 +15,19 @@ BEGIN
         MENUITEM "G&o somewhere else", 0, GRAYED
     END
     
+    POPUP "&Dialog"
+    BEGIN
+    	MENUITEM "&Show", ID_DIALOG_SHOW
+    	MENUITEM "&Hide", ID_DIALOG_HIDE
+    END
+    
     POPUP "&Help"
     BEGIN
     	MENUITEM "&About", ID_HELP_ABOUT
     END
 END
 
+//dialog box that pops up when clicking on Help->About
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 66
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "My About Box"
@@ -30,4 +38,16 @@ BEGIN
 
 END
 
+//dialog box that stays open
+IDD_TOOLBAR DIALOGEX 0, 0, 98, 52 //size of box in 'box units', not pixels
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Dialog Toolbar"
+FONT 8, "MS Sans Serif"
+BEGIN
+	PUSHBUTTON	"&Press this button",IDC_FIRST,7,7,84,14
+	PUSHBUTTON 	"&Or this one", IDC_SECOND,7,31,84,14
+END
+
+//The Icon :)
 IDI_MYICON ICON "nat_1.ico"

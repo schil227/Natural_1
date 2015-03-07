@@ -16,8 +16,29 @@
 const char g_szClassName[] = "MyWindowClass";
 int numMessages = 0;
 int mouseButtonCount = 0;
+HWND g_toolbar = NULL;
 
-
+BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
+	switch(Message){
+		case WM_COMMAND:
+			switch(LOWORD(wParam)){
+				case IDC_FIRST:
+					MessageBox(hwnd,"You top-button pressing Jerk.", "Awesome Message Title~", MB_OK | MB_ICONEXCLAMATION);
+				break;
+				case IDC_SECOND:
+					MessageBox(hwnd,"Bottom button? Ya looser.", "Awesome Message Title~", MB_OK | MB_ICONEXCLAMATION);
+				break;
+			}
+		break;
+		case WM_DESTROY:
+			DestroyWindow(g_toolbar);
+			PostQuitMessage(0);
+		break;
+		default:
+			return FALSE;
+	}
+	return TRUE;
+}
 
 BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 	switch(Message){
@@ -85,6 +106,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		            }
 				}
 				break;
+				case ID_DIALOG_SHOW:
+					ShowWindow(g_toolbar,SW_SHOW);
+				break;
+				case ID_DIALOG_HIDE:
+					ShowWindow(g_toolbar,SW_HIDE);
+				break;
 			}
 		break;
 		default:
@@ -134,6 +161,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	ShowWindow(hwnd, nCmdShow); //display window
+
+	g_toolbar = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_TOOLBAR), hwnd, ToolDlgProc);
+	if(g_toolbar != NULL){
+		ShowWindow(g_toolbar, SW_SHOW);
+	}else{
+		MessageBox(hwnd,"Could not create the toolbar dialog", "Warning!", MB_OK | MB_ICONINFORMATION);
+	}
+
+
 	UpdateWindow(hwnd); //redraw
 
 	/*
@@ -150,8 +186,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		 *
 		 * DispachMessage sends the message out to the window
 		 */
-		TranslateMessage(&Msg);
-		DispatchMessage(&Msg);
+		if (IsDialogMessageA(g_toolbar,&Msg)) {
+			TranslateMessage(&Msg);
+			DispatchMessage(&Msg);
+		}
 	}
 
 
