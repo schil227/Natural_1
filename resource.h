@@ -11,5 +11,5 @@
 
 #define IDC_FIRST 1000
 #define IDC_SECOND 1001
-
+#define IDC_TEXT 1002
 

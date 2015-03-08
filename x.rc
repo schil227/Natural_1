@@ -27,6 +27,8 @@ BEGIN
     END
 END
 
+
+
 //dialog box that pops up when clicking on Help->About
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 66
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -45,9 +47,10 @@ EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Dialog Toolbar"
 FONT 8, "MS Sans Serif"
 BEGIN
-	PUSHBUTTON	"&Press this button",IDC_FIRST,7,7,84,14
-	PUSHBUTTON 	"&Or this one", IDC_SECOND,7,31,84,14
+	EDITTEXT        IDC_TEXT,7,7,84,14,ES_AUTOHSCROLL
+	PUSHBUTTON 	"&Enter Name", IDC_SECOND,7,31,84,14
 END
+
 
 //The Icon :)
 IDI_MYICON ICON "nat_1.ico"

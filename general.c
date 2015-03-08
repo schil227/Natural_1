@@ -123,6 +123,18 @@ char * returnArr(void){
 	return stuff;
 }
 
+char *join(char *str1, char *str2){
+	char * resultStr = malloc(strlen(str1) + strlen(str2) + 1);
+
+	if(resultStr){
+		printf("copying\n");
+		strcpy(resultStr,str1);
+		strcat(resultStr,str2);
+	}
+
+	return resultStr;
+}
+
 //int babmain(void){
 //	char* myarr;
 //	myarr = returnArr();
