@@ -10,8 +10,7 @@
 #include<stdlib.h>
 #include "general.h"
 #include "resource.h"
-#define ID_FILE_EXIT 9001
-#define ID_STUFF_GO 9002
+
 
 const char g_szClassName[] = "MyWindowClass";
 int numMessages = 0;
@@ -33,7 +32,7 @@ BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 						char * textStr = (char*)GlobalAlloc(GPTR, len + 1);
 						GetDlgItemText(hwnd, IDC_TEXT, textStr, len + 1);
 //						printf("string: %s\n", textStr);
-						char * str = join("Name: ",textStr);
+						char * str = (char *)join("Name: ",textStr);
 //						printf("str: %s\n", str);
 						MessageBox(hwnd, str,"Awesome Message Title~", MB_OK | MB_ICONEXCLAMATION);
 						free(str);
@@ -74,6 +73,45 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch(msg){
+		case WM_CREATE:
+			{
+				HFONT hfDefault;
+				HWND hEdit;
+				HWND hButton;
+
+				hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "",
+					WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
+					0,0,100,100,hwnd, (HMENU) IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+
+				if(hEdit == NULL){
+					MessageBox(hwnd, "Failed to make edit window", "Notice",
+						MB_OK | MB_ICONINFORMATION);
+				}
+
+				hButton = CreateWindowEx(WS_EX_CLIENTEDGE, "BUTTON", "WOOT",
+						WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+						50,105,50,50, hwnd, (HMENU) IDC_MAIN_BUTTON,GetModuleHandle(NULL), NULL);
+
+				hfDefault = (HFONT) GetStockObject(DEFAULT_GUI_FONT);
+				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
+				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
+			}
+		break;
+		case WM_SIZE:
+		{
+			HWND hEdit;
+			HWND hButton;
+			RECT rcClient;
+
+			GetClientRect(hwnd, &rcClient);
+
+			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom-100, SWP_NOZORDER);
+
+			hButton = GetDlgItem(hwnd, IDC_MAIN_BUTTON);
+			SetWindowPos(hButton, NULL, 5, rcClient.bottom-50,50,25,SWP_NOZORDER);
+		}
+		break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 		break;
@@ -116,6 +154,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		                    MB_OK | MB_ICONINFORMATION);
 		            }
 				}
+				break;
 				case ID_FILE_EXIT:
 					PostQuitMessage(0);
 				break;
@@ -163,9 +202,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	//create the window (handle)
-	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE,g_szClassName,"Window Title :D!",
-			WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT,240,120,NULL,NULL,
-			hInstance,NULL);
+	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE,
+			g_szClassName,
+			"Window Title :D!",
+			WS_OVERLAPPEDWINDOW,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			240,120,
+			NULL,NULL,
+			hInstance,
+			NULL);
 
 	//ALWAYS CHECK THE RETURN VALUES!!!
 	if(hwnd == NULL){

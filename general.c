@@ -8,6 +8,7 @@
 #include<Math.h>
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
 #include "general.h"
 
 //make a arr struct to contain the array, type, and size

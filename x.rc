@@ -7,6 +7,8 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "E&xit", ID_FILE_EXIT
+        MENUITEM "&Save", ID_FILE_SAVE
+        MENUITEM "&Load", ID_FILE_LOAD
     END
 
     POPUP "&Stuff"
@@ -41,14 +43,16 @@ BEGIN
 END
 
 //dialog box that stays open
-IDD_TOOLBAR DIALOGEX 0, 0, 98, 52 //size of box in 'box units', not pixels
+IDD_TOOLBAR DIALOGEX 0, 0, 98, 75 //size of box in 'box units', not pixels
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Dialog Toolbar"
 FONT 8, "MS Sans Serif"
 BEGIN
-	EDITTEXT        IDC_TEXT,7,7,84,14,ES_AUTOHSCROLL
-	PUSHBUTTON 	"&Enter Name", IDC_SECOND,7,31,84,14
+	LTEXT	"Enter a Name:", -1, 7, 7, 84, 14
+	EDITTEXT    IDC_TEXT,7,30,84,14,ES_AUTOHSCROLL
+	PUSHBUTTON 	"&Enter Name", IDC_SECOND,7,60,84,14
+	
 END
 
 

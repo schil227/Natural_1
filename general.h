@@ -17,5 +17,6 @@ typedef struct {
 } charArrStruct;
 
 charArrStruct *bigTriangle(int size);
+char *join(char* str2,char* str1);
 
 #endif /* GENERAL_H_ */
