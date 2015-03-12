@@ -164,6 +164,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				case ID_DIALOG_HIDE:
 					ShowWindow(g_toolbar,SW_HIDE);
 				break;
+				case IDC_MAIN_BUTTON:
+				//	MessageBox(hwnd, "WOOT", "Error", MB_OK | MB_ICONINFORMATION);
+					openFile(hwnd);
+				break;
 			}
 		break;
 		default:
@@ -172,6 +176,62 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			return DefWindowProc(hwnd,msg,wParam,lParam);
 	}
 	return 0;
+}
+
+
+BOOL LoadTextFileToEdit(HWND hwnd, LPCTSTR pszFileName){
+	HANDLE hFile;
+	BOOL bSuccess = FALSE;
+
+	hFile = CreateFile(pszFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
+				OPEN_EXISTING, 0, NULL);
+	if(hFile!=INVALID_HANDLE_VALUE){
+		DWORD dwFileSize;
+
+		dwFileSize = GetFileSize(hFile, NULL);
+		if(dwFileSize != 0xFFFFFFFF){
+
+			LPSTR pszFileText;
+
+			pszFileText = (LPSTR)GlobalAlloc(GPTR, dwFileSize +1);
+			if(pszFileText != NULL){
+
+				DWORD dwRead;
+				if(ReadFile(hFile, pszFileText, dwFileSize, &dwRead, NULL)){
+					pszFileText[dwFileSize] = 0;
+					if(SetWindowText(hwnd, pszFileText)){
+						bSuccess = TRUE;
+					}
+				}
+				GlobalFree(pszFileText);
+			}
+
+
+		}
+		CloseHandle(hFile);
+	}
+	return bSuccess;
+}
+
+void openFile(HWND hwnd){
+	OPENFILENAME ofn;
+	char szFileName[MAX_PATH] = ""; //file name can only be as large as MAX_PATH
+
+	ZeroMemory(&ofn, sizeof(ofn)); //NULLs out unused attrbs
+
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+	ofn.lpstrFile = szFileName;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = "txt";
+
+	if(GetOpenFileName(&ofn)){
+		HWND hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+		LoadTextFileToEdit(hEdit, szFileName);
+	}
+
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -208,7 +268,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
-			240,120,
+			240,360,
 			NULL,NULL,
 			hInstance,
 			NULL);
