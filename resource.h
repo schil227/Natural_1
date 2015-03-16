@@ -20,5 +20,6 @@
 #define IDC_TEXT 1002
 #define IDC_MAIN_BUTTON 1003
 
+#define IDB_PLAYER 2001
 
 #endif

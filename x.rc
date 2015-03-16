@@ -55,6 +55,9 @@ BEGIN
 	
 END
 
+//The player bitmap:
+IDB_PLAYER BITMAP DISCARDABLE "player.bmp"
+
 
 //The Icon :)
 IDI_MYICON ICON "nat_1.ico"

@@ -13,10 +13,24 @@
 
 
 const char g_szClassName[] = "MyWindowClass";
+const int rateOfChange_player = 2;
 int numMessages = 0;
 int mouseButtonCount = 0;
-
+HBITMAP g_hbmPlayer = NULL;
+HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
+
+typedef struct _PLAYERINFO{
+	int width;
+	int height;
+	int x;
+	int y;
+
+	int dx;
+	int dy;
+}PLAYERINFO;
+
+PLAYERINFO g_playerInfo;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 	int len = 0;
@@ -71,71 +85,169 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam
 	return TRUE;
 }
 
+
+HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent){
+	HDC hdcMemColor, hdcMemMask;
+	HBITMAP hbmMask;
+	BITMAP bm;
+
+	//create a monochrome mask bitmap (1 bit)
+
+	GetObject(hbmColor, sizeof(BITMAP), &bm);
+	hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+
+	//Get some graphic handlers that are compatable with the display driver
+
+	hdcMemColor = CreateCompatibleDC(0);
+	hdcMemMask = CreateCompatibleDC(0);
+
+	SelectObject(hdcMemColor, hbmColor);
+	SelectObject(hdcMemMask, hbmMask);
+
+	//Set the background color of the color image to the color
+	//we want transparent
+	SetBkColor(hdcMemColor, crTransparent);
+
+	//Copy the bits from the color image to the black/white mask
+	//everything with the background color ends up white
+	//while everything else is black
+
+	BitBlt(hdcMemMask, 0, 0, bm.bmWidth, bm.bmHeight, hdcMemColor, 0, 0, SRCCOPY);
+
+	//Take mask and use it to turn transparent color in the original
+	//color image to black so the transparency effect will work
+
+	BitBlt(hdcMemColor, 0,0,bm.bmWidth, bm.bmHeight, hdcMemMask, 0, 0, SRCINVERT);
+
+	//clean up
+
+	DeleteDC(hdcMemColor);
+	DeleteDC(hdcMemMask);
+
+	return hbmMask;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch(msg){
 		case WM_CREATE:
 			{
 				HFONT hfDefault;
-				HWND hEdit;
-				HWND hButton;
+//				HWND hEdit;
+//				HWND hButton;
+//				HWND g_hbmPlayer;
 
-				hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "",
-					WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-					0,0,100,100,hwnd, (HMENU) IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+//				hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "",
+//					WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
+//					0,0,100,100,hwnd, (HMENU) IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
+//
+//				if(hEdit == NULL){
+//					MessageBox(hwnd, "Failed to make edit window", "Notice",
+//						MB_OK | MB_ICONINFORMATION);
+//				}
+//
+//				hButton = CreateWindowEx(WS_EX_CLIENTEDGE, "BUTTON", "WOOT",
+//						WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+//						50,105,50,50, hwnd, (HMENU) IDC_MAIN_BUTTON,GetModuleHandle(NULL), NULL);
+//
+				g_hbmPlayer = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_PLAYER));
 
-				if(hEdit == NULL){
-					MessageBox(hwnd, "Failed to make edit window", "Notice",
+				if (g_hbmPlayer == NULL) {
+					MessageBox(hwnd, "Failed to make player", "Notice",
 						MB_OK | MB_ICONINFORMATION);
 				}
 
-				hButton = CreateWindowEx(WS_EX_CLIENTEDGE, "BUTTON", "WOOT",
-						WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-						50,105,50,50, hwnd, (HMENU) IDC_MAIN_BUTTON,GetModuleHandle(NULL), NULL);
+				g_hbmPlayerMask = CreateBitmapMask(g_hbmPlayer, RGB(255,255,255)); //transparent is black
+				if (g_hbmPlayer == NULL) {
+					MessageBox(hwnd, "Failed to make player mask", "Notice",
+						MB_OK | MB_ICONINFORMATION);
+				}
 
-				hfDefault = (HFONT) GetStockObject(DEFAULT_GUI_FONT);
-				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
-				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
+//				hfDefault = (HFONT) GetStockObject(DEFAULT_GUI_FONT);
+//				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
+//				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
 			}
 		break;
-		case WM_SIZE:
-		{
-			HWND hEdit;
-			HWND hButton;
+//		case WM_SIZE:
+//		{
+//			HWND hEdit;
+//			HWND hButton;
+//			RECT rcClient;
+//
+//			GetClientRect(hwnd, &rcClient);
+//
+//			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+//		//	SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom-100, SWP_NOZORDER);
+//
+//			hButton = GetDlgItem(hwnd, IDC_MAIN_BUTTON);
+//			SetWindowPos(hButton, NULL, 5, rcClient.bottom-50,50,25,SWP_NOZORDER);
+//		}
+		break;
+		case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
+		{			   //SPAWN MORE MESSAGES!
+			BITMAP bm;
+			PAINTSTRUCT ps;
 			RECT rcClient;
 
-			GetClientRect(hwnd, &rcClient);
+			HDC hdc = BeginPaint(hwnd, &ps);
 
-			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
-			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom-100, SWP_NOZORDER);
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_hbmPlayerMask);
 
-			hButton = GetDlgItem(hwnd, IDC_MAIN_BUTTON);
-			SetWindowPos(hButton, NULL, 5, rcClient.bottom-50,50,25,SWP_NOZORDER);
+			//get the player image, store in bm
+			GetObject(g_hbmPlayer,sizeof(bm), &bm);
+
+			GetClientRect(hwnd,&rcClient);
+			FillRect(hdc, &rcClient, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
+
+			//draw the image
+//			BitBlt(hdc, 0,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
+//			BitBlt(hdc, bm.bmWidth + 10,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCAND);
+//			BitBlt(hdc, 0,bm.bmHeight+10,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+
+			BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+			BitBlt(hdc, bm.bmWidth, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
+			BitBlt(hdc, bm.bmWidth * 2, bm.bmHeight * 2, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
+
+			SelectObject(hdcMem, g_hbmPlayer);
+			BitBlt(hdc, 0, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+			BitBlt(hdc, bm.bmWidth, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
+			BitBlt(hdc, bm.bmWidth * 2, bm.bmHeight * 2, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
+
+
+
+			SelectObject(hdcMem, hbmOld);
+			DeleteDC(hdcMem);
+
+			EndPaint(hwnd, &ps);
 		}
 		break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 		break;
 		case WM_DESTROY:
+			DeleteObject(g_hbmPlayer);
+			DeleteObject(g_hbmPlayerMask);
+
 			PostQuitMessage(0);
 		break;
-		case WM_LBUTTONDOWN:
-			mouseButtonCount++;
-			//charArrStruct *myCharArr = bigTriangle(mouseButtonCount);
-		{
-			char mouseClicks[1];
-			sprintf(mouseClicks,"%d",mouseButtonCount);
-//			HINSTANCE hInstance = GetModuleHandle(NULL);
-			printf("pushin down that button! %d\n", mouseButtonCount);
-//			GetModuleFileNameA(hInstance, szFileName, MAX_PATH);
-
-		//	printf("%s\n", myCharArr->charArr);
-
-			MessageBox(hwnd,"bananas", "num clicks:",
-					MB_OK | MB_ICONINFORMATION);
-		//	free(myCharArr->charArr);
-		//	free(myCharArr);
-
-		}
+//		case WM_LBUTTONDOWN:
+//			mouseButtonCount++;
+//			//charArrStruct *myCharArr = bigTriangle(mouseButtonCount);
+//		{
+//			char mouseClicks[1];
+//			sprintf(mouseClicks,"%d",mouseButtonCount);
+////			HINSTANCE hInstance = GetModuleHandle(NULL);
+//			printf("pushin down that button! %d\n", mouseButtonCount);
+////			GetModuleFileNameA(hInstance, szFileName, MAX_PATH);
+//
+//		//	printf("%s\n", myCharArr->charArr);
+//
+//			MessageBox(hwnd,"bananas", "num clicks:",
+//					MB_OK | MB_ICONINFORMATION);
+//		//	free(myCharArr->charArr);
+//		//	free(myCharArr);
+//
+//		}
 		break;
 		case WM_COMMAND:
 			switch(LOWORD(wParam)){
@@ -163,6 +275,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				break;
 				case ID_DIALOG_HIDE:
 					ShowWindow(g_toolbar,SW_HIDE);
+				break;
+				case ID_FILE_SAVE:
+					saveFile(hwnd);
 				break;
 				case IDC_MAIN_BUTTON:
 				//	MessageBox(hwnd, "WOOT", "Error", MB_OK | MB_ICONINFORMATION);
@@ -198,7 +313,7 @@ BOOL LoadTextFileToEdit(HWND hwnd, LPCTSTR pszFileName){
 
 				DWORD dwRead;
 				if(ReadFile(hFile, pszFileText, dwFileSize, &dwRead, NULL)){
-					pszFileText[dwFileSize] = 0;
+					pszFileText[dwFileSize] = 0; //Null terminator
 					if(SetWindowText(hwnd, pszFileText)){
 						bSuccess = TRUE;
 					}
@@ -233,6 +348,64 @@ void openFile(HWND hwnd){
 	}
 
 }
+
+BOOL SaveTextFileFromEdit(hEdit, pszFileName){
+	HANDLE hFile;
+	BOOL bSuccess = FALSE;
+
+	hFile = CreateFile(pszFileName, GENERIC_WRITE, 0, NULL,
+			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(hFile != INVALID_HANDLE_VALUE){
+
+		DWORD dwTextLength;
+
+		dwTextLength = GetWindowTextLength(hEdit);
+		if(dwTextLength > 0){
+			LPSTR pszText;
+			DWORD dwBufferSize = dwTextLength+1;
+			pszText = GlobalAlloc(GPTR, dwBufferSize);
+
+			if(pszText != NULL){
+
+				if(GetWindowText(hEdit, pszText, dwBufferSize)){
+
+					DWORD dwWritten;
+
+					if(WriteFile(hFile, pszText, dwTextLength, &dwWritten, NULL)){
+						bSuccess = TRUE;
+					}
+
+				}
+				GlobalFree(pszText);
+
+			}
+		}
+		CloseHandle(hFile);
+	}
+	return bSuccess;
+}
+
+void saveFile(HWND hwnd){
+	OPENFILENAME ofn;
+	char szFileName[MAX_PATH] = ""; //file name can only be as large as MAX_PATH
+
+	ZeroMemory(&ofn, sizeof(ofn)); //NULLs out unused attrbs
+
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+	ofn.lpstrFile = szFileName;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+
+
+	if(GetSaveFileName(&ofn)){
+		HWND hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+		SaveTextFileFromEdit(hEdit, szFileName);
+	}
+
+}
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		LPSTR lpCmdLine, int nCmdShow) {
@@ -287,7 +460,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}else{
 		MessageBox(hwnd,"Could not create the toolbar dialog", "Warning!", MB_OK | MB_ICONINFORMATION);
 	}
-
+	ShowWindow(g_toolbar,SW_HIDE);
 
 	UpdateWindow(hwnd); //redraw
 
