@@ -127,11 +127,54 @@ HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent){
 	return hbmMask;
 }
 
+//Make 'em bounce around like a good screensaver.
+void updatePlayer(RECT* prc){
+
+	if(g_playerInfo.x < 0 || g_playerInfo.x + g_playerInfo.width >= prc->right){
+		g_playerInfo.dx = g_playerInfo.dx*-1;
+	}
+
+	if(g_playerInfo.y < 0 || g_playerInfo.y + g_playerInfo.height >= prc->bottom){
+		g_playerInfo.dy = g_playerInfo.dy*-1;
+	}
+
+	g_playerInfo.x += g_playerInfo.dx;
+	g_playerInfo.y += g_playerInfo.dy;
+
+}
+
+void drawPlayer(HDC hdc, RECT* prc){
+	HDC hdcBuffer = CreateCompatibleDC(hdc);
+	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right,prc->bottom);
+	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
+
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
+
+	FillRect(hdc, prc, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
+
+	BitBlt(hdcBuffer, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height,hdcMem,0,0, SRCAND);
+
+	SelectObject(hdcMem, g_hbmPlayer);
+	BitBlt(hdcBuffer, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height,hdcMem,0,0, SRCPAINT);
+
+	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
+
+	SelectObject(hdcMem,hbmOld);
+	DeleteDC(hdcMem);
+
+	SelectObject(hdcBuffer, hbmOldBuffer);
+	DeleteDC(hdcBuffer);
+	DeleteObject(hbmBuffer);
+}
+
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch(msg){
 		case WM_CREATE:
 			{
-				HFONT hfDefault;
+				BITMAP bm;
+//				HFONT hfDefault;
 //				HWND hEdit;
 //				HWND hButton;
 //				HWND g_hbmPlayer;
@@ -161,6 +204,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 					MessageBox(hwnd, "Failed to make player mask", "Notice",
 						MB_OK | MB_ICONINFORMATION);
 				}
+
+				GetObjectA(g_hbmPlayer,sizeof(bm), &bm);
+				ZeroMemory(&g_playerInfo, sizeof(g_playerInfo));
+
+				g_playerInfo.height = bm.bmHeight;
+				g_playerInfo.width = bm.bmWidth;
+
+				g_playerInfo.dx = rateOfChange_player;
+				g_playerInfo.dy = rateOfChange_player;
+
+				g_playerInfo.x = 50;
+				g_playerInfo.y = 50;
 
 //				hfDefault = (HFONT) GetStockObject(DEFAULT_GUI_FONT);
 //				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
@@ -204,16 +259,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 //			BitBlt(hdc, bm.bmWidth + 10,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCAND);
 //			BitBlt(hdc, 0,bm.bmHeight+10,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
 
-			BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
-			BitBlt(hdc, bm.bmWidth, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
-			BitBlt(hdc, bm.bmWidth * 2, bm.bmHeight * 2, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
-
+//			BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+//			BitBlt(hdc, bm.bmWidth, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
+			BitBlt(hdc, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height, hdcMem, 0, 0, SRCAND);
+//
 			SelectObject(hdcMem, g_hbmPlayer);
-			BitBlt(hdc, 0, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
-			BitBlt(hdc, bm.bmWidth, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
-			BitBlt(hdc, bm.bmWidth * 2, bm.bmHeight * 2, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
+//			BitBlt(hdc, 0, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+//			BitBlt(hdc, bm.bmWidth, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
+			BitBlt(hdc, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height, hdcMem, 0, 0, SRCPAINT);
 
 
+//			BitBlt(hdc,g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height,hdcMem, 0, 0, SRCPAINT);
 
 			SelectObject(hdcMem, hbmOld);
 			DeleteDC(hdcMem);
@@ -248,6 +304,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 //		//	free(myCharArr);
 //
 //		}
+		break;
+		case WM_KEYUP:
+		{
+			RECT* rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd,&rect);
+
+			updatePlayer(&rect);
+			drawPlayer(hdc,&rect);
+			//MessageBox(hwnd, "", "Notice", MB_OK | MB_ICONINFORMATION);
+
+		}
 		break;
 		case WM_COMMAND:
 			switch(LOWORD(wParam)){
@@ -292,6 +360,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	}
 	return 0;
 }
+
+
 
 
 BOOL LoadTextFileToEdit(HWND hwnd, LPCTSTR pszFileName){

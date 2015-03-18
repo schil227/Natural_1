@@ -22,4 +22,6 @@
 
 #define IDB_PLAYER 2001
 
+#define ID_TIMER 3001
+
 #endif
