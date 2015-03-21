@@ -174,6 +174,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		case WM_CREATE:
 			{
 				BITMAP bm;
+				UINT ret;
 //				HFONT hfDefault;
 //				HWND hEdit;
 //				HWND hButton;
@@ -217,6 +218,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				g_playerInfo.x = 50;
 				g_playerInfo.y = 50;
 
+				ret = SetTimer(hwnd, ID_TIMER, 50, NULL);//fires every 50 ms!
+
+				if(ret == 0){
+					MessageBox(hwnd, "Could not SetTimer()!", "Error", MB_OK | MB_ICONEXCLAMATION);
+				}
 //				hfDefault = (HFONT) GetStockObject(DEFAULT_GUI_FONT);
 //				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
 //				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
@@ -239,6 +245,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		break;
 		case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
 		{			   //SPAWN MORE MESSAGES!
+
+//			RECT* rect;
+//			HDC hdc = GetDC(hwnd);
+//
+//			GetClientRect(hwnd, &rect);
+//			drawPlayer(hdc,&rect);
+
 			BITMAP bm;
 			PAINTSTRUCT ps;
 			RECT rcClient;
@@ -254,13 +267,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			GetClientRect(hwnd,&rcClient);
 			FillRect(hdc, &rcClient, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
 
-			//draw the image
-//			BitBlt(hdc, 0,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
-//			BitBlt(hdc, bm.bmWidth + 10,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCAND);
-//			BitBlt(hdc, 0,bm.bmHeight+10,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+//			//draw the image
+			BitBlt(hdc, 0,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
+			BitBlt(hdc, bm.bmWidth + 10,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCAND);
+			BitBlt(hdc, 0,bm.bmHeight+10,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
 
-//			BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
-//			BitBlt(hdc, bm.bmWidth, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
+			BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+			BitBlt(hdc, bm.bmWidth, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
 			BitBlt(hdc, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height, hdcMem, 0, 0, SRCAND);
 //
 			SelectObject(hdcMem, g_hbmPlayer);
@@ -275,6 +288,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			DeleteDC(hdcMem);
 
 			EndPaint(hwnd, &ps);
+		}
+		break;
+		case WM_TIMER:
+		{
+			RECT* rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd,&rect);
+
+			updatePlayer(&rect);
+			drawPlayer(hdc,&rect);
+
+			ReleaseDC(hwnd, hdc);
 		}
 		break;
 		case WM_CLOSE:
@@ -305,14 +330,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 //
 //		}
 		break;
-		case WM_KEYUP:
+		case WM_KEYDOWN:
 		{
-			RECT* rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd,&rect);
 
-			updatePlayer(&rect);
-			drawPlayer(hdc,&rect);
 			//MessageBox(hwnd, "", "Notice", MB_OK | MB_ICONINFORMATION);
 
 		}

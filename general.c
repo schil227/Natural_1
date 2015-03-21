@@ -13,7 +13,6 @@
 
 //make a arr struct to contain the array, type, and size
 
-
 int factorial(int n, int sum){
 	if(n == 0){
 		return sum;
@@ -128,7 +127,6 @@ char *join(char *str1, char *str2){
 	char * resultStr = malloc(strlen(str1) + strlen(str2) + 1);
 
 	if(resultStr){
-		printf("copying\n");
 		strcpy(resultStr,str1);
 		strcat(resultStr,str2);
 	}
