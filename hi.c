@@ -300,7 +300,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			HDC hdc = GetDC(hwnd);
 			GetClientRect(hwnd,&rect);
 
-			updatePlayer(&rect);
+//			updatePlayer(&rect);
 			drawPlayer(hdc,&rect);
 
 			ReleaseDC(hwnd, hdc);
@@ -336,7 +336,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		break;
 		case WM_KEYDOWN:
 		{
-			g_playerInfo.x +=50;
+			switch(LOWORD(wParam)){
+			case 0x34: //left
+			case 0x64:
+				g_playerInfo.x -= 50;
+			break;
+			case 0x36:
+			case 0x66:
+				g_playerInfo.x += 50;
+			break;
+			case 0x38:
+			case 0x68:
+				g_playerInfo.y -= 50;
+			break;
+			case 0x32:
+			case 0x62:
+				g_playerInfo.y += 50;
+			break;
+			}
+//			g_playerInfo.x +=50;
 			//MessageBox(hwnd, "", "Notice", MB_OK | MB_ICONINFORMATION);
 
 		}
