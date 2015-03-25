@@ -12,7 +12,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.mingw.exe.debug.801050255" name="Debug" parent="cdt.managedbuild.config.gnu.mingw.exe.debug" prebuildStep="windres ../x.rc -o ../window_icon.o">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.mingw.exe.debug.801050255" name="Debug" parent="cdt.managedbuild.config.gnu.mingw.exe.debug" prebuildStep="windres ../resources/window_resources/main_window_resources.rc -o ../window_resources.o">
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.801050255." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.183732356" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.1647658295" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
@@ -32,7 +32,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug.685512382" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug">
 								<option id="gnu.c.link.option.userobjs.1749124915" name="Other objects" superClass="gnu.c.link.option.userobjs" valueType="userObjs">
-									<listOptionValue builtIn="false" value="window_icon.o"/>
+									<listOptionValue builtIn="false" value="window_resources.o"/>
 								</option>
 								<option id="gnu.c.link.option.ldflags.35880885" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-mwindows" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.932973849" superClass="cdt.managedbuild.tool.gnu.c.linker.input">

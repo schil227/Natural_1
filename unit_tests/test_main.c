@@ -9,8 +9,8 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
-#include"../general.h"
-#include"test_general.h"
+#include"../src/headers/general.h"
+#include"./test_headers/test_general.h"
 
 int dmain(){
 	test_general_all();

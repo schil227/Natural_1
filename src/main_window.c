@@ -8,8 +8,8 @@
 #include<stdio.h>
 #include<windows.h>
 #include<stdlib.h>
-#include "general.h"
-#include "resource.h"
+#include "./headers/general.h"
+#include "./headers/main_window.h"
 
 
 const char g_szClassName[] = "MyWindowClass";

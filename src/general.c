@@ -9,7 +9,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
-#include "general.h"
+#include "./headers/general.h"
 
 //make a arr struct to contain the array, type, and size
 
@@ -82,7 +82,7 @@ charArrStruct *bigTriangle(int size){
 
 }
 
-int babmain(void){
+int bmain(void){
 	int size = 4;
 	charArrStruct *my_pyramid = bigTriangle(size);
 	//printf("size:%d\n",(my_pyramid->arrSize));

@@ -1,4 +1,4 @@
-#include "resource.h"
+#include "../../src/headers/main_window.h"
 #include<windows.h>
 
 //The drop down menus of the main window
@@ -56,8 +56,8 @@ BEGIN
 END
 
 //The player bitmap:
-IDB_PLAYER BITMAP DISCARDABLE "player.bmp"
+IDB_PLAYER BITMAP DISCARDABLE "../images/player.bmp"
 
 
 //The Icon :)
-IDI_MYICON ICON "nat_1.ico"
+IDI_MYICON ICON "../images/nat_1.ico"
