@@ -8,6 +8,8 @@
 #ifndef GENERAL_H_
 #define GENERAL_H_
 
+
+
 typedef struct {
 //	size_t typeSize;
 	size_t size;

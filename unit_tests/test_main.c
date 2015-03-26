@@ -12,7 +12,7 @@
 #include"../src/headers/general.h"
 #include"./test_headers/test_general.h"
 
-int dmain(){
+int main(){
 	test_general_all();
 	return 0;
 }
