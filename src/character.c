@@ -4,11 +4,20 @@
  *  Created on: Mar 25, 2015
  *      Author: Adrian
  */
-#include<stdlib.h>
-#include<stdio.h>
-#include<string.h>
-#include"./headers/character.h"
 
-int nameCharacter(character* thisCharacter, char* name){
-	strcpy(thisCharacter->name = name, name);
+#include<string.h>
+#include"./headers/character_pub_methods.h"
+
+void nameCharacter(character* thisCharacter, char* name){
+	thisCharacter->name = malloc(sizeof(name));
+	strcpy(thisCharacter->name, name);
+	thisCharacter->nameLength = strlen(name);
+}
+
+void destroyCharacter(character* thisCharacter){
+	if(thisCharacter->nameLength != 0){
+		free(thisCharacter->name);
+	}
+
+	free(thisCharacter);
 }

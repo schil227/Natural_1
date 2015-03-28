@@ -7,8 +7,8 @@
 
 #ifndef SRC_HEADERS_CHARACTER_H_
 #define SRC_HEADERS_CHARACTER_H_
-
-//#include<winuser.h>
+#include<stdlib.h>
+#include<windows.h>
 
 typedef struct {
 	size_t size;
@@ -20,7 +20,7 @@ typedef struct {
 	int x;
 	int y;
 
-//	HBITMAP image;
+	HBITMAP image;
 
 } character;
 

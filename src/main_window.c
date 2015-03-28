@@ -10,7 +10,7 @@
 #include<stdlib.h>
 #include "./headers/general.h"
 #include "./headers/main_window.h"
-
+#include "./headers/character_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
 const int rateOfChange_player_x = 8;
@@ -21,17 +21,18 @@ HBITMAP g_hbmPlayer = NULL;
 HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
 
-typedef struct _PLAYERINFO{
-	int width;
-	int height;
-	int x;
-	int y;
-
-	int dx;
-	int dy;
-}PLAYERINFO;
-
-PLAYERINFO g_playerInfo;
+//typedef struct _PLAYERINFO{
+//	int width;
+//	int height;
+//	int x;
+//	int y;
+//
+//	int dx;
+//	int dy;
+//}PLAYERINFO;
+//
+//PLAYERINFO g_playerInfo;
+character* player;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 	int len = 0;
@@ -131,16 +132,16 @@ HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent){
 //Make 'em bounce around like a good screensaver.
 void updatePlayer(RECT* prc){
 
-	if(g_playerInfo.x < 0 || g_playerInfo.x + g_playerInfo.width >= prc->right){
-		g_playerInfo.dx = g_playerInfo.dx*-1;
-	}
-
-	if(g_playerInfo.y < 0 || g_playerInfo.y + g_playerInfo.height >= prc->bottom){
-		g_playerInfo.dy = g_playerInfo.dy*-1;
-	}
-
-	g_playerInfo.x += g_playerInfo.dx;
-	g_playerInfo.y += g_playerInfo.dy;
+//	if(g_playerInfo.x < 0 || g_playerInfo.x + g_playerInfo.width >= prc->right){
+//		g_playerInfo.dx = g_playerInfo.dx*-1;
+//	}
+//
+//	if(g_playerInfo.y < 0 || g_playerInfo.y + g_playerInfo.height >= prc->bottom){
+//		g_playerInfo.dy = g_playerInfo.dy*-1;
+//	}
+//
+//	g_playerInfo.x += g_playerInfo.dx;
+//	g_playerInfo.y += g_playerInfo.dy;
 
 }
 
@@ -154,10 +155,10 @@ void drawPlayer(HDC hdc, RECT* prc){
 
 	FillRect(hdc, prc, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
 
-	BitBlt(hdcBuffer, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height,hdcMem,0,0, SRCAND);
+	BitBlt(hdcBuffer, player->x,player->y,player->width,player->height,hdcMem,0,0, SRCAND);
 
 	SelectObject(hdcMem, g_hbmPlayer);
-	BitBlt(hdcBuffer, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height,hdcMem,0,0, SRCPAINT);
+	BitBlt(hdcBuffer, player->x,player->y,player->width,player->height,hdcMem,0,0, SRCPAINT);
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
@@ -208,16 +209,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				}
 
 				GetObjectA(g_hbmPlayer,sizeof(bm), &bm);
-				ZeroMemory(&g_playerInfo, sizeof(g_playerInfo));
+//				ZeroMemory(player, sizeof(player));
 
-				g_playerInfo.height = bm.bmHeight;
-				g_playerInfo.width = bm.bmWidth;
+				player = malloc(sizeof(character));
 
-				g_playerInfo.dx = rateOfChange_player_x;
-				g_playerInfo.dy = rateOfChange_player_y;
+				player->height = bm.bmHeight;
+				player->width = bm.bmWidth;
 
-				g_playerInfo.x = 50;
-				g_playerInfo.y = 50;
+//				g_playerInfo.dx = rateOfChange_player_x;
+//				g_playerInfo.dy = rateOfChange_player_y;
+
+				player->x = 50;
+				player->y = 50;
 
 				ret = SetTimer(hwnd, ID_TIMER, 50, NULL);//fires every 50 ms!
 
@@ -312,6 +315,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		case WM_DESTROY:
 			DeleteObject(g_hbmPlayer);
 			DeleteObject(g_hbmPlayerMask);
+			destroyCharacter(player);
 
 			PostQuitMessage(0);
 		break;
@@ -339,19 +343,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			switch(LOWORD(wParam)){
 			case 0x34: //left
 			case 0x64:
-				g_playerInfo.x -= 50;
+				player->x -= 50;
 			break;
 			case 0x36:
 			case 0x66:
-				g_playerInfo.x += 50;
+				player->x += 50;
 			break;
 			case 0x38:
 			case 0x68:
-				g_playerInfo.y -= 50;
+				player->y -= 50;
 			break;
 			case 0x32:
 			case 0x62:
-				g_playerInfo.y += 50;
+				player->y += 50;
 			break;
 			}
 //			g_playerInfo.x +=50;

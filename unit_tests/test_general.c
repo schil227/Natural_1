@@ -35,5 +35,5 @@ void test_general_all(){
 	assert(strcmp(ab,joined)==0);
 	assert(strcmp(join(b,a), "ba")==0);
 
-	printf("test");
+	printf("done testing general\n");
 }
