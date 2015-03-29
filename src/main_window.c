@@ -17,22 +17,12 @@ const int rateOfChange_player_x = 8;
 const int rateOfChange_player_y = 8;
 int numMessages = 0;
 int mouseButtonCount = 0;
-HBITMAP g_hbmPlayer = NULL;
+//HBITMAP g_hbmPlayer = NULL;
 HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
 
-//typedef struct _PLAYERINFO{
-//	int width;
-//	int height;
-//	int x;
-//	int y;
-//
-//	int dx;
-//	int dy;
-//}PLAYERINFO;
-//
-//PLAYERINFO g_playerInfo;
 character* player;
+
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
 	int len = 0;
@@ -157,7 +147,7 @@ void drawPlayer(HDC hdc, RECT* prc){
 
 	BitBlt(hdcBuffer, player->x,player->y,player->width,player->height,hdcMem,0,0, SRCAND);
 
-	SelectObject(hdcMem, g_hbmPlayer);
+	SelectObject(hdcMem, player->image);
 	BitBlt(hdcBuffer, player->x,player->y,player->width,player->height,hdcMem,0,0, SRCPAINT);
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -177,41 +167,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			{
 				BITMAP bm;
 				UINT ret;
-//				HFONT hfDefault;
-//				HWND hEdit;
-//				HWND hButton;
-//				HWND g_hbmPlayer;
+				player = malloc(sizeof(character));
 
-//				hEdit = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", "",
-//					WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL,
-//					0,0,100,100,hwnd, (HMENU) IDC_MAIN_EDIT, GetModuleHandle(NULL), NULL);
-//
-//				if(hEdit == NULL){
-//					MessageBox(hwnd, "Failed to make edit window", "Notice",
-//						MB_OK | MB_ICONINFORMATION);
-//				}
-//
-//				hButton = CreateWindowEx(WS_EX_CLIENTEDGE, "BUTTON", "WOOT",
-//						WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-//						50,105,50,50, hwnd, (HMENU) IDC_MAIN_BUTTON,GetModuleHandle(NULL), NULL);
-//
-				g_hbmPlayer = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_PLAYER));
+				printf("asdf1");
+				//player->image = NULL;
+				player->image = malloc(sizeof(HBITMAP));
+				player->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_PLAYER));
 
-				if (g_hbmPlayer == NULL) {
+
+				if (player->image == NULL) {
 					MessageBox(hwnd, "Failed to make player", "Notice",
 						MB_OK | MB_ICONINFORMATION);
 				}
 
-				g_hbmPlayerMask = CreateBitmapMask(g_hbmPlayer, RGB(255,255,255)); //transparent is black
-				if (g_hbmPlayer == NULL) {
+				g_hbmPlayerMask = CreateBitmapMask(player->image, RGB(255,255,255)); //transparent is black
+				if (g_hbmPlayerMask == NULL) {
 					MessageBox(hwnd, "Failed to make player mask", "Notice",
 						MB_OK | MB_ICONINFORMATION);
 				}
 
-				GetObjectA(g_hbmPlayer,sizeof(bm), &bm);
+				GetObjectA(player->image,sizeof(bm), &bm);
 //				ZeroMemory(player, sizeof(player));
-
-				player = malloc(sizeof(character));
 
 				player->height = bm.bmHeight;
 				player->width = bm.bmWidth;
@@ -232,21 +208,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 //				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
 			}
 		break;
-//		case WM_SIZE:
-//		{
-//			HWND hEdit;
-//			HWND hButton;
-//			RECT rcClient;
-//
-//			GetClientRect(hwnd, &rcClient);
-//
-//			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
-//		//	SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom-100, SWP_NOZORDER);
-//
-//			hButton = GetDlgItem(hwnd, IDC_MAIN_BUTTON);
-//			SetWindowPos(hButton, NULL, 5, rcClient.bottom-50,50,25,SWP_NOZORDER);
-//		}
-		break;
 		case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
 		{			   //SPAWN MORE MESSAGES!
 
@@ -258,43 +219,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			drawPlayer(hdc,&rect);
 
 			EndPaint(hwnd,&ps);
-
-//			BITMAP bm;
-//			PAINTSTRUCT ps;
-//			RECT rcClient;
-//
-//			HDC hdc = BeginPaint(hwnd, &ps);
-//
-//			HDC hdcMem = CreateCompatibleDC(hdc);
-//			HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, g_hbmPlayerMask);
-//
-//			//get the player image, store in bm
-//			GetObject(g_hbmPlayer,sizeof(bm), &bm);
-//
-//			GetClientRect(hwnd,&rcClient);
-//			FillRect(hdc, &rcClient, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
-//
-////			//draw the image
-//			BitBlt(hdc, 0,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
-//			BitBlt(hdc, bm.bmWidth + 10,0,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCAND);
-//			BitBlt(hdc, 0,bm.bmHeight+10,bm.bmWidth,bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
-//
-//			BitBlt(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
-//			BitBlt(hdc, bm.bmWidth, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND);
-//			BitBlt(hdc, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height, hdcMem, 0, 0, SRCAND);
-////
-//			SelectObject(hdcMem, g_hbmPlayer);
-////			BitBlt(hdc, 0, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
-////			BitBlt(hdc, bm.bmWidth, bm.bmHeight, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCPAINT);
-//			BitBlt(hdc, g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height, hdcMem, 0, 0, SRCPAINT);
-//
-//
-////			BitBlt(hdc,g_playerInfo.x,g_playerInfo.y,g_playerInfo.width,g_playerInfo.height,hdcMem, 0, 0, SRCPAINT);
-//
-//			SelectObject(hdcMem, hbmOld);
-//			DeleteDC(hdcMem);
-//
-//			EndPaint(hwnd, &ps);
 		}
 		break;
 		case WM_TIMER:
@@ -313,30 +237,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			DestroyWindow(hwnd);
 		break;
 		case WM_DESTROY:
-			DeleteObject(g_hbmPlayer);
+//			DeleteObject(g_hbmPlayer);
 			DeleteObject(g_hbmPlayerMask);
 			destroyCharacter(player);
 
 			PostQuitMessage(0);
 		break;
-//		case WM_LBUTTONDOWN:
-//			mouseButtonCount++;
-//			//charArrStruct *myCharArr = bigTriangle(mouseButtonCount);
-//		{
-//			char mouseClicks[1];
-//			sprintf(mouseClicks,"%d",mouseButtonCount);
-////			HINSTANCE hInstance = GetModuleHandle(NULL);
-//			printf("pushin down that button! %d\n", mouseButtonCount);
-////			GetModuleFileNameA(hInstance, szFileName, MAX_PATH);
-//
-//		//	printf("%s\n", myCharArr->charArr);
-//
-//			MessageBox(hwnd,"bananas", "num clicks:",
-//					MB_OK | MB_ICONINFORMATION);
-//		//	free(myCharArr->charArr);
-//		//	free(myCharArr);
-//
-//		}
+		case WM_LBUTTONDOWN:
 		break;
 		case WM_KEYDOWN:
 		{
@@ -358,8 +265,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				player->y += 50;
 			break;
 			}
-//			g_playerInfo.x +=50;
-			//MessageBox(hwnd, "", "Notice", MB_OK | MB_ICONINFORMATION);
 
 		}
 		break;
@@ -390,13 +295,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				case ID_DIALOG_HIDE:
 					ShowWindow(g_toolbar,SW_HIDE);
 				break;
-				case ID_FILE_SAVE:
-					saveFile(hwnd);
-				break;
-				case IDC_MAIN_BUTTON:
-				//	MessageBox(hwnd, "WOOT", "Error", MB_OK | MB_ICONINFORMATION);
-					openFile(hwnd);
-				break;
 			}
 		break;
 		default:
@@ -407,120 +305,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	return 0;
 }
 
-
-
-
-BOOL LoadTextFileToEdit(HWND hwnd, LPCTSTR pszFileName){
-	HANDLE hFile;
-	BOOL bSuccess = FALSE;
-
-	hFile = CreateFile(pszFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-				OPEN_EXISTING, 0, NULL);
-	if(hFile!=INVALID_HANDLE_VALUE){
-		DWORD dwFileSize;
-
-		dwFileSize = GetFileSize(hFile, NULL);
-		if(dwFileSize != 0xFFFFFFFF){
-
-			LPSTR pszFileText;
-
-			pszFileText = (LPSTR)GlobalAlloc(GPTR, dwFileSize +1);
-			if(pszFileText != NULL){
-
-				DWORD dwRead;
-				if(ReadFile(hFile, pszFileText, dwFileSize, &dwRead, NULL)){
-					pszFileText[dwFileSize] = 0; //Null terminator
-					if(SetWindowText(hwnd, pszFileText)){
-						bSuccess = TRUE;
-					}
-				}
-				GlobalFree(pszFileText);
-			}
-
-
-		}
-		CloseHandle(hFile);
-	}
-	return bSuccess;
-}
-
-void openFile(HWND hwnd){
-	OPENFILENAME ofn;
-	char szFileName[MAX_PATH] = ""; //file name can only be as large as MAX_PATH
-
-	ZeroMemory(&ofn, sizeof(ofn)); //NULLs out unused attrbs
-
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = hwnd;
-	ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
-	ofn.lpstrFile = szFileName;
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.lpstrDefExt = "txt";
-
-	if(GetOpenFileName(&ofn)){
-		HWND hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
-		LoadTextFileToEdit(hEdit, szFileName);
-	}
-
-}
-
-BOOL SaveTextFileFromEdit(hEdit, pszFileName){
-	HANDLE hFile;
-	BOOL bSuccess = FALSE;
-
-	hFile = CreateFile(pszFileName, GENERIC_WRITE, 0, NULL,
-			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if(hFile != INVALID_HANDLE_VALUE){
-
-		DWORD dwTextLength;
-
-		dwTextLength = GetWindowTextLength(hEdit);
-		if(dwTextLength > 0){
-			LPSTR pszText;
-			DWORD dwBufferSize = dwTextLength+1;
-			pszText = GlobalAlloc(GPTR, dwBufferSize);
-
-			if(pszText != NULL){
-
-				if(GetWindowText(hEdit, pszText, dwBufferSize)){
-
-					DWORD dwWritten;
-
-					if(WriteFile(hFile, pszText, dwTextLength, &dwWritten, NULL)){
-						bSuccess = TRUE;
-					}
-
-				}
-				GlobalFree(pszText);
-
-			}
-		}
-		CloseHandle(hFile);
-	}
-	return bSuccess;
-}
-
-void saveFile(HWND hwnd){
-	OPENFILENAME ofn;
-	char szFileName[MAX_PATH] = ""; //file name can only be as large as MAX_PATH
-
-	ZeroMemory(&ofn, sizeof(ofn)); //NULLs out unused attrbs
-
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = hwnd;
-	ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
-	ofn.lpstrFile = szFileName;
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-
-
-	if(GetSaveFileName(&ofn)){
-		HWND hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
-		SaveTextFileFromEdit(hEdit, szFileName);
-	}
-
-}
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
