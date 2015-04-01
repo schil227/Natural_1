@@ -11,6 +11,7 @@
 #include "./headers/general.h"
 #include "./headers/main_window.h"
 #include "./headers/character_pub_methods.h"
+#include "./headers/field_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
 const int rateOfChange_player_x = 8;
@@ -22,6 +23,7 @@ HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
 
 character* player;
+field* main_field;
 
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){

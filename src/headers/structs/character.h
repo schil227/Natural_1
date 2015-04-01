@@ -21,6 +21,7 @@ typedef struct {
 	int y;
 
 	HBITMAP image;
+	HBITMAP imageMask;
 
 } character;
 

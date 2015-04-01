@@ -22,5 +22,11 @@ void test_character_all(){
 
 	assert(strcmp(my_character->name,"Adrian")==0);
 	printf("set name: %s, len: %d\n", my_character->name, my_character->nameLength);
+
+	moveCharacter(my_character, 100, 200);
+//
+//	assert(my_character->x == 100);
+//	assert(my_character->y == 200);
+
 	destroyCharacter(my_character);
 }

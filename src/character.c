@@ -21,3 +21,8 @@ void destroyCharacter(character* thisCharacter){
 
 	free(thisCharacter);
 }
+
+void moveCharacter(character* thisCharacter, int newX, int newY){
+	thisCharacter->x = newX;
+	thisCharacter->y = newY;
+}

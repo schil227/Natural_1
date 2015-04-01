@@ -11,4 +11,5 @@
 
 void nameCharacter(character* thisCharacter, char* name);
 void destroyCharacter(character* thisCharacter);
+void moveCharacter(character* thisCharacter, int newX, int newY);
 #endif /* SRC_HEADERS_CHARACTER_PUB_METHODS_H_ */
