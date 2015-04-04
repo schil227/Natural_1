@@ -7,19 +7,26 @@
 
 #ifndef SRC_HEADERS_STRUCTS_FIELD_H_
 #define SRC_HEADERS_STRUCTS_FIELD_H_
+#include<stdbool.h>
 #include "../character_pub_methods.h"
 
 typedef struct {
 	int numCharacters;
-	character charArr[];
-} characterArray;
+	character background;
+	bool isPassable;
+	character currentCharacter;
+	character items[];
+} space;
 
 typedef struct {
 	size_t size;
 	int width;
 	int height;
 
-	characterArray grid[25][25];
+	int currentX;
+	int currentY;
+
+	space grid[25][25];
 
 } field;
 
