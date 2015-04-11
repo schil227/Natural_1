@@ -9,5 +9,6 @@
 #define SRC_HEADERS_FIELD_PUB_METHODS_H_
 #include "./structs/field.h"
 
+field* initField( char* fieldFileName);
 
 #endif /* SRC_HEADERS_FIELD_PUB_METHODS_H_ */

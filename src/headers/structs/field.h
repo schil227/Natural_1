@@ -12,21 +12,25 @@
 
 typedef struct {
 	int numCharacters;
-	character background;
+
 	bool isPassable;
-	character currentCharacter;
-	character items[];
+//	character items[];
+	character* background;
+	character* currentCharacter;
 } space;
 
 typedef struct {
 	size_t size;
-	int width;
-	int height;
+	int displayedWidth;
+	int displayedHeight;
 
-	int currentX;
-	int currentY;
+	int displayedX;
+	int displayedY;
 
-	space grid[25][25];
+	int totalX;
+	int totalY;
+
+	space* grid[25][25];
 
 } field;
 
