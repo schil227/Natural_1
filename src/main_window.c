@@ -152,6 +152,14 @@ void drawField(HDC hdc, RECT* prc) {
 	for (y = 0; y < main_field->totalY; y++) {
 		for (x = 0; x < main_field->totalX; x++) {
 
+			BitBlt(hdcBuffer, main_field->grid[x][y]->background->x,
+					main_field->grid[x][y]->background->y,
+					main_field->grid[x][y]->background->width,
+					main_field->grid[x][y]->background->height,
+						hdcMem, 0, 0, SRCAND);
+
+				SelectObject(hdcMem, main_field->grid[x][y]->background->image);
+
 			SelectObject(hdcMem, main_field->grid[x][y]->background->image);
 			BitBlt(hdcBuffer, main_field->grid[x][y]->background->x,
 					main_field->grid[x][y]->background->y,
@@ -159,10 +167,10 @@ void drawField(HDC hdc, RECT* prc) {
 					main_field->grid[x][y]->background->height, hdcMem, 0, 0,
 					SRCPAINT);
 
-//			BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
-
 		}
 	}
+
+	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 	SelectObject(hdcMem, hbmOld);
 	DeleteDC(hdcMem);
@@ -180,7 +188,7 @@ void drawPlayer(HDC hdc, RECT* prc) {
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
 
-	FillRect(hdc, prc, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
+//	FillRect(hdc, prc, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
 
 	BitBlt(hdcBuffer, player->x, player->y, player->width, player->height,
 			hdcMem, 0, 0, SRCAND);
@@ -211,15 +219,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //		printf("a\n");
 		main_field = initField("C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
 ////		printf("asdf\n");
+		int imageID;
 		for (y = 0; y < main_field->totalY; y++) {
 			printf("b\n");
 			for (x = 0; x < main_field->totalX; x++) {
-				printf("c\n");
-				main_field->grid[x][y]->background->image = malloc(
-						sizeof(HBITMAP));
-				main_field->grid[x][y]->background->image = LoadBitmap(
-						GetModuleHandle(NULL),
-						main_field->grid[x][y]->background->imageID);
+				imageID = (main_field->grid[x][y]->background)->imageID;
+				printf("id:%d\n", imageID);
+				main_field->grid[x][y]->background->image = malloc(sizeof(HBITMAP));
+				main_field->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
+				if(main_field->grid[x][y]->background->image == NULL){
+					printf("failed\n");
+				}
 			}
 		}
 
@@ -271,19 +281,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		HDC hdc = BeginPaint(hwnd, &ps);
 
 		GetClientRect(hwnd, &rect);
-//			drawField(hdc,&rect);
-		drawPlayer(hdc, &rect);
+		drawField(hdc,&rect);
+//		drawPlayer(hdc, &rect);
 
 		EndPaint(hwnd, &ps);
 	}
 		break;
 	case WM_TIMER: {
-		RECT* rect;
+		RECT rect;
 		HDC hdc = GetDC(hwnd);
 		GetClientRect(hwnd, &rect);
-
+		drawField(hdc,&rect);
 //			updatePlayer(&rect);
-		drawPlayer(hdc, &rect);
+//		drawPlayer(hdc, &rect);
 
 		ReleaseDC(hwnd, hdc);
 	}

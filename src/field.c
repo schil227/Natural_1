@@ -38,14 +38,16 @@ character* getBackgroundFromField(field* thisField, int x, int y){
  * take in a character, output the corrosponding background name (string)
 */
 int generateBackground(char backgroundSymbol){
-//	switch(backgroundSymbol){
-//		case '1':
-//
-//		break;
-//		default:
-//		break;
-//	}
-	return 2002; //grass background
+
+
+	printf("backgroundChar: %c\n", backgroundSymbol);
+
+	if(backgroundSymbol == 'c'){
+		printf("Found  a C!\n");
+		return 2003;
+	}else{
+		return 2002; //grass background
+	}
 }
 
 field* initField(char* fieldFileName){

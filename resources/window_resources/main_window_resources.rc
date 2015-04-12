@@ -59,6 +59,9 @@ END
 //IDB_PLAYER BITMAP DISCARDABLE "../images/player.bmp"
 2001 BITMAP DISCARDABLE "../images/player.bmp"
 2002 BITMAP DISCARDABLE "../images/grass.bmp"
+2003 BITMAP DISCARDABLE "../images/red.bmp"
+
+
 
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"
