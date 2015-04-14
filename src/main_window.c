@@ -142,39 +142,55 @@ void updatePlayer(RECT* prc) {
 
 void drawField(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
+	HDC hdcBuffer2 = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
+
 	HDC hdcMem = CreateCompatibleDC(hdc);
+	HDC hdcMem2 = CreateCompatibleDC(hdc);
 	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
 	int x;
 	int y;
 
+	//field
 	for (y = 0; y < main_field->totalY; y++) {
 		for (x = 0; x < main_field->totalX; x++) {
 
-			BitBlt(hdcBuffer, main_field->grid[x][y]->background->x,
-					main_field->grid[x][y]->background->y,
-					main_field->grid[x][y]->background->width,
-					main_field->grid[x][y]->background->height,
-						hdcMem, 0, 0, SRCAND);
-
-				SelectObject(hdcMem, main_field->grid[x][y]->background->image);
+//			BitBlt(hdcBuffer, main_field->grid[x][y]->background->x,
+//					main_field->grid[x][y]->background->y,
+//					main_field->grid[x][y]->background->width,
+//					main_field->grid[x][y]->background->height,
+//						hdcMem, 0, 0, SRCAND);
 
 			SelectObject(hdcMem, main_field->grid[x][y]->background->image);
+
 			BitBlt(hdcBuffer, main_field->grid[x][y]->background->x,
 					main_field->grid[x][y]->background->y,
 					main_field->grid[x][y]->background->width,
 					main_field->grid[x][y]->background->height, hdcMem, 0, 0,
-					SRCPAINT);
+					SRCCOPY);
 
 		}
 	}
 
+	//player
+
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
-	SelectObject(hdcMem, hbmOld);
-	DeleteDC(hdcMem);
 
+	SelectObject(hdcMem2, g_hbmPlayerMask);
+
+	BitBlt(hdcBuffer, player->x, player->y, player->width, player->height, hdcMem2, 0, 0, SRCAND);
+//
+	SelectObject(hdcMem2, player->image);// player->image);
+
+	BitBlt(hdcBuffer, player->x, player->y, player->width, player->height, hdcMem2, 0, 0, SRCPAINT); //was SRCPAINT
+//
+	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
+
+	SelectObject(hdcMem2, hbmOld);
+	DeleteDC(hdcMem);
+	DeleteDC(hdcMem2);
 	SelectObject(hdcBuffer, hbmOldBuffer);
 	DeleteDC(hdcBuffer);
 	DeleteObject(hbmBuffer);
