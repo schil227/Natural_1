@@ -9,10 +9,10 @@
 #include<stdio.h>
 #include<string.h>
 
-character* getCharacterFromField(field* thisField, int x, int y){
+individual* getIndividualFromField(field* thisField, int x, int y){
 	if(x < thisField->displayedWidth && x <= 0 && y < thisField->displayedHeight && y <= 0){
 
-		return (thisField->grid[x][y])->currentCharacter;
+		return (thisField->grid[x][y])->currentIndividual;
 	}
 
 	return NULL;

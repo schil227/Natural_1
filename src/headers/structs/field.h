@@ -8,7 +8,7 @@
 #ifndef SRC_HEADERS_STRUCTS_FIELD_H_
 #define SRC_HEADERS_STRUCTS_FIELD_H_
 #include<stdbool.h>
-#include "../character_pub_methods.h"
+#include "../individual_pub_methods.h"
 
 typedef struct {
 	int numCharacters;
@@ -16,7 +16,7 @@ typedef struct {
 	bool isPassable;
 //	character items[];
 	character* background;
-	character* currentCharacter;
+	individual* currentIndividual;
 } space;
 
 typedef struct {

@@ -10,7 +10,7 @@
 #include<stdlib.h>
 #include "./headers/general.h"
 #include "./headers/main_window.h"
-#include "./headers/character_pub_methods.h"
+//#include "./headers/character_pub_methods.h"
 #include "./headers/field_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
@@ -22,7 +22,7 @@ int mouseButtonCount = 0;
 HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
 
-character* player;
+individual* player;
 field* main_field;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -175,16 +175,16 @@ void drawField(HDC hdc, RECT* prc) {
 
 	//player
 
-	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
+//	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 
 	SelectObject(hdcMem2, g_hbmPlayerMask);
 
-	BitBlt(hdcBuffer, player->x, player->y, player->width, player->height, hdcMem2, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCAND);
 //
-	SelectObject(hdcMem2, player->image);// player->image);
+	SelectObject(hdcMem2, player->playerCharacter->image);// player->image);
 
-	BitBlt(hdcBuffer, player->x, player->y, player->width, player->height, hdcMem2, 0, 0, SRCPAINT); //was SRCPAINT
+	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCPAINT); //was SRCPAINT
 //
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
@@ -206,11 +206,11 @@ void drawPlayer(HDC hdc, RECT* prc) {
 
 //	FillRect(hdc, prc, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
 
-	BitBlt(hdcBuffer, player->x, player->y, player->width, player->height,
+	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height,
 			hdcMem, 0, 0, SRCAND);
 
-	SelectObject(hdcMem, player->image);
-	BitBlt(hdcBuffer, player->x, player->y, player->width, player->height,
+	SelectObject(hdcMem, player->playerCharacter->image);
+	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height,
 			hdcMem, 0, 0, SRCPAINT);
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -228,7 +228,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	case WM_CREATE: {
 		BITMAP bm;
 		UINT ret;
-		player = malloc(sizeof(character));
+		player = malloc(sizeof(individual));
 //		main_field = malloc(sizeof(field));
 		int x;
 		int y;
@@ -250,33 +250,33 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		//player->image = NULL;
-		player->imageID = 2001;
-		player->image = malloc(sizeof(HBITMAP));
-		player->image = LoadBitmap(GetModuleHandle(NULL),
-				MAKEINTRESOURCE(player->imageID));
+		player->playerCharacter->imageID = 2001;
+		player->playerCharacter->image = malloc(sizeof(HBITMAP));
+		player->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
+				MAKEINTRESOURCE(player->playerCharacter->imageID));
 
-		if (player->image == NULL) {
+		if (player->playerCharacter->image == NULL) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		g_hbmPlayerMask = CreateBitmapMask(player->image, RGB(255, 255, 255)); //transparent is black
+		g_hbmPlayerMask = CreateBitmapMask(player->playerCharacter->image, RGB(255, 70, 255)); //transparent is black
 		if (g_hbmPlayerMask == NULL) {
 			MessageBox(hwnd, "Failed to make player mask", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		GetObjectA(player->image, sizeof(bm), &bm);
+		GetObjectA(player->playerCharacter->image, sizeof(bm), &bm);
 //				ZeroMemory(player, sizeof(player));
 
-		player->height = bm.bmHeight;
-		player->width = bm.bmWidth;
+		player->playerCharacter->height = bm.bmHeight;
+		player->playerCharacter->width = bm.bmWidth;
 
 //				g_playerInfo.dx = rateOfChange_player_x;
 //				g_playerInfo.dy = rateOfChange_player_y;
 
-		player->x = 50;
-		player->y = 50;
+		player->playerCharacter->x = 50;
+		player->playerCharacter->y = 50;
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -320,7 +320,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	case WM_DESTROY:
 //			DeleteObject(g_hbmPlayer);
 		DeleteObject(g_hbmPlayerMask);
-		destroyCharacter(player);
+		distroyIndividual(player);
 
 		PostQuitMessage(0);
 		break;
@@ -330,19 +330,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		switch (LOWORD(wParam)) {
 		case 0x34: //left
 		case 0x64:
-			player->x -= 50;
+			player->playerCharacter->x -= 50;
 			break;
 		case 0x36:
 		case 0x66:
-			player->x += 50;
+			player->playerCharacter->x += 50;
 			break;
 		case 0x38:
 		case 0x68:
-			player->y -= 50;
+			player->playerCharacter->y -= 50;
 			break;
 		case 0x32:
 		case 0x62:
-			player->y += 50;
+			player->playerCharacter->y += 50;
 			break;
 		}
 
