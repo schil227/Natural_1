@@ -21,8 +21,11 @@ int mouseButtonCount = 0;
 //HBITMAP g_hbmPlayer = NULL;
 HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
+int cursorMode = 0;
+int initCursorMode = 0;
 
 individual* player;
+character* cursor;
 field* main_field;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -142,12 +145,12 @@ void updatePlayer(RECT* prc) {
 
 void drawField(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
-	HDC hdcBuffer2 = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	HDC hdcMem2 = CreateCompatibleDC(hdc);
+	HDC hdcMem3 = CreateCompatibleDC(hdc);
 	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
 	int x;
 	int y;
@@ -181,16 +184,22 @@ void drawField(HDC hdc, RECT* prc) {
 	SelectObject(hdcMem2, g_hbmPlayerMask);
 
 	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCAND);
-//
+
 	SelectObject(hdcMem2, player->playerCharacter->image);// player->image);
 
 	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCPAINT); //was SRCPAINT
-//
+
+	if(cursorMode){
+		SelectObject(hdcMem3, cursor->image);
+		BitBlt(hdcBuffer, cursor->x, cursor->y, cursor->width, cursor->height, hdcMem3, 0, 0, SRCPAINT); //was SRCPAINT
+	}
+
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 	SelectObject(hdcMem2, hbmOld);
 	DeleteDC(hdcMem);
 	DeleteDC(hdcMem2);
+	DeleteDC(hdcMem3);
 	SelectObject(hdcBuffer, hbmOldBuffer);
 	DeleteDC(hdcBuffer);
 	DeleteObject(hbmBuffer);
@@ -223,12 +232,14 @@ void drawPlayer(HDC hdc, RECT* prc) {
 	DeleteObject(hbmBuffer);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch (msg) {
 	case WM_CREATE: {
 		BITMAP bm;
 		UINT ret;
 		player = malloc(sizeof(individual));
+		player->playerCharacter = malloc(sizeof(character));
+		cursor = malloc(sizeof(character));
 //		main_field = malloc(sizeof(field));
 		int x;
 		int y;
@@ -267,16 +278,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		GetObjectA(player->playerCharacter->image, sizeof(bm), &bm);
-//				ZeroMemory(player, sizeof(player));
 
 		player->playerCharacter->height = bm.bmHeight;
 		player->playerCharacter->width = bm.bmWidth;
 
-//				g_playerInfo.dx = rateOfChange_player_x;
-//				g_playerInfo.dy = rateOfChange_player_y;
-
 		player->playerCharacter->x = 50;
 		player->playerCharacter->y = 50;
+
+		cursor->imageID = 2004;
+		cursor->image = malloc(sizeof(HBITMAP));
+		cursor->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(cursor->imageID));
+
+		cursor->x = 50;
+		cursor->y = 50;
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -344,6 +358,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x62:
 			player->playerCharacter->y += 50;
 			break;
+		case 0x41:
+			cursorMode = 1;
+			initCursorMode = 1;
+			break;
 		}
 
 	}
@@ -383,6 +401,71 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
+}
+
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	switch (msg) {
+	case WM_KEYDOWN: {
+			switch (LOWORD(wParam)) {
+			case 0x34: //left
+			case 0x64:
+				cursor->x -= 50;
+				break;
+			case 0x36:
+			case 0x66:
+				cursor->x += 50;
+				break;
+			case 0x38:
+			case 0x68:
+				cursor->y -= 50;
+				break;
+			case 0x32:
+			case 0x62:
+				cursor->y += 50;
+				break;
+			case 0x1B:
+				cursorMode = 0;
+				break;
+			}
+			case WM_TIMER: {
+				RECT rect;
+				HDC hdc = GetDC(hwnd);
+				GetClientRect(hwnd, &rect);
+				drawField(hdc,&rect);
+
+				ReleaseDC(hwnd, hdc);
+			}
+			break;
+			case WM_CLOSE:
+				DestroyWindow(hwnd);
+				break;
+			case WM_DESTROY:
+				DeleteObject(g_hbmPlayerMask);
+				distroyIndividual(player);
+				destroyCharacter(cursor);
+
+				PostQuitMessage(0);
+				break;
+			default:
+				return DefWindowProc(hwnd, msg, wParam, lParam);
+		}
+	}
+	return 0;
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if(cursorMode){
+		if(initCursorMode){
+			cursor->x = player->playerCharacter->x;
+			cursor->y = player->playerCharacter->y;
+			initCursorMode = 0;
+		}
+
+		return cursorLoop(hwnd, msg, wParam, lParam);
+	}else{
+		return mainLoop(hwnd, msg, wParam, lParam);
+	}
+
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
