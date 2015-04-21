@@ -127,43 +127,14 @@ HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
 	return hbmMask;
 }
 
-//Make 'em bounce around like a good screensaver.
-void updatePlayer(RECT* prc) {
-
-//	if(g_playerInfo.x < 0 || g_playerInfo.x + g_playerInfo.width >= prc->right){
-//		g_playerInfo.dx = g_playerInfo.dx*-1;
-//	}
-//
-//	if(g_playerInfo.y < 0 || g_playerInfo.y + g_playerInfo.height >= prc->bottom){
-//		g_playerInfo.dy = g_playerInfo.dy*-1;
-//	}
-//
-//	g_playerInfo.x += g_playerInfo.dx;
-//	g_playerInfo.y += g_playerInfo.dy;
-
-}
-
-void drawField(HDC hdc, RECT* prc) {
-	HDC hdcBuffer = CreateCompatibleDC(hdc);
-	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
-	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
-
+void drawField(HDC hdc, HDC hdcBuffer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	HDC hdcMem2 = CreateCompatibleDC(hdc);
-	HDC hdcMem3 = CreateCompatibleDC(hdc);
-	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
 	int x;
 	int y;
 
 	//field
 	for (y = 0; y < main_field->totalY; y++) {
 		for (x = 0; x < main_field->totalX; x++) {
-
-//			BitBlt(hdcBuffer, main_field->grid[x][y]->background->x,
-//					main_field->grid[x][y]->background->y,
-//					main_field->grid[x][y]->background->width,
-//					main_field->grid[x][y]->background->height,
-//						hdcMem, 0, 0, SRCAND);
 
 			SelectObject(hdcMem, main_field->grid[x][y]->background->image);
 
@@ -176,22 +147,78 @@ void drawField(HDC hdc, RECT* prc) {
 		}
 	}
 
+	DeleteDC(hdcMem);
+}
+
+void drawPlayer(HDC hdc, HDC hdcBuffer){
+		HDC hdcMem = CreateCompatibleDC(hdc);
+		SelectObject(hdcMem, player->playerCharacter->imageMask);
+
+		BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCAND);
+
+		SelectObject(hdcMem, player->playerCharacter->image);// player->image);
+
+		BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
+		DeleteDC(hdcMem);
+}
+void drawCursor(HDC hdc, HDC hdcBuffer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, cursor->imageMask);
+	BitBlt(hdcBuffer, cursor->x, cursor->y, cursor->width, cursor->height, hdcMem, 0, 0, SRCAND);
+	SelectObject(hdcMem, cursor->image);
+	BitBlt(hdcBuffer, cursor->x, cursor->y, cursor->width, cursor->height, hdcMem, 0, 0, SRCPAINT);
+	DeleteDC(hdcMem);
+}
+
+void drawAll(HDC hdc, RECT* prc) {
+	HDC hdcBuffer = CreateCompatibleDC(hdc);
+	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
+	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
+
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	HDC hdcMem2 = CreateCompatibleDC(hdc);
+	HDC hdcMem3 = CreateCompatibleDC(hdc);
+	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
+//	int x;
+//	int y;
+//
+//	//field
+//	for (y = 0; y < main_field->totalY; y++) {
+//		for (x = 0; x < main_field->totalX; x++) {
+//
+//			SelectObject(hdcMem, main_field->grid[x][y]->background->image);
+//
+//			BitBlt(hdcBuffer, main_field->grid[x][y]->background->x,
+//					main_field->grid[x][y]->background->y,
+//					main_field->grid[x][y]->background->width,
+//					main_field->grid[x][y]->background->height, hdcMem, 0, 0,
+//					SRCCOPY);
+//
+//		}
+//	}
+	drawField(hdc,hdcBuffer);
+
 	//player
-
-//	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
-
-
-	SelectObject(hdcMem2, g_hbmPlayerMask);
-
-	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCAND);
-
-	SelectObject(hdcMem2, player->playerCharacter->image);// player->image);
-
-	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCPAINT); //was SRCPAINT
+	drawPlayer(hdc,hdcBuffer);
+//	SelectObject(hdcMem2, player->playerCharacter->imageMask);
+//
+//	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCAND);
+//
+//	SelectObject(hdcMem2, player->playerCharacter->image);// player->image);
+//
+//	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem2, 0, 0, SRCPAINT); //was SRCPAINT
 
 	if(cursorMode){
-		SelectObject(hdcMem3, cursor->image);
-		BitBlt(hdcBuffer, cursor->x, cursor->y, cursor->width, cursor->height, hdcMem3, 0, 0, SRCPAINT); //was SRCPAINT
+////		SelectObject(hdcMem3, cursor->imageMask);
+////		BitBlt(hdcBuffer, cursor->x, cursor->y, cursor->width, cursor->height, hdcMem3, 0, 0, SRCAND);
+////		SelectObject(hdcMem3, cursor->image);
+////		BitBlt(hdcBuffer, cursor->x, cursor->y, cursor->width, cursor->height, hdcMem3, 0, 0, SRCPAINT); //was SRCPAINT
+//		SelectObject(hdcMem3, cursor->imageMask);
+//		BitBlt(hdcBuffer, cursor->x, cursor->y, 40,40, hdcMem3, 0, 0, SRCAND);
+//		SelectObject(hdcMem3, cursor->image);
+//		BitBlt(hdcBuffer, cursor->x, cursor->y, 40,40, hdcMem3, 0, 0, SRCPAINT); //was SRCPAINT
+		drawCursor(hdc,hdcBuffer);
+
 	}
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -205,32 +232,31 @@ void drawField(HDC hdc, RECT* prc) {
 	DeleteObject(hbmBuffer);
 }
 
-void drawPlayer(HDC hdc, RECT* prc) {
-	HDC hdcBuffer = CreateCompatibleDC(hdc);
-	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
-	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
-
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
-
-//	FillRect(hdc, prc, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
-
-	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height,
-			hdcMem, 0, 0, SRCAND);
-
-	SelectObject(hdcMem, player->playerCharacter->image);
-	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height,
-			hdcMem, 0, 0, SRCPAINT);
-
-	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
-
-	SelectObject(hdcMem, hbmOld);
-	DeleteDC(hdcMem);
-
-	SelectObject(hdcBuffer, hbmOldBuffer);
-	DeleteDC(hdcBuffer);
-	DeleteObject(hbmBuffer);
-}
+//void drawPlayer(HDC hdc, RECT* prc, HBITMAP hbmBuffer) {
+//	HDC hdcBuffer = CreateCompatibleDC(hdc);
+//	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
+//
+//	HDC hdcMem = CreateCompatibleDC(hdc);
+//	HBITMAP hbmOld = SelectObject(hdcMem, g_hbmPlayerMask);
+//
+////	FillRect(hdc, prc, (HBRUSH) GetStockObject(LTGRAY_BRUSH));
+//
+//	SelectObject(hdcMem, player->playerCharacter->imageMask);
+//
+//	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCAND);
+//
+//	SelectObject(hdcMem, player->playerCharacter->image);// player->image);
+//
+//	BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
+//
+//
+//	SelectObject(hdcMem, hbmOld);
+//	DeleteDC(hdcMem);
+//
+//	SelectObject(hdcBuffer, hbmOldBuffer);
+//	DeleteDC(hdcBuffer);
+//	DeleteObject(hbmBuffer);
+//}
 
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch (msg) {
@@ -271,26 +297,25 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		g_hbmPlayerMask = CreateBitmapMask(player->playerCharacter->image, RGB(255, 70, 255)); //transparent is black
-		if (g_hbmPlayerMask == NULL) {
-			MessageBox(hwnd, "Failed to make player mask", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
+		player->playerCharacter->imageMask = CreateBitmapMask(player->playerCharacter->image, RGB(255, 70, 255)); //transparent is black
 
 		GetObjectA(player->playerCharacter->image, sizeof(bm), &bm);
 
 		player->playerCharacter->height = bm.bmHeight;
 		player->playerCharacter->width = bm.bmWidth;
 
-		player->playerCharacter->x = 50;
-		player->playerCharacter->y = 50;
+		player->playerCharacter->x = 0;
+		player->playerCharacter->y = 0;
 
 		cursor->imageID = 2004;
 		cursor->image = malloc(sizeof(HBITMAP));
 		cursor->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(cursor->imageID));
+		cursor->x = 0;
+		cursor->y = 0;
+		cursor->width = 40;
+		cursor->height = 40;
+		cursor->imageMask = CreateBitmapMask(cursor->image, RGB(224,64,192));
 
-		cursor->x = 50;
-		cursor->y = 50;
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -311,7 +336,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		HDC hdc = BeginPaint(hwnd, &ps);
 
 		GetClientRect(hwnd, &rect);
-		drawField(hdc,&rect);
+		drawAll(hdc,&rect);
 //		drawPlayer(hdc, &rect);
 
 		EndPaint(hwnd, &ps);
@@ -321,7 +346,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		RECT rect;
 		HDC hdc = GetDC(hwnd);
 		GetClientRect(hwnd, &rect);
-		drawField(hdc,&rect);
+		drawAll(hdc,&rect);
 //			updatePlayer(&rect);
 //		drawPlayer(hdc, &rect);
 
@@ -344,19 +369,19 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		switch (LOWORD(wParam)) {
 		case 0x34: //left
 		case 0x64:
-			player->playerCharacter->x -= 50;
+			player->playerCharacter->x -= 40;
 			break;
 		case 0x36:
 		case 0x66:
-			player->playerCharacter->x += 50;
+			player->playerCharacter->x += 40;
 			break;
 		case 0x38:
 		case 0x68:
-			player->playerCharacter->y -= 50;
+			player->playerCharacter->y -= 40;
 			break;
 		case 0x32:
 		case 0x62:
-			player->playerCharacter->y += 50;
+			player->playerCharacter->y += 40;
 			break;
 		case 0x41:
 			cursorMode = 1;
@@ -409,19 +434,19 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			switch (LOWORD(wParam)) {
 			case 0x34: //left
 			case 0x64:
-				cursor->x -= 50;
+				cursor->x -= 40;
 				break;
 			case 0x36:
 			case 0x66:
-				cursor->x += 50;
+				cursor->x += 40;
 				break;
 			case 0x38:
 			case 0x68:
-				cursor->y -= 50;
+				cursor->y -= 40;
 				break;
 			case 0x32:
 			case 0x62:
-				cursor->y += 50;
+				cursor->y += 40;
 				break;
 			case 0x1B:
 				cursorMode = 0;
@@ -431,7 +456,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				RECT rect;
 				HDC hdc = GetDC(hwnd);
 				GetClientRect(hwnd, &rect);
-				drawField(hdc,&rect);
+				drawAll(hdc,&rect);
 
 				ReleaseDC(hwnd, hdc);
 			}

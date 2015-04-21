@@ -65,10 +65,10 @@ field* initField(char* fieldFileName){
 			char currentChar = line[init_x];
 
 			//initialize background
-			backgroundCharacter->width = 50;
-			backgroundCharacter->height = 50;
-			backgroundCharacter->x = init_x * 50;
-			backgroundCharacter->y = init_y * 50;
+			backgroundCharacter->width = 40;
+			backgroundCharacter->height = 40;
+			backgroundCharacter->x = init_x * 40;
+			backgroundCharacter->y = init_y * 40;
 			backgroundCharacter->name = &currentChar;
 			backgroundCharacter->imageID = generateBackground(currentChar);
 
