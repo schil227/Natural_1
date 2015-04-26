@@ -15,3 +15,15 @@ void distroyIndividual(individual* thisIndividual){
 	free(thisIndividual);
 
 }
+
+void drawPlayer(HDC hdc, HDC hdcBuffer, individual* player){
+		HDC hdcMem = CreateCompatibleDC(hdc);
+		SelectObject(hdcMem, player->playerCharacter->imageMask);
+
+		BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCAND);
+
+		SelectObject(hdcMem, player->playerCharacter->image);// player->image);
+
+		BitBlt(hdcBuffer, player->playerCharacter->x, player->playerCharacter->y, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
+		DeleteDC(hdcMem);
+}

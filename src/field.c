@@ -132,6 +132,30 @@ void updateFiled(field* thisField, char* fieldFileName){
 }
 
 
+void drawField(HDC hdc, HDC hdcBuffer, field* this_field){
+
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	int x;
+	int y;
+
+	//field
+	for (y = 0; y < this_field->totalY; y++) {
+		for (x = 0; x < this_field->totalX; x++) {
+
+			SelectObject(hdcMem, this_field->grid[x][y]->background->image);
+
+			BitBlt(hdcBuffer, this_field->grid[x][y]->background->x,
+					this_field->grid[x][y]->background->y,
+					this_field->grid[x][y]->background->width,
+					this_field->grid[x][y]->background->height, hdcMem, 0, 0,
+					SRCCOPY);
+
+		}
+	}
+
+	DeleteDC(hdcMem);
+}
+
 int b_main(){
 	field* thisField;
 //	thisField.displayedX = 1;
