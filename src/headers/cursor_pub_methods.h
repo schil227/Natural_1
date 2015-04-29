@@ -10,5 +10,6 @@
 
 #include"./structs/cursor.h"
 void drawCursor(HDC hdc, HDC hdcBuffer, cursor *thisCursor);
+void distroyCursor(cursor* thisCursor);
 
 #endif /* SRC_HEADERS_CURSOR_PUB_METHODS_H_ */

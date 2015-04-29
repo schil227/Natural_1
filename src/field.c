@@ -26,13 +26,87 @@ character* getBackgroundFromField(field* thisField, int x, int y){
 	return NULL;
 }
 
-//character* getItemArrayFromField(field* thisField, int x, int y){
-//	if(x < thisField->displayedWidth && x <= 0 && y < thisField->displayedHeight && y <= 0){
-//		return (thisField->grid[x][y]).items;
-//	}
-//
-//	return NULL;
-//}
+/*
+ * xMoveChange and yMoveChange
+ * calculates the grid move for x and y depending on the keystroke.
+ * for example, to move left the player would hit 4 (dir), decreasing the x, y would stay the same
+ */
+int xMoveChange(int dir){
+	switch(dir){
+	case 1:
+	case 4:
+	case 7:
+		return -1;
+	case 3:
+	case 6:
+	case 9:
+		return 1;
+	}
+
+	//if 2,5,8, no x change
+	return 0;
+}
+
+int yMoveChange(int dir){
+	switch(dir){
+	case 7:
+	case 8:
+	case 9:
+		return -1;
+	case 1:
+	case 2:
+	case 3:
+		return 1;
+	}
+
+	//if 4,5,6 no y change
+	return 0;
+}
+
+int moveIndividual(field *thisField, individual *thisIndividual, int direction){
+	space * currentSpace = malloc(sizeof(space));
+	space * newSpace = malloc(sizeof(space));
+	currentSpace = thisField->grid[thisIndividual->playerCharacter->x][thisIndividual->playerCharacter->y];
+	int newX = thisIndividual->playerCharacter->x + xMoveChange(direction);
+	int newY = thisIndividual->playerCharacter->y + yMoveChange(direction);
+
+	//check if in bounds, and newSpace exists
+	if(!(newX >= 0 && newX < 25 && newY >=0 && newY < 25)){
+		return 0;
+	}
+
+	//space exists, wont be null
+	newSpace = thisField->grid[newX][newY];
+
+
+	//can the individual go to this space?
+	if(newSpace->isPassable){// && !newSpace->currentIndividual){
+		printf("is passable");
+		currentSpace->currentIndividual = NULL;
+		newSpace->currentIndividual = thisIndividual;
+		thisIndividual->playerCharacter->x = newX;
+		thisIndividual->playerCharacter->y = newY;
+		return 1;
+	}else{
+//		printf("is not passable");
+		return 0;
+	}
+
+}
+int moveCursor(field *thisField, character *thisCursor, int direction){
+	int newX = thisCursor->x + xMoveChange(direction);
+	int newY = thisCursor->y + xMoveChange(direction);
+
+	//check if in bounds, and newSpace exists
+	if(!(newX >= 0 && newX < 25 && newY >=0 && newY < 25)){
+		return 0;
+	}else{
+		thisCursor->x = newX;
+		thisCursor->y = newY;
+		return 1;
+	}
+
+}
 
 /*
  * take in a character, output the corrosponding background name (string)
@@ -71,7 +145,11 @@ field* initField(char* fieldFileName){
 			backgroundCharacter->y = init_y * 40;
 			backgroundCharacter->name = &currentChar;
 			backgroundCharacter->imageID = generateBackground(currentChar);
-
+			if(backgroundCharacter->imageID == 2003){
+				newSpace->isPassable = 0;
+			}else{
+				newSpace->isPassable = 1;
+			}
 			newSpace->background = backgroundCharacter;
 			thisField->grid[init_x][init_y] = newSpace;
 

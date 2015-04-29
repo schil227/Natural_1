@@ -14,3 +14,10 @@ void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor){
 	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x, thisCursor->cursorCharacter->y, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
+
+void distroyCursor(cursor* thisCursor){
+	if(thisCursor->cursorCharacter){
+		free(thisCursor->cursorCharacter);
+	}
+	free(thisCursor);
+}

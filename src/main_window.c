@@ -155,18 +155,18 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		player = malloc(sizeof(individual));
 		player->playerCharacter = malloc(sizeof(character));
 		thisCursor = malloc(sizeof(cursor));
-//		main_field = malloc(sizeof(field));
+		thisCursor->cursorCharacter = malloc(sizeof(character));
 		int x;
 		int y;
-//		printf("a\n");
 		main_field = initField("C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
-////		printf("asdf\n");
 		int imageID;
+		int isPassable;
 		for (y = 0; y < main_field->totalY; y++) {
-			printf("b\n");
+//			printf("b\n");
 			for (x = 0; x < main_field->totalX; x++) {
 				imageID = (main_field->grid[x][y]->background)->imageID;
-				printf("id:%d\n", imageID);
+				isPassable = (main_field->grid[x][y])->isPassable;
+//				printf("is Passable:%d\n", isPassable);
 				main_field->grid[x][y]->background->image = malloc(sizeof(HBITMAP));
 				main_field->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
 				if(main_field->grid[x][y]->background->image == NULL){
@@ -258,19 +258,35 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		switch (LOWORD(wParam)) {
 		case 0x34: //left
 		case 0x64:
-			player->playerCharacter->x -= 40;
+			moveIndividual(main_field, player,4);
 			break;
-		case 0x36:
+		case 0x36: //right
 		case 0x66:
-			player->playerCharacter->x += 40;
+			moveIndividual(main_field, player,6);
 			break;
-		case 0x38:
+		case 0x38: //up
 		case 0x68:
-			player->playerCharacter->y -= 40;
+			moveIndividual(main_field, player,8);
 			break;
-		case 0x32:
+		case 0x32: //down
 		case 0x62:
-			player->playerCharacter->y += 40;
+			moveIndividual(main_field, player,2);
+			break;
+		case 0x31: //down left
+		case 0x61:
+			moveIndividual(main_field, player,1);
+			break;
+		case 0x37: //up left
+		case 0x67:
+			moveIndividual(main_field, player,7);
+			break;
+		case 0x39: //up right
+		case 0x69:
+			moveIndividual(main_field, player,9);
+			break;
+		case 0x33: //down right
+		case 0x63:
+			moveIndividual(main_field, player,3);
 			break;
 		case 0x41:
 			cursorMode = 1;
@@ -323,19 +339,23 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			switch (LOWORD(wParam)) {
 			case 0x34: //left
 			case 0x64:
-				thisCursor->cursorCharacter->x -= 40;
+				moveIndividual(main_field, player,4);
+//				thisCursor->cursorCharacter->x -= 40;
 				break;
 			case 0x36:
 			case 0x66:
-				thisCursor->cursorCharacter->x += 40;
+				moveIndividual(main_field, player, 6);
+//				thisCursor->cursorCharacter->x += 40;
 				break;
 			case 0x38:
 			case 0x68:
-				thisCursor->cursorCharacter->y -= 40;
+				moveIndividual(main_field, player,8);
+//				thisCursor->cursorCharacter->y -= 40;
 				break;
 			case 0x32:
 			case 0x62:
-				thisCursor->cursorCharacter->y += 40;
+				moveIndividual(main_field, player,2);
+//				thisCursor->cursorCharacter->y += 40;
 				break;
 			case 0x1B:
 				cursorMode = 0;
@@ -356,8 +376,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			case WM_DESTROY:
 				DeleteObject(g_hbmPlayerMask);
 				distroyIndividual(player);
-				destroyCharacter(thisCursor);
-
+				distroyCursor(thisCursor);
 				PostQuitMessage(0);
 				break;
 			default:
