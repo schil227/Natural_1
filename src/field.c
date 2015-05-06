@@ -10,7 +10,7 @@
 #include<string.h>
 
 individual* getIndividualFromField(field* thisField, int x, int y){
-	if(x < thisField->displayedWidth && x <= 0 && y < thisField->displayedHeight && y <= 0){
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 
 		return (thisField->grid[x][y])->currentIndividual;
 	}
@@ -19,11 +19,40 @@ individual* getIndividualFromField(field* thisField, int x, int y){
 }
 
 character* getBackgroundFromField(field* thisField, int x, int y){
-	if(x < thisField->displayedWidth && x <= 0 && y < thisField->displayedHeight && y <= 0){
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 		return (thisField->grid[x][y])->background;
 	}
 
 	return NULL;
+}
+
+space* getSpaceFromField(field* thisField, int x, int y){
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
+		return &thisField->grid[x][y];
+	}
+
+	return NULL;
+}
+
+/*
+ * getAdjacentSpaces: returns (up to) 9 spaces surrounding a space as
+ * indicated by the x and y values
+ */
+space** getAdjacentSpaces(field *thisField, int x, int y){
+	space** adjacentSpaces = malloc(sizeof(space*)*9);
+	space* tmpSpace = malloc(sizeof(tmpSpace));
+	int dx,dy,index=0;
+	for(dx = -1; dx < 2; dx++){
+		for(dy = -1; dy < 2; dy++){
+			tmpSpace = getSpaceFromField(thisField,x+dx, y+dy);
+			if(tmpSpace != NULL){
+				adjacentSpaces[index] = tmpSpace;
+				index++;
+			}
+		}
+	}
+	adjacentSpaces[index] = '\0';
+	return adjacentSpaces;
 }
 
 /*
@@ -64,26 +93,25 @@ int yMoveChange(int dir){
 }
 
 int moveIndividual(field *thisField, individual *thisIndividual, int direction){
-	space * currentSpace = malloc(sizeof(space));
-	space * newSpace = malloc(sizeof(space));
-	currentSpace = thisField->grid[thisIndividual->playerCharacter->x][thisIndividual->playerCharacter->y];
+	space ** currentSpace = getSpaceFromField(thisField,thisIndividual->playerCharacter->x,thisIndividual->playerCharacter->y);
+	space ** newSpace;
 	int newX = thisIndividual->playerCharacter->x + xMoveChange(direction);
 	int newY = thisIndividual->playerCharacter->y + yMoveChange(direction);
 
 	//check if in bounds, and newSpace exists
-	if(!(newX >= 0 && newX < 25 && newY >=0 && newY < 25)){
+	if(!(newX >= 0 && newX < thisField->totalX && newY >=0 && newY < thisField->totalY)){
 		return 0;
 	}
 
 	//space exists, wont be null
-	newSpace = thisField->grid[newX][newY];
+	newSpace = getSpaceFromField(thisField,newX,newY);
 
 
 	//can the individual go to this space?
-	if(newSpace->isPassable){// && !newSpace->currentIndividual){
+	if((*newSpace)->isPassable){// && !newSpace->currentIndividual){
 		printf("is passable");
-		currentSpace->currentIndividual = NULL;
-		newSpace->currentIndividual = thisIndividual;
+		(*currentSpace)->currentIndividual = NULL;
+		(*newSpace)->currentIndividual = thisIndividual;
 		thisIndividual->playerCharacter->x = newX;
 		thisIndividual->playerCharacter->y = newY;
 		return 1;

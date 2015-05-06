@@ -13,5 +13,5 @@ field* initField(char* fieldFileName);
 void drawField(HDC hdc, HDC hdcBuffer, field* this_field);
 int moveIndividual(field *thisField, individual *thisIndividual, int direction);
 int moveCursor(field *thisField, character *thisCharacter, int direction);
-
+space** getAdjacentSpaces(field *thisField, int x, int y);
 #endif /* SRC_HEADERS_FIELD_PUB_METHODS_H_ */
