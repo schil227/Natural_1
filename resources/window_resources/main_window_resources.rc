@@ -61,6 +61,7 @@ END
 2002 BITMAP DISCARDABLE "../images/grass.bmp"
 2003 BITMAP DISCARDABLE "../images/black.bmp"
 2004 BITMAP DISCARDABLE "../images/cursor2.bmp"
+2005 BITMAP DISCARDABLE "../images/skelly.bmp"
 
 
 

@@ -14,32 +14,71 @@
 #include"./test_headers/test_character.h"
 #include"../src/headers/field_pub_methods.h"
 
-int mock_field_test(){
+int mock_field_test() {
 	individual * player = malloc(sizeof(individual));
 	player->playerCharacter = malloc(sizeof(character));
 	player->playerCharacter->x = 0;
 	player->playerCharacter->y = 0;
 
-	field *thisField = initField("C:\\Users\\Adrian\\workspace\\Natural_1\\unit_tests\\testmap1.txt");
-	space **impassableSpace = getSpaceFromField(thisField,2,0);
-	printf("field width:%d, field height:%d\n",thisField->totalX,thisField->totalY);
+	field *thisField =
+			initField(
+					"C:\\Users\\Adrian\\workspace\\Natural_1\\unit_tests\\testmap1.txt");
+	space **impassableSpace = getSpaceFromField(thisField, 2, 0);
+	printf("field width:%d, field height:%d\n", thisField->totalX,
+			thisField->totalY);
 	assert(!(*impassableSpace)->isPassable);
 
 	assert(player->playerCharacter->x == 0);
 	assert(player->playerCharacter->y == 0);
-	moveIndividual(thisField, player,3); //moving to an empty space (SE)
+	moveIndividual(thisField, player, 3); //moving to an empty space (SE)
 	assert(player->playerCharacter->x == 1);
 	assert(player->playerCharacter->y == 1);
-	moveIndividual(thisField, player,3); //try to move to an impassable space
+	moveIndividual(thisField, player, 3); //try to move to an impassable space (SE)
 	assert(player->playerCharacter->x == 1);
 	assert(player->playerCharacter->y == 1);
-	moveIndividual(thisField, player,2); //move to an empty space (S)
+	moveIndividual(thisField, player, 2); //move to an empty space (S)
 	assert(player->playerCharacter->x == 1);
 	assert(player->playerCharacter->y == 2);
+
+	//testing Adjacent Spaces
+	space** tmpAdjacentSpaces = getAdjacentSpaces(thisField, 1, 1);
+	int numSpaces = 0;
+	while (tmpAdjacentSpaces[numSpaces] != '\0') {
+		numSpaces++;
+	}
+	assert(numSpaces == 9);
+
+	tmpAdjacentSpaces = getAdjacentSpaces(thisField, 0, 1);
+	numSpaces = 0;
+	while (tmpAdjacentSpaces[numSpaces] != '\0') {
+		numSpaces++;
+	}
+	assert(numSpaces == 6);
+
+	tmpAdjacentSpaces = getAdjacentSpaces(thisField, 0, 0);
+	numSpaces = 0;
+	while (tmpAdjacentSpaces[numSpaces] != '\0') {
+		numSpaces++;
+	}
+	assert(numSpaces == 4);
+
+
+	/*
+	 * .----.----.
+	 * |[0] |[2] |
+	 * |----|----|
+	 * |[1] |[3] |
+	 * '----'----'
+	 */
+	assert(tmpAdjacentSpaces[0] == getSpaceFromField(thisField, 0,0));
+	assert(tmpAdjacentSpaces[1] == getSpaceFromField(thisField, 0,1));
+	assert(tmpAdjacentSpaces[2] == getSpaceFromField(thisField, 1,0));
+	assert(tmpAdjacentSpaces[3] == getSpaceFromField(thisField, 1,1));
+
 	return 0;
 }
 
-int main(){
+int t_main() {
 //	printf("testing general\n");
 //	test_general_all();
 //	printf("testing character\n");

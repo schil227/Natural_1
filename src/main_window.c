@@ -26,6 +26,7 @@ int cursorMode = 0;
 int initCursorMode = 0;
 
 individual* player;
+individual* skeleton;
 cursor* thisCursor;
 field* main_field;
 
@@ -135,7 +136,12 @@ void drawAll(HDC hdc, RECT* prc) {
 
 
 	drawField(hdc,hdcBuffer, main_field);
-	drawPlayer(hdc,hdcBuffer, player);
+	if(player->hp > 0){
+		drawPlayer(hdc,hdcBuffer, player);
+	}
+	if(skeleton->hp > 0){
+		drawPlayer(hdc,hdcBuffer, skeleton);
+	}
 	if(cursorMode){
 		drawCursor(hdc,hdcBuffer,thisCursor);
 	}
@@ -152,8 +158,13 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	case WM_CREATE: {
 		BITMAP bm;
 		UINT ret;
+
 		player = malloc(sizeof(individual));
 		player->playerCharacter = malloc(sizeof(character));
+
+		skeleton = malloc(sizeof(individual));
+		skeleton->playerCharacter = malloc(sizeof(character));
+
 		thisCursor = malloc(sizeof(cursor));
 		thisCursor->cursorCharacter = malloc(sizeof(character));
 		int x;
@@ -195,6 +206,37 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 
 		player->playerCharacter->x = 0;
 		player->playerCharacter->y = 0;
+		player->hp = 10;
+		player->maxDam = 5;
+
+
+
+		skeleton->playerCharacter->imageID = 2005;
+		skeleton->playerCharacter->image = malloc(sizeof(HBITMAP));
+		skeleton->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
+				MAKEINTRESOURCE(skeleton->playerCharacter->imageID));
+
+		if (skeleton->playerCharacter->image == NULL) {
+			MessageBox(hwnd, "Failed to make skeleton", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
+
+		skeleton->playerCharacter->imageMask = CreateBitmapMask(skeleton->playerCharacter->image, RGB(255, 0, 255)); //transparent is black
+
+		GetObjectA(skeleton->playerCharacter->image, sizeof(bm), &bm);
+
+		skeleton->playerCharacter->height = bm.bmHeight;
+		skeleton->playerCharacter->width = bm.bmWidth;
+
+		skeleton->playerCharacter->x = 1;
+		skeleton->playerCharacter->y = 0;
+		skeleton->hp=10;
+		skeleton->maxDam = 3;
+
+
+
+
+
 
 		thisCursor->cursorCharacter->imageID = 2004;
 		thisCursor->cursorCharacter->image = malloc(sizeof(HBITMAP));

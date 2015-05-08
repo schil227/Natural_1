@@ -6,6 +6,9 @@
  */
 
 #include"./headers/individual_pub_methods.h"
+#include<stdlib.h>
+
+int isRandomized = 0;
 
 void distroyIndividual(individual* thisIndividual){
 	if(thisIndividual->playerCharacter){ //Null check
@@ -14,6 +17,26 @@ void distroyIndividual(individual* thisIndividual){
 
 	free(thisIndividual);
 
+}
+
+int attackIndividual(individual *thisIndividual, individual *targetIndividual){
+	int attackDamage;
+
+	if(!isRandomized){
+		srand(time(NULL));
+		isRandomized = 1;
+	}
+
+	attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
+	attackDamage = attackDamage + thisIndividual->minDam;
+
+	targetIndividual->hp = targetIndividual->hp - attackDamage;
+
+	if(targetIndividual->hp <= 0){ //target is dead
+		return 1;
+	}else{ //non-fatal blow
+		return 0;
+	}
 }
 
 void drawPlayer(HDC hdc, HDC hdcBuffer, individual* player){
