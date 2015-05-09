@@ -233,7 +233,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		skeleton->hp=10;
 		skeleton->maxDam = 3;
 
-
+		moveIndividual(main_field,skeleton,6);
+//		getSpaceFromField(main_field, 1, 0)->currentIndividual = skeleton;
 
 
 
@@ -376,31 +377,54 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 }
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	printf("thisCursor x:%d\n", thisCursor->cursorCharacter->x);
 	switch (msg) {
 	case WM_KEYDOWN: {
 			switch (LOWORD(wParam)) {
 			case 0x34: //left
 			case 0x64:
-				moveIndividual(main_field, player,4);
+				moveCursor(main_field, thisCursor,4);
 //				thisCursor->cursorCharacter->x -= 40;
 				break;
 			case 0x36:
 			case 0x66:
-				moveIndividual(main_field, player, 6);
+				moveCursor(main_field, thisCursor, 6);
 //				thisCursor->cursorCharacter->x += 40;
 				break;
 			case 0x38:
 			case 0x68:
-				moveIndividual(main_field, player,8);
+				moveCursor(main_field, thisCursor,8);
 //				thisCursor->cursorCharacter->y -= 40;
 				break;
 			case 0x32:
 			case 0x62:
-				moveIndividual(main_field, player,2);
+				moveCursor(main_field, thisCursor,2);
 //				thisCursor->cursorCharacter->y += 40;
 				break;
-			case 0x1B:
+			case 0x31: //down left
+			case 0x61:
+				moveCursor(main_field, thisCursor,1);
+				break;
+			case 0x37: //up left
+			case 0x67:
+				moveCursor(main_field, thisCursor,7);
+				break;
+			case 0x39: //up right
+			case 0x69:
+				moveCursor(main_field, thisCursor,9);
+				break;
+			case 0x33: //down right
+			case 0x63:
+				moveCursor(main_field, thisCursor,3);
+				break;
+			case 0x1B: //escape
 				cursorMode = 0;
+				break;
+			case 0x1D: //enter
+				if(getSpaceFromField(main_field, thisCursor->cursorCharacter->x,thisCursor->cursorCharacter->y)	!= NULL){
+					attackIndividual(player,skeleton);
+					cursorMode = 0;
+				}
 				break;
 			}
 			case WM_TIMER: {
@@ -431,6 +455,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(cursorMode){
 		if(initCursorMode){
+			printf("playerX:%d\n",player->playerCharacter->x);
 			thisCursor->cursorCharacter->x = player->playerCharacter->x;
 			thisCursor->cursorCharacter->y = player->playerCharacter->y;
 			initCursorMode = 0;

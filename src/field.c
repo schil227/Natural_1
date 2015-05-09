@@ -108,8 +108,7 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 
 
 	//can the individual go to this space?
-	if((*newSpace)->isPassable){// && !newSpace->currentIndividual){
-		printf("is passable");
+	if((*newSpace)->isPassable && (*newSpace)->currentIndividual == NULL){
 		(*currentSpace)->currentIndividual = NULL;
 		(*newSpace)->currentIndividual = thisIndividual;
 		thisIndividual->playerCharacter->x = newX;
@@ -121,17 +120,17 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 	}
 
 }
-int moveCursor(field *thisField, character *thisCursor, int direction){
-	int newX = thisCursor->x + xMoveChange(direction);
-	int newY = thisCursor->y + xMoveChange(direction);
-
+int moveCursor(field *thisField, cursor *thisCursor, int direction){
+	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
+	int newY = thisCursor->cursorCharacter->y + yMoveChange(direction);
+	printf("newX:%d, newY:%d\n",newX, newY);
 	//check if in bounds, and newSpace exists
-	if(!(newX >= 0 && newX < 25 && newY >=0 && newY < 25)){
-		return 0;
-	}else{
-		thisCursor->x = newX;
-		thisCursor->y = newY;
+	if(newX >= 0 && newX < thisField->totalX && newY >=0 && newY < thisField->totalY){
+		thisCursor->cursorCharacter->x = newX;
+		thisCursor->cursorCharacter->y = newY;
 		return 1;
+	}else{
+		return 0;
 	}
 
 }
@@ -163,6 +162,9 @@ field* initField(char* fieldFileName){
 		for(init_x = 0; init_x < strlen(line); init_x++){
 
 			space* newSpace = malloc(sizeof(space));
+			newSpace->currentIndividual = malloc(sizeof(individual));
+//			newSpace->background = malloc(sizeof(character));
+//			newSpace->currentIndividual->playerCharacter = malloc(sizeof(character));
 			character* backgroundCharacter = malloc(sizeof(character));
 			char currentChar = line[init_x];
 
@@ -179,6 +181,7 @@ field* initField(char* fieldFileName){
 				newSpace->isPassable = 1;
 			}
 			newSpace->background = backgroundCharacter;
+			newSpace->currentIndividual = NULL;
 			thisField->grid[init_x][init_y] = newSpace;
 
 		}

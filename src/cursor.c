@@ -9,9 +9,9 @@
 void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCursor->cursorCharacter->imageMask);
-	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x, thisCursor->cursorCharacter->y, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40, thisCursor->cursorCharacter->y*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
 	SelectObject(hdcMem, thisCursor->cursorCharacter->image);
-	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x, thisCursor->cursorCharacter->y, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40, thisCursor->cursorCharacter->y*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
