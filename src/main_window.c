@@ -161,9 +161,13 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 
 		player = malloc(sizeof(individual));
 		player->playerCharacter = malloc(sizeof(character));
+		player->name = malloc(sizeof(char)*32);
+		strcpy(player->name, "adrian");
 
 		skeleton = malloc(sizeof(individual));
 		skeleton->playerCharacter = malloc(sizeof(character));
+		skeleton->name = malloc(sizeof(char)*32);
+		strcpy(player->name, "skelly");
 
 		thisCursor = malloc(sizeof(cursor));
 		thisCursor->cursorCharacter = malloc(sizeof(character));
@@ -183,6 +187,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				if(main_field->grid[x][y]->background->image == NULL){
 					printf("failed\n");
 				}
+
 			}
 		}
 
@@ -233,7 +238,11 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		skeleton->hp=10;
 		skeleton->maxDam = 3;
 
+		printf("1,0:%p, 2,0:%p\n", getSpaceFromField(main_field,1,0)->currentIndividual,  getSpaceFromField(main_field,2,0)->currentIndividual);
+		printf("+++ skeleton x:%d, y:%d\n",skeleton->playerCharacter->x, skeleton->playerCharacter->y);
 		moveIndividual(main_field,skeleton,6);
+		printf("1,0:%p, 2,0:%p\n", getSpaceFromField(main_field,1,0)->currentIndividual,  getSpaceFromField(main_field,2,0)->currentIndividual);
+		printf("--- skeleton x:%d, y:%d\n",skeleton->playerCharacter->x, skeleton->playerCharacter->y);
 //		getSpaceFromField(main_field, 1, 0)->currentIndividual = skeleton;
 
 
@@ -291,7 +300,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	case WM_DESTROY:
 //			DeleteObject(g_hbmPlayer);
 		DeleteObject(g_hbmPlayerMask);
-		distroyIndividual(player);
+		destroyIndividual(player);
 
 		PostQuitMessage(0);
 		break;
@@ -377,7 +386,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 }
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
-	printf("thisCursor x:%d\n", thisCursor->cursorCharacter->x);
 	switch (msg) {
 	case WM_KEYDOWN: {
 			switch (LOWORD(wParam)) {
@@ -420,10 +428,23 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			case 0x1B: //escape
 				cursorMode = 0;
 				break;
-			case 0x1D: //enter
-				if(getSpaceFromField(main_field, thisCursor->cursorCharacter->x,thisCursor->cursorCharacter->y)	!= NULL){
-					attackIndividual(player,skeleton);
-					cursorMode = 0;
+			case 0x0D: //enter
+				{
+					int cX,cY;
+					cX = thisCursor->cursorCharacter->x;
+					cY = thisCursor->cursorCharacter->y;
+
+//					individual * tmp = getIndividualFromField(main_field, thisCursor->cursorCharacter->x,thisCursor->cursorCharacter->y);
+
+					printf("tmp:%p, skeleton:%p -- %d,%d\n",getIndividualFromField(main_field,cX,cY),skeleton,thisCursor->cursorCharacter->x,thisCursor->cursorCharacter->y);
+
+					if(getIndividualFromField(main_field,cX,cY)	== skeleton){
+						printf("attacked!");
+						attackIndividual(player,skeleton);
+						cursorMode = 0;
+					}
+
+//					destroyIndividual(tmp);
 				}
 				break;
 			}
@@ -441,8 +462,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 				break;
 			case WM_DESTROY:
 				DeleteObject(g_hbmPlayerMask);
-				distroyIndividual(player);
-				distroyCursor(thisCursor);
+				destroyIndividual(player);
+				destroyCursor(thisCursor);
 				PostQuitMessage(0);
 				break;
 			default:

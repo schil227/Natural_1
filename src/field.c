@@ -12,7 +12,7 @@
 individual* getIndividualFromField(field* thisField, int x, int y){
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 
-		return (thisField->grid[x][y])->currentIndividual;
+		return thisField->grid[x][y]->currentIndividual;
 	}
 
 	return NULL;
@@ -28,7 +28,7 @@ character* getBackgroundFromField(field* thisField, int x, int y){
 
 space* getSpaceFromField(field* thisField, int x, int y){
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
-		return &thisField->grid[x][y];
+		return thisField->grid[x][y];
 	}
 
 	return NULL;
@@ -93,8 +93,10 @@ int yMoveChange(int dir){
 }
 
 int moveIndividual(field *thisField, individual *thisIndividual, int direction){
-	space ** currentSpace = getSpaceFromField(thisField,thisIndividual->playerCharacter->x,thisIndividual->playerCharacter->y);
-	space ** newSpace;
+	int inX = thisIndividual->playerCharacter->x;
+	int inY = thisIndividual->playerCharacter->y;
+	//space * currentSpace = getSpaceFromField(thisField,inX,inY);
+//	space * newSpace;
 	int newX = thisIndividual->playerCharacter->x + xMoveChange(direction);
 	int newY = thisIndividual->playerCharacter->y + yMoveChange(direction);
 
@@ -104,15 +106,16 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 	}
 
 	//space exists, wont be null
-	newSpace = getSpaceFromField(thisField,newX,newY);
+//	newSpace = getSpaceFromField(thisField,newX,newY);
 
 
 	//can the individual go to this space?
-	if((*newSpace)->isPassable && (*newSpace)->currentIndividual == NULL){
-		(*currentSpace)->currentIndividual = NULL;
-		(*newSpace)->currentIndividual = thisIndividual;
+	if(getSpaceFromField(thisField,newX,newY)->isPassable && getSpaceFromField(thisField,newX,newY)->currentIndividual == NULL){
+		getSpaceFromField(thisField,inX,inY)->currentIndividual = NULL;
+		getSpaceFromField(thisField,newX,newY)->currentIndividual = thisIndividual;
 		thisIndividual->playerCharacter->x = newX;
 		thisIndividual->playerCharacter->y = newY;
+		printf("");
 		return 1;
 	}else{
 //		printf("is not passable");

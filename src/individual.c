@@ -10,9 +10,12 @@
 
 int isRandomized = 0;
 
-void distroyIndividual(individual* thisIndividual){
+void destroyIndividual(individual* thisIndividual){
 	if(thisIndividual->playerCharacter){ //Null check
 		destroyCharacter(thisIndividual->playerCharacter);
+	}
+	if(thisIndividual->name){ //Null check
+		free(thisIndividual->name);
 	}
 
 	free(thisIndividual);

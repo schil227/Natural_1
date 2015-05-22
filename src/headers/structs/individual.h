@@ -11,6 +11,7 @@
 
 typedef struct {
 	character* playerCharacter;
+	char* name;
 
 	short int totalHP;
 	short int hp;

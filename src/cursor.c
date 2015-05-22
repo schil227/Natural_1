@@ -15,7 +15,7 @@ void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor){
 	DeleteDC(hdcMem);
 }
 
-void distroyCursor(cursor* thisCursor){
+void destroyCursor(cursor* thisCursor){
 	if(thisCursor->cursorCharacter){
 		free(thisCursor->cursorCharacter);
 	}
