@@ -159,15 +159,18 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		BITMAP bm;
 		UINT ret;
 
-		player = malloc(sizeof(individual));
-		player->playerCharacter = malloc(sizeof(character));
-		player->name = malloc(sizeof(char)*32);
+		player = initIndividual();
+		skeleton = initIndividual();
+
+//		player = malloc(sizeof(individual));
+//		player->playerCharacter = malloc(sizeof(character));
+//		player->name = malloc(sizeof(char)*32);
 		strcpy(player->name, "adrian");
 
-		skeleton = malloc(sizeof(individual));
-		skeleton->playerCharacter = malloc(sizeof(character));
-		skeleton->name = malloc(sizeof(char)*32);
-		strcpy(player->name, "skelly");
+//		skeleton = malloc(sizeof(individual));
+//		skeleton->playerCharacter = malloc(sizeof(character));
+//		skeleton->name = malloc(sizeof(char)*32);
+		strcpy(skeleton->name, "skelly");
 
 		thisCursor = malloc(sizeof(cursor));
 		thisCursor->cursorCharacter = malloc(sizeof(character));
@@ -193,7 +196,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 
 		//player->image = NULL;
 		player->playerCharacter->imageID = 2001;
-		player->playerCharacter->image = malloc(sizeof(HBITMAP));
+//		player->playerCharacter->image = malloc(sizeof(HBITMAP));
 		player->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
 				MAKEINTRESOURCE(player->playerCharacter->imageID));
 
@@ -217,7 +220,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 
 
 		skeleton->playerCharacter->imageID = 2005;
-		skeleton->playerCharacter->image = malloc(sizeof(HBITMAP));
+//		skeleton->playerCharacter->image = malloc(sizeof(HBITMAP));
 		skeleton->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
 				MAKEINTRESOURCE(skeleton->playerCharacter->imageID));
 

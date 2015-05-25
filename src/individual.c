@@ -10,6 +10,14 @@
 
 int isRandomized = 0;
 
+individual *initIndividual(){
+	individual* toReturn = malloc(sizeof(individual));
+	toReturn->name = malloc(sizeof(char)*32);
+	toReturn->playerCharacter = malloc(sizeof(character));
+	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
+	return toReturn;
+}
+
 void destroyIndividual(individual* thisIndividual){
 	if(thisIndividual->playerCharacter){ //Null check
 		destroyCharacter(thisIndividual->playerCharacter);
