@@ -7,6 +7,7 @@
 
 #include"./headers/individual_pub_methods.h"
 #include<stdlib.h>
+#include<time.h>
 
 int isRandomized = 0;
 
@@ -48,6 +49,14 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	}else{ //non-fatal blow
 		return 0;
 	}
+}
+
+int individualWithinRange(individual * thisIndividual, individual * target){
+	if(abs(thisIndividual->playerCharacter->x - target->playerCharacter->x) <= thisIndividual->range
+	&& abs(thisIndividual->playerCharacter->y - target->playerCharacter->y) <= thisIndividual->range){
+		return 1;
+	}
+	return 0;
 }
 
 void drawPlayer(HDC hdc, HDC hdcBuffer, individual* player){

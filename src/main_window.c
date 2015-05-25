@@ -216,6 +216,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		player->playerCharacter->y = 0;
 		player->hp = 10;
 		player->maxDam = 5;
+		player->minDam = 4;
+		player->range = 2;
 
 
 
@@ -240,6 +242,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		skeleton->playerCharacter->y = 0;
 		skeleton->hp=10;
 		skeleton->maxDam = 3;
+		skeleton->range = 1;
 
 		printf("1,0:%p, 2,0:%p\n", getSpaceFromField(main_field,1,0)->currentIndividual,  getSpaceFromField(main_field,2,0)->currentIndividual);
 		printf("+++ skeleton x:%d, y:%d\n",skeleton->playerCharacter->x, skeleton->playerCharacter->y);
@@ -441,7 +444,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 
 					printf("tmp:%p, skeleton:%p -- %d,%d\n",getIndividualFromField(main_field,cX,cY),skeleton,thisCursor->cursorCharacter->x,thisCursor->cursorCharacter->y);
 
-					if(getIndividualFromField(main_field,cX,cY)	== skeleton){
+					if(getIndividualFromField(main_field,cX,cY)	== skeleton
+					&& individualWithinRange(player,skeleton)){
 						printf("attacked!");
 						attackIndividual(player,skeleton);
 						cursorMode = 0;
@@ -525,7 +529,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Window Title :D!",
 	WS_OVERLAPPEDWINDOW,
 	CW_USEDEFAULT,
-	CW_USEDEFAULT, 240, 360,
+	CW_USEDEFAULT, 460, 240,
 	NULL, NULL, hInstance,
 	NULL);
 

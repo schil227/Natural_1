@@ -16,6 +16,7 @@ typedef struct {
 	short int totalHP;
 	short int hp;
 
+	short int range;
 	short int maxDam;
 	short int minDam;
 
