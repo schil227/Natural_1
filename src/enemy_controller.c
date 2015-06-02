@@ -18,4 +18,5 @@ void getSpaceClosestToPlayer(field * this_field, individual * player, individual
 
 void enemyAction(individual * enemy, field * thisField, individual * player){
 	wanderAround(thisField, enemy);
+	attackIfInRamge(enemy,player);
 }
