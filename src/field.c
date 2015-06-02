@@ -9,6 +9,7 @@
 #include<stdio.h>
 #include<string.h>
 
+
 individual* getIndividualFromField(field* thisField, int x, int y){
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 
@@ -108,7 +109,6 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 	//space exists, wont be null
 //	newSpace = getSpaceFromField(thisField,newX,newY);
 
-
 	//can the individual go to this space?
 	if(getSpaceFromField(thisField,newX,newY)->isPassable && getSpaceFromField(thisField,newX,newY)->currentIndividual == NULL){
 		getSpaceFromField(thisField,inX,inY)->currentIndividual = NULL;
@@ -123,6 +123,7 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 	}
 
 }
+
 int moveCursor(field *thisField, cursor *thisCursor, int direction){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
 	int newY = thisCursor->cursorCharacter->y + yMoveChange(direction);
@@ -138,6 +139,11 @@ int moveCursor(field *thisField, cursor *thisCursor, int direction){
 
 }
 
+
+void wanderAround(field * thisField, individual * thisIndividual){
+ int direction = rand() % 10+1;
+ moveIndividual(thisField, thisIndividual, direction);
+}
 /*
  * take in a character, output the corrosponding background name (string)
 */

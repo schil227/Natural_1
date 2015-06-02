@@ -13,6 +13,7 @@
 field* initField(char* fieldFileName);
 void drawField(HDC hdc, HDC hdcBuffer, field* this_field);
 int moveIndividual(field *thisField, individual *thisIndividual, int direction);
+void wanderAround(field * thisField, individual * thisIndividual);
 int moveCursor(field *thisField, cursor *thisCharacter, int direction);
 space** getAdjacentSpaces(field *thisField, int x, int y);
 space* getSpaceFromField(field* thisField, int x, int y);

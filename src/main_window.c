@@ -8,6 +8,7 @@
 #include<stdio.h>
 #include<windows.h>
 #include<stdlib.h>
+#include<time.h>
 #include "./headers/general.h"
 #include "./headers/main_window.h"
 //#include "./headers/character_pub_methods.h"
@@ -215,14 +216,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		player->playerCharacter->x = 0;
 		player->playerCharacter->y = 0;
 		player->hp = 10;
-		player->maxDam = 5;
-		player->minDam = 4;
+		player->maxDam = 10;
+		player->minDam = 0;
 		player->range = 2;
 
 
-
 		skeleton->playerCharacter->imageID = 2005;
-//		skeleton->playerCharacter->image = malloc(sizeof(HBITMAP));
 		skeleton->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
 				MAKEINTRESOURCE(skeleton->playerCharacter->imageID));
 
@@ -317,34 +316,50 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		case 0x34: //left
 		case 0x64:
 			moveIndividual(main_field, player,4);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x36: //right
 		case 0x66:
 			moveIndividual(main_field, player,6);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x38: //up
 		case 0x68:
 			moveIndividual(main_field, player,8);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x32: //down
 		case 0x62:
 			moveIndividual(main_field, player,2);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x31: //down left
 		case 0x61:
 			moveIndividual(main_field, player,1);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x37: //up left
 		case 0x67:
 			moveIndividual(main_field, player,7);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x39: //up right
 		case 0x69:
 			moveIndividual(main_field, player,9);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x33: //down right
 		case 0x63:
 			moveIndividual(main_field, player,3);
+			enemyAction(skeleton, main_field, player);
+
 			break;
 		case 0x41:
 			cursorMode = 1;
@@ -449,6 +464,9 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 						printf("attacked!");
 						attackIndividual(player,skeleton);
 						cursorMode = 0;
+
+						enemyAction(skeleton, main_field, player);
+
 					}
 
 //					destroyIndividual(tmp);
@@ -502,6 +520,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	WNDCLASSEX wc;
 	HWND hwnd;
 	MSG Msg;
+	srand(time(NULL));
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure
