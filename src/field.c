@@ -19,6 +19,15 @@ individual* getIndividualFromField(field* thisField, int x, int y){
 	return NULL;
 }
 
+individual* getIndividualAddressFromField(field* thisField, int x, int y){
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
+
+		return &(thisField->grid[x][y]->currentIndividual);
+	}
+
+	return NULL;
+}
+
 character* getBackgroundFromField(field* thisField, int x, int y){
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 		return (thisField->grid[x][y])->background;
@@ -34,6 +43,15 @@ space* getSpaceFromField(field* thisField, int x, int y){
 
 	return NULL;
 }
+
+space* getSpaceAddressFromField(field* thisField, int x, int y){
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
+		return &(thisField->grid[x][y]);
+	}
+
+	return NULL;
+}
+
 
 /*
  * getAdjacentSpaces: returns (up to) 9 spaces surrounding a space as

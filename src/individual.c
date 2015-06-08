@@ -32,6 +32,7 @@ void destroyIndividual(individual* thisIndividual){
 
 int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int attackDamage;
+	thisIndividual->hasAttacked = 1;
 
 	attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
 	attackDamage = attackDamage + thisIndividual->minDam;
@@ -43,6 +44,12 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	}else{ //non-fatal blow
 		return 0;
 	}
+}
+
+void endTurn(individual *thisIndividual){
+	printf("player turn ended\n");
+	thisIndividual->hasAttacked = 0;
+	thisIndividual->remainingActions = thisIndividual->totalActions;
 }
 
 int individualWithinRange(individual * thisIndividual, individual * target){

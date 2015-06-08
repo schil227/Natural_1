@@ -15,6 +15,9 @@ typedef struct {
 
 	short int totalHP;
 	short int hp;
+	short int totalActions;
+	short int remainingActions;
+	short int hasAttacked;
 
 	short int range;
 	short int maxDam;
