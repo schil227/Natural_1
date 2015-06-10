@@ -240,8 +240,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		skeleton->playerCharacter->height = bm.bmHeight;
 		skeleton->playerCharacter->width = bm.bmWidth;
 
-		skeleton->playerCharacter->x = 1;
-		skeleton->playerCharacter->y = 0;
+		skeleton->playerCharacter->x = 4;
+		skeleton->playerCharacter->y = 1;
 		skeleton->totalHP = 10;
 		skeleton->hp = 10;
 		skeleton->totalActions = 2;
@@ -273,6 +273,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisCursor->cursorCharacter->imageMask = CreateBitmapMask(
 				thisCursor->cursorCharacter->image, RGB(224, 64, 192));
 
+
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
 		if (ret == 0) {
@@ -282,6 +283,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //				hfDefault = (HFONT) GetStockObject(DEFAULT_GUI_FONT);
 //				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
 //				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
+
+		getSpaceClosestToPlayer(main_field,skeleton,player);
 	}
 		break;
 	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
@@ -404,6 +407,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x41:
 			cursorMode = 1;
 			initCursorMode = 1;
+			break;
+		case 0x42:
+			getSpaceClosestToPlayer(main_field,skeleton,player);
 			break;
 		}
 

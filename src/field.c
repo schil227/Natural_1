@@ -44,11 +44,22 @@ space* getSpaceFromField(field* thisField, int x, int y){
 	return NULL;
 }
 
+int isSpacePassable(field* thisField, int x, int y){
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
+			if(thisField->grid[x][y]->isPassable){
+				return 1;
+			}
+	}
+
+	return 0;
+}
+
 space* getSpaceAddressFromField(field* thisField, int x, int y){
+	printf("trying to get space \n");
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 		return &(thisField->grid[x][y]);
 	}
-
+	printf("was a null space! \n");
 	return NULL;
 }
 
@@ -168,10 +179,10 @@ void wanderAround(field * thisField, individual * thisIndividual){
 int generateBackground(char backgroundSymbol){
 
 
-	printf("backgroundChar: %c\n", backgroundSymbol);
+//	printf("backgroundChar: %c\n", backgroundSymbol);
 
 	if(backgroundSymbol == 'c'){
-		printf("Found  a C!\n");
+//		printf("Found  a C!\n");
 		return 2003;
 	}else{
 		return 2002; //grass background
@@ -214,8 +225,8 @@ field* initField(char* fieldFileName){
 		}
 		init_y++;
 
-		puts(line);
-		printf("len:%d\n", strlen(line));
+//		puts(line);
+//		printf("len:%d\n", strlen(line));
 	}
 
 	thisField->totalX = init_x;
