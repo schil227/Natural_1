@@ -150,8 +150,30 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 //		printf("is not passable");
 		return 0;
 	}
+}
+
+int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int y){
+
+	//check if in bounds
+	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
+			return 0;
+	}
+
+	if(getSpaceFromField(thisField,x,y)->currentIndividual == NULL){
+		getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y)->currentIndividual = NULL;
+		getSpaceFromField(thisField, x, y)->currentIndividual = thisIndividual;
+		thisIndividual->playerCharacter->x = x;
+		thisIndividual->playerCharacter->y = y;
+		return 1;
+	}
+
+	//space occoupied
+	return 0;
 
 }
+
+
+
 
 int moveCursor(field *thisField, cursor *thisCursor, int direction){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);

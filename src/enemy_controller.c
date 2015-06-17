@@ -10,16 +10,22 @@ typedef struct {
 	int pathLength;
 	int x;
 	int y;
+	int isFinalPathNode;
 	space **currentSpace;
 	struct node ** previousNode;
 } node;
 
+typedef struct {
+	node ** nodeArray;
+	int size;
+} nodeArr;
+
 node * createNewNode(int pathLength, int x, int y, space**currentSpacePointer){
 	node* thisNode = malloc(sizeof(node));
-	thisNode->previousNode; // = malloc(sizeof(node));
 	thisNode->pathLength = pathLength;
 	thisNode->x = x;
 	thisNode->y = y;
+	thisNode->isFinalPathNode = 0;
 	thisNode->currentSpace = currentSpacePointer;
 	return thisNode;
 }
@@ -69,7 +75,7 @@ node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField
 	int dx,dy,newX,newY, index=0;
 
 	printf("getting new active nodes \n");
-	if (parentNode->pathLength < 10) {
+	if (parentNode->pathLength < 100) {
 		for (dx = -1; dx < 2; dx++) {
 			for (dy = -1; dy < 2; dy++) {
 				newX = parentNode->x + dx;
@@ -115,7 +121,6 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 
 			if(newNodes[j]->x == targetX && newNodes[j]->y == targetY){ //found target space
 				printf("found the target space!!! \n");
-				//TODO: DESTROY OTHER NODES!!//
 				return (newNodes[j]);
 			}
 
@@ -142,7 +147,16 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 	return pathFind(targetX, targetY, allNodes, newActiveNodes, thisField);
 }
 
-void getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
+/*
+ * getSpaceClosestToPlayer:
+ * This is the pathfinding algorithm, which finds the shortest path between two individuals.
+ * This function returns a struct nodeArr, which is a list of node pointers (node closest to
+ *  thisIndividual first) and the size of the nodePointers
+ *
+ *  Note that this algorithm does not include 'weighted' spaces, meaning that each space takes
+ *  the same movement-cost to traverse (
+ */
+nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
 	printf("starting!\n");
 	space ** startingSpace = NULL;
 	startingSpace = getSpaceAddressFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
@@ -168,19 +182,62 @@ void getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, ind
 	printf("starting:3\n");
 	node * endNode = pathFind(targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y, allNodes, activeNodes, thisField);
 
+	nodeArr * resultArr = malloc(sizeof(nodeArr));
+
 	if(endNode->pathLength != -1){
+		int size = 0;
 		printf("path Found:");
 		node * tmpNode = endNode;
 		while(tmpNode->previousNode != NULL){
 			printf("[%d,%d]\n", tmpNode->x, tmpNode->y);
+			tmpNode->isFinalPathNode = 1;
+			tmpNode = tmpNode->previousNode;
+			size++;
+		}
+
+		resultArr->size = size;
+		resultArr->nodeArray = malloc(sizeof(node*)*size);
+
+		tmpNode = endNode;
+
+//
+//		for(size=0; size <resultArr->size; size++){
+//			resultArr->nodeArray[size] = tmpNode;
+//			tmpNode = tmpNode->previousNode;
+//		}
+
+
+
+		for(size=resultArr->size-1; size >=0; size--){
+			resultArr->nodeArray[size] = tmpNode;
 			tmpNode = tmpNode->previousNode;
 		}
 
 	}
 
+	i = 0;
+	while(allNodes[i] != NULL){
+		if(allNodes[i]->isFinalPathNode != 1){
+			free(allNodes[i]);
+		}
+		i++;
+	}
+
+	return resultArr;
 }
 
 void enemyAction(individual * enemy, field * thisField, individual * player){
-	wanderAround(thisField, enemy);
+	nodeArr * resultArr = getSpaceClosestToPlayer(thisField, enemy, player);
+	int i;
+	int size = min(resultArr->size, enemy->mvmt);
+	for(i = 1; i < size; i++){
+		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
+		if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
+			break; // path is blocked by individual
+		}
+	}
+
+
+//	wanderAround(thisField, enemy);
 	attackIfInRamge(enemy,player);
 }

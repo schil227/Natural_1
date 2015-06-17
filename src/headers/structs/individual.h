@@ -22,6 +22,7 @@ typedef struct {
 	short int range;
 	short int maxDam;
 	short int minDam;
+	short int mvmt;
 
 
 } individual;

@@ -222,6 +222,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		player->maxDam = 10;
 		player->minDam = 0;
 		player->range = 2;
+		player->mvmt = 3;
 
 		skeleton->playerCharacter->imageID = 2005;
 		skeleton->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
@@ -240,7 +241,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		skeleton->playerCharacter->height = bm.bmHeight;
 		skeleton->playerCharacter->width = bm.bmWidth;
 
-		skeleton->playerCharacter->x = 4;
+		skeleton->playerCharacter->x = 10;
 		skeleton->playerCharacter->y = 1;
 		skeleton->totalHP = 10;
 		skeleton->hp = 10;
@@ -248,13 +249,14 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		skeleton->remainingActions = 2;
 		skeleton->maxDam = 3;
 		skeleton->range = 1;
+		skeleton->mvmt = 3;
 
 		printf("1,0:%p, 2,0:%p\n",
 				getSpaceFromField(main_field, 1, 0)->currentIndividual,
 				getSpaceFromField(main_field, 2, 0)->currentIndividual);
 		printf("+++ skeleton x:%d, y:%d\n", skeleton->playerCharacter->x,
 				skeleton->playerCharacter->y);
-		moveIndividual(main_field, skeleton, 6);
+		moveIndividual(main_field, skeleton, 8);
 		printf("1,0:%p, 2,0:%p\n",
 				getSpaceFromField(main_field, 1, 0)->currentIndividual,
 				getSpaceFromField(main_field, 2, 0)->currentIndividual);
@@ -284,7 +286,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
 //				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
 
-		getSpaceClosestToPlayer(main_field,skeleton,player);
+
 	}
 		break;
 	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
