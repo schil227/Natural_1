@@ -8,7 +8,7 @@
 #ifndef SRC_HEADERS_STRUCTS_CURSOR_H_
 #define SRC_HEADERS_STRUCTS_CURSOR_H_
 
-#include"../character_pub_methods.h"
+#include"../individual_pub_methods.h"
 
 typedef struct {
 	character* cursorCharacter;

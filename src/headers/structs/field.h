@@ -10,6 +10,7 @@
 #include<stdbool.h>
 #include "../individual_pub_methods.h"
 
+
 typedef struct {
 	int numCharacters;
 

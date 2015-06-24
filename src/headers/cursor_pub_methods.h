@@ -9,6 +9,8 @@
 #define SRC_HEADERS_CURSOR_PUB_METHODS_H_
 
 #include"./structs/cursor.h"
+#include"./field_pub_methods.h"
+
 void drawCursor(HDC hdc, HDC hdcBuffer, cursor *thisCursor);
 void destroyCursor(cursor* thisCursor);
 

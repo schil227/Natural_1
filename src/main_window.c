@@ -21,15 +21,18 @@ const int rateOfChange_player_y = 8;
 int numMessages = 0;
 int mouseButtonCount = 0;
 //HBITMAP g_hbmPlayer = NULL;
-HBITMAP g_hbmPlayerMask = NULL;
+//HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
-int cursorMode = 0;
+int * cursorMode;
 int initCursorMode = 0;
 
 individual* player;
 individual* skeleton;
 cursor* thisCursor;
 field* main_field;
+
+int trueInt = 1;
+int falseInt = 0;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
@@ -142,7 +145,7 @@ void drawAll(HDC hdc, RECT* prc) {
 	if (skeleton->hp > 0) {
 		drawPlayer(hdc, hdcBuffer, skeleton);
 	}
-	if (cursorMode) {
+	if (*cursorMode) {
 		drawCursor(hdc, hdcBuffer, thisCursor);
 	}
 
@@ -319,7 +322,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		break;
 	case WM_DESTROY:
 //			DeleteObject(g_hbmPlayer);
-		DeleteObject(g_hbmPlayerMask);
+//		DeleteObject(g_hbmPlayerMask);
 		destroyIndividual(player);
 
 		PostQuitMessage(0);
@@ -407,7 +410,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			break;
 		case 0x41:
-			cursorMode = 1;
+			*cursorMode = trueInt;
 			initCursorMode = 1;
 			break;
 		case 0x42:
@@ -454,107 +457,107 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	switch (msg) {
-	case WM_KEYDOWN: {
-		switch (LOWORD(wParam)) {
-		case 0x34: //left
-		case 0x64:
-			moveCursor(main_field, thisCursor, 4);
-//				thisCursor->cursorCharacter->x -= 40;
-			break;
-		case 0x36:
-		case 0x66:
-			moveCursor(main_field, thisCursor, 6);
-//				thisCursor->cursorCharacter->x += 40;
-			break;
-		case 0x38:
-		case 0x68:
-			moveCursor(main_field, thisCursor, 8);
-//				thisCursor->cursorCharacter->y -= 40;
-			break;
-		case 0x32:
-		case 0x62:
-			moveCursor(main_field, thisCursor, 2);
-//				thisCursor->cursorCharacter->y += 40;
-			break;
-		case 0x31: //down left
-		case 0x61:
-			moveCursor(main_field, thisCursor, 1);
-			break;
-		case 0x37: //up left
-		case 0x67:
-			moveCursor(main_field, thisCursor, 7);
-			break;
-		case 0x39: //up right
-		case 0x69:
-			moveCursor(main_field, thisCursor, 9);
-			break;
-		case 0x33: //down right
-		case 0x63:
-			moveCursor(main_field, thisCursor, 3);
-			break;
-		case 0x1B: //escape
-			cursorMode = 0;
-			break;
-		case 0x0D: //enter
-		{
-			int cX, cY;
-			cX = thisCursor->cursorCharacter->x;
-			cY = thisCursor->cursorCharacter->y;
-
-			individual ** tmp = getIndividualAddressFromField(main_field, cX, cY);
-
-			//printf("tmp:%p, tmpVal:%p other:%p \n", tmp, *tmp, (individual)*tmp);
-			printf("*tmp:%p \n", *tmp);
-			printf("skeleton:%p, Address:%p other%p \n", skeleton, &skeleton, (individual)*skeleton);
-
-			if (*tmp == skeleton //getIndividualFromField(main_field, cX, cY) == skeleton
-					&& individualWithinRange(player, skeleton)) {
-				printf("attacked!");
-				attackIndividual(player, skeleton);
-				cursorMode = 0;
-
-				player->remainingActions = player->remainingActions - 1;
-				if (player->remainingActions <= 0) {
-					endTurn(player);
-					enemyAction(skeleton, main_field, player);
-				}
-
-			}
-
-//					destroyIndividual(tmp);
-		}
-			break;
-		}
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-
-			ReleaseDC(hwnd, hdc);
-		}
-		break;
-		case WM_CLOSE:
-		DestroyWindow(hwnd);
-		break;
-		case WM_DESTROY:
-		DeleteObject(g_hbmPlayerMask);
-		destroyIndividual(player);
-		destroyCursor(thisCursor);
-		PostQuitMessage(0);
-		break;
-		default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
-	}
-	return 0;
-}
+//int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+//	switch (msg) {
+//	case WM_KEYDOWN: {
+//		switch (LOWORD(wParam)) {
+//		case 0x34: //left
+//		case 0x64:
+//			moveCursor(main_field, thisCursor, 4);
+////				thisCursor->cursorCharacter->x -= 40;
+//			break;
+//		case 0x36:
+//		case 0x66:
+//			moveCursor(main_field, thisCursor, 6);
+////				thisCursor->cursorCharacter->x += 40;
+//			break;
+//		case 0x38:
+//		case 0x68:
+//			moveCursor(main_field, thisCursor, 8);
+////				thisCursor->cursorCharacter->y -= 40;
+//			break;
+//		case 0x32:
+//		case 0x62:
+//			moveCursor(main_field, thisCursor, 2);
+////				thisCursor->cursorCharacter->y += 40;
+//			break;
+//		case 0x31: //down left
+//		case 0x61:
+//			moveCursor(main_field, thisCursor, 1);
+//			break;
+//		case 0x37: //up left
+//		case 0x67:
+//			moveCursor(main_field, thisCursor, 7);
+//			break;
+//		case 0x39: //up right
+//		case 0x69:
+//			moveCursor(main_field, thisCursor, 9);
+//			break;
+//		case 0x33: //down right
+//		case 0x63:
+//			moveCursor(main_field, thisCursor, 3);
+//			break;
+//		case 0x1B: //escape
+//			cursorMode = 0;
+//			break;
+//		case 0x0D: //enter
+//		{
+//			int cX, cY;
+//			cX = thisCursor->cursorCharacter->x;
+//			cY = thisCursor->cursorCharacter->y;
+//
+//			individual ** tmp = getIndividualAddressFromField(main_field, cX, cY);
+//
+//			//printf("tmp:%p, tmpVal:%p other:%p \n", tmp, *tmp, (individual)*tmp);
+//			printf("*tmp:%p \n", *tmp);
+//			printf("skeleton:%p, Address:%p other%p \n", skeleton, &skeleton, (individual)*skeleton);
+//
+//			if (*tmp == skeleton //getIndividualFromField(main_field, cX, cY) == skeleton
+//					&& individualWithinRange(player, skeleton)) {
+//				printf("attacked!");
+//				attackIndividual(player, skeleton);
+//				cursorMode = 0;
+//
+//				player->remainingActions = player->remainingActions - 1;
+//				if (player->remainingActions <= 0) {
+//					endTurn(player);
+//					enemyAction(skeleton, main_field, player);
+//				}
+//
+//			}
+//
+////					destroyIndividual(tmp);
+//		}
+//			break;
+//		}
+//		case WM_TIMER:
+//		{
+//			RECT rect;
+//			HDC hdc = GetDC(hwnd);
+//			GetClientRect(hwnd, &rect);
+//			drawAll(hdc, &rect);
+//
+//			ReleaseDC(hwnd, hdc);
+//		}
+//		break;
+//		case WM_CLOSE:
+//		DestroyWindow(hwnd);
+//		break;
+//		case WM_DESTROY:
+//		DeleteObject(g_hbmPlayerMask);
+//		destroyIndividual(player);
+//		destroyCursor(thisCursor);
+//		PostQuitMessage(0);
+//		break;
+//		default:
+//		return DefWindowProc(hwnd, msg, wParam, lParam);
+//	}
+//	}
+//	return 0;
+//}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if (cursorMode) {
+	if (*cursorMode) {
 		if (initCursorMode) {
 			printf("playerX:%d\n", player->playerCharacter->x);
 			thisCursor->cursorCharacter->x = player->playerCharacter->x;
@@ -562,7 +565,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			initCursorMode = 0;
 		}
 
-		return cursorLoop(hwnd, msg, wParam, lParam);
+		return cursorLoop(hwnd, msg, wParam, lParam, cursorMode, thisCursor, main_field, player, skeleton);
 	} else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}
@@ -576,6 +579,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 	srand(time(NULL));
+	cursorMode = &falseInt;
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure

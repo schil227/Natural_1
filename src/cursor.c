@@ -21,3 +21,105 @@ void destroyCursor(cursor* thisCursor){
 	}
 	free(thisCursor);
 }
+
+
+
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, cursor * thisCursor, field * main_field, individual * player, individual * skeleton) {
+
+	switch (msg) {
+	case WM_KEYDOWN: {
+		switch (LOWORD(wParam)) {
+		case 0x34: //left
+		case 0x64:
+			moveCursor(main_field, thisCursor, 4);
+//				thisCursor->cursorCharacter->x -= 40;
+			break;
+		case 0x36:
+		case 0x66:
+			moveCursor(main_field, thisCursor, 6);
+//				thisCursor->cursorCharacter->x += 40;
+			break;
+		case 0x38:
+		case 0x68:
+			moveCursor(main_field, thisCursor, 8);
+//				thisCursor->cursorCharacter->y -= 40;
+			break;
+		case 0x32:
+		case 0x62:
+			moveCursor(main_field, thisCursor, 2);
+//				thisCursor->cursorCharacter->y += 40;
+			break;
+		case 0x31: //down left
+		case 0x61:
+			moveCursor(main_field, thisCursor, 1);
+			break;
+		case 0x37: //up left
+		case 0x67:
+			moveCursor(main_field, thisCursor, 7);
+			break;
+		case 0x39: //up right
+		case 0x69:
+			moveCursor(main_field, thisCursor, 9);
+			break;
+		case 0x33: //down right
+		case 0x63:
+			moveCursor(main_field, thisCursor, 3);
+			break;
+		case 0x1B: //escape
+			*cursorMode = 0;
+			break;
+		case 0x0D: //enter
+		{
+			int cX, cY;
+			cX = thisCursor->cursorCharacter->x;
+			cY = thisCursor->cursorCharacter->y;
+
+			individual ** tmp = getIndividualAddressFromField(main_field, cX, cY);
+
+			//printf("tmp:%p, tmpVal:%p other:%p \n", tmp, *tmp, (individual)*tmp);
+			printf("*tmp:%p \n", *tmp);
+			printf("skeleton:%p, Address:%p other%p \n", skeleton, &skeleton, (individual)*skeleton);
+
+			if (*tmp == skeleton //getIndividualFromField(main_field, cX, cY) == skeleton
+					&& individualWithinRange(player, skeleton)) {
+				printf("attacked!");
+				attackIndividual(player, skeleton);
+				*cursorMode = 0;
+
+				player->remainingActions = player->remainingActions - 1;
+				if (player->remainingActions <= 0) {
+					endTurn(player);
+					enemyAction(skeleton, main_field, player);
+				}
+
+			}
+
+//					destroyIndividual(tmp);
+		}
+			break;
+		}
+		case WM_TIMER:
+		{
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+
+			ReleaseDC(hwnd, hdc);
+		}
+		break;
+		case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+		case WM_DESTROY:
+//		DeleteObject(g_hbmPlayerMask);
+		destroyIndividual(player);
+		destroyCursor(thisCursor);
+		PostQuitMessage(0);
+		break;
+		default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	}
+	return 0;
+}
