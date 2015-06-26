@@ -90,48 +90,48 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 	return TRUE;
 }
 
-HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
-	HDC hdcMemColor, hdcMemMask;
-	HBITMAP hbmMask;
-	BITMAP bm;
-
-	//create a monochrome mask bitmap (1 bit)
-
-	GetObject(hbmColor, sizeof(BITMAP), &bm);
-	hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
-
-	//Get some graphic handlers that are compatable with the display driver
-
-	hdcMemColor = CreateCompatibleDC(0);
-	hdcMemMask = CreateCompatibleDC(0);
-
-	SelectObject(hdcMemColor, hbmColor);
-	SelectObject(hdcMemMask, hbmMask);
-
-	//Set the background color of the color image to the color
-	//we want transparent
-	SetBkColor(hdcMemColor, crTransparent);
-
-	//Copy the bits from the color image to the black/white mask
-	//everything with the background color ends up white
-	//while everything else is black
-
-	BitBlt(hdcMemMask, 0, 0, bm.bmWidth, bm.bmHeight, hdcMemColor, 0, 0,
-	SRCCOPY);
-
-	//Take mask and use it to turn transparent color in the original
-	//color image to black so the transparency effect will work
-
-	BitBlt(hdcMemColor, 0, 0, bm.bmWidth, bm.bmHeight, hdcMemMask, 0, 0,
-	SRCINVERT);
-
-	//clean up
-
-	DeleteDC(hdcMemColor);
-	DeleteDC(hdcMemMask);
-
-	return hbmMask;
-}
+//HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
+//	HDC hdcMemColor, hdcMemMask;
+//	HBITMAP hbmMask;
+//	BITMAP bm;
+//
+//	//create a monochrome mask bitmap (1 bit)
+//
+//	GetObject(hbmColor, sizeof(BITMAP), &bm);
+//	hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+//
+//	//Get some graphic handlers that are compatable with the display driver
+//
+//	hdcMemColor = CreateCompatibleDC(0);
+//	hdcMemMask = CreateCompatibleDC(0);
+//
+//	SelectObject(hdcMemColor, hbmColor);
+//	SelectObject(hdcMemMask, hbmMask);
+//
+//	//Set the background color of the color image to the color
+//	//we want transparent
+//	SetBkColor(hdcMemColor, crTransparent);
+//
+//	//Copy the bits from the color image to the black/white mask
+//	//everything with the background color ends up white
+//	//while everything else is black
+//
+//	BitBlt(hdcMemMask, 0, 0, bm.bmWidth, bm.bmHeight, hdcMemColor, 0, 0,
+//	SRCCOPY);
+//
+//	//Take mask and use it to turn transparent color in the original
+//	//color image to black so the transparency effect will work
+//
+//	BitBlt(hdcMemColor, 0, 0, bm.bmWidth, bm.bmHeight, hdcMemMask, 0, 0,
+//	SRCINVERT);
+//
+//	//clean up
+//
+//	DeleteDC(hdcMemColor);
+//	DeleteDC(hdcMemMask);
+//
+//	return hbmMask;
+//}
 
 void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
@@ -164,19 +164,17 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		player = initIndividual();
 		skeleton = initIndividual();
+		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
-//		player = malloc(sizeof(individual));
-//		player->playerCharacter = malloc(sizeof(character));
-//		player->name = malloc(sizeof(char)*32);
-		strcpy(player->name, "adrian");
+		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 10, 2, 10, 0, 2, 3)) {
+			MessageBox(hwnd, "Failed to make player", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
+		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 10, 2, 3, 1, 1, 3)) {
+			MessageBox(hwnd, "Failed to make player", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
 
-//		skeleton = malloc(sizeof(individual));
-//		skeleton->playerCharacter = malloc(sizeof(character));
-//		skeleton->name = malloc(sizeof(char)*32);
-		strcpy(skeleton->name, "skelly");
-
-		thisCursor = malloc(sizeof(cursor));
-		thisCursor->cursorCharacter = malloc(sizeof(character));
 		int x;
 		int y;
 		main_field = initField(
@@ -197,63 +195,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
-		//player->image = NULL;
-		player->playerCharacter->imageID = 2001;
-//		player->playerCharacter->image = malloc(sizeof(HBITMAP));
-		player->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
-		MAKEINTRESOURCE(player->playerCharacter->imageID));
-
-		if (player->playerCharacter->image == NULL) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-
-		player->playerCharacter->imageMask = CreateBitmapMask(
-				player->playerCharacter->image, RGB(255, 70, 255)); //transparent is black
-
-		GetObjectA(player->playerCharacter->image, sizeof(bm), &bm);
-
-		player->playerCharacter->height = bm.bmHeight;
-		player->playerCharacter->width = bm.bmWidth;
-
-		player->playerCharacter->x = 0;
-		player->playerCharacter->y = 0;
-		player->totalHP = 10;
-		player->totalActions = 2;
-		player->remainingActions = 2;
-		player->hp = 10;
-		player->maxDam = 10;
-		player->minDam = 0;
-		player->range = 2;
-		player->mvmt = 3;
-
-		skeleton->playerCharacter->imageID = 2005;
-		skeleton->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
-		MAKEINTRESOURCE(skeleton->playerCharacter->imageID));
-
-		if (skeleton->playerCharacter->image == NULL) {
-			MessageBox(hwnd, "Failed to make skeleton", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-
-		skeleton->playerCharacter->imageMask = CreateBitmapMask(
-				skeleton->playerCharacter->image, RGB(255, 0, 255)); //transparent is black
-
-		GetObjectA(skeleton->playerCharacter->image, sizeof(bm), &bm);
-
-		skeleton->playerCharacter->height = bm.bmHeight;
-		skeleton->playerCharacter->width = bm.bmWidth;
-
-		skeleton->playerCharacter->x = 10;
-		skeleton->playerCharacter->y = 1;
-		skeleton->totalHP = 10;
-		skeleton->hp = 10;
-		skeleton->totalActions = 2;
-		skeleton->remainingActions = 2;
-		skeleton->maxDam = 3;
-		skeleton->range = 1;
-		skeleton->mvmt = 3;
-
 		printf("1,0:%p, 2,0:%p\n",
 				getSpaceFromField(main_field, 1, 0)->currentIndividual,
 				getSpaceFromField(main_field, 2, 0)->currentIndividual);
@@ -267,16 +208,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				skeleton->playerCharacter->y);
 //		getSpaceFromField(main_field, 1, 0)->currentIndividual = skeleton;
 
-		thisCursor->cursorCharacter->imageID = 2004;
-		thisCursor->cursorCharacter->image = malloc(sizeof(HBITMAP));
-		thisCursor->cursorCharacter->image = LoadBitmap(GetModuleHandle(NULL),
-				MAKEINTRESOURCE(thisCursor->cursorCharacter->imageID));
-		thisCursor->cursorCharacter->x = 0;
-		thisCursor->cursorCharacter->y = 0;
-		thisCursor->cursorCharacter->width = 40;
-		thisCursor->cursorCharacter->height = 40;
-		thisCursor->cursorCharacter->imageMask = CreateBitmapMask(
-				thisCursor->cursorCharacter->image, RGB(224, 64, 192));
 
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
@@ -456,105 +387,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}
 	return 0;
 }
-
-//int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-//	switch (msg) {
-//	case WM_KEYDOWN: {
-//		switch (LOWORD(wParam)) {
-//		case 0x34: //left
-//		case 0x64:
-//			moveCursor(main_field, thisCursor, 4);
-////				thisCursor->cursorCharacter->x -= 40;
-//			break;
-//		case 0x36:
-//		case 0x66:
-//			moveCursor(main_field, thisCursor, 6);
-////				thisCursor->cursorCharacter->x += 40;
-//			break;
-//		case 0x38:
-//		case 0x68:
-//			moveCursor(main_field, thisCursor, 8);
-////				thisCursor->cursorCharacter->y -= 40;
-//			break;
-//		case 0x32:
-//		case 0x62:
-//			moveCursor(main_field, thisCursor, 2);
-////				thisCursor->cursorCharacter->y += 40;
-//			break;
-//		case 0x31: //down left
-//		case 0x61:
-//			moveCursor(main_field, thisCursor, 1);
-//			break;
-//		case 0x37: //up left
-//		case 0x67:
-//			moveCursor(main_field, thisCursor, 7);
-//			break;
-//		case 0x39: //up right
-//		case 0x69:
-//			moveCursor(main_field, thisCursor, 9);
-//			break;
-//		case 0x33: //down right
-//		case 0x63:
-//			moveCursor(main_field, thisCursor, 3);
-//			break;
-//		case 0x1B: //escape
-//			cursorMode = 0;
-//			break;
-//		case 0x0D: //enter
-//		{
-//			int cX, cY;
-//			cX = thisCursor->cursorCharacter->x;
-//			cY = thisCursor->cursorCharacter->y;
-//
-//			individual ** tmp = getIndividualAddressFromField(main_field, cX, cY);
-//
-//			//printf("tmp:%p, tmpVal:%p other:%p \n", tmp, *tmp, (individual)*tmp);
-//			printf("*tmp:%p \n", *tmp);
-//			printf("skeleton:%p, Address:%p other%p \n", skeleton, &skeleton, (individual)*skeleton);
-//
-//			if (*tmp == skeleton //getIndividualFromField(main_field, cX, cY) == skeleton
-//					&& individualWithinRange(player, skeleton)) {
-//				printf("attacked!");
-//				attackIndividual(player, skeleton);
-//				cursorMode = 0;
-//
-//				player->remainingActions = player->remainingActions - 1;
-//				if (player->remainingActions <= 0) {
-//					endTurn(player);
-//					enemyAction(skeleton, main_field, player);
-//				}
-//
-//			}
-//
-////					destroyIndividual(tmp);
-//		}
-//			break;
-//		}
-//		case WM_TIMER:
-//		{
-//			RECT rect;
-//			HDC hdc = GetDC(hwnd);
-//			GetClientRect(hwnd, &rect);
-//			drawAll(hdc, &rect);
-//
-//			ReleaseDC(hwnd, hdc);
-//		}
-//		break;
-//		case WM_CLOSE:
-//		DestroyWindow(hwnd);
-//		break;
-//		case WM_DESTROY:
-//		DeleteObject(g_hbmPlayerMask);
-//		destroyIndividual(player);
-//		destroyCursor(thisCursor);
-//		PostQuitMessage(0);
-//		break;
-//		default:
-//		return DefWindowProc(hwnd, msg, wParam, lParam);
-//	}
-//	}
-//	return 0;
-//}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (*cursorMode) {

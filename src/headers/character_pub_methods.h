@@ -12,4 +12,5 @@
 void nameCharacter(character* thisCharacter, char* name);
 void destroyCharacter(character* thisCharacter);
 void moveCharacter(character* thisCharacter, int newX, int newY);
+HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent);
 #endif /* SRC_HEADERS_CHARACTER_PUB_METHODS_H_ */

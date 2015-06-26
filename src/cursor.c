@@ -22,7 +22,31 @@ void destroyCursor(cursor* thisCursor){
 	free(thisCursor);
 }
 
+cursor * initCursor(int imageID, COLORREF rgb, int x, int y) {
+	BITMAP bm;
+	cursor * thisCursor = malloc(sizeof(cursor));
+	thisCursor->cursorCharacter = malloc(sizeof(character));
 
+	thisCursor->cursorCharacter->imageID = imageID;
+	thisCursor->cursorCharacter->image = LoadBitmap(GetModuleHandle(NULL),
+	MAKEINTRESOURCE(imageID));
+
+	if (thisCursor->cursorCharacter->image == NULL) {
+		return 1;
+	}
+
+	thisCursor->cursorCharacter->imageMask = CreateBitmapMask(
+			thisCursor->cursorCharacter->image, rgb);
+
+	GetObjectA(thisCursor->cursorCharacter->image, sizeof(bm), &bm);
+
+	thisCursor->cursorCharacter->width = bm.bmWidth;
+	thisCursor->cursorCharacter->height = bm.bmHeight;
+	thisCursor->cursorCharacter->x = x;
+	thisCursor->cursorCharacter->y = y;
+
+	return thisCursor;
+}
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, cursor * thisCursor, field * main_field, individual * player, individual * skeleton) {
 

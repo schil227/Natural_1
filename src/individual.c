@@ -18,6 +18,43 @@ individual *initIndividual(){
 	return toReturn;
 }
 
+int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, char * name, int x,
+		int y, int totalHP, int totalActions, int maxDam, int minDam,
+		int range, int mvmt){
+	BITMAP bm;
+
+	thisIndividual->playerCharacter->imageID = imageID;
+	thisIndividual->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
+			MAKEINTRESOURCE(imageID));
+
+	if(thisIndividual->playerCharacter->image == NULL) {
+		return 1;
+	}
+
+	thisIndividual->playerCharacter->imageMask = CreateBitmapMask(
+			thisIndividual->playerCharacter->image, rgb);
+
+	GetObjectA(thisIndividual->playerCharacter->image, sizeof(bm), &bm);
+
+	thisIndividual->playerCharacter->height = bm.bmHeight;
+	thisIndividual->playerCharacter->width = bm.bmWidth;
+
+
+	strcpy(thisIndividual->name, name);
+	thisIndividual->playerCharacter->x = x;
+	thisIndividual->playerCharacter->y = y;
+	thisIndividual->totalHP = totalHP;
+	thisIndividual->totalActions = totalActions;
+	thisIndividual->remainingActions = totalActions;
+	thisIndividual->hp = totalHP;
+	thisIndividual->maxDam = maxDam;
+	thisIndividual->minDam = minDam;
+	thisIndividual->range = range;
+	thisIndividual->mvmt = mvmt;
+
+	return 0;
+}
+
 void destroyIndividual(individual* thisIndividual){
 	if(thisIndividual->playerCharacter){ //Null check
 		destroyCharacter(thisIndividual->playerCharacter);
@@ -80,3 +117,4 @@ void drawPlayer(HDC hdc, HDC hdcBuffer, individual* player){
 		BitBlt(hdcBuffer, player->playerCharacter->x*40, player->playerCharacter->y*40, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
 		DeleteDC(hdcMem);
 }
+
