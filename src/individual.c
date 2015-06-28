@@ -106,15 +106,15 @@ int attackIfInRamge(individual *thisIndividual, individual *targetIndividual){
 	}
 }
 
-void drawPlayer(HDC hdc, HDC hdcBuffer, individual* player){
+void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual){
 		HDC hdcMem = CreateCompatibleDC(hdc);
-		SelectObject(hdcMem, player->playerCharacter->imageMask);
+		SelectObject(hdcMem, thisIndividual->playerCharacter->imageMask);
 
-		BitBlt(hdcBuffer, player->playerCharacter->x*40, player->playerCharacter->y*40, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCAND);
+		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40, thisIndividual->playerCharacter->y*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCAND);
 
-		SelectObject(hdcMem, player->playerCharacter->image);// player->image);
+		SelectObject(hdcMem, thisIndividual->playerCharacter->image);// thisIndividual->image);
 
-		BitBlt(hdcBuffer, player->playerCharacter->x*40, player->playerCharacter->y*40, player->playerCharacter->width, player->playerCharacter->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
+		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40, thisIndividual->playerCharacter->y*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
 		DeleteDC(hdcMem);
 }
 

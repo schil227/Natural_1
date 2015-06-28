@@ -144,7 +144,6 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 		getSpaceFromField(thisField,newX,newY)->currentIndividual = thisIndividual;
 		thisIndividual->playerCharacter->x = newX;
 		thisIndividual->playerCharacter->y = newY;
-		printf("");
 		return 1;
 	}else{
 //		printf("is not passable");
@@ -171,9 +170,6 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 	return 0;
 
 }
-
-
-
 
 int moveCursor(field *thisField, cursor *thisCursor, int direction){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
@@ -324,6 +320,77 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field){
 
 	DeleteDC(hdcMem);
 }
+
+int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual){
+	switch (msg) {
+	case WM_KEYDOWN: {
+		switch (LOWORD(wParam)) {
+		case 0x34: //left
+		case 0x64:
+//				moveCursor(thisField, thisIndividual, 4);
+			break;
+		case 0x36:
+		case 0x66:
+//				moveCursor(thisField, thisIndividual, 6);
+			break;
+		case 0x38:
+		case 0x68:
+//				moveCursor(thisField, thisIndividual, 8);
+			break;
+		case 0x32:
+		case 0x62:
+//				moveCursor(thisField, thisIndividual, 2);
+			break;
+		case 0x31: //down left
+		case 0x61:
+//				moveCursor(thisField, thisIndividual, 1);
+			break;
+		case 0x37: //up left
+		case 0x67:
+//				moveCursor(thisField, thisIndividual, 7);
+			break;
+		case 0x39: //up right
+		case 0x69:
+//				moveCursor(thisField, thisIndividual, 9);
+			break;
+		case 0x33: //down right
+		case 0x63:
+//				moveCursor(thisField, thisIndividual, 3);
+			break;
+		case 0x1B: //escape
+			*moveMode = 0;
+			break;
+		case 0x0D: //enter
+			{
+
+			}
+			break;
+		}
+		case WM_TIMER:
+		{
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+
+			ReleaseDC(hwnd, hdc);
+		}
+		break;
+		case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+		case WM_DESTROY:
+
+		destroyIndividual(thisIndividual);
+		PostQuitMessage(0);
+		break;
+		default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	}
+	return 0;
+}
+
 
 int b_main(){
 	field* thisField;

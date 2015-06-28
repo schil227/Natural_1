@@ -24,6 +24,7 @@ int mouseButtonCount = 0;
 //HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
 int * cursorMode;
+int * moveMode;
 int initCursorMode = 0;
 
 individual* player;
@@ -90,49 +91,6 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 	return TRUE;
 }
 
-//HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
-//	HDC hdcMemColor, hdcMemMask;
-//	HBITMAP hbmMask;
-//	BITMAP bm;
-//
-//	//create a monochrome mask bitmap (1 bit)
-//
-//	GetObject(hbmColor, sizeof(BITMAP), &bm);
-//	hbmMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);
-//
-//	//Get some graphic handlers that are compatable with the display driver
-//
-//	hdcMemColor = CreateCompatibleDC(0);
-//	hdcMemMask = CreateCompatibleDC(0);
-//
-//	SelectObject(hdcMemColor, hbmColor);
-//	SelectObject(hdcMemMask, hbmMask);
-//
-//	//Set the background color of the color image to the color
-//	//we want transparent
-//	SetBkColor(hdcMemColor, crTransparent);
-//
-//	//Copy the bits from the color image to the black/white mask
-//	//everything with the background color ends up white
-//	//while everything else is black
-//
-//	BitBlt(hdcMemMask, 0, 0, bm.bmWidth, bm.bmHeight, hdcMemColor, 0, 0,
-//	SRCCOPY);
-//
-//	//Take mask and use it to turn transparent color in the original
-//	//color image to black so the transparency effect will work
-//
-//	BitBlt(hdcMemColor, 0, 0, bm.bmWidth, bm.bmHeight, hdcMemMask, 0, 0,
-//	SRCINVERT);
-//
-//	//clean up
-//
-//	DeleteDC(hdcMemColor);
-//	DeleteDC(hdcMemMask);
-//
-//	return hbmMask;
-//}
-
 void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
@@ -140,10 +98,10 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawField(hdc, hdcBuffer, main_field);
 	if (player->hp > 0) {
-		drawPlayer(hdc, hdcBuffer, player);
+		drawIndividual(hdc, hdcBuffer, player);
 	}
 	if (skeleton->hp > 0) {
-		drawPlayer(hdc, hdcBuffer, skeleton);
+		drawIndividual(hdc, hdcBuffer, skeleton);
 	}
 	if (*cursorMode) {
 		drawCursor(hdc, hdcBuffer, thisCursor);
@@ -177,8 +135,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		int x;
 		int y;
-		main_field = initField(
-				"C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
+		main_field = initField("C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
 		int imageID;
 
 		for (y = 0; y < main_field->totalY; y++) {
@@ -195,20 +152,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
-		printf("1,0:%p, 2,0:%p\n",
-				getSpaceFromField(main_field, 1, 0)->currentIndividual,
-				getSpaceFromField(main_field, 2, 0)->currentIndividual);
-		printf("+++ skeleton x:%d, y:%d\n", skeleton->playerCharacter->x,
-				skeleton->playerCharacter->y);
 		moveIndividual(main_field, skeleton, 8);
-		printf("1,0:%p, 2,0:%p\n",
-				getSpaceFromField(main_field, 1, 0)->currentIndividual,
-				getSpaceFromField(main_field, 2, 0)->currentIndividual);
-		printf("--- skeleton x:%d, y:%d\n", skeleton->playerCharacter->x,
-				skeleton->playerCharacter->y);
-//		getSpaceFromField(main_field, 1, 0)->currentIndividual = skeleton;
-
-
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -340,12 +284,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 
 			break;
-		case 0x41:
+		case 0x41: //a key (attack)
 			*cursorMode = trueInt;
 			initCursorMode = 1;
 			break;
-		case 0x42:
-			getSpaceClosestToPlayer(main_field,skeleton,player);
+		case 0x53: //s key (move)
+			*moveMode = 1;
 			break;
 		}
 
@@ -398,6 +342,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		return cursorLoop(hwnd, msg, wParam, lParam, cursorMode, thisCursor, main_field, player, skeleton);
+	} else if(*moveMode){
+		return moveLoop(hwnd, msg, wParam, lParam, moveMode, main_field, player);
 	} else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}
@@ -412,6 +358,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	MSG Msg;
 	srand(time(NULL));
 	cursorMode = &falseInt;
+	moveMode = &falseInt;
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure
