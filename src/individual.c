@@ -39,6 +39,7 @@ int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, cha
 	thisIndividual->playerCharacter->height = bm.bmHeight;
 	thisIndividual->playerCharacter->width = bm.bmWidth;
 
+	thisIndividual->playerCharacter->rgb = rgb;
 
 	strcpy(thisIndividual->name, name);
 	thisIndividual->playerCharacter->x = x;

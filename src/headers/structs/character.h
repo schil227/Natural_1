@@ -23,6 +23,7 @@ typedef struct {
 	int imageID;
 	HBITMAP image;
 	HBITMAP imageMask;
+	COLORREF rgb;
 
 } character;
 

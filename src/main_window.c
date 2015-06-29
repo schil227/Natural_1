@@ -24,11 +24,14 @@ int mouseButtonCount = 0;
 //HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
 int * cursorMode;
-int * moveMode;
 int initCursorMode = 0;
+
+int * moveMode;
+int initMoveMode = 0;
 
 individual* player;
 individual* skeleton;
+character** shadowIndividuals;
 cursor* thisCursor;
 field* main_field;
 
@@ -91,6 +94,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 	return TRUE;
 }
 
+
 void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
@@ -105,6 +109,13 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 	if (*cursorMode) {
 		drawCursor(hdc, hdcBuffer, thisCursor);
+	}
+	if (*moveMode){
+		int i = 0;
+		while(shadowIndividuals[i] != NULL){
+			drawCharacter(hdc, hdcBuffer, shadowIndividuals[i]);
+			i++;
+		}
 	}
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -290,6 +301,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x53: //s key (move)
 			*moveMode = 1;
+			initMoveMode = 1;
 			break;
 		}
 
@@ -343,7 +355,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		return cursorLoop(hwnd, msg, wParam, lParam, cursorMode, thisCursor, main_field, player, skeleton);
 	} else if(*moveMode){
-		return moveLoop(hwnd, msg, wParam, lParam, moveMode, main_field, player);
+
+		if(initMoveMode){
+			shadowIndividuals = malloc(sizeof(character *)*player->mvmt);
+			shadowIndividuals[0] = NULL;
+			initMoveMode = 0;
+		}
+
+		return moveLoop(hwnd, msg, wParam, lParam, moveMode, main_field, player, shadowIndividuals);
 	} else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}

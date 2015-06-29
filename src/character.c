@@ -69,3 +69,36 @@ HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
 
 	return hbmMask;
 }
+
+character * createCharacter(int imageID, COLORREF rgb, int x, int y){
+	character * thisCharacter = malloc(sizeof(character));
+	BITMAP bm;
+
+	thisCharacter->imageID = imageID;
+	thisCharacter->x = x;
+	thisCharacter->y = y;
+	thisCharacter->rgb = rgb;
+
+	thisCharacter->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
+
+	thisCharacter->imageMask = CreateBitmapMask(thisCharacter->image, rgb);
+
+	GetObjectA(thisCharacter->image, sizeof(bm), &bm);
+
+	thisCharacter->height = bm.bmHeight;
+	thisCharacter->width = bm.bmWidth;
+
+	return thisCharacter;
+}
+
+void drawCharacter(HDC hdc, HDC hdcBuffer, character * character){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+			SelectObject(hdcMem, character->imageMask);
+
+			BitBlt(hdcBuffer, character->x*40, character->y*40, character->width, character->height, hdcMem, 0, 0, SRCAND);
+
+			SelectObject(hdcMem, character->image);
+
+			BitBlt(hdcBuffer, character->x*40, character->y*40, character->width, character->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
+			DeleteDC(hdcMem);
+	}

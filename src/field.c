@@ -321,7 +321,8 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field){
 	DeleteDC(hdcMem);
 }
 
-int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual){
+
+int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, character ** shadowIndividuals){
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -372,7 +373,6 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,f
 			HDC hdc = GetDC(hwnd);
 			GetClientRect(hwnd, &rect);
 			drawAll(hdc, &rect);
-
 			ReleaseDC(hwnd, hdc);
 		}
 		break;
