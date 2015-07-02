@@ -49,7 +49,7 @@ cursor * initCursor(int imageID, COLORREF rgb, int x, int y) {
 }
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, cursor * thisCursor, field * main_field, individual * player, individual * skeleton) {
-
+	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {

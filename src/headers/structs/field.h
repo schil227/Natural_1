@@ -10,7 +10,6 @@
 #include<stdbool.h>
 #include "../individual_pub_methods.h"
 
-
 typedef struct {
 	int numCharacters;
 
@@ -34,5 +33,13 @@ typedef struct {
 	space* grid[25][25];
 
 } field;
+
+typedef struct {
+	int pathLength;
+	int x;
+	int y;
+	character ** shadowCharacter;
+	struct moveNode ** nextMoveNode;
+} moveNode;
 
 #endif /* SRC_HEADERS_STRUCTS_FIELD_H_ */

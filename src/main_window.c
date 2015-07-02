@@ -23,17 +23,17 @@ int mouseButtonCount = 0;
 //HBITMAP g_hbmPlayer = NULL;
 //HBITMAP g_hbmPlayerMask = NULL;
 HWND g_toolbar = NULL;
-int * cursorMode;
+int cursorMode = 0;
 int initCursorMode = 0;
 
-int * moveMode;
+int moveMode = 0;
 int initMoveMode = 0;
 
 individual* player;
 individual* skeleton;
-character** shadowIndividuals;
 cursor* thisCursor;
 field* main_field;
+moveNode * thisMoveNode;
 
 int trueInt = 1;
 int falseInt = 0;
@@ -107,15 +107,19 @@ void drawAll(HDC hdc, RECT* prc) {
 	if (skeleton->hp > 0) {
 		drawIndividual(hdc, hdcBuffer, skeleton);
 	}
-	if (*cursorMode) {
+
+	if (cursorMode) {
 		drawCursor(hdc, hdcBuffer, thisCursor);
 	}
-	if (*moveMode){
-		int i = 0;
-		while(shadowIndividuals[i] != NULL){
-			drawCharacter(hdc, hdcBuffer, shadowIndividuals[i]);
-			i++;
-		}
+
+	if (moveMode){
+		int i;
+		moveNode * tmp = thisMoveNode;
+//		for(i = 0; i < thisMoveNode->pathLength; i++){
+//			drawCharacter(hdc, hdcBuffer,&(tmp->shadowCharacter));
+//			tmp = &(tmp->nextMoveNode);
+//		}
+
 	}
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -296,13 +300,16 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			break;
 		case 0x41: //a key (attack)
-			*cursorMode = trueInt;
+			printf("starting \n");
+			cursorMode = 1;
 			initCursorMode = 1;
+			printf("pressed a\n");
 			break;
 		case 0x53: //s key (move)
-			*moveMode = 1;
+			moveMode = 1;
 			initMoveMode = 1;
 			break;
+			printf("pressed s\n");
 		}
 
 	}
@@ -345,24 +352,35 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if (*cursorMode) {
+	if (cursorMode) {
 		if (initCursorMode) {
 			printf("playerX:%d\n", player->playerCharacter->x);
 			thisCursor->cursorCharacter->x = player->playerCharacter->x;
 			thisCursor->cursorCharacter->y = player->playerCharacter->y;
 			initCursorMode = 0;
+
 		}
 
-		return cursorLoop(hwnd, msg, wParam, lParam, cursorMode, thisCursor, main_field, player, skeleton);
-	} else if(*moveMode){
+		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, thisCursor, main_field, player, skeleton);
+	} else if(moveMode){
 
 		if(initMoveMode){
-			shadowIndividuals = malloc(sizeof(character *)*player->mvmt);
-			shadowIndividuals[0] = NULL;
+			thisMoveNode = malloc(sizeof(moveNode *));
+			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
+					player->playerCharacter->x, player->playerCharacter->y);
+
+			thisMoveNode->x = player->playerCharacter->x;
+			thisMoveNode->y = player->playerCharacter->y;
+			thisMoveNode->nextMoveNode = NULL;
+			thisMoveNode->pathLength = 0;
+			thisMoveNode->shadowCharacter = shadowCharacter;
+
+
+
 			initMoveMode = 0;
 		}
 
-		return moveLoop(hwnd, msg, wParam, lParam, moveMode, main_field, player, shadowIndividuals);
+		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNode);
 	} else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}
@@ -376,8 +394,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 	srand(time(NULL));
-	cursorMode = &falseInt;
-	moveMode = &falseInt;
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure

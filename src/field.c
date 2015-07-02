@@ -9,7 +9,6 @@
 #include<stdio.h>
 #include<string.h>
 
-
 individual* getIndividualFromField(field* thisField, int x, int y){
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 
@@ -322,49 +321,72 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field){
 }
 
 
-int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, character ** shadowIndividuals){
+moveNode * nodeAlreadyTraversed(moveNode ** nodes, int x, int y){
+	int i = 0;
+	while(nodes[i] != NULL){
+		if(nodes[i]->x == x && nodes[i]->y == y){
+			return nodes[i];
+		}
+	}
+
+	return NULL;
+}
+
+int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
+		field * thisField, individual * thisIndividual, moveNode * rootMoveNode) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
-		case 0x34: //left
-		case 0x64:
-//				moveCursor(thisField, thisIndividual, 4);
-			break;
-		case 0x36:
-		case 0x66:
-//				moveCursor(thisField, thisIndividual, 6);
-			break;
-		case 0x38:
-		case 0x68:
-//				moveCursor(thisField, thisIndividual, 8);
-			break;
+		//number->direction on numpad
+		case 0x31:
+		case 0x61:
 		case 0x32:
 		case 0x62:
-//				moveCursor(thisField, thisIndividual, 2);
-			break;
-		case 0x31: //down left
-		case 0x61:
-//				moveCursor(thisField, thisIndividual, 1);
-			break;
-		case 0x37: //up left
-		case 0x67:
-//				moveCursor(thisField, thisIndividual, 7);
-			break;
-		case 0x39: //up right
-		case 0x69:
-//				moveCursor(thisField, thisIndividual, 9);
-			break;
-		case 0x33: //down right
+		case 0x33:
 		case 0x63:
-//				moveCursor(thisField, thisIndividual, 3);
+		case 0x34:
+		case 0x64:
+		case 0x36:
+		case 0x66:
+		case 0x37:
+		case 0x67:
+		case 0x38:
+		case 0x68:
+		case 0x39:
+		case 0x69:
+			{
+
+				int dx = xMoveChange(LOWORD(wParam) % 16);
+				int dy = yMoveChange(LOWORD(wParam) % 16);
+				int i;
+				moveNode * currentNode = rootMoveNode;
+
+				for(i = 0; i < rootMoveNode->pathLength; i++){
+					currentNode = &(currentNode->nextMoveNode);
+				}
+
+				space * tmpSpace = getSpaceFromField(thisField,
+						currentNode->x + dx, currentNode->y + dy);
+
+				if (tmpSpace->currentIndividual == NULL && tmpSpace->isPassable) {
+					moveNode * nextNode = malloc(sizeof(moveNode *));
+					nextNode->x = currentNode->x + dx;
+					nextNode->y = currentNode->y + dy;
+					nextNode->shadowCharacter = currentNode->shadowCharacter;
+
+					rootMoveNode->pathLength = rootMoveNode->pathLength + 1;
+
+
+				}
+			}
 			break;
 		case 0x1B: //escape
 			*moveMode = 0;
 			break;
 		case 0x0D: //enter
-			{
+		{
 
-			}
+		}
 			break;
 		}
 		case WM_TIMER:
@@ -391,16 +413,3 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,f
 	return 0;
 }
 
-
-int b_main(){
-	field* thisField;
-//	thisField.displayedX = 1;
-//	thisField.displayedY = 0;
-//	thisField.displayedWidth = 4;
-//	thisField.displayedHeight = 3;
-	thisField = initField( "C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
-//	updateFiled(&thisField, "C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");//"./map1.txt");
-
-	return 0;
-
-}
