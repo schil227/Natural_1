@@ -332,6 +332,34 @@ moveNode * nodeAlreadyTraversed(moveNode ** nodes, int x, int y){
 	return NULL;
 }
 
+moveNode * alreadyContainsNode(moveNode * rootNode, int x, int y) {
+	moveNode * currentNode = rootNode;
+
+	while (currentNode->nextMoveNode != NULL) {
+		if (currentNode->x == x && currentNode->y == y) {
+			return &currentNode;
+		}
+		currentNode = currentNode->nextMoveNode;
+	}
+
+	//check last node
+	if (currentNode->x == x && currentNode->y == y) {
+		return &currentNode;
+
+	}
+
+	return NULL;
+}
+
+void freeUpMovePath(moveNode * currentNode){
+	if(currentNode->nextMoveNode !=NULL){
+		freeUpMovePath(currentNode->nextMoveNode);
+	}
+
+	free(currentNode->shadowCharacter);
+	free(currentNode);
+}
+
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 		field * thisField, individual * thisIndividual, moveNode * rootMoveNode) {
 	switch (msg) {
@@ -369,9 +397,13 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 				printf("current selected x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
 
-				space ** tmpSpace = getSpaceAddressFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
+				space ** tmpSpace = (space **)getSpaceAddressFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
 				if ( tmpSpace != NULL && ((*tmpSpace)->currentIndividual == NULL || (*tmpSpace)->currentIndividual == thisIndividual) && (*tmpSpace)->isPassable) {
-					printf("in if\n");
+
+
+					moveNode ** oldNode =
+							alreadyContainsNode(rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
+					if(oldNode == NULL){
 
 					character * shadowCharacter = createCharacter((*currentNode)->shadowCharacter->imageID,(*currentNode)->shadowCharacter->rgb,
 							(*currentNode)->x + dx, (*currentNode)->y + dy);
@@ -384,7 +416,12 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 					nextNode->nextMoveNode = NULL;
 					(*currentNode)->nextMoveNode = nextNode;
 
-					rootMoveNode->pathLength = rootMoveNode->pathLength + 1;
+					}else{ //node already exists
+
+						freeUpMovePath((*oldNode)->nextMoveNode);
+						(*oldNode)->nextMoveNode = NULL;
+					}
+
 				}
 
 //				printf("root has %d nodes.\n",j);
