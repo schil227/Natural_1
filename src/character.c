@@ -74,6 +74,9 @@ character * createCharacter(int imageID, COLORREF rgb, int x, int y){
 	character * thisCharacter = malloc(sizeof(character));
 	BITMAP bm;
 
+	thisCharacter->image = malloc(sizeof(HBITMAP));
+	thisCharacter->imageMask = malloc(sizeof(HBITMAP));
+
 	thisCharacter->imageID = imageID;
 	thisCharacter->x = x;
 	thisCharacter->y = y;
@@ -91,14 +94,14 @@ character * createCharacter(int imageID, COLORREF rgb, int x, int y){
 	return thisCharacter;
 }
 
-void drawCharacter(HDC hdc, HDC hdcBuffer, character * character){
+void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-			SelectObject(hdcMem, character->imageMask);
+	SelectObject(hdcMem, thisCharacter->imageMask);
 
-			BitBlt(hdcBuffer, character->x*40, character->y*40, character->width, character->height, hdcMem, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, thisCharacter->x*40, thisCharacter->y*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCAND);
 
-			SelectObject(hdcMem, character->image);
+	SelectObject(hdcMem, thisCharacter->image);
 
-			BitBlt(hdcBuffer, character->x*40, character->y*40, character->width, character->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
-			DeleteDC(hdcMem);
-	}
+	BitBlt(hdcBuffer, thisCharacter->x*40, thisCharacter->y*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	DeleteDC(hdcMem);
+}

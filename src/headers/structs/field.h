@@ -38,8 +38,8 @@ typedef struct {
 	int pathLength;
 	int x;
 	int y;
-	character ** shadowCharacter;
-	struct moveNode ** nextMoveNode;
+	character * shadowCharacter;
+	struct moveNode * nextMoveNode;
 } moveNode;
 
 #endif /* SRC_HEADERS_STRUCTS_FIELD_H_ */

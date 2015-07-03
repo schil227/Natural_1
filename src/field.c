@@ -359,25 +359,36 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 				int dx = xMoveChange(LOWORD(wParam) % 16);
 				int dy = yMoveChange(LOWORD(wParam) % 16);
 				int i;
-				moveNode * currentNode = rootMoveNode;
+				moveNode ** currentNode = &rootMoveNode;
 
-				for(i = 0; i < rootMoveNode->pathLength; i++){
-					currentNode = &(currentNode->nextMoveNode);
+				while((*currentNode)->nextMoveNode != NULL){
+					printf("current x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
+					moveNode * tmpMoveNode = (moveNode *)(*currentNode)->nextMoveNode;
+					currentNode = &tmpMoveNode;
 				}
 
-				space * tmpSpace = getSpaceFromField(thisField,
-						currentNode->x + dx, currentNode->y + dy);
+				printf("current selected x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
 
-				if (tmpSpace->currentIndividual == NULL && tmpSpace->isPassable) {
-					moveNode * nextNode = malloc(sizeof(moveNode *));
-					nextNode->x = currentNode->x + dx;
-					nextNode->y = currentNode->y + dy;
-					nextNode->shadowCharacter = currentNode->shadowCharacter;
+				space ** tmpSpace = getSpaceAddressFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
+				if ( tmpSpace != NULL && ((*tmpSpace)->currentIndividual == NULL || (*tmpSpace)->currentIndividual == thisIndividual) && (*tmpSpace)->isPassable) {
+					printf("in if\n");
+
+					character * shadowCharacter = createCharacter((*currentNode)->shadowCharacter->imageID,(*currentNode)->shadowCharacter->rgb,
+							(*currentNode)->x + dx, (*currentNode)->y + dy);
+
+
+					moveNode * nextNode = malloc(sizeof(moveNode));
+					nextNode->x = (*currentNode)->x + dx;
+					nextNode->y = (*currentNode)->y + dy;
+					nextNode->shadowCharacter = shadowCharacter;
+					nextNode->nextMoveNode = NULL;
+					(*currentNode)->nextMoveNode = nextNode;
 
 					rootMoveNode->pathLength = rootMoveNode->pathLength + 1;
-
-
 				}
+
+//				printf("root has %d nodes.\n",j);
+				free(currentNode);
 			}
 			break;
 		case 0x1B: //escape

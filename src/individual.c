@@ -15,6 +15,7 @@ individual *initIndividual(){
 	toReturn->name = malloc(sizeof(char)*32);
 	toReturn->playerCharacter = malloc(sizeof(character));
 	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
+	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
 	return toReturn;
 }
 
@@ -113,9 +114,9 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual){
 
 		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40, thisIndividual->playerCharacter->y*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCAND);
 
-		SelectObject(hdcMem, thisIndividual->playerCharacter->image);// thisIndividual->image);
+		SelectObject(hdcMem, thisIndividual->playerCharacter->image);
 
-		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40, thisIndividual->playerCharacter->y*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCPAINT); //was SRCPAINT
+		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40, thisIndividual->playerCharacter->y*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCPAINT);
 		DeleteDC(hdcMem);
 }
 

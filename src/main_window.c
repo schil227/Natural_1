@@ -113,12 +113,13 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 
 	if (moveMode){
-		int i;
 		moveNode * tmp = thisMoveNode;
-//		for(i = 0; i < thisMoveNode->pathLength; i++){
-//			drawCharacter(hdc, hdcBuffer,&(tmp->shadowCharacter));
-//			tmp = &(tmp->nextMoveNode);
-//		}
+		while(tmp->nextMoveNode != NULL){
+			drawCharacter(hdc, hdcBuffer, tmp->shadowCharacter);
+			tmp = (moveNode*)tmp->nextMoveNode;
+		}
+
+		drawCharacter(hdc, hdcBuffer, tmp->shadowCharacter);
 
 	}
 
@@ -211,8 +212,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		DestroyWindow(hwnd);
 		break;
 	case WM_DESTROY:
-//			DeleteObject(g_hbmPlayer);
-//		DeleteObject(g_hbmPlayerMask);
 		destroyIndividual(player);
 
 		PostQuitMessage(0);
@@ -368,7 +367,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisMoveNode = malloc(sizeof(moveNode *));
 			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
 					player->playerCharacter->x, player->playerCharacter->y);
-
 			thisMoveNode->x = player->playerCharacter->x;
 			thisMoveNode->y = player->playerCharacter->y;
 			thisMoveNode->nextMoveNode = NULL;
