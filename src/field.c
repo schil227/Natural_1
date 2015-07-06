@@ -351,17 +351,19 @@ moveNode * alreadyContainsNode(moveNode * rootNode, int x, int y) {
 	return NULL;
 }
 
-void freeUpMovePath(moveNode * currentNode){
+int freeUpMovePath(moveNode * currentNode){
+	int sum = 1;
 	if(currentNode->nextMoveNode !=NULL){
-		freeUpMovePath(currentNode->nextMoveNode);
+		sum += freeUpMovePath(currentNode->nextMoveNode);
 	}
 
 	free(currentNode->shadowCharacter);
 	free(currentNode);
+	return sum;
 }
 
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
-		field * thisField, individual * thisIndividual, moveNode * rootMoveNode) {
+		field * thisField, individual * thisIndividual, moveNode * rootMoveNode, int * postMoveMode) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -401,25 +403,28 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 				if ( tmpSpace != NULL && ((*tmpSpace)->currentIndividual == NULL || (*tmpSpace)->currentIndividual == thisIndividual) && (*tmpSpace)->isPassable) {
 
 
-					moveNode ** oldNode =
-							alreadyContainsNode(rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
+					moveNode ** oldNode = alreadyContainsNode(rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
+
 					if(oldNode == NULL){
+					if (rootMoveNode->pathLength <= thisIndividual->mvmt) {
+						character * shadowCharacter = createCharacter(
+								(*currentNode)->shadowCharacter->imageID,
+								(*currentNode)->shadowCharacter->rgb,
+								(*currentNode)->x + dx, (*currentNode)->y + dy);
 
-					character * shadowCharacter = createCharacter((*currentNode)->shadowCharacter->imageID,(*currentNode)->shadowCharacter->rgb,
-							(*currentNode)->x + dx, (*currentNode)->y + dy);
+						moveNode * nextNode = malloc(sizeof(moveNode));
+						nextNode->x = (*currentNode)->x + dx;
+						nextNode->y = (*currentNode)->y + dy;
+						nextNode->shadowCharacter = shadowCharacter;
+						nextNode->nextMoveNode = NULL;
+						(*currentNode)->nextMoveNode = nextNode;
 
-
-					moveNode * nextNode = malloc(sizeof(moveNode));
-					nextNode->x = (*currentNode)->x + dx;
-					nextNode->y = (*currentNode)->y + dy;
-					nextNode->shadowCharacter = shadowCharacter;
-					nextNode->nextMoveNode = NULL;
-					(*currentNode)->nextMoveNode = nextNode;
-
+						rootMoveNode->pathLength = rootMoveNode->pathLength + 1;
+					}
 					}else{ //node already exists
-
-						freeUpMovePath((*oldNode)->nextMoveNode);
+						int removedNodes = freeUpMovePath((*oldNode)->nextMoveNode);
 						(*oldNode)->nextMoveNode = NULL;
+						rootMoveNode->pathLength =  rootMoveNode->pathLength - removedNodes;
 					}
 
 				}
@@ -433,7 +438,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 			break;
 		case 0x0D: //enter
 		{
-
+			*postMoveMode = 1;
 		}
 			break;
 		}

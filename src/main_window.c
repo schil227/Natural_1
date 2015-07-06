@@ -28,6 +28,9 @@ int initCursorMode = 0;
 
 int moveMode = 0;
 int initMoveMode = 0;
+int postMoveMode = 0;
+
+int enemyTurn = 0;
 
 individual* player;
 individual* skeleton;
@@ -220,84 +223,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		break;
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
-		case 0x34: //left
-		case 0x64:
-			moveIndividual(main_field, player, 4);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
-			break;
-		case 0x36: //right
-		case 0x66:
-			moveIndividual(main_field, player, 6);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
 
-			break;
-		case 0x38: //up
-		case 0x68:
-			moveIndividual(main_field, player, 8);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
-
-			break;
-		case 0x32: //down
-		case 0x62:
-			moveIndividual(main_field, player, 2);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
-			break;
-		case 0x31: //down left
-		case 0x61:
-			moveIndividual(main_field, player, 1);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
-
-			break;
-		case 0x37: //up left
-		case 0x67:
-			moveIndividual(main_field, player, 7);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
-
-			break;
-		case 0x39: //up right
-		case 0x69:
-			moveIndividual(main_field, player, 9);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
-
-			break;
-		case 0x33: //down right
-		case 0x63:
-			moveIndividual(main_field, player, 3);
-			player->remainingActions = player->remainingActions - 1;
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyAction(skeleton, main_field, player);
-			}
-
-			break;
 		case 0x41: //a key (attack)
 			printf("starting \n");
 			cursorMode = 1;
@@ -351,6 +277,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+
 	if (cursorMode) {
 		if (initCursorMode) {
 			printf("playerX:%d\n", player->playerCharacter->x);
@@ -363,7 +290,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, thisCursor, main_field, player, skeleton);
 	} else if(moveMode){
 
+
 		if(initMoveMode){
+			initMoveMode = 0;
 			thisMoveNode = malloc(sizeof(moveNode *));
 			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
 					player->playerCharacter->x, player->playerCharacter->y);
@@ -373,12 +302,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisMoveNode->pathLength = 0;
 			thisMoveNode->shadowCharacter = shadowCharacter;
 
-
-
-			initMoveMode = 0;
 		}
 
-		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNode);
+		if(postMoveMode){
+			moveMode = 0;
+			postMoveMode = 0;
+			moveNode * tmp = thisMoveNode;
+			while(tmp->nextMoveNode != NULL){
+				tmp = tmp->nextMoveNode;
+			}
+
+			if (tmp != thisMoveNode) {
+				setIndividualSpace(main_field, player, tmp->x, tmp->y);
+				freeUpMovePath(thisMoveNode->nextMoveNode);
+				thisMoveNode->nextMoveNode = NULL;
+				player->remainingActions = player->remainingActions - 1;
+
+				if (player->remainingActions <= 0) {
+					endTurn(player);
+					enemyAction(skeleton, main_field, player);
+				}
+			}
+
+
+		}else{
+			return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNode, &postMoveMode);
+		}
 	} else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}

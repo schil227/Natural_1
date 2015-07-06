@@ -19,5 +19,5 @@ void wanderAround(field * thisField, individual * thisIndividual);
 int moveCursor(field *thisField, cursor *thisCursor, int direction);
 space** getAdjacentSpaces(field *thisField, int x, int y);
 space* getSpaceFromField(field* thisField, int x, int y);
-int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, moveNode * moveNodeArr);
+int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, moveNode * moveNodeArr, int * postMoveMode);
 #endif /* SRC_HEADERS_FIELD_PUB_METHODS_H_ */
