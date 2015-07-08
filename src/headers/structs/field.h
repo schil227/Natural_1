@@ -38,6 +38,8 @@ typedef struct {
 	int pathLength;
 	int x;
 	int y;
+	int hasTraversed;
+	int sum;
 	character * shadowCharacter;
 	struct moveNode * nextMoveNode;
 } moveNode;

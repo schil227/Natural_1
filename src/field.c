@@ -339,7 +339,8 @@ moveNode * alreadyContainsNode(moveNode * rootNode, int x, int y) {
 		if (currentNode->x == x && currentNode->y == y) {
 			return &currentNode;
 		}
-		currentNode = currentNode->nextMoveNode;
+
+		currentNode = (moveNode *)currentNode->nextMoveNode;
 	}
 
 	//check last node
@@ -354,7 +355,7 @@ moveNode * alreadyContainsNode(moveNode * rootNode, int x, int y) {
 int freeUpMovePath(moveNode * currentNode){
 	int sum = 1;
 	if(currentNode->nextMoveNode !=NULL){
-		sum += freeUpMovePath(currentNode->nextMoveNode);
+		sum += freeUpMovePath((moveNode *)currentNode->nextMoveNode);
 	}
 
 	free(currentNode->shadowCharacter);
@@ -388,26 +389,25 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 				int dx = xMoveChange(LOWORD(wParam) % 16);
 				int dy = yMoveChange(LOWORD(wParam) % 16);
-				int i;
 				moveNode ** currentNode = &rootMoveNode;
 
 				while((*currentNode)->nextMoveNode != NULL){
-					printf("current x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
+//					printf("current x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
 					moveNode * tmpMoveNode = (moveNode *)(*currentNode)->nextMoveNode;
 					currentNode = &tmpMoveNode;
 				}
 
-				printf("current selected x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
+//				printf("current selected x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
 
 				space ** tmpSpace = (space **)getSpaceAddressFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
 				if ( tmpSpace != NULL && ((*tmpSpace)->currentIndividual == NULL || (*tmpSpace)->currentIndividual == thisIndividual) && (*tmpSpace)->isPassable) {
 
 
-					moveNode ** oldNode = alreadyContainsNode(rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
+					moveNode ** oldNode = (moveNode **)alreadyContainsNode(rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
 
 					if(oldNode == NULL){
 					if (rootMoveNode->pathLength <= thisIndividual->mvmt) {
-						character * shadowCharacter = createCharacter(
+						character * shadowCharacter = (moveNode *)createCharacter(
 								(*currentNode)->shadowCharacter->imageID,
 								(*currentNode)->shadowCharacter->rgb,
 								(*currentNode)->x + dx, (*currentNode)->y + dy);
@@ -417,12 +417,14 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 						nextNode->y = (*currentNode)->y + dy;
 						nextNode->shadowCharacter = shadowCharacter;
 						nextNode->nextMoveNode = NULL;
-						(*currentNode)->nextMoveNode = nextNode;
+						nextNode->hasTraversed = 0;
+						nextNode->sum = 0;
+						(*currentNode)->nextMoveNode = (moveNode *)nextNode;
 
 						rootMoveNode->pathLength = rootMoveNode->pathLength + 1;
 					}
 					}else{ //node already exists
-						int removedNodes = freeUpMovePath((*oldNode)->nextMoveNode);
+						int removedNodes = freeUpMovePath((moveNode *)(*oldNode)->nextMoveNode);
 						(*oldNode)->nextMoveNode = NULL;
 						rootMoveNode->pathLength =  rootMoveNode->pathLength - removedNodes;
 					}
@@ -438,7 +440,11 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 			break;
 		case 0x0D: //enter
 		{
-			*postMoveMode = 1;
+			*moveMode = 0;
+			if(rootMoveNode->nextMoveNode != NULL){
+				*postMoveMode = 1;
+			}
+
 		}
 			break;
 		}
@@ -464,5 +470,47 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 	}
 	}
 	return 0;
+}
+
+void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
+		individual * thisIndividual, moveNode * rootMoveNode, int speed, int * postMoveMode){
+	switch (msg) {
+
+		case WM_TIMER: {
+			printf("hit timer! sum: %d\n", rootMoveNode->sum);
+		RECT rect;
+		HDC hdc = GetDC(hwnd);
+		GetClientRect(hwnd, &rect);
+		drawAll(hdc, &rect);
+		rootMoveNode->sum = rootMoveNode->sum +1;
+		ReleaseDC(hwnd, hdc);
+
+		if(rootMoveNode->sum > speed){
+			rootMoveNode->sum = 0;
+			moveNode ** tmpMoveNode = &rootMoveNode;
+
+			while((*tmpMoveNode)->hasTraversed){
+				moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
+				tmpMoveNode = &nextTmpMoveNode;
+			}
+
+			(*tmpMoveNode)->hasTraversed = 1;
+
+			setIndividualSpace(thisField,thisIndividual,(*tmpMoveNode)->x, (*tmpMoveNode)->y);
+
+			if((*tmpMoveNode)->nextMoveNode == NULL){
+				*postMoveMode = 0;
+//				freeUpMovePath((moveNode *) rootMoveNode->nextMoveNode);
+//				rootMoveNode->nextMoveNode = NULL;
+			}
+		}
+
+
+		}
+		break;
+		default: {
+
+		}
+	}
 }
 

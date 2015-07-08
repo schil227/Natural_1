@@ -212,6 +212,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}
 		break;
 	case WM_CLOSE:
+		KillTimer(hwnd,ID_TIMER);
 		DestroyWindow(hwnd);
 		break;
 	case WM_DESTROY:
@@ -234,7 +235,15 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			moveMode = 1;
 			initMoveMode = 1;
 			break;
-			printf("pressed s\n");
+		case 0x57: //w key (wait)
+			player->remainingActions = player->remainingActions - 1;
+
+			if (player->remainingActions <= 0) {
+				endTurn(player);
+				enemyAction(skeleton, main_field, player);
+			}
+
+			break;
 		}
 
 	}
@@ -301,33 +310,35 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisMoveNode->nextMoveNode = NULL;
 			thisMoveNode->pathLength = 0;
 			thisMoveNode->shadowCharacter = shadowCharacter;
+			thisMoveNode->hasTraversed = 1;
+			thisMoveNode->sum = 0;
 
 		}
 
-		if(postMoveMode){
-			moveMode = 0;
-			postMoveMode = 0;
-			moveNode * tmp = thisMoveNode;
-			while(tmp->nextMoveNode != NULL){
-				tmp = tmp->nextMoveNode;
-			}
+	return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNode, &postMoveMode);
+	} else if(postMoveMode){
+//		printf("looping in moveMode\n");
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNode,5,&postMoveMode);
+		if(!postMoveMode){
 
-			if (tmp != thisMoveNode) {
-				setIndividualSpace(main_field, player, tmp->x, tmp->y);
+			if (thisMoveNode->nextMoveNode != NULL) {
+
 				freeUpMovePath(thisMoveNode->nextMoveNode);
-				thisMoveNode->nextMoveNode = NULL;
+
 				player->remainingActions = player->remainingActions - 1;
 
 				if (player->remainingActions <= 0) {
 					endTurn(player);
 					enemyAction(skeleton, main_field, player);
 				}
+
 			}
 
+			free(thisMoveNode);
 
-		}else{
-			return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNode, &postMoveMode);
 		}
+
+		return 0;
 	} else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}
