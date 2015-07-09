@@ -240,6 +240,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			if (player->remainingActions <= 0) {
 				endTurn(player);
+				//enemyAction(hwnd,msg,wParam,lParam,skeleton, main_field, player);
 				enemyAction(skeleton, main_field, player);
 			}
 
@@ -329,6 +330,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				if (player->remainingActions <= 0) {
 					endTurn(player);
+					//enemyAction(hwnd, msg, wParam, lParam,skeleton, main_field, player);
 					enemyAction(skeleton, main_field, player);
 				}
 
