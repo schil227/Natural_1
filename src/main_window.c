@@ -36,7 +36,7 @@ individual* player;
 individual* skeleton;
 cursor* thisCursor;
 field* main_field;
-moveNode * thisMoveNode;
+moveNodeMeta * thisMoveNodeMeta;
 
 int trueInt = 1;
 int falseInt = 0;
@@ -116,13 +116,17 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 
 	if (moveMode){
-		moveNode * tmp = thisMoveNode;
+		moveNode * tmp = thisMoveNodeMeta->rootMoveNode;
+		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
 		while(tmp->nextMoveNode != NULL){
-			drawCharacter(hdc, hdcBuffer, tmp->shadowCharacter);
+			if(tmpCharacter==NULL){
+				int x;
+			}
+			drawUnboundCharacter(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter);
 			tmp = (moveNode*)tmp->nextMoveNode;
 		}
 
-		drawCharacter(hdc, hdcBuffer, tmp->shadowCharacter);
+		drawUnboundCharacter(hdc, hdcBuffer,tmp->x,tmp->y,tmpCharacter);
 
 	}
 
@@ -303,41 +307,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		if(initMoveMode){
 			initMoveMode = 0;
-			thisMoveNode = malloc(sizeof(moveNode *));
 			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
-					player->playerCharacter->x, player->playerCharacter->y);
-			thisMoveNode->x = player->playerCharacter->x;
-			thisMoveNode->y = player->playerCharacter->y;
-			thisMoveNode->nextMoveNode = NULL;
-			thisMoveNode->pathLength = 0;
-			thisMoveNode->shadowCharacter = shadowCharacter;
-			thisMoveNode->hasTraversed = 1;
-			thisMoveNode->sum = 0;
+								player->playerCharacter->x, player->playerCharacter->y);
+
+
+			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
+			thisMoveNodeMeta->shadowCharacter = malloc(sizeof(character));
+			thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
+			thisMoveNodeMeta->sum = 0;
+			thisMoveNodeMeta->pathLength = 0;
+			thisMoveNodeMeta->shadowCharacter = shadowCharacter;
+
+			printf("x:%d,y:%d\n",thisMoveNodeMeta->shadowCharacter->x, thisMoveNodeMeta->shadowCharacter->y);
+
+			thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
+			thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
+			thisMoveNodeMeta->rootMoveNode->nextMoveNode = NULL;
+			thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
 
 		}
 
-	return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNode, &postMoveMode);
+	return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode);
 	} else if(postMoveMode){
 //		printf("looping in moveMode\n");
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNode,5,&postMoveMode);
-		if(!postMoveMode){
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode);
+		if (!postMoveMode) {
 
-			if (thisMoveNode->nextMoveNode != NULL) {
+			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
 
-				freeUpMovePath(thisMoveNode->nextMoveNode);
+			player->remainingActions = player->remainingActions - 1;
 
-				player->remainingActions = player->remainingActions - 1;
-
-				if (player->remainingActions <= 0) {
-					endTurn(player);
-					//enemyAction(hwnd, msg, wParam, lParam,skeleton, main_field, player);
-					enemyAction(skeleton, main_field, player);
-				}
-
+			if (player->remainingActions <= 0) {
+				endTurn(player);
+				//enemyAction(hwnd, msg, wParam, lParam,skeleton, main_field, player);
+				enemyAction(skeleton, main_field, player);
 			}
 
-			free(thisMoveNode);
-
+			free(thisMoveNodeMeta->rootMoveNode);
+			free(thisMoveNodeMeta);
 		}
 
 		return 0;

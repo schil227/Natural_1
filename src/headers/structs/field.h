@@ -35,13 +35,19 @@ typedef struct {
 } field;
 
 typedef struct {
-	int pathLength;
 	int x;
 	int y;
 	int hasTraversed;
-	int sum;
-	character * shadowCharacter;
 	struct moveNode * nextMoveNode;
 } moveNode;
+
+
+typedef struct{
+	int sum;
+	int pathLength;
+	character * shadowCharacter;
+	moveNode * rootMoveNode;
+} moveNodeMeta;
+
 
 #endif /* SRC_HEADERS_STRUCTS_FIELD_H_ */

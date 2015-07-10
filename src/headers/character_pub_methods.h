@@ -13,5 +13,6 @@ void nameCharacter(character* thisCharacter, char* name);
 void destroyCharacter(character* thisCharacter);
 void moveCharacter(character* thisCharacter, int newX, int newY);
 void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter);
+void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter);
 HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent);
 #endif /* SRC_HEADERS_CHARACTER_PUB_METHODS_H_ */

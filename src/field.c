@@ -358,13 +358,12 @@ int freeUpMovePath(moveNode * currentNode){
 		sum += freeUpMovePath((moveNode *)currentNode->nextMoveNode);
 	}
 
-	free(currentNode->shadowCharacter);
 	free(currentNode);
 	return sum;
 }
 
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
-		field * thisField, individual * thisIndividual, moveNode * rootMoveNode, int * postMoveMode) {
+		field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -389,7 +388,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 				int dx = xMoveChange(LOWORD(wParam) % 16);
 				int dy = yMoveChange(LOWORD(wParam) % 16);
-				moveNode ** currentNode = &rootMoveNode;
+				moveNode ** currentNode = &(thisMoveNodeMeta->rootMoveNode);
 
 				while((*currentNode)->nextMoveNode != NULL){
 //					printf("current x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
@@ -403,35 +402,29 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 				if ( tmpSpace != NULL && ((*tmpSpace)->currentIndividual == NULL || (*tmpSpace)->currentIndividual == thisIndividual) && (*tmpSpace)->isPassable) {
 
 
-					moveNode ** oldNode = (moveNode **)alreadyContainsNode(rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
+					moveNode ** oldNode = (moveNode **)alreadyContainsNode(thisMoveNodeMeta->rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
 
 					if(oldNode == NULL){
-					if (rootMoveNode->pathLength <= thisIndividual->mvmt) {
-						character * shadowCharacter = (moveNode *)createCharacter(
-								(*currentNode)->shadowCharacter->imageID,
-								(*currentNode)->shadowCharacter->rgb,
-								(*currentNode)->x + dx, (*currentNode)->y + dy);
+					if (thisMoveNodeMeta->pathLength <= thisIndividual->mvmt) {
+
 
 						moveNode * nextNode = malloc(sizeof(moveNode));
 						nextNode->x = (*currentNode)->x + dx;
 						nextNode->y = (*currentNode)->y + dy;
-						nextNode->shadowCharacter = shadowCharacter;
 						nextNode->nextMoveNode = NULL;
 						nextNode->hasTraversed = 0;
-						nextNode->sum = 0;
 						(*currentNode)->nextMoveNode = (moveNode *)nextNode;
 
-						rootMoveNode->pathLength = rootMoveNode->pathLength + 1;
+						thisMoveNodeMeta->pathLength = thisMoveNodeMeta->pathLength + 1;
 					}
 					}else{ //node already exists
 						int removedNodes = freeUpMovePath((moveNode *)(*oldNode)->nextMoveNode);
 						(*oldNode)->nextMoveNode = NULL;
-						rootMoveNode->pathLength =  rootMoveNode->pathLength - removedNodes;
+						thisMoveNodeMeta->pathLength =  thisMoveNodeMeta->pathLength - removedNodes;
 					}
 
 				}
 
-//				printf("root has %d nodes.\n",j);
 				free(currentNode);
 			}
 			break;
@@ -441,7 +434,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 		case 0x0D: //enter
 		{
 			*moveMode = 0;
-			if(rootMoveNode->nextMoveNode != NULL){
+			if(thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
 				*postMoveMode = 1;
 			}
 
@@ -473,21 +466,21 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 }
 
 void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
-		individual * thisIndividual, moveNode * rootMoveNode, int speed, int * postMoveMode){
+		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode){
 	switch (msg) {
 
 		case WM_TIMER: {
-			printf("hit timer! sum: %d\n", rootMoveNode->sum);
+			printf("hit timer! sum: %d\n", thisMoveNodeMeta->sum);
 		RECT rect;
 		HDC hdc = GetDC(hwnd);
 		GetClientRect(hwnd, &rect);
 		drawAll(hdc, &rect);
-		rootMoveNode->sum = rootMoveNode->sum +1;
+		thisMoveNodeMeta->sum = thisMoveNodeMeta->sum +1;
 		ReleaseDC(hwnd, hdc);
 
-		if(rootMoveNode->sum > speed){
-			rootMoveNode->sum = 0;
-			moveNode ** tmpMoveNode = &rootMoveNode;
+		if(thisMoveNodeMeta->sum > speed){
+			thisMoveNodeMeta->sum = 0;
+			moveNode ** tmpMoveNode = &(thisMoveNodeMeta->rootMoveNode);
 
 			while((*tmpMoveNode)->hasTraversed){
 				moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;

@@ -218,17 +218,10 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 	int animateloop = 1;
 	int size = min(resultArr->size, enemy->mvmt);
 
-//	moveNode * rootMoveNode = malloc(sizeof(rootMoveNode));
-//	rootMoveNode->hasTraversed = 1;
-//	rootMoveNode->x = resultArr->nodeArray[0]->x;
-//	rootMoveNode->y = resultArr->nodeArray[0]->y;
-//	rootMoveNode->sum = 0;
-//	rootMoveNode->shadowCharacter = enemy->playerCharacter;
-//	rootMoveNode->nextMoveNode = NULL;
+	moveNode * rootMoveNode = malloc(sizeof(rootMoveNode));
+	moveNode ** tmpMoveNode = &rootMoveNode;
 
 	for(i = 0; i < size; i++){
-//		moveNode * tmpMoveNode = malloc(sizeof(tmpMoveNode));
-//		tmpMoveNode->
 
 		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
 		if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
@@ -237,11 +230,5 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 		}
 	}
 
-//	while(animateloop){
-//		animateMoveLoop(hwnd,msg,wParam,lParam,thisField,enemy, rootMoveNode,5,&animateloop);
-//	}
-//
-//	free(rootMoveNode);
-//	wanderAround(thisField, enemy);
 	attackIfInRamge(enemy,player);
 }

@@ -105,3 +105,15 @@ void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter){
 	BitBlt(hdcBuffer, thisCharacter->x*40, thisCharacter->y*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
+
+void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, thisCharacter->imageMask);
+
+	BitBlt(hdcBuffer, x*40, y*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCAND);
+
+	SelectObject(hdcMem, thisCharacter->image);
+
+	BitBlt(hdcBuffer, x*40, y*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	DeleteDC(hdcMem);
+}
