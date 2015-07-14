@@ -119,9 +119,7 @@ void drawAll(HDC hdc, RECT* prc) {
 		moveNode * tmp = thisMoveNodeMeta->rootMoveNode;
 		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
 		while(tmp->nextMoveNode != NULL){
-			if(tmpCharacter==NULL){
-				int x;
-			}
+
 			drawUnboundCharacter(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter);
 			tmp = (moveNode*)tmp->nextMoveNode;
 		}
@@ -175,7 +173,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
-		moveIndividual(main_field, skeleton, 8);
+		setIndividualSpace(main_field,player, 0,0);
+		setIndividualSpace(main_field,skeleton, 10,0);
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -361,6 +360,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 	srand(time(NULL));
+
+	//run the tests!
+	test_main();
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure

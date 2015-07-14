@@ -42,6 +42,19 @@ typedef struct {
 } moveNode;
 
 
+typedef struct {
+	int pathLength;
+	int x;
+	int y;
+	int isFinalPathNode;
+	struct node * previousNode;
+} node;
+
+typedef struct {
+	node ** nodeArray;
+	int size;
+} nodeArr;
+
 typedef struct{
 	int sum;
 	int pathLength;

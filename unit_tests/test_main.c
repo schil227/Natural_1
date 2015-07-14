@@ -13,6 +13,7 @@
 #include"./test_headers/test_general.h"
 #include"./test_headers/test_character.h"
 #include"../src/headers/field_pub_methods.h"
+#include"../src/headers/enemy_controller_pub_methods.h"
 
 int mock_field_test() {
 	individual * player = malloc(sizeof(individual));
@@ -78,12 +79,83 @@ int mock_field_test() {
 	return 0;
 }
 
-int t_main() {
+int path_and_attack_test() {
+	//setup
+
+	BITMAP bm;
+	UINT ret;
+
+	individual * player = initIndividual();
+	individual * skeleton = initIndividual();
+
+	assert(!defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 10, 2, 10, 0, 2, 3));
+	assert(!defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 10, 2, 3, 1, 1, 3));
+
+	int x;
+	int y;
+	field * main_field = initField( "C:\\Users\\Adrian\\workspace\\Natural_1\\src\\testmap1.txt");
+	int imageID;
+
+	for (y = 0; y < main_field->totalY; y++) {
+		for (x = 0; x < main_field->totalX; x++) {
+			imageID = (main_field->grid[x][y]->background)->imageID;
+			main_field->grid[x][y]->background->image = malloc(sizeof(HBITMAP));
+			main_field->grid[x][y]->background->image = LoadBitmap(
+			GetModuleHandle(NULL), imageID);
+			if (main_field->grid[x][y]->background->image == NULL) {
+				printf("failed\n");
+			}
+
+		}
+	}
+
+	assert(setIndividualSpace(main_field, player, 0, 0));
+	assert(setIndividualSpace(main_field, skeleton, 10, 0));
+
+	nodeArr * resultArr = getSpaceClosestToPlayer(main_field, skeleton, player);
+
+	assert(resultArr->nodeArray[11]->x == 0 && resultArr->nodeArray[11]->y == 0);
+	assert(resultArr->nodeArray[10]->x == 1 && resultArr->nodeArray[10]->y == 0);
+	assert(resultArr->nodeArray[9]->x == 2 && resultArr->nodeArray[9]->y == 0);
+	assert(resultArr->nodeArray[8]->x == 3 && resultArr->nodeArray[8]->y == 0);
+	assert(resultArr->nodeArray[7]->x == 4 && resultArr->nodeArray[7]->y == 0);
+	assert(resultArr->nodeArray[6]->x == 5 && resultArr->nodeArray[6]->y == 0);
+	assert(resultArr->nodeArray[5]->x == 6 && resultArr->nodeArray[5]->y == 0);
+	assert(resultArr->nodeArray[4]->x == 7 && resultArr->nodeArray[4]->y == 1);
+	assert(resultArr->nodeArray[3]->x == 8 && resultArr->nodeArray[3]->y == 2);
+	assert(resultArr->nodeArray[2]->x == 9 && resultArr->nodeArray[2]->y == 3);
+	assert(resultArr->nodeArray[1]->x == 10 && resultArr->nodeArray[1]->y == 2);
+	assert(resultArr->nodeArray[0]->x == 10 && resultArr->nodeArray[0]->y == 1);
+
+	int i;
+	int size = min(resultArr->size, skeleton->mvmt);
+
+	moveNode * rootMoveNode = malloc(sizeof(rootMoveNode));
+	moveNode ** tmpMoveNode = &rootMoveNode;
+
+	for(i = 0; i < size; i++){
+
+		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
+		if(setIndividualSpace(main_field,skeleton, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
+
+			break; // path is blocked by individual
+		}
+	}
+
+	//skeleton should be at space [9,3]
+	assert(getIndividualFromField(main_field,9,3) == skeleton);
+
+	return 0;
+}
+
+int test_main() {
 //	printf("testing general\n");
 //	test_general_all();
 //	printf("testing character\n");
 //	test_character_all();
-	mock_field_test();
+//	mock_field_test();
+
+	path_and_attack_test();
 
 	return 0;
 }

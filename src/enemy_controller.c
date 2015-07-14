@@ -4,20 +4,7 @@
  *  Created on: May 4, 2015
  *      Author: Adrian
  */
-#include"./headers/field_pub_methods.h"
-
-typedef struct {
-	int pathLength;
-	int x;
-	int y;
-	int isFinalPathNode;
-	struct node ** previousNode;
-} node;
-
-typedef struct {
-	node ** nodeArray;
-	int size;
-} nodeArr;
+#include"./headers/enemy_controller_pub_methods.h"
 
 node * createNewNode(int pathLength, int x, int y){
 	node* thisNode = malloc(sizeof(node));
@@ -44,7 +31,7 @@ int containsNode(int x, int y, node ** nodeList){
 }
 
 //TODO make this less dumb, keep track of the size in an object
-void addNodeToList(node * newNode, node *** nodeList){
+void addNodeToList(node * newNode, node ** nodeList){
 	int i = 0;
 	while(nodeList[i] != NULL){
 		i++;
