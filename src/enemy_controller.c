@@ -217,5 +217,5 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 		}
 	}
 
-	attackIfInRamge(enemy,player);
+	attackIfInRange(enemy,player);
 }

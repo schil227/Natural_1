@@ -11,7 +11,8 @@
 #include<string.h>
 #include"../src/headers/general.h"
 #include"./test_headers/test_general.h"
-#include"./test_headers/test_character.h"
+//#include"./test_headers/test_character.h"
+#include"../src/headers/individual_pub_methods.h"
 #include"../src/headers/field_pub_methods.h"
 #include"../src/headers/enemy_controller_pub_methods.h"
 
@@ -88,7 +89,7 @@ int path_and_attack_test() {
 	individual * player = initIndividual();
 	individual * skeleton = initIndividual();
 
-	assert(!defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 10, 2, 10, 0, 2, 3));
+	assert(!defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 10, 2, 6, 5, 2, 3));
 	assert(!defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 10, 2, 3, 1, 1, 3));
 
 	int x;
@@ -144,6 +145,22 @@ int path_and_attack_test() {
 
 	//skeleton should be at space [9,3]
 	assert(getIndividualFromField(main_field,9,3) == skeleton);
+
+	//too far away to attack
+	assert(!attackIfInRange(skeleton, player));
+
+	//warp player next to skeleton
+	setIndividualSpace(main_field,player,8,3);
+
+	//is within range - attack
+	assert(attackIfInRange(player, skeleton));
+
+	//was attacked for 5 (5/10 hp)
+	printf("skelly health:%d\n", skeleton->hp);
+	assert(skeleton->hp  == 5);
+
+	//skeleton will be killed (0/10 hp)
+	assert(attackIndividual(player, skeleton));
 
 	return 0;
 }

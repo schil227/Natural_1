@@ -46,9 +46,9 @@ int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, cha
 	thisIndividual->playerCharacter->x = x;
 	thisIndividual->playerCharacter->y = y;
 	thisIndividual->totalHP = totalHP;
+	thisIndividual->hp = totalHP;
 	thisIndividual->totalActions = totalActions;
 	thisIndividual->remainingActions = totalActions;
-	thisIndividual->hp = totalHP;
 	thisIndividual->maxDam = maxDam;
 	thisIndividual->minDam = minDam;
 	thisIndividual->range = range;
@@ -99,7 +99,7 @@ int individualWithinRange(individual * thisIndividual, individual * target){
 	return 0;
 }
 
-int attackIfInRamge(individual *thisIndividual, individual *targetIndividual){
+int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
 	if(individualWithinRange(thisIndividual, targetIndividual)){
 		attackIndividual(thisIndividual, targetIndividual);
 		return 1;
