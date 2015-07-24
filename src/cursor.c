@@ -48,7 +48,7 @@ cursor * initCursor(int imageID, COLORREF rgb, int x, int y) {
 	return thisCursor;
 }
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, cursor * thisCursor, field * main_field, individual * player, individual * skeleton) {
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, enemies  * thisEnemies) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
@@ -94,26 +94,26 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 			break;
 		case 0x0D: //enter
 		{
-			int cX, cY;
+			int cX, cY, index;
 			cX = thisCursor->cursorCharacter->x;
 			cY = thisCursor->cursorCharacter->y;
 
 			individual ** tmp = getIndividualAddressFromField(main_field, cX, cY);
 
-			//printf("tmp:%p, tmpVal:%p other:%p \n", tmp, *tmp, (individual)*tmp);
-			printf("*tmp:%p \n", *tmp);
-			printf("skeleton:%p, Address:%p other%p \n", skeleton, &skeleton, (individual)*skeleton);
+			for (index = 0; index < thisEnemies->numEnemies; index++) {
 
-			if (*tmp == skeleton //getIndividualFromField(main_field, cX, cY) == skeleton
-					&& individualWithinRange(player, skeleton)) {
-				printf("attacked!");
-				attackIndividual(player, skeleton);
-				*cursorMode = 0;
+				individual * tmpEnemy = thisEnemies->enemies[index];
 
-				player->remainingActions = player->remainingActions - 1;
-				if (player->remainingActions <= 0) {
-					endTurn(player);
-					enemyAction(skeleton, main_field, player);
+				if (*tmp == tmpEnemy && individualWithinRange(player, tmpEnemy)) {
+					printf("attacked!");
+					if(attackIndividual(player, tmpEnemy)){
+						deleteEnemyFromEnemies(thisEnemies,tmpEnemy);
+						destroyIndividual(tmpEnemy);
+					}
+					*cursorMode = 0;
+					*postCursorMode = 1;
+
+					break;
 				}
 
 			}

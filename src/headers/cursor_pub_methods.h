@@ -10,6 +10,7 @@
 
 #include"./structs/cursor.h"
 #include"./field_pub_methods.h"
+#include"./field_controller_pub_methods.h"
 
 void drawCursor(HDC hdc, HDC hdcBuffer, cursor *thisCursor);
 void destroyCursor(cursor* thisCursor);

@@ -12,7 +12,7 @@
 #include "./headers/general.h"
 #include "./headers/main_window.h"
 //#include "./headers/character_pub_methods.h"
-#include "./headers/field_pub_methods.h"
+#include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
@@ -25,6 +25,7 @@ int mouseButtonCount = 0;
 HWND g_toolbar = NULL;
 int cursorMode = 0;
 int initCursorMode = 0;
+int postCursorMode = 0;
 
 int moveMode = 0;
 int initMoveMode = 0;
@@ -33,7 +34,8 @@ int postMoveMode = 0;
 int enemyTurn = 0;
 
 individual* player;
-individual* skeleton;
+
+enemies* thisEnemies;
 cursor* thisCursor;
 field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
@@ -102,13 +104,15 @@ void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
+	int index;
 
 	drawField(hdc, hdcBuffer, main_field);
 	if (player->hp > 0) {
 		drawIndividual(hdc, hdcBuffer, player);
 	}
-	if (skeleton->hp > 0) {
-		drawIndividual(hdc, hdcBuffer, skeleton);
+
+	for(index = 0; index < thisEnemies->numEnemies; index++){
+		drawIndividual(hdc, hdcBuffer, thisEnemies->enemies[index]);
 	}
 
 	if (cursorMode) {
@@ -142,20 +146,30 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		UINT ret;
 
 		player = initIndividual();
-		skeleton = initIndividual();
+		individual* skeleton = initIndividual();
+		individual* skeleton2 = initIndividual();
+		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
-		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 10, 2, 10, 0, 2, 3)) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 10, 2, 3, 1, 1, 3)) {
+		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 20, 2, 10, 0, 2, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		int x;
-		int y;
+		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 8, 2, 3, 1, 1, 3)) {
+			MessageBox(hwnd, "Failed to make player", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
+
+		if (defineIndividual(skeleton2, 2005, RGB(255, 0, 255), "skelly2", 10, 2, 2, 2, 3, 1, 1, 3)) {
+			MessageBox(hwnd, "Failed to make player", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
+
+		addEnemyToEnemies(thisEnemies,skeleton2);
+		addEnemyToEnemies(thisEnemies,skeleton);
+
+		int x, y;
 		main_field = initField("C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
 		int imageID;
 
@@ -175,6 +189,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		setIndividualSpace(main_field,player, 0,0);
 		setIndividualSpace(main_field,skeleton, 10,0);
+		setIndividualSpace(main_field,skeleton2,10,1);
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -243,8 +258,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			if (player->remainingActions <= 0) {
 				endTurn(player);
-				//enemyAction(hwnd,msg,wParam,lParam,skeleton, main_field, player);
-				enemyAction(skeleton, main_field, player);
+				int i;
+				for(i = 0; i < thisEnemies->numEnemies; i++){
+					enemyAction((thisEnemies->enemies[i]), main_field, player);
+				}
 			}
 
 			break;
@@ -300,7 +317,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		}
 
-		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, thisCursor, main_field, player, skeleton);
+		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, thisEnemies);
+	} else if(postCursorMode){
+		postCursorMode = 0;
+
+		player->remainingActions = player->remainingActions - 1;
+
+		if (player->remainingActions <= 0) {
+			endTurn(player);
+			int i;
+			for (i = 0; i < thisEnemies->numEnemies; i++) {
+				enemyAction((thisEnemies->enemies[i]), main_field, player);
+			}
+		}
+
 	} else if(moveMode){
 
 
@@ -308,7 +338,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			initMoveMode = 0;
 			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
 								player->playerCharacter->x, player->playerCharacter->y);
-
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
 			thisMoveNodeMeta->shadowCharacter = malloc(sizeof(character));
@@ -338,8 +367,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			if (player->remainingActions <= 0) {
 				endTurn(player);
-				//enemyAction(hwnd, msg, wParam, lParam,skeleton, main_field, player);
-				enemyAction(skeleton, main_field, player);
+				int i;
+				for(i = 0; i < thisEnemies->numEnemies; i++){
+					enemyAction((thisEnemies->enemies[i]), main_field, player);
+				}
 			}
 
 			free(thisMoveNodeMeta->rootMoveNode);
