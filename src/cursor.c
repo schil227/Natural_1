@@ -108,6 +108,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 					printf("attacked!");
 					if(attackIndividual(player, tmpEnemy)){
 						deleteEnemyFromEnemies(thisEnemies,tmpEnemy);
+						removeIndividualFromField(main_field, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
 						destroyIndividual(tmpEnemy);
 					}
 					*cursorMode = 0;

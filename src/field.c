@@ -63,6 +63,15 @@ space* getSpaceAddressFromField(field* thisField, int x, int y){
 }
 
 
+int removeIndividualFromField(field * thisField, int x, int y){
+	if(thisField->grid[x][y]->currentIndividual != NULL){
+		thisField->grid[x][y]->currentIndividual = NULL;
+		return 1;
+	}
+
+	return 0;
+}
+
 /*
  * getAdjacentSpaces: returns (up to) 9 spaces surrounding a space as
  * indicated by the x and y values
