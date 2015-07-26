@@ -11,17 +11,13 @@
 #include<time.h>
 #include "./headers/general.h"
 #include "./headers/main_window.h"
-//#include "./headers/character_pub_methods.h"
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
-const int rateOfChange_player_x = 8;
-const int rateOfChange_player_y = 8;
 int numMessages = 0;
 int mouseButtonCount = 0;
-//HBITMAP g_hbmPlayer = NULL;
-//HBITMAP g_hbmPlayerMask = NULL;
+
 HWND g_toolbar = NULL;
 int cursorMode = 0;
 int initCursorMode = 0;
@@ -39,9 +35,6 @@ enemies* thisEnemies;
 cursor* thisCursor;
 field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
-
-int trueInt = 1;
-int falseInt = 0;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
@@ -105,6 +98,24 @@ void drawAll(HDC hdc, RECT* prc) {
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
 	int index;
+
+
+	//console test
+
+	HDC consoleHDC = GetWindowDC(g_toolbar);
+
+	char szSize[100];
+	char someText[] = "This is my test text";
+	RECT consoleRect;
+	GetClientRect(consoleHDC, &consoleRect);
+	consoleRect.left = 10;
+	consoleRect.top = 30;
+	DrawText(consoleHDC, someText, -1, &consoleRect, DT_SINGLELINE | DT_NOCLIP);
+	DeleteDC(consoleHDC);
+
+
+
+
 
 	drawField(hdc, hdcBuffer, main_field);
 	if (player->hp > 0) {
@@ -442,7 +453,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		MessageBox(hwnd, "Could not create the toolbar dialog", "Warning!",
 		MB_OK | MB_ICONINFORMATION);
 	}
-	ShowWindow(g_toolbar, SW_HIDE);
+	//ShowWindow(g_toolbar, SW_HIDE);
 
 	UpdateWindow(hwnd); //redraw
 
@@ -460,10 +471,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		 *
 		 * DispachMessage sends the message out to the window
 		 */
-//		if (!IsDialogMessageA(g_toolbar,&Msg)) {
 		TranslateMessage(&Msg);
 		DispatchMessage(&Msg);
-//		}
 	}
 
 	return Msg.wParam;
