@@ -357,7 +357,7 @@ LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 		{
 			eConsole = CreateWindowEx(0, "EDIT", "",
 				WS_CHILD | WS_VISIBLE | WS_VSCROLL |  ES_MULTILINE | ES_AUTOVSCROLL,
-				0, 0, 100, 100, g_toolbar, NULL, GetModuleHandle(NULL), NULL);
+				0, 0, 100, 100, hwnd, NULL, GetModuleHandle(NULL), NULL);
 
 			if(eConsole == NULL)
 				MessageBox(hwnd, "Could not create edit box.", "Error", MB_OK | MB_ICONERROR);
