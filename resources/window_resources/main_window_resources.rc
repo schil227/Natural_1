@@ -46,10 +46,10 @@ END
 IDD_TOOLBAR DIALOGEX 0, 0, 300, 175 //size of box in 'box units', not pixels
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
 EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "Dialog Toolbar"
+CAPTION "Console"
 FONT 8, "MS Sans Serif"
 BEGIN
-	LTEXT	"Enter a Name:", -1, 7, 7, 84, 14
+//	LTEXT	"Enter a Name:", -1, 7, 7, 84, 14
 	///EDITTEXT    IDC_TEXT,7,30,84,14,ES_AUTOHSCROLL
 	PUSHBUTTON 	"&Enter Name", IDC_SECOND,7,60,84,14
 	

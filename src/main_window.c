@@ -15,10 +15,12 @@
 #include "./headers/cursor_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
+const char  g_szClassNameCons[] = "MyConsoleClass";
 int numMessages = 0;
 int mouseButtonCount = 0;
 
 HWND g_toolbar = NULL;
+HWND eConsole = NULL;
 int cursorMode = 0;
 int initCursorMode = 0;
 int postCursorMode = 0;
@@ -101,19 +103,34 @@ void drawAll(HDC hdc, RECT* prc) {
 
 
 	//console test
-
+/*
 	HDC consoleHDC = GetWindowDC(g_toolbar);
 
-	char szSize[100];
-	char someText[] = "This is my test text";
+//	char szSize[100];
+	char someText[] = "This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text "
+			" This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text";
 	RECT consoleRect;
 	GetClientRect(consoleHDC, &consoleRect);
 	consoleRect.left = 10;
 	consoleRect.top = 30;
-	DrawText(consoleHDC, someText, -1, &consoleRect, DT_SINGLELINE | DT_NOCLIP);
+	DrawText(consoleHDC, someText, strlen(someText), &consoleRect, DT_TOP | DT_LEFT);
 	DeleteDC(consoleHDC);
+*/
+
+	char someText[] = "This is my test\n text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text "
+				" This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text";
 
 
+	PAINTSTRUCT ps;
+	HDC consoleHDC = BeginPaint(g_toolbar, &ps);
+
+	RECT rec;
+	 //SetRect(&rec,10,10,100,100);
+	GetClientRect(g_toolbar, &rec);
+
+	DrawText(consoleHDC, someText, strlen(someText), &rec, DT_TOP|DT_LEFT);
+	EndPaint(g_toolbar, &ps);
+	ReleaseDC(g_toolbar,consoleHDC);
 
 
 
@@ -148,6 +165,26 @@ void drawAll(HDC hdc, RECT* prc) {
 	SelectObject(hdcBuffer, hbmOldBuffer);
 	DeleteDC(hdcBuffer);
 	DeleteObject(hbmBuffer);
+}
+
+void AppendText(HWND hwnd, TCHAR *newText)
+{
+    // get edit control from dialog
+    HWND hwndOutput = hwnd;
+
+    // get the current selection
+    DWORD StartPos, EndPos;
+    SendMessage( hwndOutput, EM_GETSEL, &StartPos, &EndPos);
+
+    // move the caret to the end of the text
+    int outLength = GetWindowTextLength( hwndOutput );
+    SendMessage( hwndOutput, EM_SETSEL, outLength, outLength );
+
+    // insert the text at the new caret position
+    SendMessage( hwndOutput, EM_REPLACESEL, TRUE, newText);
+
+    // restore the previous selection
+    SendMessage( hwndOutput, EM_SETSEL, StartPos, EndPos );
 }
 
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -208,10 +245,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			MessageBox(hwnd, "Could not SetTimer()!", "Error",
 			MB_OK | MB_ICONEXCLAMATION);
 		}
-//				hfDefault = (HFONT) GetStockObject(DEFAULT_GUI_FONT);
-//				SendMessage(hEdit, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
-//				SendMessage(hButton, WM_SETFONT, (WPARAM) hfDefault, MAKELPARAM(FALSE, 0));
-
 
 	}
 		break;
@@ -317,6 +350,52 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
+LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch(msg)
+	{
+		case WM_CREATE:
+		{
+			eConsole = CreateWindowEx(0, "EDIT", "",
+				WS_CHILD | WS_VISIBLE | WS_VSCROLL |  ES_MULTILINE | ES_AUTOVSCROLL,
+				0, 0, 100, 100, g_toolbar, NULL, GetModuleHandle(NULL), NULL);
+
+			if(eConsole == NULL)
+				MessageBox(hwnd, "Could not create edit box.", "Error", MB_OK | MB_ICONERROR);
+
+			SendMessage(eConsole, WM_SETFONT, DEFAULT_GUI_FONT, MAKELPARAM(FALSE, 0));
+
+			SetWindowText(eConsole, TEXT("The quick brown fox jumped over the lazy dog. He jumped quite high over him.\r\n"));
+			int i = 0;
+			for(; i < 100; i++){
+				AppendText(eConsole,"JUMP!\r\n");
+				SendMessage(eConsole, EM_LINESCROLL, 0, 1100);
+			}
+		}
+		break;
+		case WM_SIZE:
+		{
+			HWND hEdit;
+			RECT rcClient;
+
+			GetClientRect(hwnd, &rcClient);
+
+			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom, SWP_NOZORDER);
+		}
+
+		break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+		break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+		break;
+		default:
+			return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	return 0;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	if (cursorMode) {
@@ -399,9 +478,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		LPSTR lpCmdLine, int nCmdShow) {
 
 	WNDCLASSEX wc;
+	WNDCLASSEX wc2;
 	HWND hwnd;
 	MSG Msg;
 	srand(time(NULL));
+	int mainWindowWidth = 480;
+	int mainWindowHeight = 480;
 
 	//run the tests!
 	test_main();
@@ -428,11 +510,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 0;
 	}
 
+
+
+	wc2.cbSize = sizeof(WNDCLASSEX); //Size of the structure
+	wc2.style = 0; //Class styles (usually zero)
+	wc2.lpfnWndProc = ConsWndProc; //Pointer to the window procedure for this window class
+	wc2.cbClsExtra = 0; //amount of extra data for this class in memory
+	wc2.cbWndExtra = 0; //amount of extra data per window of this type
+	wc2.hInstance = hInstance; //handle to app instance (input param)
+	wc2.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_MYICON)); //Icon shown when user presses alt+tab
+	wc2.hCursor = LoadCursorA(NULL, IDC_ARROW); //cursor that will be displayed over win.
+	wc2.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1); //background brush to set color of window
+//	wc2.lpszMenuName = MAKEINTRESOURCE(IDR_MYMENU);
+	; // name of menu resource to use for the windows
+	wc2.lpszClassName = g_szClassNameCons; //name to identify class with
+	wc2.hIconSm = (HICON) LoadImage(GetModuleHandle(NULL),
+	MAKEINTRESOURCE(IDI_MYICON), IMAGE_ICON, 16, 16, 0); //small icon to show in taskbar
+
+	if (!RegisterClassEx(&wc2)) {
+		MessageBox(NULL, "Window Registration Failed!", "Error",
+		MB_ICONEXCLAMATION | MB_OK);
+		return 0;
+	}
+
+
+
+
 	//create the window (handle)
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Window Title :D!",
 	WS_OVERLAPPEDWINDOW,
 	CW_USEDEFAULT,
-	CW_USEDEFAULT, 460, 240,
+	CW_USEDEFAULT, mainWindowWidth, mainWindowHeight,
 	NULL, NULL, hInstance,
 	NULL);
 
@@ -444,9 +552,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	ShowWindow(hwnd, nCmdShow); //display window
+//
+	g_toolbar = CreateWindowEx(
+			0,
+			g_szClassNameCons,
+			"Console",
+			WS_OVERLAPPEDWINDOW,
+			CW_USEDEFAULT, CW_USEDEFAULT, 480, 320,
+			hwnd, NULL, hInstance, NULL);
 
-	g_toolbar =
-			CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_TOOLBAR), hwnd, ToolDlgProc);
+//	g_toolbar = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_TOOLBAR), hwnd, ToolDlgProc);
 	if (g_toolbar != NULL) {
 		ShowWindow(g_toolbar, SW_SHOW);
 	} else {
@@ -454,6 +569,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		MB_OK | MB_ICONINFORMATION);
 	}
 	//ShowWindow(g_toolbar, SW_HIDE);
+	MoveWindow(hwnd,100,100, mainWindowWidth, mainWindowHeight, TRUE);
+	MoveWindow(g_toolbar,100,100+mainWindowHeight, 300, 175, TRUE);
 
 	UpdateWindow(hwnd); //redraw
 
