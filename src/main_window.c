@@ -16,9 +16,11 @@
 
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameCons[] = "MyConsoleClass";
+const char  g_szClassNameSideBar[] = "MySideBarClass";
 int numMessages = 0;
 int mouseButtonCount = 0;
 
+HWND g_sidebar = NULL;
 HWND g_toolbar = NULL;
 HWND eConsole = NULL;
 int cursorMode = 0;
@@ -350,14 +352,51 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
+LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch(msg)
+	{
+		case WM_CREATE:
+		{
+			RECT rec;
+
+		}
+		break;
+		case WM_SIZE:
+		{
+			HWND hEdit;
+			RECT rcClient;
+
+			GetClientRect(hwnd, &rcClient);
+
+			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
+			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom, SWP_NOZORDER);
+		}
+
+		break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+		break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+		break;
+		default:
+			return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	return 0;
+}
+
+
 LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch(msg)
 	{
 		case WM_CREATE:
 		{
+			RECT rec;
+			GetClientRect(hwnd,&rec);
+
 			eConsole = CreateWindowEx(0, "EDIT", "",
-				WS_CHILD | WS_VISIBLE | WS_VSCROLL |  ES_MULTILINE | ES_AUTOVSCROLL,
-				0, 0, 100, 100, hwnd, NULL, GetModuleHandle(NULL), NULL);
+				WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_READONLY | ES_MULTILINE | ES_AUTOVSCROLL, //ES_READONLY
+				0, 0, rec.right, rec.bottom, hwnd, NULL, GetModuleHandle(NULL), NULL);
 
 			if(eConsole == NULL)
 				MessageBox(hwnd, "Could not create edit box.", "Error", MB_OK | MB_ICONERROR);
@@ -395,6 +434,7 @@ LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 	}
 	return 0;
 }
+
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
@@ -479,11 +519,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	WNDCLASSEX wc;
 	WNDCLASSEX wc2;
+	WNDCLASSEX wc3;
 	HWND hwnd;
 	MSG Msg;
 	srand(time(NULL));
 	int mainWindowWidth = 480;
 	int mainWindowHeight = 480;
+	int consoleWindowWidth = 480;
+	int consoleWindowHeight = 175;
+	int sidebarWindowWidth = 175;
+	int sidebarWindowHeight = 655;
+
 
 	//run the tests!
 	test_main();
@@ -534,6 +580,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 
+	wc3.cbSize = sizeof(WNDCLASSEX); //Size of the structure
+	wc3.style = 0; //Class styles (usually zero)
+	wc3.lpfnWndProc = SideBarWndProc; //Pointer to the window procedure for this window class
+	wc3.cbClsExtra = 0; //amount of extra data for this class in memory
+	wc3.cbWndExtra = 0; //amount of extra data per window of this type
+	wc3.hInstance = hInstance; //handle to app instance (input param)
+	wc3.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_MYICON)); //Icon shown when user presses alt+tab
+	wc3.hCursor = LoadCursorA(NULL, IDC_ARROW); //cursor that will be displayed over win.
+	wc3.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1); //background brush to set color of window
+//	wc2.lpszMenuName = MAKEINTRESOURCE(IDR_MYMENU);
+	; // name of menu resource to use for the windows
+	wc3.lpszClassName = g_szClassNameSideBar; //name to identify class with
+	wc3.hIconSm = (HICON) LoadImage(GetModuleHandle(NULL),
+	MAKEINTRESOURCE(IDI_MYICON), IMAGE_ICON, 16, 16, 0); //small icon to show in taskbar
+
+	if (!RegisterClassEx(&wc3)) {
+		MessageBox(NULL, "Window Registration Failed!", "Error",
+		MB_ICONEXCLAMATION | MB_OK);
+		return 0;
+	}
+
+
 
 
 	//create the window (handle)
@@ -552,25 +620,41 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	ShowWindow(hwnd, nCmdShow); //display window
-//
+
 	g_toolbar = CreateWindowEx(
 			0,
 			g_szClassNameCons,
 			"Console",
-			WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT, CW_USEDEFAULT, 480, 320,
+			WS_OVERLAPPED,
+			CW_USEDEFAULT, CW_USEDEFAULT, consoleWindowWidth, consoleWindowHeight,
 			hwnd, NULL, hInstance, NULL);
 
-//	g_toolbar = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_TOOLBAR), hwnd, ToolDlgProc);
 	if (g_toolbar != NULL) {
 		ShowWindow(g_toolbar, SW_SHOW);
 	} else {
-		MessageBox(hwnd, "Could not create the toolbar dialog", "Warning!",
+		MessageBox(hwnd, "Could not create g_toolbar", "Warning!",
 		MB_OK | MB_ICONINFORMATION);
 	}
+
+	g_sidebar = CreateWindowEx(
+			0,
+			g_szClassNameSideBar,
+			"Status",
+			WS_OVERLAPPED, //WS_OVERLAPPEDWINDOW
+			CW_USEDEFAULT, CW_USEDEFAULT, sidebarWindowWidth, sidebarWindowHeight,
+			hwnd, NULL, hInstance, NULL);
+
+	if (g_sidebar != NULL) {
+		ShowWindow(g_sidebar, SW_SHOW);
+	} else {
+		MessageBox(hwnd, "Could not create g_sidebar", "Warning!",
+		MB_OK | MB_ICONINFORMATION);
+	}
+
 	//ShowWindow(g_toolbar, SW_HIDE);
 	MoveWindow(hwnd,100,100, mainWindowWidth, mainWindowHeight, TRUE);
-	MoveWindow(g_toolbar,100,100+mainWindowHeight, 300, 175, TRUE);
+	MoveWindow(g_toolbar,100,100+mainWindowHeight, consoleWindowWidth, consoleWindowHeight, TRUE);
+	MoveWindow(g_sidebar,100+mainWindowWidth,100,sidebarWindowWidth, sidebarWindowHeight, TRUE);
 
 	UpdateWindow(hwnd); //redraw
 
