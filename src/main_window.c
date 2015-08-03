@@ -102,37 +102,20 @@ void drawAll(HDC hdc, RECT* prc) {
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
 	int index;
-
-
-	//console test
-/*
-	HDC consoleHDC = GetWindowDC(g_toolbar);
-
-//	char szSize[100];
-	char someText[] = "This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text "
-			" This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text";
-	RECT consoleRect;
-	GetClientRect(consoleHDC, &consoleRect);
-	consoleRect.left = 10;
-	consoleRect.top = 30;
-	DrawText(consoleHDC, someText, strlen(someText), &consoleRect, DT_TOP | DT_LEFT);
-	DeleteDC(consoleHDC);
-*/
-
-	char someText[] = "This is my test\n text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text "
-				" This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text This is my test text";
-
-
 	PAINTSTRUCT ps;
 	HDC consoleHDC = BeginPaint(g_toolbar, &ps);
 
 	RECT rec;
 	 //SetRect(&rec,10,10,100,100);
-	GetClientRect(g_toolbar, &rec);
+//	GetClientRect(g_toolbar, &rec);
 
-	DrawText(consoleHDC, someText, strlen(someText), &rec, DT_TOP|DT_LEFT);
-	EndPaint(g_toolbar, &ps);
-	ReleaseDC(g_toolbar,consoleHDC);
+//	if(!UpdateWindow(g_sidebar)){
+//		printf("failed!!!\n");
+//	}
+//	UpdateWindow(g_toolbar);
+
+//	EndPaint(g_toolbar, &ps);
+//	ReleaseDC(g_toolbar,consoleHDC);
 
 
 
@@ -357,8 +340,8 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	{
 		case WM_CREATE:
 		{
-			RECT rec;
-
+			UINT ret2;
+			ret2 = SetTimer(hwnd, ID_TIMER, 50, NULL);
 		}
 		break;
 		case WM_SIZE:
@@ -371,7 +354,37 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
 			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom, SWP_NOZORDER);
 		}
+		break;
+		case WM_PAINT:
+		{
+			RECT rec;
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hwnd, &ps); //GetDC(hwnd);
 
+			GetClientRect(hwnd, &rec);
+
+			DrawSideBar(hwnd,hdc, rec, player);
+
+
+			EndPaint(hwnd,&ps);
+			ReleaseDC(hwnd, hdc);
+		}
+		break;
+		case WM_TIMER:
+		{
+//			printf("got the time!\n");
+			RECT rec;
+			PAINTSTRUCT ps;
+			HDC hdc = GetDC(hwnd);
+
+			GetClientRect(hwnd, &rec);
+
+			DrawSideBar(hwnd,hdc, rec, player);
+
+
+			EndPaint(hwnd,&ps);
+			ReleaseDC(hwnd, hdc);
+		}
 		break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
@@ -407,7 +420,7 @@ LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 			int i = 0;
 			for(; i < 100; i++){
 				AppendText(eConsole,"JUMP!\r\n");
-				SendMessage(eConsole, EM_LINESCROLL, 0, 1100);
+				SendMessage(eConsole, EM_LINESCROLL, 0, 1100);//update this
 			}
 		}
 		break;

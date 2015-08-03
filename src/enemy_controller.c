@@ -36,7 +36,7 @@ void addNodeToList(node * newNode, node ** nodeList){
 	while(nodeList[i] != NULL){
 		i++;
 	}
-	printf("\n");
+//	printf("\n");
 	nodeList[i] = newNode;
 
 }
@@ -44,10 +44,10 @@ void addNodeToList(node * newNode, node ** nodeList){
 void printNodeList(node ** nodeList){
 	int i = 0;
 	while(nodeList[i] != NULL){
-		printf("[%d,%d] ", nodeList[i]->x, nodeList[i]->y);
+//		printf("[%d,%d] ", nodeList[i]->x, nodeList[i]->y);
 		i++;
 	}
-	printf("\n");
+//	printf("\n");
 }
 
 node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField){
@@ -59,7 +59,7 @@ node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField
 //	space** tmpSpace = NULL;
 	int dx,dy,newX,newY, index=0;
 
-	printf("getting new active nodes \n");
+//	printf("getting new active nodes \n");
 	if (parentNode->pathLength < 100) {
 		for (dx = -1; dx < 2; dx++) {
 			for (dy = -1; dy < 2; dy++) {
@@ -80,7 +80,7 @@ node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField
 			}
 		}
 	}
-	printf("index: %d\n", index);
+//	printf("index: %d\n", index);
 //	printf("done with getNewActiveNodes call \n");
 	newActiveNodes[index] = NULL;
 	return newActiveNodes;
@@ -94,18 +94,18 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 	}
 	int numNewActiveNodes = 0;
 	int i = 0;
-	printf("New pathFind iteration \n");
+//	printf("New pathFind iteration \n");
 
 	while(activeNodes[i] != NULL){
-		printf("active node %d \n", i);
+	//	printf("active node %d \n", i);
 		int j = 0;
 		node ** newNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField);
 
 		while(newNodes[j] != NULL){
-			printf("checking new node: [%d,%d] == [%d,%d] \n", newNodes[j]->x, newNodes[j]->y, targetX, targetY);
+		//	printf("checking new node: [%d,%d] == [%d,%d] \n", newNodes[j]->x, newNodes[j]->y, targetX, targetY);
 
 			if(newNodes[j]->x == targetX && newNodes[j]->y == targetY){ //found target space
-				printf("found the target space!!! \n");
+		//		printf("found the target space!!! \n");
 				return (newNodes[j]);
 			}
 
@@ -121,13 +121,13 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 	free(activeNodes);
 
 	if(numNewActiveNodes == 0){
-		printf("Path not found.");
+//		printf("Path not found.");
 		return createNewNode(-1,-1,-1);
 	}
 
-	printf("recurring on the following spaces:");
+//	printf("recurring on the following spaces:");
 	printNodeList(newActiveNodes);
-	printf("all nodes:");
+//	printf("all nodes:");
 	printNodeList(allNodes);
 	return pathFind(targetX, targetY, allNodes, newActiveNodes, thisField);
 }
@@ -142,7 +142,7 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
  *  the same movement-cost to traverse (
  */
 nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
-	printf("starting!\n");
+//	printf("starting!\n");
 	node * startingNode = createNewNode(0,thisIndividual->playerCharacter->x,thisIndividual->playerCharacter->y); //startingSpace);
 	startingNode->previousNode = NULL;
 	node ** allNodes = malloc(sizeof(node**)*300);
@@ -159,17 +159,17 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 	}
 	allNodes[0] = startingNode; //this works, the other doesn't
 	activeNodes[0] = startingNode;
-	printf("starting:3\n");
+//	printf("starting:3\n");
 	node * endNode = pathFind(targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y, allNodes, activeNodes, thisField);
 
 	nodeArr * resultArr = malloc(sizeof(nodeArr));
 
 	if(endNode->pathLength != -1){
 		int size = 0;
-		printf("path Found:\n");
+//		printf("path Found:\n");
 		node * tmpNode = endNode;
 		while(tmpNode->previousNode != NULL){
-			printf("[%d,%d]\n", tmpNode->x, tmpNode->y);
+//			printf("[%d,%d]\n", tmpNode->x, tmpNode->y);
 			tmpNode->isFinalPathNode = 1;
 			tmpNode = tmpNode->previousNode;
 			size++;
@@ -210,9 +210,9 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 
 	for(i = 0; i < size; i++){
 
-		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
+//		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
 		if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
-			printf("no go!\n");
+//			printf("no go!\n");
 			break; // path is blocked by individual
 		}
 	}
