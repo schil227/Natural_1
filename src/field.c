@@ -414,7 +414,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 					moveNode ** oldNode = (moveNode **)alreadyContainsNode(thisMoveNodeMeta->rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
 
 					if(oldNode == NULL){
-					if (thisMoveNodeMeta->pathLength <= thisIndividual->mvmt) {
+					if (thisMoveNodeMeta->pathLength < thisIndividual->mvmt) {
 
 
 						moveNode * nextNode = malloc(sizeof(moveNode));

@@ -184,7 +184,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
-		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 20, 2, 10, 0, 2, 3)) {
+		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 20, 2, 10, 0, 2, 4)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -670,7 +670,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	MoveWindow(g_sidebar,100+mainWindowWidth,100,sidebarWindowWidth, sidebarWindowHeight, TRUE);
 
 	UpdateWindow(hwnd); //redraw
-
+	SetActiveWindow(hwnd);
 	/*
 	 * GetMessage gets a message from the queue, e.g. when the user moves
 	 * the mouse or types a key, clicks, etc.
