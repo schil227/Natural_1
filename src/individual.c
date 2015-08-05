@@ -20,7 +20,7 @@ individual *initIndividual(){
 }
 
 int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, char * name, int x,
-		int y, int totalHP, int totalActions, int maxDam, int minDam,
+		int y, int totalHP, int totalActions, int AC, int attack, int maxDam, int minDam,  char critType[3],
 		int range, int mvmt){
 	BITMAP bm;
 
@@ -49,8 +49,11 @@ int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, cha
 	thisIndividual->hp = totalHP;
 	thisIndividual->totalActions = totalActions;
 	thisIndividual->remainingActions = totalActions;
+	thisIndividual->AC = AC;
+	thisIndividual->attack = attack;
 	thisIndividual->maxDam = maxDam;
 	thisIndividual->minDam = minDam;
+	strcpy(thisIndividual->critType,critType);
 	thisIndividual->range = range;
 	thisIndividual->mvmt = mvmt;
 
@@ -70,11 +73,34 @@ void destroyIndividual(individual* thisIndividual){
 }
 
 int attackIndividual(individual *thisIndividual, individual *targetIndividual){
+
+	int d20 = rand() % 20 + 1;
+
+	if(d20 == 20){
+		return damageIndividual(thisIndividual, targetIndividual, 1);
+
+	} else if(d20 == 1){ //THE natural one.
+		cwrite("Where'd you learn to fight?\n");
+		return 0;
+
+	}else if(d20+thisIndividual->attack >= targetIndividual->AC){ //Tie goes to attacker, of course.
+		return damageIndividual(thisIndividual, targetIndividual, 0);
+
+	}else{ //miss
+		cwrite("miss\n");
+	}
+}
+
+int damageIndividual(individual *thisIndividual, individual *targetIndividual, int isCrit){
 	int attackDamage;
 	thisIndividual->hasAttacked = 1;
-
-	attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
-	attackDamage = attackDamage + thisIndividual->minDam;
+	if(isCrit){
+		cwrite("CRITICAL HIT!!!\n");
+		attackDamage = calcCrit(thisIndividual);
+	}else{
+		attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
+		attackDamage = attackDamage + thisIndividual->minDam;
+	}
 	printf("dam:%d\n", attackDamage);
 	char damOut[7];
 	sprintf(damOut,"dam:%d\n",attackDamage);
@@ -85,6 +111,15 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 		return 1;
 	}else{ //non-fatal blow
 		return 0;
+	}
+}
+
+int calcCrit(individual * thisIndividual){
+	if(strcmp(thisIndividual->critType, "MAX") == 0){
+		return thisIndividual->maxDam;
+	} else if(strcmp(thisIndividual->critType, "DUB") == 0){
+		int attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
+		attackDamage = (attackDamage + thisIndividual->minDam) * 2;
 	}
 }
 

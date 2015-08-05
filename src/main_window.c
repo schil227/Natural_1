@@ -107,19 +107,6 @@ void drawAll(HDC hdc, RECT* prc) {
 	HDC consoleHDC = BeginPaint(g_toolbar, &ps);
 
 	RECT rec;
-	 //SetRect(&rec,10,10,100,100);
-//	GetClientRect(g_toolbar, &rec);
-
-//	if(!UpdateWindow(g_sidebar)){
-//		printf("failed!!!\n");
-//	}
-//	UpdateWindow(g_toolbar);
-
-//	EndPaint(g_toolbar, &ps);
-//	ReleaseDC(g_toolbar,consoleHDC);
-
-
-
 	drawField(hdc, hdcBuffer, main_field);
 	if (player->hp > 0) {
 		drawIndividual(hdc, hdcBuffer, player);
@@ -153,25 +140,6 @@ void drawAll(HDC hdc, RECT* prc) {
 	DeleteObject(hbmBuffer);
 }
 
-void AppendText(HWND hwnd, TCHAR *newText)
-{
-    // get edit control from dialog
-    HWND hwndOutput = hwnd;
-
-    // get the current selection
-    DWORD StartPos, EndPos;
-    SendMessage( hwndOutput, EM_GETSEL, &StartPos, &EndPos);
-
-    // move the caret to the end of the text
-    int outLength = GetWindowTextLength( hwndOutput );
-    SendMessage( hwndOutput, EM_SETSEL, outLength, outLength );
-
-    // insert the text at the new caret position
-    SendMessage( hwndOutput, EM_REPLACESEL, TRUE, newText);
-
-    // restore the previous selection
-    SendMessage( hwndOutput, EM_SETSEL, StartPos, EndPos );
-}
 
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
@@ -185,17 +153,17 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
-		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 20, 2, 10, 0, 2, 4)) {
+		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 8, 2, 3, 1, 1, 3)) {
+		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 8, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton2, 2005, RGB(255, 0, 255), "skelly2", 10, 2, 2, 2, 3, 1, 1, 3)) {
+		if (defineIndividual(skeleton2, 2005, RGB(255, 0, 255), "skelly2", 10, 2, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -498,7 +466,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 
 	//run the tests!
-	test_main();
+//	test_main();
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure

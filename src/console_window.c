@@ -58,6 +58,34 @@ LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 	return 0;
 }
 
+void AppendText(HWND hwnd, TCHAR *newText)
+{
+    // get edit control from dialog
+    HWND hwndOutput = hwnd;
+
+    // get the current selection
+    DWORD StartPos, EndPos;
+    SendMessage( hwndOutput, EM_GETSEL, &StartPos, &EndPos);
+
+    // move the caret to the end of the text
+    int outLength = GetWindowTextLength( hwndOutput );
+    SendMessage( hwndOutput, EM_SETSEL, outLength, outLength );
+
+    // insert the text at the new caret position
+    SendMessage( hwndOutput, EM_REPLACESEL, TRUE, newText);
+
+    // restore the previous selection
+    SendMessage( hwndOutput, EM_SETSEL, StartPos, EndPos );
+}
+
+//void sendAttackDialog(individual * attacker, individual * attacked, int dam){
+//	//<attacker> attacks!  <soon to be attack roll>:HIT! <or>:miss! (if close: "A glancing blow!")
+//	//(if high damage)A savage blow!
+//	int atkDlgSize = 0;
+////	cwrite(eConsole,)
+//
+//}
+
 void cwrite(char* text){
 	AppendText(eConsole,text);
 }

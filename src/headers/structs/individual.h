@@ -19,10 +19,16 @@ typedef struct {
 	short int remainingActions;
 	short int hasAttacked;
 
+	short int AC;
+
 	short int range;
+	short int attack;
 	short int maxDam;
 	short int minDam;
+	char critType[3];
+
 	short int mvmt;
+
 
 
 } individual;
