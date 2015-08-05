@@ -32,16 +32,29 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	char mvmtRng[17];
 	sprintf(mvmtRng, "Movement Range:%d", player->mvmt);
 
+//	HFONT hfont = CreateFont(textYStep, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "Courier");
+//	HFONT oldfont = (HFONT)SelectObject(hdc, hfont);
+
 	TextOut(hdc, 10, 10, hpOut, strlen(hpOut));
 	TextOut(hdc, 10, 10+textYStep, actionOut, strlen(actionOut));
 	TextOut(hdc, 10, 10+textYStep*2, damSpread, strlen(damSpread));
 	TextOut(hdc, 10, 10+textYStep*3, mvmtRng, strlen(mvmtRng));
 	TextOut(hdc, 10, 100, "STATS:", strlen("STATS:"));
-	TextOut(hdc, 17, 100+textYStep, "STR:0", 5);
-	TextOut(hdc, 17, 100+textYStep*2, "CON:0", 5);
-	TextOut(hdc, 17, 100+textYStep*3, "DEX:0", 5);
-	TextOut(hdc, 17, 100+textYStep*4, "INT:0", 5);
-	TextOut(hdc, 17, 100+textYStep*5, "WIS:0", 5);
-	TextOut(hdc, 17, 100+textYStep*6, "WIL:0", 5);
-	TextOut(hdc, 17, 100+textYStep*7, "CHR:0", 5);
+	TextOut(hdc, 17, 100+textYStep, "STR", 3);
+	TextOut(hdc, 47, 100+textYStep, ":0", 2);
+	TextOut(hdc, 17, 100+textYStep*2, "CON", 3);
+	TextOut(hdc, 47, 100+textYStep*2, ":0", 2);
+	TextOut(hdc, 17, 100+textYStep*3, "DEX", 3);
+	TextOut(hdc, 47, 100+textYStep*3, ":0", 2);
+	TextOut(hdc, 17, 100+textYStep*4, "INT", 3);
+	TextOut(hdc, 47, 100+textYStep*4, ":0", 2);
+	TextOut(hdc, 17, 100+textYStep*5, "WIS", 3);
+	TextOut(hdc, 47, 100+textYStep*5, ":0", 2);
+	TextOut(hdc, 17, 100+textYStep*6, "WIL", 3);
+	TextOut(hdc, 47, 100+textYStep*6, ":0", 2);
+	TextOut(hdc, 17, 100+textYStep*7, "CHR", 3);
+	TextOut(hdc, 47, 100+textYStep*7, ":0", 2);
+
+//	SelectObject(hdc, oldfont);
+//	DeleteObject(hfont);
 }

@@ -76,6 +76,9 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
 	attackDamage = attackDamage + thisIndividual->minDam;
 	printf("dam:%d\n", attackDamage);
+	char damOut[7];
+	sprintf(damOut,"dam:%d\n",attackDamage);
+	cwrite(damOut);
 	targetIndividual->hp = targetIndividual->hp - attackDamage;
 
 	if(targetIndividual->hp <= 0){ //target is dead
