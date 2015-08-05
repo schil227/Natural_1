@@ -1,6 +1,8 @@
 # Natural_1
 Teaching myself C through designing a Game
 
+8/4/15: Wow, time bloody flies, huh? Haven't updated this in a while, guess I'll just make a note here saying work is steady and I've conqured a lot, and I'm modestly proud of what I have acomplished so far--however there is a stunning amount of work yet to do. My C-fu is getting better, and I've gotta say I have a new found appreciation for some higher-level languages, but at the same time they take all the fun out of it :) The goals below (and their subsequent surprises) have been finished for a while, I've moved on to my new set: implementing windows for displaying data to the user (soon to be revised to a single window), managing field transformations (going from one field to another) and camera-lock on the player as they move around... we'll see what surprises happen this time.
+
 3/24/15: I feel that I've got somewhat of a grip on the win32 API at this point, so I'm beginning the first iteration of this project! I have basically 3 main goals:
 1.) Create a 'character' object which will be used as the parent class for the player/npc/etc.
 2.) Create a 'field' object which will act as the main playing field container
