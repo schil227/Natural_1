@@ -73,7 +73,6 @@ void destroyIndividual(individual* thisIndividual){
 }
 
 int attackIndividual(individual *thisIndividual, individual *targetIndividual){
-
 	int d20 = rand() % 20 + 1;
 
 	if(d20 == 20){

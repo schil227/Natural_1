@@ -456,7 +456,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	WNDCLASSEX wc3;
 	HWND hwnd;
 	MSG Msg;
-	srand(time(NULL));
+
 	int mainWindowWidth = 480;
 	int mainWindowHeight = 480;
 	int consoleWindowWidth = 480;
@@ -466,7 +466,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 
 	//run the tests!
-//	test_main();
+	//init rand for tests
+	srand(0);
+	int i;
+//	for(i = 0; i < 10; i++){
+//		printf("%d, ", rand()%100);
+//	}
+
+	test_main();
+	srand(time(NULL));
+	for(i = 0; i < 10; i++){
+		printf("%d, ", rand()%100);
+	}
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure

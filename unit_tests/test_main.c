@@ -90,7 +90,7 @@ int path_and_attack_test() {
 	individual * skeleton = initIndividual();
 
 	assert(!defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 20, 2, 13, 3, 10, 0, "MAX", 2, 4));
-	assert(!defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 8, 2, 8, 0, 3, 1, "DUB", 1, 3));
+	assert(!defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 10, 2, 8, 0, 3, 1, "DUB", 1, 3));
 
 	int x;
 	int y;
@@ -155,9 +155,9 @@ int path_and_attack_test() {
 	//is within range - attack
 	assert(attackIfInRange(player, skeleton));
 
-	//was attacked for 5 (5/10 hp)
+	//was attacked for 9 (1/10 hp)
 	printf("skelly health:%d\n", skeleton->hp);
-	assert(skeleton->hp  == 5);
+	assert(skeleton->hp  == 1);
 
 	//skeleton will be killed (0/10 hp)
 	assert(attackIndividual(player, skeleton));
