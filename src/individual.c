@@ -86,7 +86,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 		return damageIndividual(thisIndividual, targetIndividual, 0);
 
 	}else{ //miss
-		cwrite("miss\n");
+		sendMissedDialog(thisIndividual->name,targetIndividual->name,d20,targetIndividual->AC);
 	}
 }
 
@@ -103,6 +103,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 	printf("dam:%d\n", attackDamage);
 	char damOut[7];
 	sprintf(damOut,"dam:%d\n",attackDamage);
+
 	cwrite(damOut);
 	targetIndividual->hp = targetIndividual->hp - attackDamage;
 

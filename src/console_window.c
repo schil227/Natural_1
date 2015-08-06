@@ -78,6 +78,36 @@ void AppendText(HWND hwnd, TCHAR *newText)
     SendMessage( hwndOutput, EM_SETSEL, StartPos, EndPos );
 }
 
+char* appendStrings(char* str1, char* str2){
+	char* toReturn = (char *)malloc(strlen(str1) + strlen(str2)+1);
+	strcpy(toReturn,str1);
+	strcat(toReturn,str2);
+	return toReturn;
+}
+
+void sendMissedDialog(char* individualName, char* targetName, int attackRoll, int targetAC){
+
+	char* missedStr;
+	if(attackRoll +1 == targetAC){
+		missedStr = appendStrings(individualName, " just barely missed!\n");
+
+	}else if(attackRoll > 6){
+		missedStr = appendStrings(individualName, " missed!\n");
+
+	}else if(attackRoll <= 6 && attackRoll > 3){
+		char* tmp1 = appendStrings(individualName, " wiffed trying to hit ");
+		char* tmp2 = appendStrings(targetName, "!\n");
+		missedStr = appendStrings(tmp1,tmp2);
+		free(tmp1);
+		free(tmp2);
+	}else{
+		missedStr = appendStrings(individualName, " nearly fell down trying to attack.\n");
+
+	}
+	cwrite(missedStr);
+	free(missedStr);
+}
+
 //void sendAttackDialog(individual * attacker, individual * attacked, int dam){
 //	//<attacker> attacks!  <soon to be attack roll>:HIT! <or>:miss! (if close: "A glancing blow!")
 //	//(if high damage)A savage blow!
