@@ -100,14 +100,16 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
 		attackDamage = attackDamage + thisIndividual->minDam;
 	}
-	printf("dam:%d\n", attackDamage);
-	char damOut[7];
-	sprintf(damOut,"dam:%d\n",attackDamage);
-
-	cwrite(damOut);
+//	printf("dam:%d\n", attackDamage);
+//	char damOut[7];
+//	sprintf(damOut,"dam:%d\n",attackDamage);
+//
+//	cwrite(damOut);
+	sendHitDialog(thisIndividual->name, targetIndividual->name, thisIndividual->maxDam, attackDamage);
 	targetIndividual->hp = targetIndividual->hp - attackDamage;
 
 	if(targetIndividual->hp <= 0){ //target is dead
+		sendDeathDialog(targetIndividual->name, thisIndividual->name);
 		return 1;
 	}else{ //non-fatal blow
 		return 0;

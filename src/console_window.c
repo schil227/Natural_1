@@ -26,12 +26,6 @@ LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
 			SendMessage(eConsole, WM_SETFONT, DEFAULT_GUI_FONT, MAKELPARAM(FALSE, 0));
 
-			SetWindowText(eConsole, TEXT("The quick brown fox jumped over the lazy dog. He jumped quite high over him.\r\n"));
-			int i = 0;
-			for(; i < 100; i++){
-				AppendText(eConsole,"JUMP!\r\n");
-				SendMessage(eConsole, EM_LINESCROLL, 0, 1100);//update this
-			}
 		}
 		break;
 		case WM_SIZE:
@@ -79,7 +73,7 @@ void AppendText(HWND hwnd, TCHAR *newText)
 }
 
 char* appendStrings(char* str1, char* str2){
-	char* toReturn = (char *)malloc(strlen(str1) + strlen(str2)+1);
+	char* toReturn = (char *)malloc(strlen(str1) + strlen(str2)+3);
 	strcpy(toReturn,str1);
 	strcat(toReturn,str2);
 	return toReturn;
@@ -108,13 +102,46 @@ void sendMissedDialog(char* individualName, char* targetName, int attackRoll, in
 	free(missedStr);
 }
 
-//void sendAttackDialog(individual * attacker, individual * attacked, int dam){
-//	//<attacker> attacks!  <soon to be attack roll>:HIT! <or>:miss! (if close: "A glancing blow!")
-//	//(if high damage)A savage blow!
-//	int atkDlgSize = 0;
-////	cwrite(eConsole,)
-//
-//}
+int calcUpperPercentileThreshold(int num, int topPercentile){
+	return ((num*100)*(100-topPercentile))/10000;
+}
+
+int damageUpperPercentile(int damage, int maxDam, int nthP){
+	if(damage == maxDam || damage > calcUpperPercentileThreshold(maxDam, nthP)){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+void sendHitDialog(char* individualName, char* targetName, int maxDam, int damage){
+
+	char* hitStr;
+	char takeOut[20]; //" takes %d damage!\n"
+
+	if(damageUpperPercentile(damage, maxDam, 20)){
+		char* highDam = appendStrings(individualName, " executes a brutal strike!\n");
+		cwrite(highDam);
+		free(highDam);
+	}
+
+	sprintf(takeOut, " takes %d damage!\n", damage);
+	hitStr = appendStrings(targetName, takeOut);
+
+	cwrite(hitStr);
+	free(hitStr);
+}
+
+void sendDeathDialog(char* name, char* killer){
+	char* deathStr;
+
+	deathStr = appendStrings(name, " was slain by ");
+	deathStr = appendStrings(deathStr, killer);
+	deathStr = appendStrings(deathStr, "!\n");
+
+	cwrite(deathStr);
+	free(deathStr);
+}
 
 void cwrite(char* text){
 	AppendText(eConsole,text);
