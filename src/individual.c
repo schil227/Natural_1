@@ -87,6 +87,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 
 	}else{ //miss
 		sendMissedDialog(thisIndividual->name,targetIndividual->name,d20,targetIndividual->AC);
+		return 0;
 	}
 }
 
