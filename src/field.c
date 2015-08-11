@@ -179,6 +179,31 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 
 }
 
+int setIndividualTmpSpace(field *thisField, individual *thisIndividual, int x, int y){
+
+	//check if in bounds
+	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
+			return 0;
+	}
+
+	if(getSpaceFromField(thisField,x,y)->tmpIndividual == NULL){
+		space * oldSpace = getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+		space * newSpace = getSpaceFromField(thisField, x, y);
+		newSpace->tmpIndividual = malloc(sizeof(individual*));
+		oldSpace->tmpIndividual = NULL;
+		free(oldSpace->tmpIndividual);
+
+		newSpace->tmpIndividual = thisIndividual;
+		thisIndividual->playerCharacter->x = x;
+		thisIndividual->playerCharacter->y = y;
+		return 1;
+	}
+
+	//space occoupied
+	return 0;
+
+}
+
 int moveCursor(field *thisField, cursor *thisCursor, int direction){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
 	int newY = thisCursor->cursorCharacter->y + yMoveChange(direction);
@@ -227,6 +252,7 @@ field* initField(char* fieldFileName){
 
 			space* newSpace = malloc(sizeof(space));
 			newSpace->currentIndividual = malloc(sizeof(individual));
+//			newSpace->tmpIndividual = malloc(sizeof(individual));
 //			newSpace->background = malloc(sizeof(character));
 //			newSpace->currentIndividual->playerCharacter = malloc(sizeof(character));
 			character* backgroundCharacter = malloc(sizeof(character));

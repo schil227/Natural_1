@@ -166,15 +166,20 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 
 	if(endNode->pathLength != -1){
 		int size = 0;
+		int moveLimit = -1;
+
 //		printf("path Found:\n");
 		node * tmpNode = endNode;
 		while(tmpNode->previousNode != NULL){
 //			printf("[%d,%d]\n", tmpNode->x, tmpNode->y);
+
 			tmpNode->isFinalPathNode = 1;
 			tmpNode = tmpNode->previousNode;
 			size++;
 		}
 
+		moveLimit = min(size, thisIndividual->mvmt);
+		resultArr->lastAvailableSpace = -1;
 		resultArr->size = size;
 		resultArr->nodeArray = malloc(sizeof(node*)*size);
 
@@ -183,6 +188,10 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 		for(size=resultArr->size-1; size >=0; size--){
 			resultArr->nodeArray[size] = tmpNode;
 			tmpNode = (node*) tmpNode->previousNode;
+			if(resultArr->lastAvailableSpace == -1 && size <= moveLimit && getIndividualFromField(thisField, tmpNode->x, tmpNode->y) == NULL){
+				resultArr->lastAvailableSpace = size;
+				printf("end space: %d,%d\n",tmpNode->x, tmpNode->y);
+			}
 		}
 
 	}
@@ -203,18 +212,33 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 	nodeArr * resultArr = getSpaceClosestToPlayer(thisField, enemy, player);
 	int i;
 	int animateloop = 1;
-	int size = min(resultArr->size, enemy->mvmt);
+	int size = resultArr->lastAvailableSpace;
 
 	moveNode * rootMoveNode = malloc(sizeof(rootMoveNode));
 	moveNode ** tmpMoveNode = &rootMoveNode;
-
+	printf("moving enemy. limit: %d\n",size);
+	if(size > 0){
+		removeIndividualFromField(thisField,enemy->playerCharacter->x, enemy->playerCharacter->y);
+	}
 	for(i = 0; i < size; i++){
 
-//		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
-		if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
-//			printf("no go!\n");
-			break; // path is blocked by individual
+		/*
+		 * Still have an issue; size is determined from whatever's shorter,
+		 * resultArr->size or enemy mvmt. gotta truncate the arr or something.
+		 */
+		if(i+1 == size){
+			if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y) == 0){
+				printf("Individiual at space!");
+			}
+		}else{
+			setIndividualTmpSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
 		}
+
+		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
+//		if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
+////			printf("no go!\n");
+//			break; // path is blocked by individual
+//		}
 	}
 
 	attackIfInRange(enemy,player);
