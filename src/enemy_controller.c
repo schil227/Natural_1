@@ -41,14 +41,7 @@ void addNodeToList(node * newNode, node ** nodeList){
 
 }
 
-void printNodeList(node ** nodeList){
-	int i = 0;
-	while(nodeList[i] != NULL){
-//		printf("[%d,%d] ", nodeList[i]->x, nodeList[i]->y);
-		i++;
-	}
-//	printf("\n");
-}
+
 
 node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField){
 	node** newActiveNodes = malloc(sizeof(node*)*9);
@@ -126,9 +119,9 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 	}
 
 //	printf("recurring on the following spaces:");
-	printNodeList(newActiveNodes);
+//	printNodeList(newActiveNodes);
 //	printf("all nodes:");
-	printNodeList(allNodes);
+//	printNodeList(allNodes);
 	return pathFind(targetX, targetY, allNodes, newActiveNodes, thisField);
 }
 
@@ -141,12 +134,12 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
  *  Note that this algorithm does not include 'weighted' spaces, meaning that each space takes
  *  the same movement-cost to traverse (
  */
-nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
+nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, int targetY){
 //	printf("starting!\n");
-	node * startingNode = createNewNode(0,thisIndividual->playerCharacter->x,thisIndividual->playerCharacter->y); //startingSpace);
+	node * startingNode = createNewNode(0,thisX,thisY); //startingSpace);
 	startingNode->previousNode = NULL;
-	node ** allNodes = malloc(sizeof(node**)*300);
-	node ** activeNodes = malloc(sizeof(node**)*100);
+	node ** allNodes = malloc(sizeof(node*)*300);
+	node ** activeNodes = malloc(sizeof(node*)*100);
 	allNodes[0] = NULL;
 	activeNodes[0] = NULL;
 
@@ -160,26 +153,20 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 	allNodes[0] = startingNode; //this works, the other doesn't
 	activeNodes[0] = startingNode;
 //	printf("starting:3\n");
-	node * endNode = pathFind(targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y, allNodes, activeNodes, thisField);
+	node * endNode = pathFind(targetX, targetY, allNodes, activeNodes, thisField);
 
 	nodeArr * resultArr = malloc(sizeof(nodeArr));
 
 	if(endNode->pathLength != -1){
 		int size = 0;
-		int moveLimit = -1;
 
-//		printf("path Found:\n");
 		node * tmpNode = endNode;
 		while(tmpNode->previousNode != NULL){
-//			printf("[%d,%d]\n", tmpNode->x, tmpNode->y);
-
 			tmpNode->isFinalPathNode = 1;
 			tmpNode = tmpNode->previousNode;
 			size++;
 		}
 
-		moveLimit = min(size, thisIndividual->mvmt);
-		resultArr->lastAvailableSpace = -1;
 		resultArr->size = size;
 		resultArr->nodeArray = malloc(sizeof(node*)*size);
 
@@ -188,10 +175,6 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 		for(size=resultArr->size-1; size >=0; size--){
 			resultArr->nodeArray[size] = tmpNode;
 			tmpNode = (node*) tmpNode->previousNode;
-			if(resultArr->lastAvailableSpace == -1 && size <= moveLimit && getIndividualFromField(thisField, tmpNode->x, tmpNode->y) == NULL){
-				resultArr->lastAvailableSpace = size;
-				printf("end space: %d,%d\n",tmpNode->x, tmpNode->y);
-			}
 		}
 
 	}
@@ -207,39 +190,144 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 	return resultArr;
 }
 
+void initializeArr(node ** nodeArr, int size){
+	int i = 0;
+	for(i; i < size; i++){
+		nodeArr[size] = NULL;
+	}
+}
+
+int spaceIsTaken(node * thisNode, field * thisField){
+	int a = spaceIsAvailable(thisField, thisNode->x, thisNode->y);
+	printf("a:%d\n",a);
+	if(a == 0){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes){
+
+	int i = 0;
+	node ** newActiveNodes = malloc(sizeof(node*)*300);
+	for(i; i < 300; i++){
+		newActiveNodes[i] = NULL;
+	}
+
+	i = 0;
+
+	//check for free spaces in active nodes
+	while(activeNodes[i] != NULL){
+		printf("currentNode:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
+		if( !spaceIsTaken(activeNodes[i], thisField)){
+			return activeNodes[i];
+		}else{
+			printf("space was taken:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
+		}
+
+		addNodeToList(activeNodes[i], allNodes);
+
+		if(moveRange > 0){
+			node ** tmpNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField); // filters out blocked nodes and nodes in allNodes
+			int j = 0;
+
+			while(tmpNodes[j] != NULL){
+				if(!spaceIsTaken(tmpNodes[j], thisField)){
+					addNodeToList(tmpNodes[j], newActiveNodes);
+				}
+
+				j++;
+			}
+		}
+
+		i++;
+	}
+
+	if(newActiveNodes[0] == NULL){
+		if( endNode->previousNode == NULL){
+			return NULL;
+		}else{
+			addNodeToList(endNode->previousNode, newActiveNodes);
+
+			return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes);
+		}
+	}else{
+		return findOpenNode(endNode, newActiveNodes, thisIndividual, moveRange-1, distanceFromLastNode, thisField, allNodes);
+	}
+
+}
+
+nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
+	int nodeIndex = max(min(nodePath->size, thisIndividaul->mvmt)-1, 0);
+	nodeArr * nullNode = malloc(sizeof(nodeArr*));
+	nullNode->size = 0;
+
+	if(nodeIndex > 0){ //going somewhere
+		node * endNode = nodePath->nodeArray[nodeIndex];
+		node ** allNodes = malloc(sizeof(node*)*300);
+		node ** activeNodes= malloc(sizeof(node*)*300);
+		int i;
+		for(i = 0; i < 300; i++){
+			activeNodes[i] = NULL;
+			allNodes[i] = NULL;
+		}
+
+		addNodeToList(endNode, activeNodes);
+		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes);
+
+		if(targetNode != NULL){
+			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetNode->x, targetNode->y);
+		} else {
+			return nullNode;
+		}
+	}
+
+	return nullNode;
+}
+
+nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
+	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
+
+	return processPath(thisField, resultArr, thisIndividual);
+}
+
+
 //HWND hwnd, MSG msg, WPARAM wParam, LPARAM lParam,
 void enemyAction( individual * enemy, field * thisField, individual * player){
+	printf("starting: %s\n", enemy->name);
 	nodeArr * resultArr = getSpaceClosestToPlayer(thisField, enemy, player);
 	int i;
-	int animateloop = 1;
-	int size = resultArr->lastAvailableSpace;
-
-	moveNode * rootMoveNode = malloc(sizeof(rootMoveNode));
-	moveNode ** tmpMoveNode = &rootMoveNode;
-	printf("moving enemy. limit: %d\n",size);
+	int size = resultArr->size;
+	printf("moving enemy. size: %d\n",size);
 	if(size > 0){
+		printf(enemy->name);
+		printf(" starting space:[%d,%d] \n", enemy->playerCharacter->x, enemy->playerCharacter->y);
 		removeIndividualFromField(thisField,enemy->playerCharacter->x, enemy->playerCharacter->y);
 	}
 	for(i = 0; i < size; i++){
 
-		/*
-		 * Still have an issue; size is determined from whatever's shorter,
-		 * resultArr->size or enemy mvmt. gotta truncate the arr or something.
-		 */
 		if(i+1 == size){
+			printf(enemy->name);
+			printf(" at target space:[%d,%d] \n", resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
+			printf("space is taken:%d\n",spaceIsAvailable(thisField,resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y));
 			if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y) == 0){
 				printf("Individiual at space!");
+			}else{
+				printf(enemy->name);
+				printf(": %d,%d is at space: %p\n", enemy->playerCharacter->x,enemy->playerCharacter->y, getIndividualAddressFromField(thisField,resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y));
+				printf("space is taken:%d\n",spaceIsAvailable(thisField,resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y));
 			}
 		}else{
-			setIndividualTmpSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
+			printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
+//			setIndividualTmpSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
 		}
 
-		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
-//		if(setIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
-////			printf("no go!\n");
-//			break; // path is blocked by individual
-//		}
+
 	}
+	printf("\n");
+
+
 
 	attackIfInRange(enemy,player);
 }

@@ -17,7 +17,7 @@ typedef struct {
 //	character items[];
 	character* background;
 	individual* currentIndividual;
-	individual* tmpIndividual;
+//	individual* tmpIndividual;
 } space;
 
 typedef struct {
@@ -54,7 +54,6 @@ typedef struct {
 typedef struct {
 	node ** nodeArray;
 	int size;
-	int lastAvailableSpace;
 } nodeArr;
 
 typedef struct{

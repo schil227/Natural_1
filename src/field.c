@@ -43,6 +43,16 @@ space* getSpaceFromField(field* thisField, int x, int y){
 	return NULL;
 }
 
+int spaceIsAvailable(field* thisField, int x, int y){
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
+		if(thisField->grid[x][y]->currentIndividual != NULL){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 int isSpacePassable(field* thisField, int x, int y){
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 			if(thisField->grid[x][y]->isPassable){
@@ -64,8 +74,8 @@ space* getSpaceAddressFromField(field* thisField, int x, int y){
 
 
 int removeIndividualFromField(field * thisField, int x, int y){
-	if(thisField->grid[x][y]->currentIndividual != NULL){
-		thisField->grid[x][y]->currentIndividual = NULL;
+	if((thisField->grid[x][y])->currentIndividual != NULL){
+		(thisField->grid[x][y])->currentIndividual = NULL;
 		return 1;
 	}
 
@@ -179,30 +189,30 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 
 }
 
-int setIndividualTmpSpace(field *thisField, individual *thisIndividual, int x, int y){
-
-	//check if in bounds
-	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
-			return 0;
-	}
-
-	if(getSpaceFromField(thisField,x,y)->tmpIndividual == NULL){
-		space * oldSpace = getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
-		space * newSpace = getSpaceFromField(thisField, x, y);
-		newSpace->tmpIndividual = malloc(sizeof(individual*));
-		oldSpace->tmpIndividual = NULL;
-		free(oldSpace->tmpIndividual);
-
-		newSpace->tmpIndividual = thisIndividual;
-		thisIndividual->playerCharacter->x = x;
-		thisIndividual->playerCharacter->y = y;
-		return 1;
-	}
-
-	//space occoupied
-	return 0;
-
-}
+//int setIndividualTmpSpace(field *thisField, individual *thisIndividual, int x, int y){
+//
+//	//check if in bounds
+//	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
+//			return 0;
+//	}
+//
+//	if(getSpaceFromField(thisField,x,y)->tmpIndividual == NULL){
+//		space * oldSpace = getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+//		space * newSpace = getSpaceFromField(thisField, x, y);
+//		newSpace->tmpIndividual = malloc(sizeof(individual*));
+//		oldSpace->tmpIndividual = NULL;
+//		free(oldSpace->tmpIndividual);
+//
+//		newSpace->tmpIndividual = thisIndividual;
+//		thisIndividual->playerCharacter->x = x;
+//		thisIndividual->playerCharacter->y = y;
+//		return 1;
+//	}
+//
+//	//space occoupied
+//	return 0;
+//
+//}
 
 int moveCursor(field *thisField, cursor *thisCursor, int direction){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
@@ -542,3 +552,12 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 	}
 }
 
+void printField(field * thisField){
+	int i,j;
+
+	for(i = 0; i < thisField->totalX; i++){
+		for(j = 0; j < thisField->totalY; j++){
+			printf("[%d,%d] : %d\n",i,j, getIndividualFromField(thisField,i,j));//spaceIsAvailable(thisField,i,j));
+		}
+	}
+}

@@ -150,6 +150,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		player = initIndividual();
 		individual* skeleton = initIndividual();
 		individual* skeleton2 = initIndividual();
+		individual* skeleton3 = initIndividual();
+		individual* skeleton4 = initIndividual();
+		individual* skeleton5 = initIndividual();
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
@@ -158,18 +161,36 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 1, 8, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 0, 8, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton2, 2005, RGB(255, 0, 255), "skelly2", 10, 2, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+		if (defineIndividual(skeleton2, 2006, RGB(255, 0, 255), "skelly2", 10, 1, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		addEnemyToEnemies(thisEnemies,skeleton2);
+		if (defineIndividual(skeleton3, 2007, RGB(255, 0, 255), "skelly3", 10, 2, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+			MessageBox(hwnd, "Failed to make player", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
+
+		if (defineIndividual(skeleton4, 2008, RGB(255, 0, 255), "skelly4", 10, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+			MessageBox(hwnd, "Failed to make player", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
+
+		if (defineIndividual(skeleton5, 2009, RGB(255, 0, 255), "skelly5", 9, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+			MessageBox(hwnd, "Failed to make player", "Notice",
+			MB_OK | MB_ICONINFORMATION);
+		}
+
 		addEnemyToEnemies(thisEnemies,skeleton);
+		addEnemyToEnemies(thisEnemies,skeleton2);
+		addEnemyToEnemies(thisEnemies,skeleton3);
+		addEnemyToEnemies(thisEnemies,skeleton4);
+		addEnemyToEnemies(thisEnemies,skeleton5);
 
 		int x, y;
 		main_field = initField("C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
@@ -192,6 +213,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		setIndividualSpace(main_field,player, 0,0);
 		setIndividualSpace(main_field,skeleton, 10,0);
 		setIndividualSpace(main_field,skeleton2,10,1);
+		setIndividualSpace(main_field,skeleton3,10,2);
+		setIndividualSpace(main_field,skeleton4,10,3);
+		setIndividualSpace(main_field,skeleton5,9,3);
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -259,6 +283,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				int i;
 				for(i = 0; i < thisEnemies->numEnemies; i++){
 					enemyAction((thisEnemies->enemies[i]), main_field, player);
+					printField(main_field);
 				}
 			}
 
@@ -473,7 +498,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 //		printf("%d, ", rand()%100);
 //	}
 
-	test_main();
+//	test_main();
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){
 		printf("%d, ", rand()%100);
