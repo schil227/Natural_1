@@ -41,6 +41,9 @@ cursor* thisCursor;
 field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
 
+int xShift = 0;
+int yShift = 0;
+
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
 	switch (Message) {
@@ -97,6 +100,13 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 	return TRUE;
 }
 
+void tryUpdateShift(int* shift, int newCord){
+	if(newCord - *shift < 3 && *shift > 0){
+		*shift = *shift - 1;
+	}else if(newCord -*shift > 9){
+		*shift = *shift + 1;
+	}
+}
 
 void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
@@ -107,17 +117,17 @@ void drawAll(HDC hdc, RECT* prc) {
 	HDC consoleHDC = BeginPaint(g_toolbar, &ps);
 
 	RECT rec;
-	drawField(hdc, hdcBuffer, main_field);
+	drawField(hdc, hdcBuffer, main_field, xShift, yShift);
 	if (player->hp > 0) {
-		drawIndividual(hdc, hdcBuffer, player);
+		drawIndividual(hdc, hdcBuffer, player, xShift, yShift);
 	}
 
 	for(index = 0; index < thisEnemies->numEnemies; index++){
-		drawIndividual(hdc, hdcBuffer, thisEnemies->enemies[index]);
+		drawIndividual(hdc, hdcBuffer, thisEnemies->enemies[index], xShift, yShift);
 	}
 
 	if (cursorMode) {
-		drawCursor(hdc, hdcBuffer, thisCursor);
+		drawCursor(hdc, hdcBuffer, thisCursor, xShift, yShift);
 	}
 
 	if (moveMode){
@@ -125,11 +135,11 @@ void drawAll(HDC hdc, RECT* prc) {
 		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
 		while(tmp->nextMoveNode != NULL){
 
-			drawUnboundCharacter(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter);
+			drawUnboundCharacter(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, xShift, yShift);
 			tmp = (moveNode*)tmp->nextMoveNode;
 		}
 
-		drawUnboundCharacter(hdc, hdcBuffer,tmp->x,tmp->y,tmpCharacter);
+		drawUnboundCharacter(hdc, hdcBuffer,tmp->x,tmp->y,tmpCharacter, xShift, yShift);
 
 	}
 
@@ -193,7 +203,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		addEnemyToEnemies(thisEnemies,skeleton5);
 
 		int x, y;
-		main_field = initField("C:\\Users\\Adrian\\workspace\\Natural_1\\src\\map1.txt");
+		main_field = initField("C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\map1.txt");
 		int imageID;
 
 		for (y = 0; y < main_field->totalY; y++) {
@@ -406,7 +416,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		}
 
-		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, thisEnemies);
+		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, thisEnemies, &xShift, &yShift);
 	} else if(postCursorMode){
 		postCursorMode = 0;
 

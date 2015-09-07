@@ -13,10 +13,10 @@
 
 
 field* initField(char* fieldFileName);
-void drawField(HDC hdc, HDC hdcBuffer, field* this_field);
+void drawField(HDC hdc, HDC hdcBuffer, field* this_field, int xShift, int yShift);
 int moveIndividual(field *thisField, individual *thisIndividual, int direction);
 void wanderAround(field * thisField, individual * thisIndividual);
-int moveCursor(field *thisField, cursor *thisCursor, int direction);
+int moveCursor(field *thisField, cursor *thisCursor, int direction, int * xShift, int * yShift);
 space** getAdjacentSpaces(field *thisField, int x, int y);
 space* getSpaceFromField(field* thisField, int x, int y);
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode);

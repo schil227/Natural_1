@@ -145,15 +145,15 @@ int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
 	}
 }
 
-void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual){
+void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, int xShift, int yShift){
 		HDC hdcMem = CreateCompatibleDC(hdc);
 		SelectObject(hdcMem, thisIndividual->playerCharacter->imageMask);
 
-		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40, thisIndividual->playerCharacter->y*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCAND);
+		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - xShift*40, thisIndividual->playerCharacter->y*40 - yShift*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCAND);
 
 		SelectObject(hdcMem, thisIndividual->playerCharacter->image);
 
-		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40, thisIndividual->playerCharacter->y*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCPAINT);
+		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - xShift*40, thisIndividual->playerCharacter->y*40 - yShift*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCPAINT);
 		DeleteDC(hdcMem);
 }
 

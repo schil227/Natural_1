@@ -24,7 +24,7 @@ int mock_field_test() {
 
 	field *thisField =
 			initField(
-					"C:\\Users\\Adrian\\workspace\\Natural_1\\unit_tests\\testmap1.txt");
+					"C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testmap1.txt");
 	space **impassableSpace = getSpaceFromField(thisField, 2, 0);
 	printf("field width:%d, field height:%d\n", thisField->totalX,
 			thisField->totalY);

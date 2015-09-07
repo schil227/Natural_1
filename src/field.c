@@ -214,7 +214,7 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 //
 //}
 
-int moveCursor(field *thisField, cursor *thisCursor, int direction){
+int moveCursor(field *thisField, cursor *thisCursor, int direction, int* xShift, int* yShift){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
 	int newY = thisCursor->cursorCharacter->y + yMoveChange(direction);
 	printf("newX:%d, newY:%d\n",newX, newY);
@@ -222,6 +222,8 @@ int moveCursor(field *thisField, cursor *thisCursor, int direction){
 	if(newX >= 0 && newX < thisField->totalX && newY >=0 && newY < thisField->totalY){
 		thisCursor->cursorCharacter->x = newX;
 		thisCursor->cursorCharacter->y = newY;
+		tryUpdateShift(xShift, newX);
+		tryUpdateShift(yShift, newY);
 		return 1;
 	}else{
 		return 0;
@@ -341,7 +343,7 @@ void updateFiled(field* thisField, char* fieldFileName){
 }
 
 
-void drawField(HDC hdc, HDC hdcBuffer, field* this_field){
+void drawField(HDC hdc, HDC hdcBuffer, field* this_field, int xShift, int yShift){
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	int x;
@@ -353,8 +355,8 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field){
 
 			SelectObject(hdcMem, this_field->grid[x][y]->background->image);
 
-			BitBlt(hdcBuffer, this_field->grid[x][y]->background->x,
-					this_field->grid[x][y]->background->y,
+			BitBlt(hdcBuffer, this_field->grid[x][y]->background->x - xShift*40,
+					this_field->grid[x][y]->background->y - yShift*40,
 					this_field->grid[x][y]->background->width,
 					this_field->grid[x][y]->background->height, hdcMem, 0, 0,
 					SRCCOPY);
@@ -515,7 +517,6 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 	switch (msg) {
 
 		case WM_TIMER: {
-			printf("hit timer! sum: %d\n", thisMoveNodeMeta->sum);
 		RECT rect;
 		HDC hdc = GetDC(hwnd);
 		GetClientRect(hwnd, &rect);
