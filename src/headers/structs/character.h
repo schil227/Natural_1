@@ -27,5 +27,12 @@ typedef struct {
 
 } character;
 
+typedef struct {
+	int xShift;
+	int yShift;
+	int xShiftOld;
+	int yShiftOld;
+} ShiftData;
+
 
 #endif /* SRC_HEADERS_CHARACTER_H_ */

@@ -214,16 +214,17 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 //
 //}
 
-int moveCursor(field *thisField, cursor *thisCursor, int direction, int* xShift, int* yShift){
+int moveCursor(field *thisField, cursor *thisCursor, int direction, ShiftData * viewShift){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
 	int newY = thisCursor->cursorCharacter->y + yMoveChange(direction);
 	printf("newX:%d, newY:%d\n",newX, newY);
 	//check if in bounds, and newSpace exists
+	printf("y:%d \n", viewShift->yShift);
 	if(newX >= 0 && newX < thisField->totalX && newY >=0 && newY < thisField->totalY){
 		thisCursor->cursorCharacter->x = newX;
 		thisCursor->cursorCharacter->y = newY;
-		tryUpdateShift(xShift, newX);
-		tryUpdateShift(yShift, newY);
+		tryUpdateXShift(viewShift, newX);
+		tryUpdateYShift(viewShift, newY);
 		return 1;
 	}else{
 		return 0;
@@ -343,7 +344,7 @@ void updateFiled(field* thisField, char* fieldFileName){
 }
 
 
-void drawField(HDC hdc, HDC hdcBuffer, field* this_field, int xShift, int yShift){
+void drawField(HDC hdc, HDC hdcBuffer, field* this_field, ShiftData * viewShift){
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	int x;
@@ -355,8 +356,8 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, int xShift, int yShift
 
 			SelectObject(hdcMem, this_field->grid[x][y]->background->image);
 
-			BitBlt(hdcBuffer, this_field->grid[x][y]->background->x - xShift*40,
-					this_field->grid[x][y]->background->y - yShift*40,
+			BitBlt(hdcBuffer, this_field->grid[x][y]->background->x - (viewShift->xShift)*40,
+					this_field->grid[x][y]->background->y - (viewShift->yShift)*40,
 					this_field->grid[x][y]->background->width,
 					this_field->grid[x][y]->background->height, hdcMem, 0, 0,
 					SRCCOPY);

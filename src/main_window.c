@@ -41,8 +41,7 @@ cursor* thisCursor;
 field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
 
-int xShift = 0;
-int yShift = 0;
+ShiftData * viewShift;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
@@ -100,11 +99,19 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 	return TRUE;
 }
 
-void tryUpdateShift(int* shift, int newCord){
-	if(newCord - *shift < 3 && *shift > 0){
-		*shift = *shift - 1;
-	}else if(newCord -*shift > 9){
-		*shift = *shift + 1;
+void tryUpdateXShift(ShiftData * viewShift, int newX){
+	if(newX - viewShift->xShift < 3 && viewShift->xShift > 0){
+		viewShift->xShift = viewShift->xShift - 1;
+	}else if(newX - viewShift->xShift > 9){
+		viewShift->xShift = viewShift->xShift + 1;
+	}
+}
+
+void tryUpdateYShift(ShiftData * viewShift, int newY){
+	if(newY - viewShift->yShift < 3 && viewShift->yShift > 0){
+		viewShift->yShift = viewShift->yShift - 1;
+	}else if(newY - viewShift->yShift > 9){
+		viewShift->yShift = viewShift->yShift + 1;
 	}
 }
 
@@ -117,17 +124,17 @@ void drawAll(HDC hdc, RECT* prc) {
 	HDC consoleHDC = BeginPaint(g_toolbar, &ps);
 
 	RECT rec;
-	drawField(hdc, hdcBuffer, main_field, xShift, yShift);
+	drawField(hdc, hdcBuffer, main_field, viewShift);
 	if (player->hp > 0) {
-		drawIndividual(hdc, hdcBuffer, player, xShift, yShift);
+		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}
 
 	for(index = 0; index < thisEnemies->numEnemies; index++){
-		drawIndividual(hdc, hdcBuffer, thisEnemies->enemies[index], xShift, yShift);
+		drawIndividual(hdc, hdcBuffer, thisEnemies->enemies[index], viewShift);
 	}
 
 	if (cursorMode) {
-		drawCursor(hdc, hdcBuffer, thisCursor, xShift, yShift);
+		drawCursor(hdc, hdcBuffer, thisCursor, viewShift);
 	}
 
 	if (moveMode){
@@ -135,11 +142,11 @@ void drawAll(HDC hdc, RECT* prc) {
 		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
 		while(tmp->nextMoveNode != NULL){
 
-			drawUnboundCharacter(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, xShift, yShift);
+			drawUnboundCharacter(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, viewShift);
 			tmp = (moveNode*)tmp->nextMoveNode;
 		}
 
-		drawUnboundCharacter(hdc, hdcBuffer,tmp->x,tmp->y,tmpCharacter, xShift, yShift);
+		drawUnboundCharacter(hdc, hdcBuffer,tmp->x,tmp->y,tmpCharacter, viewShift);
 
 	}
 
@@ -233,6 +240,13 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			MessageBox(hwnd, "Could not SetTimer()!", "Error",
 			MB_OK | MB_ICONEXCLAMATION);
 		}
+
+		 viewShift = malloc(sizeof(ShiftData));
+
+		viewShift->xShift = 0;
+		viewShift->yShift = 0;
+		viewShift->xShiftOld = 0;
+		viewShift->yShiftOld = 0;
 
 	}
 		break;
@@ -409,6 +423,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	if (cursorMode) {
 		if (initCursorMode) {
+			viewShift->xShiftOld = viewShift->xShift;
+			viewShift->yShiftOld = viewShift->yShift;
+
 			printf("playerX:%d\n", player->playerCharacter->x);
 			thisCursor->cursorCharacter->x = player->playerCharacter->x;
 			thisCursor->cursorCharacter->y = player->playerCharacter->y;
@@ -416,7 +433,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		}
 
-		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, thisEnemies, &xShift, &yShift);
+		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, thisEnemies, viewShift);
 	} else if(postCursorMode){
 		postCursorMode = 0;
 

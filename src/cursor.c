@@ -6,12 +6,12 @@
  */
 #include "./headers/cursor_pub_methods.h"
 
-void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor, int xShift, int yShift){
+void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor, ShiftData * viewData){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCursor->cursorCharacter->imageMask);
-	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40 - xShift*40, thisCursor->cursorCharacter->y*40 - yShift*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursor->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
 	SelectObject(hdcMem, thisCursor->cursorCharacter->image);
-	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40 - xShift*40, thisCursor->cursorCharacter->y*40 - yShift*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursor->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
@@ -48,7 +48,7 @@ cursor * initCursor(int imageID, COLORREF rgb, int x, int y) {
 	return thisCursor;
 }
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, enemies  * thisEnemies, int* xShift, int* yShift) {
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, enemies  * thisEnemies, ShiftData * viewShift) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
@@ -72,11 +72,14 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 		{
 			int direction;
 			direction = LOWORD(wParam) % 16;
-			moveCursor(main_field,thisCursor,direction, xShift, yShift);
+			printf("cursor y:%d \n", viewShift->yShift);
+			moveCursor(main_field,thisCursor,direction, viewShift);
 			break;
 		}
 		case 0x1B: //escape
 			*cursorMode = 0;
+			viewShift->xShift = viewShift->xShiftOld;
+			viewShift->yShift = viewShift->yShiftOld;
 			break;
 		case 0x0D: //enter
 		{
@@ -100,6 +103,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 					*cursorMode = 0;
 					*postCursorMode = 1;
 
+					viewShift->xShift = viewShift->xShiftOld;
+					viewShift->yShift = viewShift->yShiftOld;
 					break;
 				}
 

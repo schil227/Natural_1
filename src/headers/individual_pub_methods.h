@@ -12,7 +12,7 @@
 
 individual *initIndividual();
 void destroyIndividual(individual* thisIndividual);
-void drawIndividual(HDC hdc, HDC hdcBuffer, individual* player, int xShift, int yShift);
+void drawIndividual(HDC hdc, HDC hdcBuffer, individual* player, ShiftData * viewShift);
 int attackIndividual(individual *thisIndividual, individual *targetIndividual);
 int individualWithinRange(individual * thisIndividual, individual * target);
 

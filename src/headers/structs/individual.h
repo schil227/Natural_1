@@ -29,8 +29,6 @@ typedef struct {
 
 	short int mvmt;
 
-
-
 } individual;
 
 #endif /* SRC_HEADERS_STRUCTS_INDIVIDUAL_H_ */
