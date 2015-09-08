@@ -411,7 +411,7 @@ int freeUpMovePath(moveNode * currentNode){
 }
 
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
-		field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode) {
+		field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode, ShiftData * viewShift) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -464,11 +464,16 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 						(*currentNode)->nextMoveNode = (moveNode *)nextNode;
 
 						thisMoveNodeMeta->pathLength = thisMoveNodeMeta->pathLength + 1;
+
+						tryUpdateXShift(viewShift, nextNode->x);
+						tryUpdateYShift(viewShift, nextNode->y);
 					}
 					}else{ //node already exists
 						int removedNodes = freeUpMovePath((moveNode *)(*oldNode)->nextMoveNode);
 						(*oldNode)->nextMoveNode = NULL;
 						thisMoveNodeMeta->pathLength =  thisMoveNodeMeta->pathLength - removedNodes;
+						tryUpdateXShift(viewShift, (*oldNode)->x);
+						tryUpdateYShift(viewShift, (*oldNode)->y);
 					}
 
 				}
@@ -478,12 +483,16 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 			break;
 		case 0x1B: //escape
 			*moveMode = 0;
+			viewShift->xShift = viewShift->xShiftOld;
+			viewShift->yShift = viewShift->yShiftOld;
 			break;
 		case 0x0D: //enter
 		{
 			*moveMode = 0;
 			if(thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
 				*postMoveMode = 1;
+				viewShift->xShift = viewShift->xShiftOld;
+				viewShift->yShift = viewShift->yShiftOld;
 			}
 
 		}
@@ -514,7 +523,8 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 }
 
 void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
-		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode){
+		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode,
+		ShiftData * viewShift){
 	switch (msg) {
 
 		case WM_TIMER: {
@@ -537,6 +547,9 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 			(*tmpMoveNode)->hasTraversed = 1;
 
 			setIndividualSpace(thisField,thisIndividual,(*tmpMoveNode)->x, (*tmpMoveNode)->y);
+
+			tryUpdateXShift(viewShift, (*tmpMoveNode)->x);
+			tryUpdateYShift(viewShift, (*tmpMoveNode)->y);
 
 			if((*tmpMoveNode)->nextMoveNode == NULL){
 				*postMoveMode = 0;

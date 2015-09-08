@@ -98,11 +98,11 @@ void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter, ShiftData 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCharacter->imageMask);
 
-	BitBlt(hdcBuffer, thisCharacter->x*40 + (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCAND);
 
 	SelectObject(hdcMem, thisCharacter->image);
 
-	BitBlt(hdcBuffer, thisCharacter->x*40 + (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
@@ -110,10 +110,10 @@ void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * this
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCharacter->imageMask);
 
-	BitBlt(hdcBuffer, x*40, y*40, thisCharacter->width - (viewShift->xShift)*40, thisCharacter->height - (viewShift->yShift)*40, hdcMem, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width , thisCharacter->height, hdcMem, 0, 0, SRCAND);
 
 	SelectObject(hdcMem, thisCharacter->image);
 
-	BitBlt(hdcBuffer, x*40, y*40, thisCharacter->width - (viewShift->xShift)*40, thisCharacter->height - (viewShift->yShift)*40, hdcMem, 0, 0, SRCPAINT);
+	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }

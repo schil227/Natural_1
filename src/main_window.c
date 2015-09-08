@@ -110,7 +110,7 @@ void tryUpdateXShift(ShiftData * viewShift, int newX){
 void tryUpdateYShift(ShiftData * viewShift, int newY){
 	if(newY - viewShift->yShift < 3 && viewShift->yShift > 0){
 		viewShift->yShift = viewShift->yShift - 1;
-	}else if(newY - viewShift->yShift > 9){
+	}else if(newY - viewShift->yShift > 7){
 		viewShift->yShift = viewShift->yShift + 1;
 	}
 }
@@ -469,12 +469,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisMoveNodeMeta->rootMoveNode->nextMoveNode = NULL;
 			thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
 
+			viewShift->xShiftOld = viewShift->xShift;
+			viewShift->yShiftOld = viewShift->yShift;
+
 		}
 
-	return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode);
+	return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
 	} else if(postMoveMode){
 //		printf("looping in moveMode\n");
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode);
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode, viewShift);
 		if (!postMoveMode) {
 
 			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
@@ -492,6 +495,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			free(thisMoveNodeMeta->rootMoveNode);
 			free(thisMoveNodeMeta);
 		}
+
+
 
 		return 0;
 	} else {

@@ -19,7 +19,7 @@ void wanderAround(field * thisField, individual * thisIndividual);
 int moveCursor(field *thisField, cursor *thisCursor, int direction, ShiftData * viewShift);
 space** getAdjacentSpaces(field *thisField, int x, int y);
 space* getSpaceFromField(field* thisField, int x, int y);
-int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode);
-void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode);
+int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode, ShiftData * viewShift);
+void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode, ShiftData * viewShift);
 int removeIndividualFromField(field * thisField, int x, int y);
 #endif /* SRC_HEADERS_FIELD_PUB_METHODS_H_ */

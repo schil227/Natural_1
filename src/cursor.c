@@ -87,7 +87,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 			cX = thisCursor->cursorCharacter->x;
 			cY = thisCursor->cursorCharacter->y;
 
-			individual ** tmp = getIndividualAddressFromField(main_field, cX, cY);
+			individual ** tmp = (individual**) getIndividualAddressFromField(main_field, cX, cY);
 
 			for (index = 0; index < thisEnemies->numEnemies; index++) {
 
