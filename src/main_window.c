@@ -157,7 +157,6 @@ void drawAll(HDC hdc, RECT* prc) {
 	DeleteObject(hbmBuffer);
 }
 
-
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 	case WM_CREATE: {
@@ -173,32 +172,32 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
-		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 0, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
+		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 3, 3, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly", 10, 0, 8, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly",0, 10, 0, 8, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton2, 2006, RGB(255, 0, 255), "skelly2", 10, 1, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+		if (defineIndividual(skeleton2, 2006, RGB(255, 0, 255), "skelly2",0, 10, 1, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton3, 2007, RGB(255, 0, 255), "skelly3", 10, 2, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+		if (defineIndividual(skeleton3, 2007, RGB(255, 0, 255), "skelly3",0, 10, 2, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton4, 2008, RGB(255, 0, 255), "skelly4", 10, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+		if (defineIndividual(skeleton4, 2008, RGB(255, 0, 255), "skelly4",0, 10, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
 
-		if (defineIndividual(skeleton5, 2009, RGB(255, 0, 255), "skelly5", 9, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+		if (defineIndividual(skeleton5, 2009, RGB(255, 0, 255), "skelly5",0, 9, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -514,8 +513,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 
-	int mainWindowWidth = 480;
-	int mainWindowHeight = 480;
+	int mainWindowWidth = 640;
+	int mainWindowHeight = 820;
 	int consoleWindowWidth = 480;
 	int consoleWindowHeight = 175;
 	int sidebarWindowWidth = 175;

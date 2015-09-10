@@ -7,7 +7,6 @@
 
 #include"./headers/individual_pub_methods.h"
 
-
 int isRandomized = 0;
 
 individual *initIndividual(){
@@ -19,7 +18,7 @@ individual *initIndividual(){
 	return toReturn;
 }
 
-int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, char * name, int x,
+int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, char * name, int direction, int x,
 		int y, int totalHP, int totalActions, int AC, int attack, int maxDam, int minDam,  char critType[3],
 		int range, int mvmt){
 	BITMAP bm;
@@ -43,6 +42,7 @@ int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, cha
 	thisIndividual->playerCharacter->rgb = rgb;
 
 	strcpy(thisIndividual->name, name);
+	thisIndividual->playerCharacter->direction = direction;
 	thisIndividual->playerCharacter->x = x;
 	thisIndividual->playerCharacter->y = y;
 	thisIndividual->totalHP = totalHP;
@@ -155,5 +155,11 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, ShiftDat
 
 		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCPAINT);
 		DeleteDC(hdcMem);
+
+}
+
+void rotateImage(int angle){
+
+
 }
 

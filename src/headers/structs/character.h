@@ -19,6 +19,7 @@ typedef struct {
 	int height;
 	int x;
 	int y;
+	int direction;
 
 	int imageID;
 	HBITMAP image;

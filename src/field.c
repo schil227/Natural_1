@@ -8,6 +8,8 @@
 #include"./headers/field_pub_methods.h"
 #include<stdio.h>
 #include<string.h>
+#include<math.h>
+
 
 individual* getIndividualFromField(field* thisField, int x, int y){
 	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
@@ -241,15 +243,37 @@ void wanderAround(field * thisField, individual * thisIndividual){
  * take in a character, output the corrosponding background name (string)
 */
 int generateBackground(char backgroundSymbol){
-
-
 //	printf("backgroundChar: %c\n", backgroundSymbol);
 
 	if(backgroundSymbol == 'c'){
 //		printf("Found  a C!\n");
-		return 2003;
+		return 2502;
+	}else if (backgroundSymbol == 'g'){
+		return 2501;
+	}else if (backgroundSymbol == '1'){
+		return 2511;
+	}else if (backgroundSymbol == '2'){
+		return 2512;
+	}else if (backgroundSymbol == '3'){
+		return 2513;
+	}else if (backgroundSymbol == '4'){
+		return 2514;
+	}else if (backgroundSymbol == '6'){
+		return 2516;
+	}else if (backgroundSymbol == '7'){
+		return 2517;
+	}else if (backgroundSymbol == '8'){
+		return 2518;
+	}else if (backgroundSymbol == '9'){
+		return 2519;
+	}else if (backgroundSymbol == 'p'){
+		return 2001;
+	}else if (backgroundSymbol == 'q'){
+		return 2001;
+	}else if (backgroundSymbol == 'r'){
+		return 2001;
 	}else{
-		return 2002; //grass background
+		return 2501;
 	}
 }
 
@@ -278,11 +302,22 @@ field* initField(char* fieldFileName){
 			backgroundCharacter->y = init_y * 40;
 			backgroundCharacter->name = &currentChar;
 			backgroundCharacter->imageID = generateBackground(currentChar);
-			if(backgroundCharacter->imageID == 2003){
+			if(currentChar == 'c'){
 				newSpace->isPassable = 0;
 			}else{
 				newSpace->isPassable = 1;
 			}
+
+			if (currentChar == 'p') {
+				backgroundCharacter->direction = 3;
+			}else if (currentChar == 'q'){
+				backgroundCharacter->direction = 2;
+			}else if (currentChar == 'r'){
+				backgroundCharacter->direction = 1;
+			}else{
+				backgroundCharacter->direction = 0;
+			}
+
 			newSpace->background = backgroundCharacter;
 			newSpace->currentIndividual = NULL;
 			thisField->grid[init_x][init_y] = newSpace;
@@ -350,17 +385,24 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, ShiftData * viewShift)
 	int x;
 	int y;
 
-	//field
 	for (y = 0; y < this_field->totalY; y++) {
 		for (x = 0; x < this_field->totalX; x++) {
 
-			SelectObject(hdcMem, this_field->grid[x][y]->background->image);
+			character * tmpBackground = this_field->grid[x][y]->background;
 
-			BitBlt(hdcBuffer, this_field->grid[x][y]->background->x - (viewShift->xShift)*40,
-					this_field->grid[x][y]->background->y - (viewShift->yShift)*40,
-					this_field->grid[x][y]->background->width,
-					this_field->grid[x][y]->background->height, hdcMem, 0, 0,
-					SRCCOPY);
+			if(tmpBackground->direction != 0){
+				drawRotatedBackground(hdcMem, hdcBuffer, tmpBackground, viewShift);
+			}else{
+
+			SelectObject(hdcMem, tmpBackground->image);
+
+			BitBlt(hdcBuffer,
+				tmpBackground->x - (viewShift->xShift)*40,
+				tmpBackground->y - (viewShift->yShift)*40,
+				tmpBackground->width,
+				tmpBackground->height, hdcMem, 0, 0,
+				SRCCOPY);
+			}
 
 		}
 	}
@@ -368,6 +410,84 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, ShiftData * viewShift)
 	DeleteDC(hdcMem);
 }
 
+void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundCharacter, ShiftData * viewShift){
+
+	int direction = backgroundCharacter->direction;
+	float cosine = (float) cos(direction*M_PI/2.0);
+	float sine = (float) sin(direction*M_PI/2.0);
+
+	// Compute dimensions of the resulting bitmap
+	// First get the coordinates of the 3 corners other than origin
+	int x1 = (int) (40 * sine);
+	int y1 = (int) (40 * cosine);
+	int x2 = (int) (40 * cosine + 40 * sine);
+	int y2 = (int) (40 * cosine - 40 * sine);
+	int x3 = (int) (40 * cosine);
+	int y3 = (int) (-40 * sine);
+
+	int minx = min(0, min(x1, min(x2,x3)));
+	int miny = min(0, min(y1, min(y2,y3)));
+	int maxx = max(0, max(x1, max(x2,x3)));
+	int maxy = max(0, max(y1, max(y2,y3)));
+
+	SetGraphicsMode(hdcBuffer, GM_ADVANCED);
+	XFORM xForm;
+	xForm.eM11 = cosine;
+	xForm.eM12 = -sine;
+	xForm.eM21 = sine;
+	xForm.eM22 = cosine;
+	xForm.eDx = (float) -minx;
+	xForm.eDy = (float) -miny;
+
+	if (!SetWorldTransform(hdcBuffer, &xForm)) {
+		printf("setworldtransform failed");
+	}
+
+	SelectObject(hdcMem, backgroundCharacter->image);
+
+	int xMod = calcXMod(direction, backgroundCharacter, viewShift);
+	int yMod = calcYMod(direction, backgroundCharacter, viewShift);
+
+	BitBlt(hdcBuffer,
+			xMod,//*(backgroundCharacter->x - (viewShift->xShift) * 40),
+			yMod,//*(backgroundCharacter->y - (viewShift->yShift) * 40),
+			backgroundCharacter->width, backgroundCharacter->height, hdcMem, 0,
+			0,
+			SRCCOPY);
+
+	//set world transform back to normal
+	xForm.eM11 = 1;
+	xForm.eM12 = 0;
+	xForm.eM21 = 0;
+	xForm.eM22 = 1;
+	xForm.eDx = 0;
+	xForm.eDy = 0;
+	if (!SetWorldTransform(hdcBuffer, &xForm)) {
+		printf("setworldtransform failed");
+	}
+
+}
+
+int calcXMod(int direction, character * backgroundCharacter, ShiftData * viewShift){
+	if(direction == 1){
+		return -1*(backgroundCharacter->y - viewShift->yShift*40);
+	}else if(direction == 2){
+		return -1*(backgroundCharacter->x-viewShift->xShift*40);
+	}
+	else{
+		return (backgroundCharacter->y -viewShift->yShift*40);
+	}
+}
+
+int calcYMod(int direction, character * backgroundCharacter, ShiftData * viewShift){
+	if(direction == 1){
+		return (backgroundCharacter->x-viewShift->xShift*40);
+	}else if(direction == 2){
+		return -1*(backgroundCharacter->y-viewShift->yShift*40);
+	}else{
+		return -1*(backgroundCharacter->x-viewShift->xShift*40);
+	}
+}
 
 moveNode * nodeAlreadyTraversed(moveNode ** nodes, int x, int y){
 	int i = 0;

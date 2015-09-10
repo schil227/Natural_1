@@ -58,8 +58,8 @@ END
 //The player bitmap:
 //IDB_PLAYER BITMAP DISCARDABLE "../images/player.bmp"
 2001 BITMAP DISCARDABLE "../images/player.bmp"
-2002 BITMAP DISCARDABLE "../images/grass.bmp"
-2003 BITMAP DISCARDABLE "../images/black.bmp"
+//2002 BITMAP DISCARDABLE "../images/grass.bmp"
+//2003 BITMAP DISCARDABLE "../images/black.bmp"
 2004 BITMAP DISCARDABLE "../images/cursor2.bmp"
 2005 BITMAP DISCARDABLE "../images/skelly.bmp"
 2006 BITMAP DISCARDABLE "../images/skelly2.bmp"
@@ -67,7 +67,19 @@ END
 2008 BITMAP DISCARDABLE "../images/skelly4.bmp"
 2009 BITMAP DISCARDABLE "../images/skelly5.bmp"
 
+2500 BITMAP DISCARDABLE "../images/black.bmp"
+2501 BITMAP DISCARDABLE "../images/grass.bmp"
+2502 BITMAP DISCARDABLE "../images/sea.bmp"
 
+//shore images
+2511 BITMAP DISCARDABLE "../images/shore1.bmp"
+2512 BITMAP DISCARDABLE "../images/shore2.bmp"
+2513 BITMAP DISCARDABLE "../images/shore3.bmp"
+2514 BITMAP DISCARDABLE "../images/shore4.bmp"
+2516 BITMAP DISCARDABLE "../images/shore6.bmp"
+2517 BITMAP DISCARDABLE "../images/shore7.bmp"
+2518 BITMAP DISCARDABLE "../images/shore8.bmp"
+2519 BITMAP DISCARDABLE "../images/shore9.bmp"
 
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"
