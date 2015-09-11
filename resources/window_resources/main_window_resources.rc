@@ -72,6 +72,12 @@ END
 2502 BITMAP DISCARDABLE "../images/sea.bmp"
 
 //shore images
+2511 BITMAP DISCARDABLE "../images/shore_edge.bmp"
+2512 BITMAP DISCARDABLE "../images/shore_split.bmp"
+2513 BITMAP DISCARDABLE "../images/shore_corner.bmp"
+2514 BITMAP DISCARDABLE "../images/shore_cove.bmp"
+2515 BITMAP DISCARDABLE "../images/shore_pond.bmp"
+/*
 2511 BITMAP DISCARDABLE "../images/shore1.bmp"
 2512 BITMAP DISCARDABLE "../images/shore2.bmp"
 2513 BITMAP DISCARDABLE "../images/shore3.bmp"
@@ -80,6 +86,6 @@ END
 2517 BITMAP DISCARDABLE "../images/shore7.bmp"
 2518 BITMAP DISCARDABLE "../images/shore8.bmp"
 2519 BITMAP DISCARDABLE "../images/shore9.bmp"
-
+*/
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

@@ -31,7 +31,7 @@ typedef struct {
 	int totalX;
 	int totalY;
 
-	space* grid[25][25];
+	space* grid[100][100];
 
 } field;
 

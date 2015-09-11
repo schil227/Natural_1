@@ -250,28 +250,16 @@ int generateBackground(char backgroundSymbol){
 		return 2502;
 	}else if (backgroundSymbol == 'g'){
 		return 2501;
-	}else if (backgroundSymbol == '1'){
+	}else if (backgroundSymbol == '-'){
 		return 2511;
-	}else if (backgroundSymbol == '2'){
+	}else if (backgroundSymbol == '='){
 		return 2512;
-	}else if (backgroundSymbol == '3'){
-		return 2513;
-	}else if (backgroundSymbol == '4'){
-		return 2514;
-	}else if (backgroundSymbol == '6'){
-		return 2516;
-	}else if (backgroundSymbol == '7'){
-		return 2517;
-	}else if (backgroundSymbol == '8'){
-		return 2518;
-	}else if (backgroundSymbol == '9'){
-		return 2519;
-	}else if (backgroundSymbol == 'p'){
-		return 2001;
-	}else if (backgroundSymbol == 'q'){
-		return 2001;
 	}else if (backgroundSymbol == 'r'){
-		return 2001;
+		return 2513;
+	}else if (backgroundSymbol == 'u'){
+		return 2514;
+	}else if (backgroundSymbol == 'o'){
+		return 2515;
 	}else{
 		return 2501;
 	}
@@ -282,18 +270,16 @@ field* initField(char* fieldFileName){
 	FILE * fp = fopen(fieldFileName, "r");
 	char line[80];
 	int init_y = 0;
-	int init_x;
+	int init_x = 0;
+	int xIndex;
 	while(fgets(line,80,fp) != NULL){
-
-		for(init_x = 0; init_x < strlen(line); init_x++){
+		init_x = 0;
+		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
 
 			space* newSpace = malloc(sizeof(space));
 			newSpace->currentIndividual = malloc(sizeof(individual));
-//			newSpace->tmpIndividual = malloc(sizeof(individual));
-//			newSpace->background = malloc(sizeof(character));
-//			newSpace->currentIndividual->playerCharacter = malloc(sizeof(character));
 			character* backgroundCharacter = malloc(sizeof(character));
-			char currentChar = line[init_x];
+			char currentChar = line[xIndex];
 
 			//initialize background
 			backgroundCharacter->width = 40;
@@ -302,17 +288,23 @@ field* initField(char* fieldFileName){
 			backgroundCharacter->y = init_y * 40;
 			backgroundCharacter->name = &currentChar;
 			backgroundCharacter->imageID = generateBackground(currentChar);
-			if(currentChar == 'c'){
+			if(currentChar == 'c'
+				|| currentChar == '-'
+				|| currentChar == '='
+				|| currentChar == 'r'
+				|| currentChar == 'u'
+				|| currentChar == 'o'){
 				newSpace->isPassable = 0;
 			}else{
 				newSpace->isPassable = 1;
 			}
 
-			if (currentChar == 'p') {
+			currentChar = line[xIndex+1];
+			if (currentChar == '>') {
 				backgroundCharacter->direction = 3;
-			}else if (currentChar == 'q'){
+			}else if (currentChar == 'v'){
 				backgroundCharacter->direction = 2;
-			}else if (currentChar == 'r'){
+			}else if (currentChar == '<'){
 				backgroundCharacter->direction = 1;
 			}else{
 				backgroundCharacter->direction = 0;
@@ -321,8 +313,9 @@ field* initField(char* fieldFileName){
 			newSpace->background = backgroundCharacter;
 			newSpace->currentIndividual = NULL;
 			thisField->grid[init_x][init_y] = newSpace;
-
+			init_x++;
 		}
+
 		init_y++;
 
 //		puts(line);
