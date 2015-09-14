@@ -169,6 +169,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		individual* skeleton3 = initIndividual();
 		individual* skeleton4 = initIndividual();
 		individual* skeleton5 = initIndividual();
+		individual* skeleton6 = initIndividual();
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
@@ -202,11 +203,17 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			MB_OK | MB_ICONINFORMATION);
 		}
 
+		if (defineIndividual(skeleton6, 2009, RGB(255, 0, 255), "skelly6",0, 8, 15, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
+					MessageBox(hwnd, "Failed to make player", "Notice",
+					MB_OK | MB_ICONINFORMATION);
+				}
+
 		addEnemyToEnemies(thisEnemies,skeleton);
 		addEnemyToEnemies(thisEnemies,skeleton2);
 		addEnemyToEnemies(thisEnemies,skeleton3);
 		addEnemyToEnemies(thisEnemies,skeleton4);
 		addEnemyToEnemies(thisEnemies,skeleton5);
+		addEnemyToEnemies(thisEnemies,skeleton6);
 
 		int x, y;
 		main_field = initField("C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\map1.txt");

@@ -5,6 +5,7 @@
  *      Author: Adrian
  */
 #include"./headers/enemy_controller_pub_methods.h"
+#include<stdio.h>
 
 node * createNewNode(int pathLength, int x, int y){
 	node* thisNode = malloc(sizeof(node));
@@ -53,7 +54,7 @@ node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField
 	int dx,dy,newX,newY, index=0;
 
 //	printf("getting new active nodes \n");
-	if (parentNode->pathLength < 100) {
+	if (parentNode->pathLength < 10) {
 		for (dx = -1; dx < 2; dx++) {
 			for (dy = -1; dy < 2; dy++) {
 				newX = parentNode->x + dx;
@@ -157,6 +158,8 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 
 	nodeArr * resultArr = malloc(sizeof(nodeArr));
 
+	resultArr->size = 0;
+
 	if(endNode->pathLength != -1){
 		int size = 0;
 
@@ -208,9 +211,9 @@ int spaceIsTaken(node * thisNode, field * thisField){
 }
 
 node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes){
-
 	int i = 0;
 	node ** newActiveNodes = malloc(sizeof(node*)*300);
+
 	for(i; i < 300; i++){
 		newActiveNodes[i] = NULL;
 	}
@@ -229,10 +232,15 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 		addNodeToList(activeNodes[i], allNodes);
 
 		if(moveRange > 0){
+			printf("before 1st call\n");
+			fflush(stdout);
 			node ** tmpNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField); // filters out blocked nodes and nodes in allNodes
+			printf("1st getNewActiveNodes Call\n");
+			fflush(stdout);
 			int j = 0;
 
 			while(tmpNodes[j] != NULL){
+
 				if(!spaceIsTaken(tmpNodes[j], thisField)){
 					addNodeToList(tmpNodes[j], newActiveNodes);
 				}
