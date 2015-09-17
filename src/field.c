@@ -7,6 +7,7 @@
 
 #include"./headers/field_pub_methods.h"
 #include<stdio.h>
+#include<stdlib.h>
 #include<string.h>
 #include<math.h>
 
@@ -260,9 +261,44 @@ int generateBackground(char backgroundSymbol){
 		return 2514;
 	}else if (backgroundSymbol == 'o'){
 		return 2515;
+	}else if (backgroundSymbol == 'w'){
+		return 2521;
+	}else if (backgroundSymbol == 't'){
+		return 2522;
 	}else{
 		return 2501;
 	}
+}
+
+field * loadMap(char * mapName, individual * player, enemies* thisEnemies){
+	FILE * fp = fopen(mapName, "r");
+
+	char line[80];
+	char* cords;
+	char* enemyMap;
+	//init player cords
+	fgets(line,10,fp);
+
+	//Split line on ","
+	cords = strtok(line, ",");
+
+	//convert first chars into int (x)
+	player->playerCharacter->x = atoi(cords);
+
+	cords = strtok(NULL, ",");
+	//convert second chars into int (y)
+	player->playerCharacter->y = atoi(cords);
+
+	//enemy filename
+	fgets(line,80,fp);
+	enemyMap = line;
+	fclose(fp);
+
+	loadEnemies(thisEnemies, enemyMap);
+
+	field* thisField = initField(mapName);
+
+	return thisField;
 }
 
 field* initField(char* fieldFileName){
@@ -272,6 +308,11 @@ field* initField(char* fieldFileName){
 	int init_y = 0;
 	int init_x = 0;
 	int xIndex;
+
+	//used to get rid of the first 2 lines of data (see loadMap)
+	fgets(line,80,fp);
+	fgets(line,80,fp);
+
 	while(fgets(line,80,fp) != NULL){
 		init_x = 0;
 		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
@@ -293,7 +334,8 @@ field* initField(char* fieldFileName){
 				|| currentChar == '='
 				|| currentChar == 'r'
 				|| currentChar == 'u'
-				|| currentChar == 'o'){
+				|| currentChar == 'o'
+				|| currentChar == 'w'){
 				newSpace->isPassable = 0;
 			}else{
 				newSpace->isPassable = 1;

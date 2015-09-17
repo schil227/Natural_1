@@ -6,6 +6,7 @@
  */
 
 #include "./headers/field_controller_pub_methods.h"
+#include<stdio.h>
 
 enemies * initEnemies(){
 	enemies * thisEnemies = malloc(sizeof(enemies));
@@ -22,6 +23,68 @@ int addEnemyToEnemies(enemies * thisEnemies, individual * enemey){
 	}
 
 	return 0;
+}
+
+void createEnemyFromLine(individual * newEnemy, char * line){
+	int imageID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt;
+	char * name;
+	char critType[3];
+	char * value = strtok(line,",");
+	imageID = atoi(value);
+	value = strtok(NULL,",");
+	r = atoi(value);
+	value = strtok(NULL,",");
+	g = atoi(value);
+	value = strtok(NULL,",");
+	b = atoi(value);
+
+	value = strtok(NULL,",");
+	name = value;
+	value = strtok(NULL,",");
+	direction = atoi(value);
+	value = strtok(NULL,",");
+	x = atoi(value);
+	value = strtok(NULL,",");
+	y = atoi(value);
+	value = strtok(NULL,",");
+	totalHP = atoi(value);
+	value = strtok(NULL,",");
+	totalActions = atoi(value);
+	value = strtok(NULL,",");
+	ac= atoi(value);
+	value = strtok(NULL,",");
+	attack= atoi(value);
+	value = strtok(NULL,",");
+	maxDam = atoi(value);
+	value = strtok(NULL,",");
+	minDam= atoi(value);
+	value = strtok(NULL,",");
+	strcpy(critType,value);
+	value = strtok(NULL,",");
+	range = atoi(value);
+	value = strtok(NULL,",");
+	mvmt = atoi(value);
+
+
+	if(defineIndividual(newEnemy,imageID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,critType,range,mvmt)){
+		printf("failed making new enemy\n");
+	}
+}
+
+void loadEnemies(enemies * enemiesList, char * enemyFile){
+	char * directory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
+	char * fullEnemyFile = appendStrings(directory, enemyFile);
+	fullEnemyFile[strlen(fullEnemyFile)-1] = NULL; //remove '\n' at end of line
+	FILE * enemyFP = fopen(fullEnemyFile, "r");
+	char line[80];
+
+	while(fgets(line,80,enemyFP) != NULL){
+		individual * newEnemy = initIndividual();
+		createEnemyFromLine(newEnemy, line);
+		addEnemyToEnemies(enemiesList,newEnemy);
+	}
+
+	fclose(enemyFP);
 }
 
 individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey){

@@ -157,7 +157,6 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 	node * endNode = pathFind(targetX, targetY, allNodes, activeNodes, thisField);
 
 	nodeArr * resultArr = malloc(sizeof(nodeArr));
-
 	resultArr->size = 0;
 
 	if(endNode->pathLength != -1){

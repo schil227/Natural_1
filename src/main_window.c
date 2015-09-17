@@ -208,15 +208,15 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					MB_OK | MB_ICONINFORMATION);
 				}
 
-		addEnemyToEnemies(thisEnemies,skeleton);
-		addEnemyToEnemies(thisEnemies,skeleton2);
-		addEnemyToEnemies(thisEnemies,skeleton3);
-		addEnemyToEnemies(thisEnemies,skeleton4);
-		addEnemyToEnemies(thisEnemies,skeleton5);
-		addEnemyToEnemies(thisEnemies,skeleton6);
+//		addEnemyToEnemies(thisEnemies,skeleton);
+//		addEnemyToEnemies(thisEnemies,skeleton2);
+//		addEnemyToEnemies(thisEnemies,skeleton3);
+//		addEnemyToEnemies(thisEnemies,skeleton4);
+//		addEnemyToEnemies(thisEnemies,skeleton5);
+//		addEnemyToEnemies(thisEnemies,skeleton6);
 
 		int x, y;
-		main_field = initField("C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\map1.txt");
+		main_field = loadMap("C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\map1.txt", player,thisEnemies);
 		int imageID;
 
 		for (y = 0; y < main_field->totalY; y++) {
@@ -233,7 +233,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
-		setIndividualSpace(main_field,player, 0,0);
+		setIndividualSpace(main_field,player, player->playerCharacter->x, player->playerCharacter->y);
 		setIndividualSpace(main_field,skeleton, 10,0);
 		setIndividualSpace(main_field,skeleton2,10,1);
 		setIndividualSpace(main_field,skeleton3,10,2);

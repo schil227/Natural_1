@@ -77,6 +77,10 @@ END
 2513 BITMAP DISCARDABLE "../images/shore_corner.bmp"
 2514 BITMAP DISCARDABLE "../images/shore_cove.bmp"
 2515 BITMAP DISCARDABLE "../images/shore_pond.bmp"
+
+//mountain images
+2521 BITMAP DISCARDABLE "../images/wall.bmp"
+2522 BITMAP DISCARDABLE "../images/tmp_ground.bmp"
 /*
 2511 BITMAP DISCARDABLE "../images/shore1.bmp"
 2512 BITMAP DISCARDABLE "../images/shore2.bmp"
