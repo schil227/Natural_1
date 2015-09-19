@@ -57,6 +57,8 @@ int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, cha
 	thisIndividual->range = range;
 	thisIndividual->mvmt = mvmt;
 
+	thisIndividual->jumpTarget = 0;
+
 	return 0;
 }
 

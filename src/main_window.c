@@ -164,59 +164,16 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		UINT ret;
 
 		player = initIndividual();
-		individual* skeleton = initIndividual();
-		individual* skeleton2 = initIndividual();
-		individual* skeleton3 = initIndividual();
-		individual* skeleton4 = initIndividual();
-		individual* skeleton5 = initIndividual();
-		individual* skeleton6 = initIndividual();
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
-		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 3, 3, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
+		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 8, 15, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
-
-		if (defineIndividual(skeleton, 2005, RGB(255, 0, 255), "skelly",0, 10, 0, 8, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-
-		if (defineIndividual(skeleton2, 2006, RGB(255, 0, 255), "skelly2",0, 10, 1, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-
-		if (defineIndividual(skeleton3, 2007, RGB(255, 0, 255), "skelly3",0, 10, 2, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-
-		if (defineIndividual(skeleton4, 2008, RGB(255, 0, 255), "skelly4",0, 10, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-
-		if (defineIndividual(skeleton5, 2009, RGB(255, 0, 255), "skelly5",0, 9, 3, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
-
-		if (defineIndividual(skeleton6, 2009, RGB(255, 0, 255), "skelly6",0, 8, 15, 2, 2, 8, 0, 3, 1, "DUB", 1, 3)) {
-					MessageBox(hwnd, "Failed to make player", "Notice",
-					MB_OK | MB_ICONINFORMATION);
-				}
-
-//		addEnemyToEnemies(thisEnemies,skeleton);
-//		addEnemyToEnemies(thisEnemies,skeleton2);
-//		addEnemyToEnemies(thisEnemies,skeleton3);
-//		addEnemyToEnemies(thisEnemies,skeleton4);
-//		addEnemyToEnemies(thisEnemies,skeleton5);
-//		addEnemyToEnemies(thisEnemies,skeleton6);
 
 		int x, y;
-		main_field = loadMap("C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\map1.txt", player,thisEnemies);
+		main_field = loadMap("map1.txt", player,thisEnemies);
 		int imageID;
 
 		for (y = 0; y < main_field->totalY; y++) {
@@ -232,13 +189,14 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			}
 		}
-
-		setIndividualSpace(main_field,player, player->playerCharacter->x, player->playerCharacter->y);
-		setIndividualSpace(main_field,skeleton, 10,0);
-		setIndividualSpace(main_field,skeleton2,10,1);
-		setIndividualSpace(main_field,skeleton3,10,2);
-		setIndividualSpace(main_field,skeleton4,10,3);
-		setIndividualSpace(main_field,skeleton5,9,3);
+//
+//		setIndividualSpace(main_field,player, player->playerCharacter->x, player->playerCharacter->y);
+//		setEnemiesToField(main_field, thisEnemies);
+		//		setIndividualSpace(main_field,skeleton, 10,0);
+//		setIndividualSpace(main_field,skeleton2,10,1);
+//		setIndividualSpace(main_field,skeleton3,10,2);
+//		setIndividualSpace(main_field,skeleton4,10,3);
+//		setIndividualSpace(main_field,skeleton5,9,3);
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -304,6 +262,40 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x53: //s key (move)
 			moveMode = 1;
 			initMoveMode = 1;
+			break;
+		case 0x45: //e key (enter)
+		{
+			space * tmpSpace = main_field->grid[player->playerCharacter->x][player->playerCharacter->y];
+			char * map = main_field->grid[player->playerCharacter->x][player->playerCharacter->y]->transitMap;
+			if( map == NULL){
+				printf("the map was null!\n");
+			}
+
+			printf("transit ID:%d\n", tmpSpace->targetMapTransitID);
+
+			if(tmpSpace->targetMapTransitID != 0){
+				int x, y, imageID;
+				player->jumpTarget = tmpSpace->targetMapTransitID;
+
+				main_field = loadMap(tmpSpace->transitMap, player, thisEnemies);
+
+				for (y = 0; y < main_field->totalY; y++) {
+					for (x = 0; x < main_field->totalX; x++) {
+						imageID = (main_field->grid[x][y]->background)->imageID;
+						main_field->grid[x][y]->background->image = malloc(
+								sizeof(HBITMAP));
+						main_field->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
+						if (main_field->grid[x][y]->background->image == NULL) {
+							printf("failed\n");
+						}
+
+					}
+				}
+
+
+			}
+
+		}
 			break;
 		case 0x57: //w key (wait)
 			player->remainingActions = player->remainingActions - 1;

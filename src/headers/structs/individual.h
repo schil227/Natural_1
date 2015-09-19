@@ -29,6 +29,8 @@ typedef struct {
 
 	short int mvmt;
 
+	short int jumpTarget;
+
 } individual;
 
 #endif /* SRC_HEADERS_STRUCTS_INDIVIDUAL_H_ */

@@ -18,6 +18,10 @@ typedef struct {
 	character* background;
 	individual* currentIndividual;
 //	individual* tmpIndividual;
+	char* transitMap;
+	int transitID;
+	int targetMapTransitID;
+
 } space;
 
 typedef struct {

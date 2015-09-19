@@ -1,4 +1,4 @@
-1,1
+map1_transit.txt
 map1_enemies.txt
 g^g^g^t^t^t^g^r>-v->g^g^r>
 g^g^g^t^t^t^g^g^g^=>g^g^g^

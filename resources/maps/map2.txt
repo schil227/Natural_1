@@ -1,0 +1,5 @@
+map2_transit.txt
+map2_enemies.txt
+g^g^g^-<
+g^g^g^r>
+g^g^g^g^

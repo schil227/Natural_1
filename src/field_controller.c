@@ -29,8 +29,10 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	int imageID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt;
 	char * name;
 	char critType[3];
+
 	char * value = strtok(line,",");
 	imageID = atoi(value);
+
 	value = strtok(NULL,",");
 	r = atoi(value);
 	value = strtok(NULL,",");
@@ -65,7 +67,6 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	value = strtok(NULL,",");
 	mvmt = atoi(value);
 
-
 	if(defineIndividual(newEnemy,imageID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,critType,range,mvmt)){
 		printf("failed making new enemy\n");
 	}
@@ -85,6 +86,23 @@ void loadEnemies(enemies * enemiesList, char * enemyFile){
 	}
 
 	fclose(enemyFP);
+}
+
+void clearEnemies(enemies * thisEnemies){
+	int i;
+	for(i = 0; i < thisEnemies->numEnemies; i++){
+		destroyIndividual(thisEnemies->enemies[i]);
+	}
+	thisEnemies->numEnemies = 0;
+}
+
+void setEnemiesToField(field * thisField, enemies * enemiesList){
+	individual * tmpEnemy;
+	int i;
+	for(i = 0; i < enemiesList->numEnemies; i++){
+		tmpEnemy = enemiesList->enemies[i];
+		setIndividualSpace(thisField,tmpEnemy,tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
+	}
 }
 
 individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey){

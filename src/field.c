@@ -192,6 +192,30 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 
 }
 
+/*
+ * FromJump: the players old space may not exist anymore - removing logic to remove currentIndividual from old space
+ */
+int setIndividualSpaceFromJump(field *thisField, individual *thisIndividual, int x, int y){
+
+	//check if in bounds
+	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
+			return 0;
+	}
+
+	if(getSpaceFromField(thisField,x,y)->currentIndividual == NULL){
+//		getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y)->currentIndividual = NULL;
+		getSpaceFromField(thisField, x, y)->currentIndividual = thisIndividual;
+		thisIndividual->playerCharacter->x = x;
+		thisIndividual->playerCharacter->y = y;
+		return 1;
+	}
+
+	//space occoupied
+	return 0;
+
+}
+
+
 //int setIndividualTmpSpace(field *thisField, individual *thisIndividual, int x, int y){
 //
 //	//check if in bounds
@@ -271,34 +295,85 @@ int generateBackground(char backgroundSymbol){
 }
 
 field * loadMap(char * mapName, individual * player, enemies* thisEnemies){
-	FILE * fp = fopen(mapName, "r");
+	char * directory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
+	char transitMap[80];
+	char enemyMap[80];
+	char * fullMapName = appendStrings(directory, mapName);
+//	fullMapName[strlen(fullMapName)-1] = '\0'; //remove /n at end
 
-	char line[80];
-	char* cords;
-	char* enemyMap;
+	FILE * fp = fopen(fullMapName, "r");
+
 	//init player cords
-	fgets(line,10,fp);
-
-	//Split line on ","
-	cords = strtok(line, ",");
-
-	//convert first chars into int (x)
-	player->playerCharacter->x = atoi(cords);
-
-	cords = strtok(NULL, ",");
-	//convert second chars into int (y)
-	player->playerCharacter->y = atoi(cords);
+	fgets(transitMap,80,fp);
+	printf("transit map name: %s\n", transitMap);
 
 	//enemy filename
-	fgets(line,80,fp);
-	enemyMap = line;
+	fgets(enemyMap,80,fp);
+	printf("transit map name: %s\n", transitMap);
+	printf("enemy map name:%s\n", enemyMap);
+
 	fclose(fp);
 
+	clearEnemies(thisEnemies);
 	loadEnemies(thisEnemies, enemyMap);
 
-	field* thisField = initField(mapName);
+	field* thisField = initField(fullMapName);
+
+	makeTransitSpaces(transitMap, thisField, player);
+
+	setIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
+	setEnemiesToField(thisField, thisEnemies);
 
 	return thisField;
+}
+
+void makeTransitSpaces(char * transitMap, field * thisField, individual * player){
+	char * directory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
+	char * fullTransitFile = appendStrings(directory, transitMap);
+	fullTransitFile[strlen(fullTransitFile)-1] = NULL; //remove '\n' at end of line
+	FILE * enemyFP = fopen(fullTransitFile, "r");
+	char line[80];
+
+	while(fgets(line,80,enemyFP) != NULL){
+		space * tmpSpace;
+		int id, x, y, targetID;
+		char * targetTransitMap;
+
+		char * transitInstance = strtok(line,",");
+		id = atoi(transitInstance);
+
+		transitInstance = strtok(NULL, ",");
+		x = atoi(transitInstance);
+
+		transitInstance = strtok(NULL, ",");
+		y = atoi(transitInstance);
+
+		transitInstance = strtok(NULL, ",");
+		targetTransitMap = transitInstance;
+
+		transitInstance = strtok(NULL, ",");
+		targetID = atoi(transitInstance);
+
+		tmpSpace = getSpaceFromField(thisField,x,y);
+
+
+		thisField->grid[x][y]->transitID = id;
+		thisField->grid[x][y]->transitMap = malloc(sizeof(strlen(targetTransitMap)));
+		strcpy(thisField->grid[x][y]->transitMap,targetTransitMap);
+		thisField->grid[x][y]->targetMapTransitID = targetID;
+
+		printf("defined transit space [%d,%d]: id:%d, map:%s, targetID:%d\n",x,y, id, targetTransitMap, targetID);
+
+		//spawn player at this location
+		if(player->jumpTarget == id){
+			printf("Jumping player:[%d,%d]\n", x, y);
+			setIndividualSpaceFromJump(thisField,player,x,y);
+			player->jumpTarget = 0;
+		}
+	}
+
+	fclose(enemyFP);
+
 }
 
 field* initField(char* fieldFileName){
@@ -323,10 +398,12 @@ field* initField(char* fieldFileName){
 			char currentChar = line[xIndex];
 
 			//initialize background
+			backgroundCharacter->name = "";
+			backgroundCharacter->nameLength = 0;
 			backgroundCharacter->width = 40;
 			backgroundCharacter->height = 40;
-			backgroundCharacter->x = init_x * 40;
-			backgroundCharacter->y = init_y * 40;
+			backgroundCharacter->x = init_x;
+			backgroundCharacter->y = init_y;
 			backgroundCharacter->name = &currentChar;
 			backgroundCharacter->imageID = generateBackground(currentChar);
 			if(currentChar == 'c'
@@ -354,6 +431,9 @@ field* initField(char* fieldFileName){
 
 			newSpace->background = backgroundCharacter;
 			newSpace->currentIndividual = NULL;
+			newSpace->targetMapTransitID = 0;
+			newSpace->transitID = 0;
+			newSpace->transitMap = "";
 			thisField->grid[init_x][init_y] = newSpace;
 			init_x++;
 		}
@@ -432,8 +512,8 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, ShiftData * viewShift)
 			SelectObject(hdcMem, tmpBackground->image);
 
 			BitBlt(hdcBuffer,
-				tmpBackground->x - (viewShift->xShift)*40,
-				tmpBackground->y - (viewShift->yShift)*40,
+				tmpBackground->x*40 - (viewShift->xShift)*40,
+				tmpBackground->y*40 - (viewShift->yShift)*40,
 				tmpBackground->width,
 				tmpBackground->height, hdcMem, 0, 0,
 				SRCCOPY);
@@ -505,22 +585,22 @@ void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundChar
 
 int calcXMod(int direction, character * backgroundCharacter, ShiftData * viewShift){
 	if(direction == 1){
-		return -1*(backgroundCharacter->y - viewShift->yShift*40);
+		return -1*(backgroundCharacter->y*40 - viewShift->yShift*40);
 	}else if(direction == 2){
-		return -1*(backgroundCharacter->x-viewShift->xShift*40);
+		return -1*(backgroundCharacter->x*40-viewShift->xShift*40);
 	}
 	else{
-		return (backgroundCharacter->y -viewShift->yShift*40);
+		return (backgroundCharacter->y*40 -viewShift->yShift*40);
 	}
 }
 
 int calcYMod(int direction, character * backgroundCharacter, ShiftData * viewShift){
 	if(direction == 1){
-		return (backgroundCharacter->x-viewShift->xShift*40);
+		return (backgroundCharacter->x*40-viewShift->xShift*40);
 	}else if(direction == 2){
-		return -1*(backgroundCharacter->y-viewShift->yShift*40);
+		return -1*(backgroundCharacter->y*40-viewShift->yShift*40);
 	}else{
-		return -1*(backgroundCharacter->x-viewShift->xShift*40);
+		return -1*(backgroundCharacter->x*40-viewShift->xShift*40);
 	}
 }
 
