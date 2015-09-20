@@ -120,10 +120,7 @@ void drawAll(HDC hdc, RECT* prc) {
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
 	int index;
-	PAINTSTRUCT ps;
-	HDC consoleHDC = BeginPaint(g_toolbar, &ps);
 
-	RECT rec;
 	drawField(hdc, hdcBuffer, main_field, viewShift);
 	if (player->hp > 0) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
@@ -189,14 +186,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			}
 		}
-//
-//		setIndividualSpace(main_field,player, player->playerCharacter->x, player->playerCharacter->y);
-//		setEnemiesToField(main_field, thisEnemies);
-		//		setIndividualSpace(main_field,skeleton, 10,0);
-//		setIndividualSpace(main_field,skeleton2,10,1);
-//		setIndividualSpace(main_field,skeleton3,10,2);
-//		setIndividualSpace(main_field,skeleton4,10,3);
-//		setIndividualSpace(main_field,skeleton5,9,3);
 
 		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
 
@@ -226,6 +215,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //		drawPlayer(hdc, &rect);
 
 		EndPaint(hwnd, &ps);
+		ReleaseDC(hwnd, hdc);
 	}
 		break;
 	case WM_TIMER: {
@@ -233,8 +223,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		HDC hdc = GetDC(hwnd);
 		GetClientRect(hwnd, &rect);
 		drawAll(hdc, &rect);
-//			updatePlayer(&rect);
-//		drawPlayer(hdc, &rect);
 
 		ReleaseDC(hwnd, hdc);
 	}
@@ -371,12 +359,12 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 			RECT rec;
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(hwnd, &ps); //GetDC(hwnd);
-
+//
 			GetClientRect(hwnd, &rec);
 
 			DrawSideBar(hwnd,hdc, rec, player);
-
-
+//
+//
 			EndPaint(hwnd,&ps);
 			ReleaseDC(hwnd, hdc);
 		}
