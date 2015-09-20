@@ -167,7 +167,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 
-		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 8, 15, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
+		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -266,19 +266,14 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x45: //e key (enter)
 		{
 			space * tmpSpace = main_field->grid[player->playerCharacter->x][player->playerCharacter->y];
-			char * map = main_field->grid[player->playerCharacter->x][player->playerCharacter->y]->transitMap;
-			if( map == NULL){
-				printf("the map was null!\n");
-			}
 
-			printf("transit ID:%d\n", tmpSpace->targetMapTransitID);
-
-			if(tmpSpace->targetMapTransitID != 0){
+			if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
 				int x, y, imageID;
-				player->jumpTarget = tmpSpace->targetMapTransitID;
+				player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
-				main_field = loadMap(tmpSpace->transitMap, player, thisEnemies);
-
+				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, player, thisEnemies);
+				viewShift->xShift = 0;
+				viewShift->yShift = 0;
 				for (y = 0; y < main_field->totalY; y++) {
 					for (x = 0; x < main_field->totalX; x++) {
 						imageID = (main_field->grid[x][y]->background)->imageID;

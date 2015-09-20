@@ -81,15 +81,17 @@ END
 //mountain images
 2521 BITMAP DISCARDABLE "../images/wall.bmp"
 2522 BITMAP DISCARDABLE "../images/tmp_ground.bmp"
-/*
-2511 BITMAP DISCARDABLE "../images/shore1.bmp"
-2512 BITMAP DISCARDABLE "../images/shore2.bmp"
-2513 BITMAP DISCARDABLE "../images/shore3.bmp"
-2514 BITMAP DISCARDABLE "../images/shore4.bmp"
-2516 BITMAP DISCARDABLE "../images/shore6.bmp"
-2517 BITMAP DISCARDABLE "../images/shore7.bmp"
-2518 BITMAP DISCARDABLE "../images/shore8.bmp"
-2519 BITMAP DISCARDABLE "../images/shore9.bmp"
-*/
+
+//building
+2531 BITMAP DISCARDABLE "../images/stone_wall.bmp"
+2532 BITMAP DISCARDABLE "../images/stone_wall_top.bmp"
+2533 BITMAP DISCARDABLE "../images/stone_wall_doorway.bmp"
+
+//walkway
+2543 BITMAP DISCARDABLE "../images/path.bmp"
+
+//floor
+2551 BITMAP DISCARDABLE "../images/floor_wood.bmp"
+
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

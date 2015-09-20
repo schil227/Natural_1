@@ -289,6 +289,16 @@ int generateBackground(char backgroundSymbol){
 		return 2521;
 	}else if (backgroundSymbol == 't'){
 		return 2522;
+	}else if (backgroundSymbol == 'p'){
+		return 2543;
+	}else if (backgroundSymbol == 'f'){
+		return 2551;
+	}else if (backgroundSymbol == 'x'){
+		return 2531;
+	}else if (backgroundSymbol == 's'){
+		return 2532;
+	}else if (backgroundSymbol == 'd'){
+		return 2533;
 	}else{
 		return 2501;
 	}
@@ -356,11 +366,11 @@ void makeTransitSpaces(char * transitMap, field * thisField, individual * player
 
 		tmpSpace = getSpaceFromField(thisField,x,y);
 
-
-		thisField->grid[x][y]->transitID = id;
-		thisField->grid[x][y]->transitMap = malloc(sizeof(strlen(targetTransitMap)));
-		strcpy(thisField->grid[x][y]->transitMap,targetTransitMap);
-		thisField->grid[x][y]->targetMapTransitID = targetID;
+		thisField->grid[x][y]->thisTransitInfo = malloc(sizeof(transitInfo));
+		thisField->grid[x][y]->thisTransitInfo->transitID = id;
+		thisField->grid[x][y]->thisTransitInfo->transitMap = malloc(sizeof(strlen(targetTransitMap)));
+		strcpy(thisField->grid[x][y]->thisTransitInfo->transitMap,targetTransitMap);
+		thisField->grid[x][y]->thisTransitInfo->targetMapTransitID = targetID;
 
 		printf("defined transit space [%d,%d]: id:%d, map:%s, targetID:%d\n",x,y, id, targetTransitMap, targetID);
 
@@ -394,6 +404,7 @@ field* initField(char* fieldFileName){
 
 			space* newSpace = malloc(sizeof(space));
 			newSpace->currentIndividual = malloc(sizeof(individual));
+			newSpace->thisTransitInfo = malloc(sizeof(transitInfo));
 			character* backgroundCharacter = malloc(sizeof(character));
 			char currentChar = line[xIndex];
 
@@ -412,6 +423,8 @@ field* initField(char* fieldFileName){
 				|| currentChar == 'r'
 				|| currentChar == 'u'
 				|| currentChar == 'o'
+				|| currentChar == 's'
+				|| currentChar == 'x'
 				|| currentChar == 'w'){
 				newSpace->isPassable = 0;
 			}else{
@@ -431,9 +444,10 @@ field* initField(char* fieldFileName){
 
 			newSpace->background = backgroundCharacter;
 			newSpace->currentIndividual = NULL;
-			newSpace->targetMapTransitID = 0;
-			newSpace->transitID = 0;
-			newSpace->transitMap = "";
+			newSpace->thisTransitInfo = NULL;
+//			newSpace->targetMapTransitID = 0;
+//			newSpace->transitID = 0;
+//			newSpace->transitMap = "";
 			thisField->grid[init_x][init_y] = newSpace;
 			init_x++;
 		}

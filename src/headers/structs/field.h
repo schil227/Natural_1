@@ -11,17 +11,19 @@
 #include "../individual_pub_methods.h"
 
 typedef struct {
-	int numCharacters;
+	char* transitMap;
+	int transitID;
+	int targetMapTransitID;
+} transitInfo;
 
+typedef struct {
+	int numCharacters;
 	bool isPassable;
 //	character items[];
 	character* background;
 	individual* currentIndividual;
 //	individual* tmpIndividual;
-	char* transitMap;
-	int transitID;
-	int targetMapTransitID;
-
+	transitInfo* thisTransitInfo;
 } space;
 
 typedef struct {
@@ -38,6 +40,8 @@ typedef struct {
 	space* grid[100][100];
 
 } field;
+
+
 
 typedef struct {
 	int x;
