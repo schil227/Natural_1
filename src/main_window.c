@@ -270,7 +270,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
 				int x, y, imageID;
 				player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
-
+				free(main_field);
 				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, player, thisEnemies);
 				viewShift->xShift = 0;
 				viewShift->yShift = 0;
