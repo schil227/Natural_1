@@ -11,7 +11,7 @@
 #include "../individual_pub_methods.h"
 
 typedef struct {
-	char* transitMap;
+	char transitMap[256];
 	int transitID;
 	int targetMapTransitID;
 } transitInfo;

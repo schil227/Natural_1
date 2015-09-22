@@ -78,7 +78,7 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 
 void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, enemyFile);
-	fullEnemyFile[strlen(fullEnemyFile)-1] = NULL; //remove '\n' at end of line
+	fullEnemyFile[strlen(fullEnemyFile)-1] = '\0'; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullEnemyFile, "r");
 	char line[80];
 

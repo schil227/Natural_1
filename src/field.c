@@ -339,7 +339,7 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 void makeTransitSpaces(char * transitMap, char* directory, field * thisField, individual * player){
 	char * fullTransitFile = appendStrings(directory, transitMap);
-	fullTransitFile[strlen(fullTransitFile)-1] = NULL; //remove '\n' at end of line
+	fullTransitFile[strlen(fullTransitFile)-1] = '\0'; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullTransitFile, "r");
 	char line[80];
 
@@ -367,7 +367,6 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 
 		thisField->grid[x][y]->thisTransitInfo = malloc(sizeof(transitInfo));
 		thisField->grid[x][y]->thisTransitInfo->transitID = id;
-		thisField->grid[x][y]->thisTransitInfo->transitMap = malloc(sizeof(strlen(targetTransitMap)));
 		strcpy(thisField->grid[x][y]->thisTransitInfo->transitMap,targetTransitMap);
 		thisField->grid[x][y]->thisTransitInfo->targetMapTransitID = targetID;
 

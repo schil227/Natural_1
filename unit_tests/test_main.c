@@ -31,58 +31,82 @@ int path_and_attack_test() {
 //	getchar();
 
 	testPlayer = initIndividual();
-//
+
 	thisTestEnemies = initEnemies();
-//	printf("prod");
-//	thisTestCursor = initCursor(2004,RGB(224, 64, 192),0,0);
+
+	//	thisTestCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 //
 //
 //
 	if (defineIndividual(testPlayer, 2001, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX\0", 2, 4)) {
 	}
-//
-//	int x, y;
+
+	int x, y;
 	main_test_field = loadMap("map1.txt", mapTestDirectory, testPlayer, thisTestEnemies);
-//	int imageID;
-////	int imageID;
-//
-//	printf("enemies: %d\n",thisTestEnemies->numEnemies);
+	int imageID;
+
+
 	assert(thisTestEnemies->numEnemies == 6);
-////
-//	for (y = 0; y < main_test_field->totalY; y++) {
-//		for (x = 0; x < main_test_field->totalX; x++) {
-//			imageID = (main_test_field->grid[x][y]->background)->imageID;
-//			main_test_field->grid[x][y]->background->image = malloc(
-//					sizeof(HBITMAP));
-//			main_test_field->grid[x][y]->background->image = LoadBitmap(
-//					GetModuleHandle(NULL), imageID);
-//			if (main_test_field->grid[x][y]->background->image == NULL) {
-//				printf("failed\n");
-//			}
-//
-//		}
-//	}
-//
-//	//player is on field at their coordinates, name check
-//	individual * tmpIndividual = getIndividualFromField( main_test_field,testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
-//
-//	printf("name:%s\n",tmpIndividual->name);
-//
-//	assert(!strcmp(tmpIndividual->name,	testPlayer->name));
+
+	for (y = 0; y < main_test_field->totalY; y++) {
+		for (x = 0; x < main_test_field->totalX; x++) {
+			imageID = (main_test_field->grid[x][y]->background)->imageID;
+			main_test_field->grid[x][y]->background->image = malloc(
+					sizeof(HBITMAP));
+			main_test_field->grid[x][y]->background->image = LoadBitmap(
+					GetModuleHandle(NULL), imageID);
+			if (main_test_field->grid[x][y]->background->image == NULL) {
+				printf("failed\n");
+			}
+
+		}
+	}
+
+//player is on field at their coordinates, name check
+	individual * tmpIndividual = getIndividualFromField( main_test_field,testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name,	testPlayer->name));
 
 	//enemies are on field at their coordinates, name check
-//	assert(!strcmp(getIndividualFromField(main_field,thisEnemies->enemies[0]->playerCharacter->x, thisEnemies->enemies[0]->playerCharacter->y)->name,
-//			thisEnemies->enemies[0]->name));
-//	assert(!strcmp(getIndividualFromField(main_field,thisEnemies->enemies[1]->playerCharacter->x, thisEnemies->enemies[1]->playerCharacter->y)->name,
-//				thisEnemies->enemies[1]->name));
-//	assert(!strcmp(getIndividualFromField(main_field,thisEnemies->enemies[2]->playerCharacter->x, thisEnemies->enemies[2]->playerCharacter->y)->name,
-//				thisEnemies->enemies[2]->name));
-//	assert(!strcmp(getIndividualFromField(main_field,thisEnemies->enemies[3]->playerCharacter->x, thisEnemies->enemies[3]->playerCharacter->y)->name,
-//				thisEnemies->enemies[3]->name));
-//	assert(!strcmp(getIndividualFromField(main_field,thisEnemies->enemies[4]->playerCharacter->x, thisEnemies->enemies[4]->playerCharacter->y)->name,
-//				thisEnemies->enemies[4]->name));
-//	assert(!strcmp(getIndividualFromField(main_field,thisEnemies->enemies[5]->playerCharacter->x, thisEnemies->enemies[5]->playerCharacter->y)->name,
-//				thisEnemies->enemies[5]->name));
+	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->enemies[0]->playerCharacter->x, thisTestEnemies->enemies[0]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, thisTestEnemies->enemies[0]->name));
+
+	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->enemies[1]->playerCharacter->x, thisTestEnemies->enemies[1]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, thisTestEnemies->enemies[1]->name));
+
+	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->enemies[2]->playerCharacter->x, thisTestEnemies->enemies[2]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, thisTestEnemies->enemies[2]->name));
+
+	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->enemies[3]->playerCharacter->x, thisTestEnemies->enemies[3]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, thisTestEnemies->enemies[3]->name));
+
+	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->enemies[4]->playerCharacter->x, thisTestEnemies->enemies[4]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, thisTestEnemies->enemies[4]->name));
+
+	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->enemies[5]->playerCharacter->x, thisTestEnemies->enemies[5]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, thisTestEnemies->enemies[5]->name));
+
+	int i;
+	for(i = 0; i < thisTestEnemies->numEnemies; i++){
+		enemyAction((thisTestEnemies->enemies[i]), main_test_field, testPlayer);
+	}
+
+	//skeleton 1&5 too far away, same starting position
+//	tmpIndividual =thisTestEnemies->enemies[0];
+//	assert(tmpIndividual->playerCharacter->x == 10 &&
+//			tmpIndividual->playerCharacter->y == 0 );
+//	assert(tmpIndividual->playerCharacter->x == 9 &&
+//			tmpIndividual->playerCharacter->y == 15 );
+
+//	//skeletons 2,3,4,5 move towards the player
+//	assert(tmpIndividual->playerCharacter->x == 8 &&
+//			tmpIndividual->playerCharacter->y == 2 );
+//	assert(tmpIndividual->playerCharacter->x == 90);
+//	assert(tmpIndividual->playerCharacter->y == 1 );
+//	assert(tmpIndividual->playerCharacter->x == 6 &&
+//			tmpIndividual->playerCharacter->y == 1 );
+//	assert(tmpIndividual->playerCharacter->x == 6 &&
+//			tmpIndividual->playerCharacter->y == 0 );
+
 
 //	nodeArr * resultArr = getSpaceClosestToPlayer(main_field, skeleton, player);
 //
@@ -134,6 +158,7 @@ int path_and_attack_test() {
 //	assert(attackIndividual(player, skeleton));
 
 	free(testPlayer);
+//	free(tmpIndividual);
 	free(thisTestCursor);
 	free(thisTestEnemies);
 	free(main_test_field);
@@ -148,7 +173,7 @@ int test_main() {
 //	test_character_all();
 //	mock_field_test();
 
-//	path_and_attack_test();
+	path_and_attack_test();
 
 	return 0;
 }
