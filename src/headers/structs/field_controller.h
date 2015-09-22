@@ -10,6 +10,7 @@
 #include "../field_pub_methods.h"
 
 typedef struct {
+	size_t size;
 	int numEnemies;
 	individual * enemies[50];
 } enemies;

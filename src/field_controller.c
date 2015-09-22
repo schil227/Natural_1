@@ -9,8 +9,12 @@
 #include<stdio.h>
 
 enemies * initEnemies(){
+	int index;
 	enemies * thisEnemies = malloc(sizeof(enemies));
 	thisEnemies->numEnemies = 0;
+	for(index = 0; index < 50; index++){
+		thisEnemies->enemies[index] = NULL;
+	}
 	return thisEnemies;
 }
 
@@ -72,8 +76,7 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	}
 }
 
-void loadEnemies(enemies * enemiesList, char * enemyFile){
-	char * directory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
+void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, enemyFile);
 	fullEnemyFile[strlen(fullEnemyFile)-1] = NULL; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullEnemyFile, "r");

@@ -12,7 +12,7 @@
 #include"./field_pub_methods.h"
 #include"./field_controller_pub_methods.h"
 
-void drawCursor(HDC hdc, HDC hdcBuffer, cursor *thisCursor, ShiftData * viewShift);
+void drawCursor(HDC hdc, HDC hdcBuffer, cursor *thisCursor, shiftData * viewShift);
 void destroyCursor(cursor* thisCursor);
 
 #endif /* SRC_HEADERS_CURSOR_PUB_METHODS_H_ */

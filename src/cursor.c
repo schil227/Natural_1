@@ -6,7 +6,7 @@
  */
 #include "./headers/cursor_pub_methods.h"
 
-void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor, ShiftData * viewData){
+void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor, shiftData * viewData){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCursor->cursorCharacter->imageMask);
 	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursor->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
@@ -48,7 +48,7 @@ cursor * initCursor(int imageID, COLORREF rgb, int x, int y) {
 	return thisCursor;
 }
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, enemies  * thisEnemies, ShiftData * viewShift) {
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, enemies  * thisEnemies, shiftData * viewShift) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {

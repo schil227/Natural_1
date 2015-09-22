@@ -241,7 +241,7 @@ int setIndividualSpaceFromJump(field *thisField, individual *thisIndividual, int
 //
 //}
 
-int moveCursor(field *thisField, cursor *thisCursor, int direction, ShiftData * viewShift){
+int moveCursor(field *thisField, cursor *thisCursor, int direction, shiftData * viewShift){
 	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
 	int newY = thisCursor->cursorCharacter->y + yMoveChange(direction);
 	printf("newX:%d, newY:%d\n",newX, newY);
@@ -304,8 +304,8 @@ int generateBackground(char backgroundSymbol){
 	}
 }
 
-field * loadMap(char * mapName, individual * player, enemies* thisEnemies){
-	char * directory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
+field * loadMap(char * mapName, char* directory, individual * player, enemies* thisEnemies){
+
 	char transitMap[80];
 	char enemyMap[80];
 	char * fullMapName = appendStrings(directory, mapName);
@@ -325,11 +325,11 @@ field * loadMap(char * mapName, individual * player, enemies* thisEnemies){
 	fclose(fp);
 
 	clearEnemies(thisEnemies);
-	loadEnemies(thisEnemies, enemyMap);
+	loadEnemies(thisEnemies, enemyMap, directory);
 
 	field* thisField = initField(fullMapName);
 
-	makeTransitSpaces(transitMap, thisField, player);
+	makeTransitSpaces(transitMap, directory, thisField, player);
 
 	setIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
 	setEnemiesToField(thisField, thisEnemies);
@@ -337,8 +337,7 @@ field * loadMap(char * mapName, individual * player, enemies* thisEnemies){
 	return thisField;
 }
 
-void makeTransitSpaces(char * transitMap, field * thisField, individual * player){
-	char * directory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
+void makeTransitSpaces(char * transitMap, char* directory, field * thisField, individual * player){
 	char * fullTransitFile = appendStrings(directory, transitMap);
 	fullTransitFile[strlen(fullTransitFile)-1] = NULL; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullTransitFile, "r");
@@ -409,13 +408,11 @@ field* initField(char* fieldFileName){
 			char currentChar = line[xIndex];
 
 			//initialize background
-			backgroundCharacter->name = "";
 			backgroundCharacter->nameLength = 0;
 			backgroundCharacter->width = 40;
 			backgroundCharacter->height = 40;
 			backgroundCharacter->x = init_x;
 			backgroundCharacter->y = init_y;
-			backgroundCharacter->name = &currentChar;
 			backgroundCharacter->imageID = generateBackground(currentChar);
 			if(currentChar == 'c'
 				|| currentChar == '-'
@@ -508,7 +505,7 @@ void updateFiled(field* thisField, char* fieldFileName){
 }
 
 
-void drawField(HDC hdc, HDC hdcBuffer, field* this_field, ShiftData * viewShift){
+void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	int x;
@@ -539,7 +536,7 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, ShiftData * viewShift)
 	DeleteDC(hdcMem);
 }
 
-void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundCharacter, ShiftData * viewShift){
+void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){
 
 	int direction = backgroundCharacter->direction;
 	float cosine = (float) cos(direction*M_PI/2.0);
@@ -597,7 +594,7 @@ void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundChar
 
 }
 
-int calcXMod(int direction, character * backgroundCharacter, ShiftData * viewShift){
+int calcXMod(int direction, character * backgroundCharacter, shiftData * viewShift){
 	if(direction == 1){
 		return -1*(backgroundCharacter->y*40 - viewShift->yShift*40);
 	}else if(direction == 2){
@@ -608,7 +605,7 @@ int calcXMod(int direction, character * backgroundCharacter, ShiftData * viewShi
 	}
 }
 
-int calcYMod(int direction, character * backgroundCharacter, ShiftData * viewShift){
+int calcYMod(int direction, character * backgroundCharacter, shiftData * viewShift){
 	if(direction == 1){
 		return (backgroundCharacter->x*40-viewShift->xShift*40);
 	}else if(direction == 2){
@@ -660,7 +657,7 @@ int freeUpMovePath(moveNode * currentNode){
 }
 
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
-		field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode, ShiftData * viewShift) {
+		field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode, shiftData * viewShift) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -773,7 +770,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
 		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode,
-		ShiftData * viewShift){
+		shiftData * viewShift){
 	switch (msg) {
 
 		case WM_TIMER: {

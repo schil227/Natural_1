@@ -18,6 +18,7 @@
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameCons[] = "MyConsoleClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
+const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
 int numMessages = 0;
 int mouseButtonCount = 0;
 
@@ -41,7 +42,7 @@ cursor* thisCursor;
 field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
 
-ShiftData * viewShift;
+shiftData * viewShift;
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
@@ -99,7 +100,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 	return TRUE;
 }
 
-void tryUpdateXShift(ShiftData * viewShift, int newX){
+void tryUpdateXShift(shiftData * viewShift, int newX){
 	if(newX - viewShift->xShift < 3 && viewShift->xShift > 0){
 		viewShift->xShift = viewShift->xShift - 1;
 	}else if(newX - viewShift->xShift > 9){
@@ -107,7 +108,7 @@ void tryUpdateXShift(ShiftData * viewShift, int newX){
 	}
 }
 
-void tryUpdateYShift(ShiftData * viewShift, int newY){
+void tryUpdateYShift(shiftData * viewShift, int newY){
 	if(newY - viewShift->yShift < 3 && viewShift->yShift > 0){
 		viewShift->yShift = viewShift->yShift - 1;
 	}else if(newY - viewShift->yShift > 7){
@@ -170,7 +171,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		int x, y;
-		main_field = loadMap("map1.txt", player,thisEnemies);
+		main_field = loadMap("map1.txt", mapDirectory, player, thisEnemies);
 		int imageID;
 
 		for (y = 0; y < main_field->totalY; y++) {
@@ -194,12 +195,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			MB_OK | MB_ICONEXCLAMATION);
 		}
 
-		 viewShift = malloc(sizeof(ShiftData));
-
-		viewShift->xShift = 0;
-		viewShift->yShift = 0;
-		viewShift->xShiftOld = 0;
-		viewShift->yShiftOld = 0;
+		 viewShift = initShiftData();
 
 	}
 		break;
@@ -259,7 +255,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				int x, y, imageID;
 				player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 				free(main_field);
-				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, player, thisEnemies);
+				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, mapDirectory, player, thisEnemies);
 				viewShift->xShift = 0;
 				viewShift->yShift = 0;
 				for (y = 0; y < main_field->totalY; y++) {
@@ -511,7 +507,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 //		printf("%d, ", rand()%100);
 //	}
 
-//	test_main();
+	test_main();
+//return 0;
+//	return 0;
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){
 		printf("%d, ", rand()%100);
@@ -583,9 +581,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
-
-
-
 
 	//create the window (handle)
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Window Title :D!",

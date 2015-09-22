@@ -11,7 +11,7 @@ int isRandomized = 0;
 
 individual *initIndividual(){
 	individual* toReturn = malloc(sizeof(individual));
-	toReturn->name = malloc(sizeof(char)*32);
+//	toReturn->name = malloc(sizeof(char)*32);
 	toReturn->playerCharacter = malloc(sizeof(character));
 	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
 	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
@@ -66,9 +66,9 @@ void destroyIndividual(individual* thisIndividual){
 	if(thisIndividual->playerCharacter){ //Null check
 		destroyCharacter(thisIndividual->playerCharacter);
 	}
-	if(thisIndividual->name){ //Null check
-		free(thisIndividual->name);
-	}
+//	if(thisIndividual->name){ //Null check
+//		free(thisIndividual->name);
+//	}
 
 	free(thisIndividual);
 
@@ -147,7 +147,7 @@ int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
 	}
 }
 
-void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, ShiftData * viewShift){
+void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftData * viewShift){
 		HDC hdcMem = CreateCompatibleDC(hdc);
 		SelectObject(hdcMem, thisIndividual->playerCharacter->imageMask);
 

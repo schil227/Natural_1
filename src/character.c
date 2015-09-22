@@ -8,17 +8,8 @@
 #include<string.h>
 #include"./headers/character_pub_methods.h"
 
-void nameCharacter(character* thisCharacter, char* name){
-	thisCharacter->name = malloc(sizeof(name));
-	strcpy(thisCharacter->name, name);
-	thisCharacter->nameLength = strlen(name);
-}
 
 void destroyCharacter(character* thisCharacter){
-	if(thisCharacter->nameLength != 0){
-		free(thisCharacter->name);
-	}
-
 	free(thisCharacter);
 }
 
@@ -94,7 +85,7 @@ character * createCharacter(int imageID, COLORREF rgb, int x, int y){
 	return thisCharacter;
 }
 
-void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter, ShiftData * viewShift){
+void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCharacter->imageMask);
 
@@ -106,7 +97,7 @@ void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter, ShiftData 
 	DeleteDC(hdcMem);
 }
 
-void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, ShiftData * viewShift){
+void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, shiftData * viewShift){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCharacter->imageMask);
 
@@ -116,4 +107,14 @@ void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * this
 
 	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
+}
+
+shiftData * initShiftData(){
+	shiftData * newShiftData = malloc(sizeof(shiftData));
+	newShiftData->xShift = 0;
+	newShiftData->yShift = 0;
+	newShiftData->xShiftOld = 0;
+	newShiftData->yShiftOld = 0;
+
+	return newShiftData;
 }

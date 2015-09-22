@@ -12,7 +12,6 @@
 
 typedef struct {
 	size_t size;
-	char* name;
 	int nameLength;
 
 	int width;
@@ -33,7 +32,7 @@ typedef struct {
 	int yShift;
 	int xShiftOld;
 	int yShiftOld;
-} ShiftData;
+} shiftData;
 
 
 #endif /* SRC_HEADERS_CHARACTER_H_ */
