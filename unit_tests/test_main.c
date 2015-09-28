@@ -15,7 +15,7 @@
 #include"../src/headers/individual_pub_methods.h"
 #include"../src/headers/field_pub_methods.h"
 #include"../src/headers/enemy_controller_pub_methods.h"
-	char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";// "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";
+	char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";// "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";
 
 individual* testPlayer;
 enemies* thisTestEnemies;
@@ -42,7 +42,7 @@ int path_and_attack_test() {
 	}
 
 	int x, y;
-	main_test_field = loadMap("map1.txt", mapTestDirectory, testPlayer, thisTestEnemies);
+	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, thisTestEnemies);
 	int imageID;
 
 
@@ -91,21 +91,26 @@ int path_and_attack_test() {
 	}
 
 	//skeleton 1&5 too far away, same starting position
-//	tmpIndividual =thisTestEnemies->enemies[0];
-//	assert(tmpIndividual->playerCharacter->x == 10 &&
-//			tmpIndividual->playerCharacter->y == 0 );
-//	assert(tmpIndividual->playerCharacter->x == 9 &&
-//			tmpIndividual->playerCharacter->y == 15 );
+	tmpIndividual =thisTestEnemies->enemies[0];
+	assert(tmpIndividual->playerCharacter->x == 10 &&
+			tmpIndividual->playerCharacter->y == 0 );
+	tmpIndividual =thisTestEnemies->enemies[5];
+	assert(tmpIndividual->playerCharacter->x == 9 &&
+			tmpIndividual->playerCharacter->y == 15 );
 
 //	//skeletons 2,3,4,5 move towards the player
-//	assert(tmpIndividual->playerCharacter->x == 8 &&
-//			tmpIndividual->playerCharacter->y == 2 );
-//	assert(tmpIndividual->playerCharacter->x == 90);
-//	assert(tmpIndividual->playerCharacter->y == 1 );
-//	assert(tmpIndividual->playerCharacter->x == 6 &&
-//			tmpIndividual->playerCharacter->y == 1 );
-//	assert(tmpIndividual->playerCharacter->x == 6 &&
-//			tmpIndividual->playerCharacter->y == 0 );
+	tmpIndividual =thisTestEnemies->enemies[1];
+	assert(tmpIndividual->playerCharacter->x == 8 &&
+			tmpIndividual->playerCharacter->y == 2 );
+	tmpIndividual =thisTestEnemies->enemies[2];
+	assert(tmpIndividual->playerCharacter->x == 7 &&
+			tmpIndividual->playerCharacter->y == 1 );
+	tmpIndividual =thisTestEnemies->enemies[3];
+	assert(tmpIndividual->playerCharacter->x == 8 &&
+			tmpIndividual->playerCharacter->y == 1 );
+	tmpIndividual =thisTestEnemies->enemies[4];
+	assert(tmpIndividual->playerCharacter->x == 6 &&
+			tmpIndividual->playerCharacter->y == 0 );
 
 
 //	nodeArr * resultArr = getSpaceClosestToPlayer(main_field, skeleton, player);
