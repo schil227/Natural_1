@@ -130,3 +130,30 @@ individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey)
 	return NULL;
 
 }
+
+int attemptToTransit(field ** thisField, individual * player, enemies * thisEnemies, shiftData * viewShift){
+	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
+
+		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
+			int x, y, imageID;
+			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
+			free(*thisField);
+			*thisField = loadMap(tmpSpace->thisTransitInfo->transitMap,  "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\", player, thisEnemies);
+			viewShift->xShift = 0;
+			viewShift->yShift = 0;
+			for (y = 0; y < (*thisField)->totalY; y++) {
+				for (x = 0; x < (*thisField)->totalX; x++) {
+					imageID = ((*thisField)->grid[x][y]->background)->imageID;
+					(*thisField)->grid[x][y]->background->image = malloc(
+							sizeof(HBITMAP));
+					(*thisField)->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
+					if ((*thisField)->grid[x][y]->background->image == NULL) {
+						printf("failed\n");
+					}
+				}
+			}
+
+			return 1;
+		}
+	return 0;
+}

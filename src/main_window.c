@@ -249,30 +249,35 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x45: //e key (enter)
 		{
-			space * tmpSpace = main_field->grid[player->playerCharacter->x][player->playerCharacter->y];
 
-			if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
-				int x, y, imageID;
-				player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
-				free(main_field);
-				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, mapDirectory, player, thisEnemies);
-				viewShift->xShift = 0;
-				viewShift->yShift = 0;
-				for (y = 0; y < main_field->totalY; y++) {
-					for (x = 0; x < main_field->totalX; x++) {
-						imageID = (main_field->grid[x][y]->background)->imageID;
-						main_field->grid[x][y]->background->image = malloc(
-								sizeof(HBITMAP));
-						main_field->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
-						if (main_field->grid[x][y]->background->image == NULL) {
-							printf("failed\n");
-						}
-
-					}
-				}
-
+			if(attemptToTransit(&main_field,player,thisEnemies,viewShift)){
 
 			}
+
+//			space * tmpSpace = main_field->grid[player->playerCharacter->x][player->playerCharacter->y];
+//
+//			if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
+//				int x, y, imageID;
+//				player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
+//				free(main_field);
+//				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, mapDirectory, player, thisEnemies);
+//				viewShift->xShift = 0;
+//				viewShift->yShift = 0;
+//				for (y = 0; y < main_field->totalY; y++) {
+//					for (x = 0; x < main_field->totalX; x++) {
+//						imageID = (main_field->grid[x][y]->background)->imageID;
+//						main_field->grid[x][y]->background->image = malloc(
+//								sizeof(HBITMAP));
+//						main_field->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
+//						if (main_field->grid[x][y]->background->image == NULL) {
+//							printf("failed\n");
+//						}
+//
+//					}
+//				}
+//
+//
+//			}
 
 		}
 			break;
