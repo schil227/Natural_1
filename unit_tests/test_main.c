@@ -113,36 +113,59 @@ int path_and_attack_test() {
 			tmpIndividual->playerCharacter->y == 0 );
 
 
-//	nodeArr * resultArr = getSpaceClosestToPlayer(main_field, skeleton, player);
-//
-//	assert(resultArr->nodeArray[11]->x == 0 && resultArr->nodeArray[11]->y == 0);
-//	assert(resultArr->nodeArray[10]->x == 1 && resultArr->nodeArray[10]->y == 0);
-//	assert(resultArr->nodeArray[9]->x == 2 && resultArr->nodeArray[9]->y == 0);
-//	assert(resultArr->nodeArray[8]->x == 3 && resultArr->nodeArray[8]->y == 0);
-//	assert(resultArr->nodeArray[7]->x == 4 && resultArr->nodeArray[7]->y == 0);
-//	assert(resultArr->nodeArray[6]->x == 5 && resultArr->nodeArray[6]->y == 0);
-//	assert(resultArr->nodeArray[5]->x == 6 && resultArr->nodeArray[5]->y == 0);
-//	assert(resultArr->nodeArray[4]->x == 7 && resultArr->nodeArray[4]->y == 1);
-//	assert(resultArr->nodeArray[3]->x == 8 && resultArr->nodeArray[3]->y == 2);
-//	assert(resultArr->nodeArray[2]->x == 9 && resultArr->nodeArray[2]->y == 3);
-//	assert(resultArr->nodeArray[1]->x == 10 && resultArr->nodeArray[1]->y == 2);
-//	assert(resultArr->nodeArray[0]->x == 10 && resultArr->nodeArray[0]->y == 1);
-//
-//	int i;
-//	int size = min(resultArr->size, skeleton->mvmt);
-//
-//	moveNode * rootMoveNode = malloc(sizeof(rootMoveNode));
-//	moveNode ** tmpMoveNode = &rootMoveNode;
-//
-//	for(i = 0; i < size; i++){
-//
-//		printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
-//		if(setIndividualSpace(main_field,skeleton, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y)==0){
-//
-//			break; // path is blocked by individual
-//		}
-//	}
-//
+	//get full node path of closest skeleton to player
+	nodeArr * resultArr = getFullNodePath(main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y,
+			thisTestEnemies->enemies[4]->playerCharacter->x, thisTestEnemies->enemies[4]->playerCharacter->y);
+
+	assert(resultArr->nodeArray[0]->x == 2 && resultArr->nodeArray[0]->y == 0);
+	assert(resultArr->nodeArray[1]->x == 3 && resultArr->nodeArray[1]->y == 0);
+	assert(resultArr->nodeArray[2]->x == 4 && resultArr->nodeArray[2]->y == 0);
+	assert(resultArr->nodeArray[3]->x == 5 && resultArr->nodeArray[3]->y == 0);
+	assert(resultArr->nodeArray[4]->x == 6 && resultArr->nodeArray[4]->y == 0);
+
+	//get the node path to the first open space within the movement range
+	resultArr = getSpaceClosestToPlayer(main_test_field, thisTestEnemies->enemies[4], testPlayer);
+
+	assert(resultArr->nodeArray[0]->x == 5 && resultArr->nodeArray[0]->y == 0);
+	assert(resultArr->nodeArray[1]->x == 4 && resultArr->nodeArray[0]->y == 0);
+	assert(resultArr->nodeArray[2]->x == 3 && resultArr->nodeArray[0]->y == 0);
+
+	free(resultArr);
+
+	//move the enemies two more times, attack the player
+	for(i = 0; i < thisTestEnemies->numEnemies; i++){
+		enemyAction((thisTestEnemies->enemies[i]), main_test_field, testPlayer);
+	}
+	for(i = 0; i < thisTestEnemies->numEnemies; i++){
+		enemyAction((thisTestEnemies->enemies[i]), main_test_field, testPlayer);
+	}
+
+	//while skeletons 2, 3, and 4 all moved without being blocked, 5 reacts to the blocked path
+	//and moves to [3,1]
+	tmpIndividual = thisTestEnemies->enemies[4];
+	assert(tmpIndividual->playerCharacter->x == 3 && tmpIndividual->playerCharacter->y == 1 );
+
+
+
+	//after being attacked 3 times, player health is 14
+	assert(testPlayer->hp == 14);
+
+	//skeleton0 cannot attack the player, vis versa
+	assert(!individualWithinRange(thisTestEnemies->enemies[0],testPlayer));
+	assert(!individualWithinRange(testPlayer,thisTestEnemies->enemies[0]));
+
+	//skeleton5 cannot reach the player, but the player can attack
+	assert(!individualWithinRange(thisTestEnemies->enemies[4],testPlayer));
+	assert(individualWithinRange(testPlayer,thisTestEnemies->enemies[4]));
+
+	//player attacks skeleton5, skeleton5 dies
+	assert(attackIndividual(testPlayer,thisTestEnemies->enemies[4]));
+
+	//warping player to doorway
+	setIndividualSpace(main_test_field,testPlayer,6,8);
+
+	printf("Player health: %d\n", thisTestEnemies->enemies[2]->hp);
+
 //	//skeleton should be at space [9,3]
 //	assert(getIndividualFromField(main_field,9,3) == skeleton);
 //
