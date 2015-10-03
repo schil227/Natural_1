@@ -131,14 +131,14 @@ individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey)
 
 }
 
-int attemptToTransit(field ** thisField, individual * player, enemies * thisEnemies, shiftData * viewShift){
+int attemptToTransit(field ** thisField, individual * player, enemies * thisEnemies, shiftData * viewShift, char * mapDirectory){
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
 		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
 			int x, y, imageID;
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 			free(*thisField);
-			*thisField = loadMap(tmpSpace->thisTransitInfo->transitMap,  "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\", player, thisEnemies);
+			*thisField = loadMap(tmpSpace->thisTransitInfo->transitMap,  mapDirectory, player, thisEnemies);
 			viewShift->xShift = 0;
 			viewShift->yShift = 0;
 			for (y = 0; y < (*thisField)->totalY; y++) {

@@ -250,9 +250,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x45: //e key (enter)
 		{
 
-			if(attemptToTransit(&main_field,player,thisEnemies,viewShift)){
-
-			}
+			attemptToTransit(&main_field,player,thisEnemies,viewShift, mapDirectory);
 
 //			space * tmpSpace = main_field->grid[player->playerCharacter->x][player->playerCharacter->y];
 //

@@ -21,23 +21,17 @@ individual* testPlayer;
 enemies* thisTestEnemies;
 field* main_test_field;
 cursor* thisTestCursor;
+shiftData* testShiftData;
 int path_and_attack_test() {
 	//setup
 
 	BITMAP bm;
 	UINT ret;
 
-//	printf("gimmie one!\n");
-//	getchar();
-
 	testPlayer = initIndividual();
-
 	thisTestEnemies = initEnemies();
+	testShiftData = initShiftData();
 
-	//	thisTestCursor = initCursor(2004,RGB(224, 64, 192),0,0);
-//
-//
-//
 	if (defineIndividual(testPlayer, 2001, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX\0", 2, 4)) {
 	}
 
@@ -161,32 +155,25 @@ int path_and_attack_test() {
 	//player attacks skeleton5, skeleton5 dies
 	assert(attackIndividual(testPlayer,thisTestEnemies->enemies[4]));
 
+	//warping player next to doorway
+	setIndividualSpace(main_test_field,testPlayer,6,9);
+
+	//fails, not a transitional space
+	assert(!attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData, mapTestDirectory));
+
 	//warping player to doorway
 	setIndividualSpace(main_test_field,testPlayer,6,8);
 
-	printf("Player health: %d\n", thisTestEnemies->enemies[2]->hp);
+	//works, player is in a transitional space - new field is loaded
+	assert(attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData));
 
-//	//skeleton should be at space [9,3]
-//	assert(getIndividualFromField(main_field,9,3) == skeleton);
-//
-//	//too far away to attack
-//	assert(!attackIfInRange(skeleton, player));
-//
-//	//warp player next to skeleton
-//	setIndividualSpace(main_field,player,8,3);
-//
-//	//is within range - attack
-//	assert(attackIfInRange(player, skeleton));
-//
-//	//was attacked for 9 (1/10 hp)
-//	printf("skelly health:%d\n", skeleton->hp);
-//	assert(skeleton->hp  == 1);
-//
-//	//skeleton will be killed (0/10 hp)
-//	assert(attackIndividual(player, skeleton));
+	printf("Player location %d,%d\n", testPlayer->playerCharacter->x,testPlayer->playerCharacter->y);
+
+	//player was transported to new map, new position is [2,3]
+	assert(testPlayer->playerCharacter->x == 2 && testPlayer->playerCharacter->y == 3);
 
 	free(testPlayer);
-//	free(tmpIndividual);
+	free(tmpIndividual);
 	free(thisTestCursor);
 	free(thisTestEnemies);
 	free(main_test_field);

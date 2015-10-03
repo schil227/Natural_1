@@ -313,7 +313,7 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 	FILE * fp = fopen(fullMapName, "r");
 
-	//init player cords
+	//transit map filename
 	fgets(transitMap,80,fp);
 	printf("transit map name: %s\n", transitMap);
 
@@ -342,6 +342,8 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 	fullTransitFile[strlen(fullTransitFile)-1] = '\0'; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullTransitFile, "r");
 	char line[80];
+
+	printf("%s\n",fullTransitFile);
 
 	while(fgets(line,80,enemyFP) != NULL){
 		space * tmpSpace;
