@@ -14,13 +14,14 @@
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 #include"./headers/console_window_pub_methods.h"
+#include"./headers/console_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameCons[] = "MyConsoleClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
 const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
-int numMessages = 0;
-int mouseButtonCount = 0;
+int mainWindowWidth = 640;
+int mainWindowHeight = 820;
 
 HWND g_sidebar = NULL;
 HWND g_toolbar = NULL;
@@ -148,6 +149,8 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	}
 
+	drawThisConsole(hdc,hdcBuffer,prc);
+
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 	SelectObject(hdcBuffer, hbmOldBuffer);
@@ -164,6 +167,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		player = initIndividual();
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
+		initThisConsole(2010,0,0,300,200);
+		appendNewMessageNode("You leave the forest.");
+		appendNewMessageNode("You enter the clearing.");
+		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
 		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
@@ -252,31 +259,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			attemptToTransit(&main_field,player,thisEnemies,viewShift, mapDirectory);
 
-//			space * tmpSpace = main_field->grid[player->playerCharacter->x][player->playerCharacter->y];
-//
-//			if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
-//				int x, y, imageID;
-//				player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
-//				free(main_field);
-//				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, mapDirectory, player, thisEnemies);
-//				viewShift->xShift = 0;
-//				viewShift->yShift = 0;
-//				for (y = 0; y < main_field->totalY; y++) {
-//					for (x = 0; x < main_field->totalX; x++) {
-//						imageID = (main_field->grid[x][y]->background)->imageID;
-//						main_field->grid[x][y]->background->image = malloc(
-//								sizeof(HBITMAP));
-//						main_field->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
-//						if (main_field->grid[x][y]->background->image == NULL) {
-//							printf("failed\n");
-//						}
-//
-//					}
-//				}
-//
-//
-//			}
-
 		}
 			break;
 		case 0x57: //w key (wait)
@@ -326,8 +308,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 		break;
 	default:
-//			printf("msg:%d, count:%d\n",msg,numMessages);
-		numMessages++;
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
@@ -494,8 +474,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 
-	int mainWindowWidth = 640;
-	int mainWindowHeight = 820;
+
 	int consoleWindowWidth = 480;
 	int consoleWindowHeight = 175;
 	int sidebarWindowWidth = 175;

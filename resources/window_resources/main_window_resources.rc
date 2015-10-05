@@ -67,6 +67,8 @@ END
 2008 BITMAP DISCARDABLE "../images/skelly4.bmp"
 2009 BITMAP DISCARDABLE "../images/skelly5.bmp"
 
+2010 BITMAP DISCARDABLE "../images/console_bg.bmp"
+
 2500 BITMAP DISCARDABLE "../images/black.bmp"
 2501 BITMAP DISCARDABLE "../images/grass.bmp"
 2502 BITMAP DISCARDABLE "../images/sea.bmp"
@@ -88,10 +90,14 @@ END
 2533 BITMAP DISCARDABLE "../images/stone_wall_doorway.bmp"
 
 //walkway
-2543 BITMAP DISCARDABLE "../images/path.bmp"
+2541 BITMAP DISCARDABLE "../images/path.bmp"
+2542 BITMAP DISCARDABLE "../images/path_diag.bmp"
 
 //floor
 2551 BITMAP DISCARDABLE "../images/floor_wood.bmp"
+
+//wilderness
+2561 BITMAP DISCARDABLE "../images/tree.bmp"
 
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"
