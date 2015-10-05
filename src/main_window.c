@@ -19,8 +19,8 @@ const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameCons[] = "MyConsoleClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
 const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
-int numMessages = 0;
-int mouseButtonCount = 0;
+int mainWindowWidth = 640;
+int mainWindowHeight = 820;
 
 HWND g_sidebar = NULL;
 HWND g_toolbar = NULL;
@@ -148,6 +148,27 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	}
 
+
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(2010)));
+
+//	printf("bottom:%d, right:%d\n", prc->bottom,prc->right);
+	 StretchBlt(hdcBuffer,
+			 0,prc->bottom - 200,
+			 prc->right,200,
+			 hdcMem,
+			 0,0,
+			 300,200,
+			 SRCCOPY);
+
+	DeleteDC(hdcMem);
+
+	//test draw text
+	char intro[] = "You leave the forest.";
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+
+//	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
+
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 	SelectObject(hdcBuffer, hbmOldBuffer);
@@ -252,31 +273,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			attemptToTransit(&main_field,player,thisEnemies,viewShift, mapDirectory);
 
-//			space * tmpSpace = main_field->grid[player->playerCharacter->x][player->playerCharacter->y];
-//
-//			if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
-//				int x, y, imageID;
-//				player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
-//				free(main_field);
-//				main_field = loadMap(tmpSpace->thisTransitInfo->transitMap, mapDirectory, player, thisEnemies);
-//				viewShift->xShift = 0;
-//				viewShift->yShift = 0;
-//				for (y = 0; y < main_field->totalY; y++) {
-//					for (x = 0; x < main_field->totalX; x++) {
-//						imageID = (main_field->grid[x][y]->background)->imageID;
-//						main_field->grid[x][y]->background->image = malloc(
-//								sizeof(HBITMAP));
-//						main_field->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
-//						if (main_field->grid[x][y]->background->image == NULL) {
-//							printf("failed\n");
-//						}
-//
-//					}
-//				}
-//
-//
-//			}
-
 		}
 			break;
 		case 0x57: //w key (wait)
@@ -326,8 +322,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 		break;
 	default:
-//			printf("msg:%d, count:%d\n",msg,numMessages);
-		numMessages++;
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
@@ -494,8 +488,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 
-	int mainWindowWidth = 640;
-	int mainWindowHeight = 820;
+
 	int consoleWindowWidth = 480;
 	int consoleWindowHeight = 175;
 	int sidebarWindowWidth = 175;

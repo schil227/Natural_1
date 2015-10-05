@@ -1,0 +1,6 @@
+test_map2_transit.txt
+test_map2_enemies.txt
+s^x^x^x^s
+s^f^f^f^s
+s^f^f^f^s
+x^x^f^x^x

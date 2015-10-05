@@ -288,9 +288,11 @@ int generateBackground(char backgroundSymbol){
 	}else if (backgroundSymbol == 'w'){
 		return 2521;
 	}else if (backgroundSymbol == 't'){
-		return 2522;
+		return 2561;
 	}else if (backgroundSymbol == 'p'){
-		return 2543;
+		return 2541;
+	}else if (backgroundSymbol == '\\'){
+		return 2542;
 	}else if (backgroundSymbol == 'f'){
 		return 2551;
 	}else if (backgroundSymbol == 'x'){
@@ -423,7 +425,8 @@ field* initField(char* fieldFileName){
 				|| currentChar == 'o'
 				|| currentChar == 's'
 				|| currentChar == 'x'
-				|| currentChar == 'w'){
+				|| currentChar == 'w'
+				|| currentChar == 't'){
 				newSpace->isPassable = 0;
 			}else{
 				newSpace->isPassable = 1;
