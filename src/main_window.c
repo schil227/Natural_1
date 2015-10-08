@@ -149,30 +149,9 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	}
 
-<<<<<<< HEAD
 	drawThisConsole(hdc,hdcBuffer,prc);
-=======
-
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(2010)));
-
-//	printf("bottom:%d, right:%d\n", prc->bottom,prc->right);
-	 StretchBlt(hdcBuffer,
-			 0,prc->bottom - 200,
-			 prc->right,200,
-			 hdcMem,
-			 0,0,
-			 300,200,
-			 SRCCOPY);
-
-	DeleteDC(hdcMem);
-
-	//test draw text
-	char intro[] = "You leave the forest.";
-	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 
 //	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
->>>>>>> 049b7fc3edf48ab51c07f40c154104238a2acacd
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
@@ -191,6 +170,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
+		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
+		appendNewMessageNode("You leave the forest.");
+		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("You enter the clearing.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");

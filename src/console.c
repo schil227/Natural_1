@@ -16,6 +16,7 @@ console * initConsole(int imageID, int x, int y, int width, int height){
 	thisNewConsole->currentMessageNode = thisNewConsole->newestMessageNode;
 	thisNewConsole->newestMessageNode->nextMessageNode = NULL;
 	thisNewConsole->newestMessageNode->previousMessageNode = NULL;
+	strcpy(thisNewConsole->newestMessageNode->message, "");
 
 	thisNewConsole->consoleCharacter->x = x;
 	thisNewConsole->consoleCharacter->y = y;
@@ -80,10 +81,11 @@ void drawConsoleText(HDC hdcBuffer, RECT * prc){
 		textRect.right = prc->right;
 
 	while (linesAvailable > 0 && currentMessageNode != NULL) {
-		int breakIndex[10], counter = 0, spaceIndex, arrSize = 0, i;
+		int breakIndex[10], counter = 0, spaceIndex, arrSize = 1, i;
 		char currentMessage[256];
 		strcpy(currentMessage, currentMessageNode->message);
 
+		breakIndex[0] = 0;
 		for (i = 0; i < strlen(currentMessage); i++) {
 
 			counter++;
@@ -99,44 +101,26 @@ void drawConsoleText(HDC hdcBuffer, RECT * prc){
 			}
 
 		}
+		breakIndex[arrSize] = i;
 
+		textRect.left = 60; //make the indent
 
+		for (i = arrSize; i > 0; i--) {
 
-		if (arrSize == 0) { // beginning to end of string, no newlines
-			DrawText(hdcBuffer, currentMessage, -1, &textRect, DT_SINGLELINE);
+			if (i - 1 == 0) {
+				textRect.left = 50;
+			}
+			if(textRect.top >= prc->bottom - 200){
+				int numCharactersToIndex = breakIndex[i] - breakIndex[i - 1];
+				char tmp[numCharactersToIndex];
+				strncpy(tmp, currentMessage + breakIndex[i - 1], numCharactersToIndex);
+				tmp[numCharactersToIndex] = '\0';
 
-			linesAvailable--;
-			textRect.top = textRect.top - 15;
-		}else{
-			textRect.left = 60; //make the indent
-			for (i = arrSize; i >= 0; i--) {
-				if (i == arrSize) { //last element, to end of string
-					int numCharactersToEnd = strlen(currentMessage) - breakIndex[i-1];
-					char tmp[numCharactersToEnd];
-					strncpy(tmp, currentMessage+breakIndex[i-1],numCharactersToEnd);
-					tmp[numCharactersToEnd] = '\0';
+				DrawText(hdcBuffer, tmp, -1, &textRect, DT_SINGLELINE);
 
-					DrawText(hdcBuffer, tmp, -1, &textRect, DT_SINGLELINE);
-				} else if (i == 0) { //beginning to first index
-					textRect.left = 50;
-					int numCharactersToIndex = breakIndex[i];
-					char tmp[numCharactersToIndex];
-					strncpy(tmp,currentMessage,numCharactersToIndex);
-					tmp[numCharactersToIndex] = '\0';
-
-					DrawText(hdcBuffer, tmp, -1, &textRect, DT_SINGLELINE);
-				} else {
-					int numCharactersToIndex = breakIndex[i] - breakIndex[i-1];
-					char tmp[numCharactersToIndex];
-					strncpy(tmp,currentMessage+breakIndex[i-1], numCharactersToIndex);
-					tmp[numCharactersToIndex] = '\0';
-
-					DrawText(hdcBuffer, tmp, -1, &textRect, DT_SINGLELINE);
-				}
 				linesAvailable--;
 				textRect.top = textRect.top - 15;
 			}
-
 
 		}
 
