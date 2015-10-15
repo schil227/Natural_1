@@ -176,10 +176,11 @@ int path_and_attack_test() {
 	assert(testPlayer->playerCharacter->x == 2 && testPlayer->playerCharacter->y == 3);
 
 	free(testPlayer);
-	free(tmpIndividual);
-	free(thisTestCursor);
+	destroyIndividual(testPlayer);
+	destroyIndividual(tmpIndividual);
 	free(thisTestEnemies);
 	free(main_test_field);
+	destroyConsoleInstance();
 	return 0;
 }
 

@@ -37,6 +37,30 @@ void initThisConsole(int imageID, int x, int y, int width, int height){
 	printf("thisConsole->x:%d\n", thisConsole->consoleCharacter->x);
 }
 
+void destroyConsoleInstance(){
+	messageNode * currentNode = thisConsole->currentMessageNode;
+	if (currentNode != NULL) {
+		messageNode * tmpNode = currentNode->nextMessageNode;
+		while (tmpNode != NULL) {
+			messageNode * swapNode = tmpNode->nextMessageNode;
+			free(tmpNode);
+			tmpNode = swapNode;
+		}
+
+		tmpNode = currentNode->previousMessageNode;
+		while (tmpNode != NULL) {
+			messageNode * swapNode = tmpNode->previousMessageNode;
+			free(tmpNode);
+			tmpNode = swapNode;
+		}
+		free(currentNode);
+	}
+
+	destroyCharacter(thisConsole->consoleCharacter);
+	free(thisConsole);
+
+}
+
 void appendNewMessageNode(char * message){
 	messageNode * thisMessage = malloc(sizeof(messageNode));
 	strcpy(thisMessage->message,message);

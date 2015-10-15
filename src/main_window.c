@@ -238,7 +238,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		break;
 	case WM_DESTROY:
 		destroyIndividual(player);
-
+		destroyConsoleInstance();
 		PostQuitMessage(0);
 		break;
 	case WM_LBUTTONDOWN:
