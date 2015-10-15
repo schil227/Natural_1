@@ -170,11 +170,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
-		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
+//		appendNewMessageNode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		appendNewMessageNode("You leave the forest.");
-		appendNewMessageNode("You leave the forest.");
-		appendNewMessageNode("You leave the forest.");
-		appendNewMessageNode("You enter the clearing.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
 		if (defineIndividual(player, 2001, RGB(255, 70, 255), "adr", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX", 2, 4)) {
@@ -490,13 +487,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	//init rand for tests
 	srand(0);
 	int i;
-//	for(i = 0; i < 10; i++){
-//		printf("%d, ", rand()%100);
-//	}
 
 	test_main();
-//return 0;
-//	return 0;
+
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){
 		printf("%d, ", rand()%100);
@@ -570,7 +563,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	//create the window (handle)
-	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Window Title :D!",
+	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
 	WS_OVERLAPPEDWINDOW,
 	CW_USEDEFAULT,
 	CW_USEDEFAULT, mainWindowWidth, mainWindowHeight,

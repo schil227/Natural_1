@@ -51,98 +51,98 @@ LRESULT CALLBACK ConsWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 	}
 	return 0;
 }
-
-void AppendText(HWND hwnd, TCHAR *newText)
-{
-    // get edit control from dialog
-    HWND hwndOutput = hwnd;
-
-    // get the current selection
-    DWORD StartPos, EndPos;
-    SendMessage( hwndOutput, EM_GETSEL, &StartPos, &EndPos);
-
-    // move the caret to the end of the text
-    int outLength = GetWindowTextLength( hwndOutput );
-    SendMessage( hwndOutput, EM_SETSEL, outLength, outLength );
-
-    // insert the text at the new caret position
-    SendMessage( hwndOutput, EM_REPLACESEL, TRUE, newText);
-
-    // restore the previous selection
-    SendMessage( hwndOutput, EM_SETSEL, StartPos, EndPos );
-}
-
-char* appendStrings(char* str1, char* str2){
-	char* toReturn = (char *)malloc(strlen(str1) + strlen(str2)+3);
-	strcpy(toReturn,str1);
-	strcat(toReturn,str2);
-	return toReturn;
-}
-
-void sendMissedDialog(char* individualName, char* targetName, int attackRoll, int targetAC){
-
-	char* missedStr;
-	if(attackRoll +1 == targetAC){
-		missedStr = appendStrings(individualName, " just barely missed!\n");
-
-	}else if(attackRoll > 6){
-		missedStr = appendStrings(individualName, " missed!\n");
-
-	}else if(attackRoll <= 6 && attackRoll > 3){
-		char* tmp1 = appendStrings(individualName, " wiffed trying to hit ");
-		char* tmp2 = appendStrings(targetName, "!\n");
-		missedStr = appendStrings(tmp1,tmp2);
-		free(tmp1);
-		free(tmp2);
-	}else{
-		missedStr = appendStrings(individualName, " nearly fell down trying to attack.\n");
-
-	}
-	cwrite(missedStr);
-	free(missedStr);
-}
-
-int calcUpperPercentileThreshold(int num, int topPercentile){
-	return ((num*100)*(100-topPercentile))/10000;
-}
-
-int damageUpperPercentile(int damage, int maxDam, int nthP){
-	if(damage == maxDam || damage > calcUpperPercentileThreshold(maxDam, nthP)){
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-void sendHitDialog(char* individualName, char* targetName, int maxDam, int damage){
-
-	char* hitStr;
-	char takeOut[20]; //" takes %d damage!\n"
-
-	if(damageUpperPercentile(damage, maxDam, 20)){
-		char* highDam = appendStrings(individualName, " executes a brutal strike!\n");
-		cwrite(highDam);
-		free(highDam);
-	}
-
-	sprintf(takeOut, " takes %d damage!\n", damage);
-	hitStr = appendStrings(targetName, takeOut);
-
-	cwrite(hitStr);
-	free(hitStr);
-}
-
-void sendDeathDialog(char* name, char* killer){
-	char* deathStr;
-
-	deathStr = appendStrings(name, " was slain by ");
-	deathStr = appendStrings(deathStr, killer);
-	deathStr = appendStrings(deathStr, "!\n");
-
-	cwrite(deathStr);
-	free(deathStr);
-}
-
-void cwrite(char* text){
-	AppendText(eConsole,text);
-}
+//
+//void AppendText(HWND hwnd, TCHAR *newText)
+//{
+//    // get edit control from dialog
+//    HWND hwndOutput = hwnd;
+//
+//    // get the current selection
+//    DWORD StartPos, EndPos;
+//    SendMessage( hwndOutput, EM_GETSEL, &StartPos, &EndPos);
+//
+//    // move the caret to the end of the text
+//    int outLength = GetWindowTextLength( hwndOutput );
+//    SendMessage( hwndOutput, EM_SETSEL, outLength, outLength );
+//
+//    // insert the text at the new caret position
+//    SendMessage( hwndOutput, EM_REPLACESEL, TRUE, newText);
+//
+//    // restore the previous selection
+//    SendMessage( hwndOutput, EM_SETSEL, StartPos, EndPos );
+//}
+//
+//char* appendStrings(char* str1, char* str2){
+//	char* toReturn = (char *)malloc(strlen(str1) + strlen(str2)+3);
+//	strcpy(toReturn,str1);
+//	strcat(toReturn,str2);
+//	return toReturn;
+//}
+//
+//void sendMissedDialog(char* individualName, char* targetName, int attackRoll, int targetAC){
+//
+//	char* missedStr;
+//	if(attackRoll +1 == targetAC){
+//		missedStr = appendStrings(individualName, " just barely missed!\n");
+//
+//	}else if(attackRoll > 6){
+//		missedStr = appendStrings(individualName, " missed!\n");
+//
+//	}else if(attackRoll <= 6 && attackRoll > 3){
+//		char* tmp1 = appendStrings(individualName, " wiffed trying to hit ");
+//		char* tmp2 = appendStrings(targetName, "!\n");
+//		missedStr = appendStrings(tmp1,tmp2);
+//		free(tmp1);
+//		free(tmp2);
+//	}else{
+//		missedStr = appendStrings(individualName, " nearly fell down trying to attack.\n");
+//
+//	}
+//	cwrite(missedStr);
+//	free(missedStr);
+//}
+//
+//int calcUpperPercentileThreshold(int num, int topPercentile){
+//	return ((num*100)*(100-topPercentile))/10000;
+//}
+//
+//int damageUpperPercentile(int damage, int maxDam, int nthP){
+//	if(damage == maxDam || damage > calcUpperPercentileThreshold(maxDam, nthP)){
+//		return 1;
+//	}else{
+//		return 0;
+//	}
+//}
+//
+//void sendHitDialog(char* individualName, char* targetName, int maxDam, int damage){
+//
+//	char* hitStr;
+//	char takeOut[20]; //" takes %d damage!\n"
+//
+//	if(damageUpperPercentile(damage, maxDam, 20)){
+//		char* highDam = appendStrings(individualName, " executes a brutal strike!\n");
+//		cwrite(highDam);
+//		free(highDam);
+//	}
+//
+//	sprintf(takeOut, " takes %d damage!\n", damage);
+//	hitStr = appendStrings(targetName, takeOut);
+//
+//	cwrite(hitStr);
+//	free(hitStr);
+//}
+//
+//void sendDeathDialog(char* name, char* killer){
+//	char* deathStr;
+//
+//	deathStr = appendStrings(name, " was slain by ");
+//	deathStr = appendStrings(deathStr, killer);
+//	deathStr = appendStrings(deathStr, "!\n");
+//
+//	cwrite(deathStr);
+//	free(deathStr);
+//}
+//
+//void cwrite(char* text){
+//	AppendText(eConsole,text);
+//}

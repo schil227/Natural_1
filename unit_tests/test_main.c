@@ -14,6 +14,7 @@
 //#include"./test_headers/test_character.h"
 #include"../src/headers/individual_pub_methods.h"
 #include"../src/headers/field_pub_methods.h"
+#include"../src/headers/console_pub_methods.h"
 #include"../src/headers/enemy_controller_pub_methods.h"
 	char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";// "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";
 
@@ -22,6 +23,7 @@ enemies* thisTestEnemies;
 field* main_test_field;
 cursor* thisTestCursor;
 shiftData* testShiftData;
+
 int path_and_attack_test() {
 	//setup
 
@@ -31,6 +33,7 @@ int path_and_attack_test() {
 	testPlayer = initIndividual();
 	thisTestEnemies = initEnemies();
 	testShiftData = initShiftData();
+	initThisConsole(2010,0,0,300,200);
 
 	if (defineIndividual(testPlayer, 2001, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX\0", 2, 4)) {
 	}

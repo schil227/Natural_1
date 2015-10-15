@@ -201,7 +201,7 @@ void initializeArr(node ** nodeArr, int size){
 
 int spaceIsTaken(node * thisNode, field * thisField){
 	int a = spaceIsAvailable(thisField, thisNode->x, thisNode->y);
-	printf("a:%d\n",a);
+//	printf("a:%d\n",a);
 	if(a == 0){
 		return 0;
 	}else{
@@ -218,23 +218,23 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 	}
 
 	i = 0;
-
+	printf("endnode: [%d,%d]\n", endNode->x,endNode->y);
 	//check for free spaces in active nodes
 	while(activeNodes[i] != NULL){
-		printf("currentNode:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
+//		printf("currentNode:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
 		if( !spaceIsTaken(activeNodes[i], thisField)){
 			return activeNodes[i];
 		}else{
-			printf("space was taken:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
+//			printf("space was taken:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
 		}
 
 		addNodeToList(activeNodes[i], allNodes);
 
 		if(moveRange > 0){
-			printf("before 1st call\n");
+//			printf("before 1st call\n");
 			fflush(stdout);
 			node ** tmpNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField); // filters out blocked nodes and nodes in allNodes
-			printf("1st getNewActiveNodes Call\n");
+//			printf("1st getNewActiveNodes Call\n");
 			fflush(stdout);
 			int j = 0;
 
@@ -243,7 +243,7 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 				if(!spaceIsTaken(tmpNodes[j], thisField)){
 					addNodeToList(tmpNodes[j], newActiveNodes);
 				}
-
+//				printf("j: %d\n",j);
 				j++;
 			}
 		}
@@ -255,11 +255,20 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 		if( endNode->previousNode == NULL){
 			return NULL;
 		}else{
-			addNodeToList(endNode->previousNode, newActiveNodes);
+			node * tmpPreviousEndNodeNode = endNode->previousNode;
 
-			return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes);
+			if(containsNode(tmpPreviousEndNodeNode->x, tmpPreviousEndNodeNode->y, allNodes)){
+				return NULL;
+
+			}else{
+				addNodeToList(endNode->previousNode, newActiveNodes);
+				addNodeToList(endNode->previousNode,allNodes);
+//				printf("called from a\n");
+				return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes);
+			}
 		}
 	}else{
+//		printf("called from b\n");
 		return findOpenNode(endNode, newActiveNodes, thisIndividual, moveRange-1, distanceFromLastNode, thisField, allNodes);
 	}
 
@@ -281,11 +290,13 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 		}
 
 		addNodeToList(endNode, activeNodes);
+//		printf("called from c\n");
 		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes);
 
 		if(targetNode != NULL){
 			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetNode->x, targetNode->y);
 		} else {
+			printf("returning null\n");
 			return nullNode;
 		}
 	}
@@ -330,11 +341,8 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 //			setIndividualTmpSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
 		}
 
-
 	}
 	printf("\n");
-
-
 
 	attackIfInRange(enemy,player);
 }
