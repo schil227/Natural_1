@@ -153,6 +153,7 @@ int attemptToTransit(field ** thisField, individual * player, enemies * thisEnem
 				}
 			}
 
+			clearMessages();
 			return 1;
 		}
 	return 0;

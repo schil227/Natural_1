@@ -87,6 +87,35 @@ void appendNewMessageNode(char * message){
 
 }
 
+void clearMessages(){
+	messageNode * currentNode = thisConsole->currentMessageNode;
+	if (currentNode != NULL) {
+		messageNode * tmpNode = currentNode->nextMessageNode;
+		while (tmpNode != NULL) {
+			messageNode * swapNode = tmpNode->nextMessageNode;
+			free(tmpNode);
+			tmpNode = swapNode;
+		}
+
+		tmpNode = currentNode->previousMessageNode;
+		while (tmpNode != NULL) {
+			messageNode * swapNode = tmpNode->previousMessageNode;
+			free(tmpNode);
+			tmpNode = swapNode;
+		}
+		free(currentNode);
+	}
+
+	thisConsole->newestMessageNode = malloc(sizeof(messageNode));
+	thisConsole->currentMessageNode = thisConsole->newestMessageNode;
+	thisConsole->oldestMessageNode = thisConsole->newestMessageNode;
+	thisConsole->newestMessageNode->nextMessageNode = NULL;
+	thisConsole->newestMessageNode->previousMessageNode = NULL;
+	strcpy(thisConsole->newestMessageNode->message, "");
+	thisConsole->numMessages = 0;
+
+}
+
 void drawThisConsole(HDC hdc, HDC hdcBuffer, RECT * prc){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
