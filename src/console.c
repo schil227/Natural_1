@@ -87,6 +87,35 @@ void appendNewMessageNode(char * message){
 
 }
 
+void clearMessages(){
+	messageNode * currentNode = thisConsole->currentMessageNode;
+	if (currentNode != NULL) {
+		messageNode * tmpNode = currentNode->nextMessageNode;
+		while (tmpNode != NULL) {
+			messageNode * swapNode = tmpNode->nextMessageNode;
+			free(tmpNode);
+			tmpNode = swapNode;
+		}
+
+		tmpNode = currentNode->previousMessageNode;
+		while (tmpNode != NULL) {
+			messageNode * swapNode = tmpNode->previousMessageNode;
+			free(tmpNode);
+			tmpNode = swapNode;
+		}
+		free(currentNode);
+	}
+
+	thisConsole->newestMessageNode = malloc(sizeof(messageNode));
+	thisConsole->currentMessageNode = thisConsole->newestMessageNode;
+	thisConsole->oldestMessageNode = thisConsole->newestMessageNode;
+	thisConsole->newestMessageNode->nextMessageNode = NULL;
+	thisConsole->newestMessageNode->previousMessageNode = NULL;
+	strcpy(thisConsole->newestMessageNode->message, "");
+	thisConsole->numMessages = 0;
+
+}
+
 void drawThisConsole(HDC hdc, HDC hdcBuffer, RECT * prc){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
@@ -101,76 +130,134 @@ void drawThisConsole(HDC hdc, HDC hdcBuffer, RECT * prc){
 	 			 SRCCOPY);
 
 	DeleteDC(hdcMem);
+
+	thisConsole->rowLength = prc->right - (prc->right * 0.10);
 	drawConsoleText(hdcBuffer, prc);
 }
 
-int calcNumIndexes(int messageLength, int charsPerLine){
-	int result = messageLength / charsPerLine + 1;
-
-	if(messageLength % charsPerLine != 0){
-		result++;
-	}
-
-	return result;
-}
-
-int * createSpaceIndexArr(char currentMessage[256], int breakIndexArrSize) {
-	int rowLengthcounter = 0, spaceIndex, spaceIndexArrIndex = 1, i;
-	int * spaceIndexArr = malloc(sizeof(int) * breakIndexArrSize);
-	spaceIndexArr[0] = 0;
+int calcNumIndexes(char currentMessage[256], int lineLength, HDC hdcBuffer, int leftIndent){
+	SIZE size;
+	int result=2, rowLengthCounter=0, spaceIndex = 0, i;
 
 	for (i = 0; i < strlen(currentMessage); i++) {
-		rowLengthcounter++;
+		GetTextExtentPoint32(hdcBuffer, &currentMessage[i], 1, &size);
+		rowLengthCounter += size.cx;
 
 		if (currentMessage[i] == ' ') {
 			spaceIndex = i;
 		}
 
-		if (rowLengthcounter > thisConsole->rowLength) {
-			rowLengthcounter = 0;
-			spaceIndexArr[spaceIndexArrIndex] = spaceIndex;
+		if(rowLengthCounter > lineLength){
+			//account for indent
+			rowLengthCounter = leftIndent;
+
+			if (i - spaceIndex < 3) {
+				//need to account for the added characters after the space break on next line
+				int j;
+
+				for(j = i; j > spaceIndex; j--){
+					GetTextExtentPoint32(hdcBuffer, &currentMessage[j], 1, &size);
+					rowLengthCounter += size.cx;
+				}
+			}
+
+			result++;
+		}
+
+	}
+	return result;
+}
+
+int * createSpaceIndexArr(char currentMessage[256], int breakIndexArrSize, HDC hdcBuffer, int leftIndent) {
+	int rowLengthCounter = 0, spaceIndex=0, spaceIndexArrIndex = 1, i;
+	int * spaceIndexArr = malloc(sizeof(int) * breakIndexArrSize);
+	spaceIndexArr[0] = 0;
+	SIZE size;
+
+	for (i = 0; i < strlen(currentMessage); i++) {
+
+		GetTextExtentPoint32(hdcBuffer, &currentMessage[i], 1, &size);
+		rowLengthCounter += size.cx;
+
+		if (currentMessage[i] == ' ') {
+			spaceIndex = i;
+		}
+
+		if (rowLengthCounter > thisConsole->rowLength) {
+			rowLengthCounter = leftIndent; //not 0, account for indent
+			if (i - spaceIndex < 3) {
+				spaceIndexArr[spaceIndexArrIndex] = spaceIndex;
+
+				//need to account for the added characters after the space break on next line
+				int j;
+				for(j = i; j > spaceIndex; j--){
+					GetTextExtentPoint32(hdcBuffer, &currentMessage[j], 1, &size);
+					rowLengthCounter += size.cx;
+				}
+
+
+			} else {
+				spaceIndexArr[spaceIndexArrIndex] = i;
+			}
 			spaceIndexArrIndex++;
 		}
 
 	}
 
 	spaceIndexArr[spaceIndexArrIndex] = i;
+	spaceIndexArrIndex++;
 
 	return spaceIndexArr;
 }
 
 void drawConsoleText(HDC hdcBuffer, RECT * prc){
 	int linesAvailable = thisConsole->numRows;
+	int left = prc->right - prc->right*0.95;
+	int leftIndent = prc->right - prc->right*0.9;
+
 	messageNode * currentMessageNode = thisConsole->currentMessageNode;
 	RECT textBoxRect;
 		textBoxRect.bottom = prc->bottom;
 		textBoxRect.top =  prc->bottom - 30;
-		textBoxRect.left = 50;
+		textBoxRect.left = left;
 		textBoxRect.right = prc->right;
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 	SetBkMode(hdcBuffer, TRANSPARENT);
 
 	while (linesAvailable > 0 && currentMessageNode != NULL) {
-		int index, sizeOfSpaceIndexArr, * spaceIndexArr;
+		int index, sizeOfSpaceIndexArr, *spaceIndexArr;
 		char currentMessage[256];
 
 		strcpy(currentMessage, currentMessageNode->message);
-		sizeOfSpaceIndexArr = calcNumIndexes(strlen(currentMessage), thisConsole->rowLength);
-		spaceIndexArr = createSpaceIndexArr(currentMessage,sizeOfSpaceIndexArr);
-		textBoxRect.left = 60; //make the indent
+		sizeOfSpaceIndexArr = calcNumIndexes(currentMessage, thisConsole->rowLength, hdcBuffer, leftIndent);
+		spaceIndexArr = createSpaceIndexArr(currentMessage,sizeOfSpaceIndexArr, hdcBuffer, leftIndent);
+
+
+
+		textBoxRect.left = leftIndent; //make the indent
 
 		for (index = sizeOfSpaceIndexArr-1; index > 0; index--) {
 
 			if (index - 1 == 0) {
-				textBoxRect.left = 50;
+				textBoxRect.left = left;
 			}
 
 			if(linesAvailable > 0){
 				//create the substring
 				int numCharactersToIndex = spaceIndexArr[index] - spaceIndexArr[index - 1];
+
+				if(index != sizeOfSpaceIndexArr-1 && currentMessage[spaceIndexArr[index]] != ' '){
+					numCharactersToIndex++;
+				}
+
 				char messageSubLine[numCharactersToIndex];
 				strncpy(messageSubLine, currentMessage + spaceIndexArr[index - 1], numCharactersToIndex);
+
+				if(index != sizeOfSpaceIndexArr-1 && currentMessage[spaceIndexArr[index]] != ' '){
+					messageSubLine[numCharactersToIndex-1] = '-';
+				}
+
 				messageSubLine[numCharactersToIndex] = '\0';
 
 				//draw the substring to the window

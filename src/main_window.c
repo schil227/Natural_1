@@ -170,7 +170,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
-//		appendNewMessageNode("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
