@@ -34,8 +34,9 @@ int path_and_attack_test() {
 	thisTestEnemies = initEnemies();
 	testShiftData = initShiftData();
 	initThisConsole(2010,0,0,300,200);
+	initalizeTheGlobalRegister();
 
-	if (defineIndividual(testPlayer, 2001, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX\0", 2, 4)) {
+	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 13, 3, 10, 1, "MAX\0", 2, 4)) {
 	}
 
 	int x, y;
@@ -181,6 +182,7 @@ int path_and_attack_test() {
 	free(thisTestEnemies);
 	free(main_test_field);
 	destroyConsoleInstance();
+	destroyTheGlobalRegister();
 	return 0;
 }
 

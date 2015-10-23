@@ -1,6 +1,8 @@
 # Natural_1
 Teaching myself C through designing a Game
 
+10/18/15: Today marks the end of another iteration, having successfuly implemented last iterations goals - including making the console twice! They way I figure it, there's probably about 4-5 iterations worth of content to yet implement (in order): Items and a Global registry, NPCs, Magic System, A.I., Story/world building. So next up comes creating items, an inventory/equip  system for individuals, inventory for field spaces, and a global registry system to keep track of what happens.
+
 8/4/15: Wow, time bloody flies, huh? Haven't updated this in a while, guess I'll just make a note here saying work is steady and I've conqured a lot, and I'm modestly proud of what I have acomplished so far--however there is a stunning amount of work yet to do. My C-fu is getting better, and I've gotta say I have a new found appreciation for some higher-level languages, but at the same time they take all the fun out of it :) The goals below (and their subsequent surprises) have been finished for a while, I've moved on to my new set: implementing windows for displaying data to the user (soon to be revised to a single window), managing field transformations (going from one field to another) and camera-lock on the player as they move around... we'll see what surprises happen this time.
 
 3/24/15: I feel that I've got somewhat of a grip on the win32 API at this point, so I'm beginning the first iteration of this project! I have basically 3 main goals:

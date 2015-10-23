@@ -30,12 +30,15 @@ int addEnemyToEnemies(enemies * thisEnemies, individual * enemey){
 }
 
 void createEnemyFromLine(individual * newEnemy, char * line){
-	int imageID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt;
+	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt;
 	char * name;
 	char critType[3];
 
 	char * value = strtok(line,",");
 	imageID = atoi(value);
+
+	value = strtok(NULL,",");
+	ID = atoi(value);
 
 	value = strtok(NULL,",");
 	r = atoi(value);
@@ -71,7 +74,7 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	value = strtok(NULL,",");
 	mvmt = atoi(value);
 
-	if(defineIndividual(newEnemy,imageID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,critType,range,mvmt)){
+	if(defineIndividual(newEnemy,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,critType,range,mvmt)){
 		printf("failed making new enemy\n");
 	}
 }
@@ -85,7 +88,9 @@ void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 	while(fgets(line,80,enemyFP) != NULL){
 		individual * newEnemy = initIndividual();
 		createEnemyFromLine(newEnemy, line);
-		addEnemyToEnemies(enemiesList,newEnemy);
+		if(doesExist(newEnemy->ID)){
+			addEnemyToEnemies(enemiesList,newEnemy);
+		}
 	}
 
 	fclose(enemyFP);

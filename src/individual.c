@@ -18,12 +18,13 @@ individual *initIndividual(){
 	return toReturn;
 }
 
-int defineIndividual(individual * thisIndividual, int imageID, COLORREF rgb, char * name, int direction, int x,
+int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
 		int y, int totalHP, int totalActions, int AC, int attack, int maxDam, int minDam,  char critType[3],
 		int range, int mvmt){
 	BITMAP bm;
 
 	thisIndividual->playerCharacter->imageID = imageID;
+	thisIndividual->ID = ID;
 	thisIndividual->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
 			MAKEINTRESOURCE(imageID));
 
@@ -109,6 +110,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
+		removeFromExistance(targetIndividual->ID);
 		return 1;
 	}else{ //non-fatal blow
 		return 0;
