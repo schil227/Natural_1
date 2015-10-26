@@ -30,7 +30,9 @@ int addEnemyToEnemies(enemies * thisEnemies, individual * enemey){
 }
 
 void createEnemyFromLine(individual * newEnemy, char * line){
-	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt;
+	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt,
+	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
+	fireWeakness,waterWeakness,lightiningWeakness;
 	char * name;
 	char critType[3];
 
@@ -74,7 +76,36 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	value = strtok(NULL,",");
 	mvmt = atoi(value);
 
-	if(defineIndividual(newEnemy,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,critType,range,mvmt)){
+	value = strtok(NULL,",");
+	bluntDR = atoi(value);
+	value = strtok(NULL,",");
+	chopDR = atoi(value);
+	value = strtok(NULL,",");
+	slashDR = atoi(value);
+	value = strtok(NULL,",");
+	pierceDR = atoi(value);
+
+	value = strtok(NULL,",");
+	earthDR = atoi(value);
+	value = strtok(NULL,",");
+	fireDR = atoi(value);
+	value = strtok(NULL,",");
+	waterDR = atoi(value);
+	value = strtok(NULL,",");
+	lightningDR = atoi(value);
+
+	value = strtok(NULL,",");
+	earthWeakness = atoi(value);
+	value = strtok(NULL,",");
+	fireWeakness = atoi(value);
+	value = strtok(NULL,",");
+	waterWeakness = atoi(value);
+	value = strtok(NULL,",");
+	lightiningWeakness = atoi(value);
+
+
+	if(defineIndividual(newEnemy,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,critType,range,mvmt,
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness)){
 		printf("failed making new enemy\n");
 	}
 }

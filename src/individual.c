@@ -20,7 +20,10 @@ individual *initIndividual(){
 
 int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
 		int y, int totalHP, int totalActions, int AC, int attack, int maxDam, int minDam,  char critType[3],
-		int range, int mvmt){
+		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
+		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
+		int lightiningWeakness){
+
 	BITMAP bm;
 
 	thisIndividual->playerCharacter->imageID = imageID;
@@ -57,6 +60,21 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	strcpy(thisIndividual->critType,critType);
 	thisIndividual->range = range;
 	thisIndividual->mvmt = mvmt;
+
+	thisIndividual->bluntDR = bluntDR;
+	thisIndividual->chopDR = chopDR;
+	thisIndividual->slashDR = slashDR;
+	thisIndividual->pierceDR = pierceDR;
+
+	thisIndividual->earthDR = earthDR;
+	thisIndividual->fireDR = fireDR;
+	thisIndividual->waterDR = waterDR;
+	thisIndividual->lightningDR = lightningDR;
+
+	thisIndividual->earthWeakness = earthWeakness;
+	thisIndividual->fireWeakness = fireWeakness;
+	thisIndividual->waterWeakness = waterWeakness;
+	thisIndividual->lightiningWeakness = lightiningWeakness;
 
 	thisIndividual->jumpTarget = 0;
 

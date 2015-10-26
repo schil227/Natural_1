@@ -8,6 +8,7 @@
 #ifndef SRC_HEADERS_STRUCTS_INDIVIDUAL_H_
 #define SRC_HEADERS_STRUCTS_INDIVIDUAL_H_
 #include"../character_pub_methods.h"
+#include"../item_pub_methods.h"
 
 typedef struct {
 	character* playerCharacter;
@@ -21,17 +22,35 @@ typedef struct {
 	short int hasAttacked;
 
 	short int AC;
-
-	short int range;
 	short int attack;
 	short int maxDam;
 	short int minDam;
+	short int range;
 	char critType[3];
-
 	short int mvmt;
 
-	short int jumpTarget;
+	//physical damage resistance
+	short int bluntDR;
+	short int chopDR;
+	short int slashDR;
+	short int pierceDR;
 
+	//magic damage resistance
+	short int earthDR;
+	short int fireDR;
+	short int waterDR;
+	short int lightningDR;
+
+	short int earthWeakness;
+	short int fireWeakness;
+	short int waterWeakness;
+	short int lightiningWeakness;
+
+	int jumpTarget;
+
+	weapon * equiptWeapon;
+	armor * equiptArmor;
+	item * inventory[40];
 } individual;
 
 #endif /* SRC_HEADERS_STRUCTS_INDIVIDUAL_H_ */
