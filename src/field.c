@@ -310,6 +310,7 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 	char transitMap[80];
 	char enemyMap[80];
+	char enemyItemMap[80];
 	char * fullMapName = appendStrings(directory, mapName);
 //	fullMapName[strlen(fullMapName)-1] = '\0'; //remove /n at end
 
@@ -321,6 +322,9 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 	//enemy filename
 	fgets(enemyMap,80,fp);
+
+	//enemy Item filename
+	fgets(enemyItemMap,80,fp);
 	printf("transit map name: %s\n", transitMap);
 	printf("enemy map name:%s\n", enemyMap);
 
@@ -328,6 +332,8 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 	clearEnemies(thisEnemies);
 	loadEnemies(thisEnemies, enemyMap, directory);
+
+	loadEnemyItems(thisEnemies,enemyItemMap,directory);
 
 	field* thisField = initField(fullMapName);
 
@@ -396,7 +402,8 @@ field* initField(char* fieldFileName){
 	int init_x = 0;
 	int xIndex;
 
-	//used to get rid of the first 2 lines of data (see loadMap)
+	//used to get rid of the first 3 lines of data (see loadMap)
+	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);
 

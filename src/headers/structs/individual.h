@@ -48,8 +48,8 @@ typedef struct {
 
 	int jumpTarget;
 
-	weapon * equiptWeapon;
-	armor * equiptArmor;
+	item * equiptWeapon;
+	item * equiptArmor;
 	item * inventory[40];
 } individual;
 

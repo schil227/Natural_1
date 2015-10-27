@@ -144,6 +144,140 @@ void setEnemiesToField(field * thisField, enemies * enemiesList){
 	}
 }
 
+void loadItemsToField(field * thisField, char * itemFile, char* directory){
+	char * fullEnemyFile = appendStrings(directory, itemFile);
+		fullEnemyFile[strlen(fullEnemyFile)-1] = '\0'; //remove '\n' at end of line
+		FILE * itemFP = fopen(fullEnemyFile, "r");
+		char line[80];
+
+		while(fgets(line,80,itemFP) != NULL){
+
+		}
+		fclose(itemFP);
+}
+
+void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
+	char * fullEnemyFile = appendStrings(directory, itemFile);
+	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
+	FILE * itemFP = fopen(fullEnemyFile, "r");
+	char line[160];
+	item * newItem;
+
+	while (fgets(line, 160, itemFP) != NULL) {
+		newItem = createEquipItemFromFile(line, enemiesList);
+	}
+	fclose(itemFP);
+}
+
+void createEquipItemFromFile(char line[160], enemies * enemiesList){
+	item * newItem;
+	char name[32];
+	char type, weaponDamType, armorClass;
+	int i, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, attackMod,
+	maxDamMod, minDamMod, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
+	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
+	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod;
+
+	char * value = strtok(line,",");
+		enemyId = atoi(value);
+
+		value = strtok(NULL,",");
+		imageID = atoi(value);
+
+		value = strtok(NULL,",");
+		ID = atoi(value);
+
+		value = strtok(NULL,",");
+		type = value[0];
+
+		value = strtok(NULL,",");
+		weaponDamType = value[0];
+
+		value = strtok(NULL,",");
+		armorClass = value[0];
+
+		value = strtok(NULL,",");
+		r = atoi(value);
+		value = strtok(NULL,",");
+		g = atoi(value);
+		value = strtok(NULL,",");
+		b = atoi(value);
+
+		value = strtok(NULL,",");
+		strcpy(name, value);
+		value = strtok(NULL,",");
+		x = atoi(value);
+		value = strtok(NULL,",");
+		y = atoi(value);
+
+		value = strtok(NULL,",");
+		totalHealthMod = atoi(value);
+		value = strtok(NULL,",");
+		healthMod = atoi(value);
+		value = strtok(NULL,",");
+		totalManaMod = atoi(value);
+		value = strtok(NULL,",");
+		manaMod = atoi(value);
+
+		value = strtok(NULL,",");
+		attackMod = atoi(value);
+		value = strtok(NULL,",");
+		maxDamMod = atoi(value);
+		value = strtok(NULL,",");
+		minDamMod = atoi(value);
+		value = strtok(NULL,",");
+		mvmtMod = atoi(value);
+		value = strtok(NULL,",");
+		rangeMod = atoi(value);
+
+		value = strtok(NULL,",");
+		bluntDRMod = atoi(value);
+		value = strtok(NULL,",");
+		chopDRMod = atoi(value);
+		value = strtok(NULL,",");
+		slashDRMod = atoi(value);
+		value = strtok(NULL,",");
+		pierceDRMod = atoi(value);
+
+		value = strtok(NULL,",");
+		earthDRMod = atoi(value);
+		value = strtok(NULL,",");
+		fireDRMod = atoi(value);
+		value = strtok(NULL,",");
+		waterDRMod = atoi(value);
+		value = strtok(NULL,",");
+		lightningDRMod = atoi(value);
+
+		value = strtok(NULL,",");
+		earthWeaknessMod = atoi(value);
+		value = strtok(NULL,",");
+		fireWeaknessMod = atoi(value);
+		value = strtok(NULL,",");
+		waterWeaknessMod = atoi(value);
+		value = strtok(NULL,",");
+		lightiningWeaknessMod = atoi(value);
+
+		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass,
+				totalHealthMod,healthMod,totalManaMod,manaMod,attackMod,maxDamMod,minDamMod,
+				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
+				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
+				waterWeaknessMod, lightiningWeaknessMod);
+
+	for(i = 0; i < enemiesList->numEnemies; i++){
+		if(enemiesList->enemies[i]->ID == enemyId){
+			if(newItem->type == 'w'){
+				enemiesList->enemies[i]->equiptWeapon = newItem;
+			}
+			if(newItem->type == 'a'){
+				enemiesList->enemies[i]->equiptArmor = newItem;
+			}
+
+			break;
+		}
+	}
+
+}
+
 individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey){
 	int index;
 	int numEnemies = thisEnemies->numEnemies;

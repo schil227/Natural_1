@@ -8,12 +8,17 @@
 #ifndef SRC_HEADERS_STRUCTS_ITEM_H_
 #define SRC_HEADERS_STRUCTS_ITEM_H_
 
-#include"../character_pub_methods.h";
+#include"../character_pub_methods.h"
 
 typedef struct {
 	character * itemCharacter;
 	int ID;
-	int type; //equippable, consumeable
+	char type; // (w)eapon/(a)rmor/(i)tem
+	char name[32];
+
+	//type specific info
+	char weponDamageType;//(b)lunt, (c)hop, (s)lash, (p)ierce
+	char armorClass;//(l)ight, (m)edium, (h)eavy
 
 	short int totalHealthMod;
 	short int healthMod;
@@ -22,7 +27,8 @@ typedef struct {
 	short int manaMod;
 
 	short int attackMod;
-	short int damMod;
+	short int maxDamMod;
+	short int minDamMod;
 	short int mvmtMod;
 	short int rangeMod;
 
@@ -43,15 +49,5 @@ typedef struct {
 	short int lightiningWeaknessMod;
 
 } item;
-
-typedef struct{
-	item * theItem;
-	char damType;
-} weapon;
-
-typedef struct{
-	item * theItem;
-	char weightClass;
-} armor;
 
 #endif /* SRC_HEADERS_STRUCTS_ITEM_H_ */

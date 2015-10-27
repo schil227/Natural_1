@@ -1,5 +1,6 @@
 test_map1_transit.txt
 test_map1_enemies.txt
+test_map1_enemy_items.txt
 g^g^g^g^g^g^g^r>-v->g^g^r>
 g^g^g^g^g^g^g^g^g^=>g^g^g^
 g^p^p^t^t^t^g^u<g^u>g^g^g^

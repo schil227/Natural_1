@@ -99,5 +99,9 @@ END
 //wilderness
 2561 BITMAP DISCARDABLE "../images/tree.bmp"
 
+//items
+//weapons
+3001 BITMAP DISCARDABLE "../images/dagger.bmp"
+
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"
