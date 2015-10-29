@@ -341,7 +341,7 @@ int damageUpperPercentile(int damage, int maxDam, int nthP){
 void sendHitDialog(char* individualName, char* targetName, int maxDam, int damage){
 
 	char* hitStr;
-	char takeOut[20]; //" takes %d damage!\n"
+	char takeOut[32]; //" takes %d damage!\n"
 
 	if(damageUpperPercentile(damage, maxDam, 20)){
 		char* highDam = appendStrings(individualName, " executes a brutal strike!\n");
@@ -349,8 +349,13 @@ void sendHitDialog(char* individualName, char* targetName, int maxDam, int damag
 		free(highDam);
 	}
 
-	sprintf(takeOut, " takes %d damage!\n", damage);
-	hitStr = appendStrings(targetName, takeOut);
+	if(damage == 0){
+		sprintf(takeOut, " deflected the blow\n");
+		hitStr = appendStrings(targetName, takeOut);
+	}else{
+		sprintf(takeOut, " takes %d damage!\n", damage);
+		hitStr = appendStrings(targetName, takeOut);
+	}
 
 	cwrite(hitStr);
 	free(hitStr);

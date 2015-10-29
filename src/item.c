@@ -8,10 +8,10 @@
 
 item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, char name[32],
 		char weaponDamageType, char armorClass, int totalHealthMod, int healthMod, int totalManaMod,
-		int manaMod, int attackMod, int maxDamMod, int minDamMod, int mvmtMod, int rangeMod, int bluntDRMod,
+		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int mvmtMod, int rangeMod, int bluntDRMod,
 		int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod, int fireDRMod,
 		int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
-		int waterWeaknessMod, int lightiningWeaknessMod){
+		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt){
 
 	item * thisItem = malloc(sizeof(item));
 	thisItem->itemCharacter = malloc(sizeof(character));
@@ -47,7 +47,9 @@ item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, ch
 	thisItem->healthMod = healthMod;
 	thisItem->totalManaMod = totalManaMod;
 	thisItem->manaMod = manaMod;
+	thisItem->acMod = acMod;
 	thisItem->attackMod = attackMod;
+	thisItem->damMod = damMod;
 	thisItem->maxDamMod = maxDamMod;
 	thisItem->minDamMod = minDamMod;
 	thisItem->mvmtMod = mvmtMod;
@@ -64,6 +66,7 @@ item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, ch
 	thisItem->fireWeaknessMod = fireWeaknessMod;
 	thisItem->waterWeaknessMod = waterWeaknessMod;
 	thisItem->lightiningWeaknessMod = lightiningWeaknessMod;
+	thisItem->isEquipt = isEquipt;
 
 	return thisItem;
 }

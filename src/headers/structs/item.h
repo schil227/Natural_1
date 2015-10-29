@@ -26,7 +26,9 @@ typedef struct {
 	short int totalManaMod;
 	short int manaMod;
 
+	short int acMod;
 	short int attackMod;
+	short int damMod;
 	short int maxDamMod;
 	short int minDamMod;
 	short int mvmtMod;
@@ -47,6 +49,8 @@ typedef struct {
 	short int fireWeaknessMod;
 	short int waterWeaknessMod;
 	short int lightiningWeaknessMod;
+
+	short int isEquipt;
 
 } item;
 

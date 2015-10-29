@@ -176,7 +176,7 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 	int i, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, attackMod,
 	maxDamMod, minDamMod, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
-	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod;
+	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
 
 	char * value = strtok(line,",");
 		enemyId = atoi(value);
@@ -257,20 +257,24 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 		value = strtok(NULL,",");
 		lightiningWeaknessMod = atoi(value);
 
+		value = strtok(NULL,",");
+		isEquipt = atoi(value);
+
 		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass,
 				totalHealthMod,healthMod,totalManaMod,manaMod,attackMod,maxDamMod,minDamMod,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
-				waterWeaknessMod, lightiningWeaknessMod);
+				waterWeaknessMod, lightiningWeaknessMod, isEquipt);
 
 	for(i = 0; i < enemiesList->numEnemies; i++){
 		if(enemiesList->enemies[i]->ID == enemyId){
-			if(newItem->type == 'w'){
-				enemiesList->enemies[i]->equiptWeapon = newItem;
-			}
-			if(newItem->type == 'a'){
-				enemiesList->enemies[i]->equiptArmor = newItem;
-			}
+			addItemToIndividual(enemiesList->enemies[i]->backpack, newItem);
+//			if(newItem->type == 'w'){
+//				enemiesList->enemies[i]->equiptWeapon = newItem;
+//			}
+//			if(newItem->type == 'a'){
+//				enemiesList->enemies[i]->equiptArmor = newItem;
+//			}
 
 			break;
 		}

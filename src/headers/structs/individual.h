@@ -10,10 +10,17 @@
 #include"../character_pub_methods.h"
 #include"../item_pub_methods.h"
 
+typedef struct{
+	int inventorySize;
+	item * inventoryArr[40];
+} inventory;
+
 typedef struct {
 	character* playerCharacter;
 	char name[32];
 	int ID;
+
+	inventory * backpack;
 
 	short int totalHP;
 	short int hp;
@@ -48,9 +55,8 @@ typedef struct {
 
 	int jumpTarget;
 
-	item * equiptWeapon;
-	item * equiptArmor;
-	item * inventory[40];
 } individual;
+
+
 
 #endif /* SRC_HEADERS_STRUCTS_INDIVIDUAL_H_ */
