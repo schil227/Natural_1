@@ -1,6 +1,7 @@
 map1_transit.txt
 map1_enemies.txt
 map1_enemy_items.txt
+map1_items.txt
 t^t^t^t^t^g^g^r>-v->g^g^r>
 t^p^t^t^t^g^g^g^g^=>g^g^g^
 g^\v\^t^t^t^g^u<g^u>g^g^g^

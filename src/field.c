@@ -308,9 +308,7 @@ int generateBackground(char backgroundSymbol){
 
 field * loadMap(char * mapName, char* directory, individual * player, enemies* thisEnemies){
 
-	char transitMap[80];
-	char enemyMap[80];
-	char enemyItemMap[80];
+	char transitMap[80], enemyMap[80], enemyItemMap[80], fieldItemMap[80];
 	char * fullMapName = appendStrings(directory, mapName);
 //	fullMapName[strlen(fullMapName)-1] = '\0'; //remove /n at end
 
@@ -318,24 +316,25 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 	//transit map filename
 	fgets(transitMap,80,fp);
-	printf("transit map name: %s\n", transitMap);
 
 	//enemy filename
 	fgets(enemyMap,80,fp);
 
-	//enemy Item filename
+	//enemy item filename
 	fgets(enemyItemMap,80,fp);
-	printf("transit map name: %s\n", transitMap);
-	printf("enemy map name:%s\n", enemyMap);
+
+	//field item filename
+	fgets(fieldItemMap,80,fp);
 
 	fclose(fp);
 
 	clearEnemies(thisEnemies);
 	loadEnemies(thisEnemies, enemyMap, directory);
-
-	loadEnemyItems(thisEnemies,enemyItemMap,directory);
+	loadEnemyItems(thisEnemies, enemyItemMap,directory);
 
 	field* thisField = initField(fullMapName);
+
+	loadFieldItems(thisField, fieldItemMap, directory);
 
 	makeTransitSpaces(transitMap, directory, thisField, player);
 
@@ -346,6 +345,7 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 }
 
 void makeTransitSpaces(char * transitMap, char* directory, field * thisField, individual * player){
+	int i;
 	char * fullTransitFile = appendStrings(directory, transitMap);
 	fullTransitFile[strlen(fullTransitFile)-1] = '\0'; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullTransitFile, "r");
@@ -356,7 +356,7 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 	while(fgets(line,80,enemyFP) != NULL){
 		space * tmpSpace;
 		int id, x, y, targetID;
-		char * targetTransitMap;
+		char * targetTransitMap = malloc(sizeof(char) * 32);
 
 		char * transitInstance = strtok(line,",");
 		id = atoi(transitInstance);
@@ -394,15 +394,42 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 
 }
 
+int addItemToField(fieldInventory * thisFieldInventory, item * thisItem){
+	int i;
+	if(thisFieldInventory->inventorySize >= 1000){
+		return 0;
+	}
+	for(i = 0; i < 1000; i++){
+		if(thisFieldInventory->inventoryArr[i] == NULL){
+			thisFieldInventory->inventoryArr[i] = thisItem;
+			thisFieldInventory->inventorySize++;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+void removeItemFromField(fieldInventory * thisFieldInventory, item * thisItem){
+	int i;
+
+	for(i = 0; i < 1000; i++){
+		if(thisFieldInventory->inventoryArr[i] == thisItem){
+			thisFieldInventory->inventoryArr[i] = NULL;
+			break;
+		}
+	}
+
+}
+
 field* initField(char* fieldFileName){
 	field* thisField = malloc(sizeof(field));
 	FILE * fp = fopen(fieldFileName, "r");
 	char line[80];
-	int init_y = 0;
-	int init_x = 0;
-	int xIndex;
+	int init_y = 0, init_x = 0, xIndex, i;
 
-	//used to get rid of the first 3 lines of data (see loadMap)
+	//used to get rid of the first 4 lines of data (see loadMap)
+	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);
@@ -466,10 +493,17 @@ field* initField(char* fieldFileName){
 //		printf("len:%d\n", strlen(line));
 	}
 
+	fclose(fp);
+
+	thisField->thisFieldInventory = malloc(sizeof(fieldInventory));
+	thisField->thisFieldInventory->inventorySize = 0;
+
+	for(i = 0; i < 1000; i++){
+		thisField->thisFieldInventory->inventoryArr[i] = NULL;
+	}
+
 	thisField->totalX = init_x;
 	thisField->totalY = init_y;
-
-	fclose(fp);
 
 	return thisField;
 }
@@ -519,8 +553,7 @@ void updateFiled(field* thisField, char* fieldFileName){
 void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	int x;
-	int y;
+	int x, y, i;
 
 	for (y = 0; y < this_field->totalY; y++) {
 		for (x = 0; x < this_field->totalX; x++) {
@@ -545,6 +578,23 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift)
 	}
 
 	DeleteDC(hdcMem);
+}
+
+void drawItemsFromField(HDC hdc, HDC hdcBuffer, fieldInventory * thisFieldInventory, shiftData * viewShift){
+	int i, numDrawn = 0;
+	for(i = 0; i < 1000; i++){
+
+		if(thisFieldInventory->inventoryArr[i] != NULL){
+			drawCharacter(hdc, hdcBuffer, thisFieldInventory->inventoryArr[i]->itemCharacter, viewShift);
+			numDrawn++;
+		}
+
+		//all items drawn
+		if(numDrawn == thisFieldInventory->inventorySize){
+			break;
+		}
+
+	}
 }
 
 void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){

@@ -124,6 +124,7 @@ void drawAll(HDC hdc, RECT* prc) {
 	int index;
 
 	drawField(hdc, hdcBuffer, main_field, viewShift);
+	drawItemsFromField(hdc, hdcBuffer, main_field->thisFieldInventory, viewShift);
 	if (player->hp > 0) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}

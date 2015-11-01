@@ -7,7 +7,7 @@
 
 #ifndef SRC_HEADERS_STRUCTS_INDIVIDUAL_H_
 #define SRC_HEADERS_STRUCTS_INDIVIDUAL_H_
-#include"../character_pub_methods.h"
+//#include"../character_pub_methods.h"
 #include"../item_pub_methods.h"
 
 typedef struct{

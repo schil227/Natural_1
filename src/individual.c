@@ -15,6 +15,7 @@ individual *initIndividual(){
 	toReturn->playerCharacter = malloc(sizeof(character));
 	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
 	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
+	toReturn->backpack = malloc(sizeof(inventory));
 	return toReturn;
 }
 

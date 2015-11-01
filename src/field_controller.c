@@ -33,7 +33,7 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness;
-	char * name;
+	char * name = malloc(sizeof(char) * 32);
 	char critType[3];
 
 	char * value = strtok(line,",");
@@ -50,13 +50,15 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	b = atoi(value);
 
 	value = strtok(NULL,",");
-	name = value;
+	strcpy(name, value);
+
 	value = strtok(NULL,",");
 	direction = atoi(value);
 	value = strtok(NULL,",");
 	x = atoi(value);
 	value = strtok(NULL,",");
 	y = atoi(value);
+
 	value = strtok(NULL,",");
 	totalHP = atoi(value);
 	value = strtok(NULL,",");
@@ -114,9 +116,9 @@ void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, enemyFile);
 	fullEnemyFile[strlen(fullEnemyFile)-1] = '\0'; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullEnemyFile, "r");
-	char line[80];
+	char line[160];
 
-	while(fgets(line,80,enemyFP) != NULL){
+	while(fgets(line,160,enemyFP) != NULL){
 		individual * newEnemy = initIndividual();
 		createEnemyFromLine(newEnemy, line);
 		if(doesExist(newEnemy->ID)){
@@ -144,18 +146,6 @@ void setEnemiesToField(field * thisField, enemies * enemiesList){
 	}
 }
 
-void loadItemsToField(field * thisField, char * itemFile, char* directory){
-	char * fullEnemyFile = appendStrings(directory, itemFile);
-		fullEnemyFile[strlen(fullEnemyFile)-1] = '\0'; //remove '\n' at end of line
-		FILE * itemFP = fopen(fullEnemyFile, "r");
-		char line[80];
-
-		while(fgets(line,80,itemFP) != NULL){
-
-		}
-		fclose(itemFP);
-}
-
 void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, itemFile);
 	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
@@ -164,7 +154,7 @@ void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
 	item * newItem;
 
 	while (fgets(line, 160, itemFP) != NULL) {
-		newItem = createEquipItemFromFile(line, enemiesList);
+		createEquipItemFromFile(line, enemiesList);
 	}
 	fclose(itemFP);
 }
@@ -173,7 +163,7 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 	item * newItem;
 	char name[32];
 	char type, weaponDamType, armorClass;
-	int i, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, attackMod,
+	int i, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
@@ -220,7 +210,11 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 		manaMod = atoi(value);
 
 		value = strtok(NULL,",");
+		acMod = atoi(value);
+		value = strtok(NULL,",");
 		attackMod = atoi(value);
+		value = strtok(NULL,",");
+		damMod = atoi(value);
 		value = strtok(NULL,",");
 		maxDamMod = atoi(value);
 		value = strtok(NULL,",");
@@ -261,7 +255,7 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 		isEquipt = atoi(value);
 
 		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass,
-				totalHealthMod,healthMod,totalManaMod,manaMod,attackMod,maxDamMod,minDamMod,
+				totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 				waterWeaknessMod, lightiningWeaknessMod, isEquipt);
@@ -269,18 +263,123 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 	for(i = 0; i < enemiesList->numEnemies; i++){
 		if(enemiesList->enemies[i]->ID == enemyId){
 			addItemToIndividual(enemiesList->enemies[i]->backpack, newItem);
-//			if(newItem->type == 'w'){
-//				enemiesList->enemies[i]->equiptWeapon = newItem;
-//			}
-//			if(newItem->type == 'a'){
-//				enemiesList->enemies[i]->equiptArmor = newItem;
-//			}
-
 			break;
 		}
 	}
 
 }
+
+void loadFieldItems(field * thisField, char * itemFile, char* directory){
+	char * fullEnemyFile = appendStrings(directory, itemFile);
+	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
+	FILE * itemFP = fopen(fullEnemyFile, "r");
+	char line[160];
+	item * newItem;
+
+	while (fgets(line, 160, itemFP) != NULL) {
+		addItemToFieldFromFile(line, thisField->thisFieldInventory);
+	}
+	fclose(itemFP);
+}
+
+void addItemToFieldFromFile(char line[16], fieldInventory * thisFieldInventory){
+	item * newItem;
+	char name[32];
+	char type, weaponDamType, armorClass;
+	int i, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	maxDamMod, minDamMod, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
+	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
+	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod;
+
+	char * value = strtok(line,",");
+		imageID = atoi(value);
+
+		value = strtok(NULL,",");
+		ID = atoi(value);
+
+		value = strtok(NULL,",");
+		type = value[0];
+
+		value = strtok(NULL,",");
+		weaponDamType = value[0];
+
+		value = strtok(NULL,",");
+		armorClass = value[0];
+
+		value = strtok(NULL,",");
+		r = atoi(value);
+		value = strtok(NULL,",");
+		g = atoi(value);
+		value = strtok(NULL,",");
+		b = atoi(value);
+
+		value = strtok(NULL,",");
+		strcpy(name, value);
+		value = strtok(NULL,",");
+		x = atoi(value);
+		value = strtok(NULL,",");
+		y = atoi(value);
+
+		value = strtok(NULL,",");
+		totalHealthMod = atoi(value);
+		value = strtok(NULL,",");
+		healthMod = atoi(value);
+		value = strtok(NULL,",");
+		totalManaMod = atoi(value);
+		value = strtok(NULL,",");
+		manaMod = atoi(value);
+
+		value = strtok(NULL,",");
+		acMod = atoi(value);
+		value = strtok(NULL,",");
+		attackMod = atoi(value);
+		value = strtok(NULL,",");
+		damMod = atoi(value);
+		value = strtok(NULL,",");
+		maxDamMod = atoi(value);
+		value = strtok(NULL,",");
+		minDamMod = atoi(value);
+		value = strtok(NULL,",");
+		mvmtMod = atoi(value);
+		value = strtok(NULL,",");
+		rangeMod = atoi(value);
+
+		value = strtok(NULL,",");
+		bluntDRMod = atoi(value);
+		value = strtok(NULL,",");
+		chopDRMod = atoi(value);
+		value = strtok(NULL,",");
+		slashDRMod = atoi(value);
+		value = strtok(NULL,",");
+		pierceDRMod = atoi(value);
+
+		value = strtok(NULL,",");
+		earthDRMod = atoi(value);
+		value = strtok(NULL,",");
+		fireDRMod = atoi(value);
+		value = strtok(NULL,",");
+		waterDRMod = atoi(value);
+		value = strtok(NULL,",");
+		lightningDRMod = atoi(value);
+
+		value = strtok(NULL,",");
+		earthWeaknessMod = atoi(value);
+		value = strtok(NULL,",");
+		fireWeaknessMod = atoi(value);
+		value = strtok(NULL,",");
+		waterWeaknessMod = atoi(value);
+		value = strtok(NULL,",");
+		lightiningWeaknessMod = atoi(value);
+
+		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass,
+				totalHealthMod,healthMod,totalManaMod,manaMod,acMod, attackMod,damMod,maxDamMod,minDamMod,
+				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
+				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
+				waterWeaknessMod, lightiningWeaknessMod, 0);
+
+		addItemToField(thisFieldInventory, newItem);
+}
+
 
 individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey){
 	int index;
@@ -311,10 +410,13 @@ int attemptToTransit(field ** thisField, individual * player, enemies * thisEnem
 		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
 			int x, y, imageID;
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
+
 			free(*thisField);
 			*thisField = loadMap(tmpSpace->thisTransitInfo->transitMap,  mapDirectory, player, thisEnemies);
+
 			viewShift->xShift = 0;
 			viewShift->yShift = 0;
+			//load images for new map
 			for (y = 0; y < (*thisField)->totalY; y++) {
 				for (x = 0; x < (*thisField)->totalX; x++) {
 					imageID = ((*thisField)->grid[x][y]->background)->imageID;

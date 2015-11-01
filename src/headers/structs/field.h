@@ -11,6 +11,11 @@
 #include "../individual_pub_methods.h"
 
 typedef struct {
+	int inventorySize;
+	item * inventoryArr[1000];
+} fieldInventory;
+
+typedef struct {
 	char transitMap[256];
 	int transitID;
 	int targetMapTransitID;
@@ -39,9 +44,8 @@ typedef struct {
 
 	space* grid[100][100];
 
+	fieldInventory * thisFieldInventory;
 } field;
-
-
 
 typedef struct {
 	int x;

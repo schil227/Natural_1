@@ -34,6 +34,11 @@ item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, ch
 	thisItem->itemCharacter->height = bm.bmHeight;
 	thisItem->itemCharacter->width = bm.bmWidth;
 
+	thisItem->itemCharacter->x = x;
+	thisItem->itemCharacter->y = y;
+
+	thisItem->itemCharacter->direction = 0;
+
 	thisItem->itemCharacter->rgb = rgb;
 
 	thisItem->ID = ID;
