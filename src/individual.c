@@ -139,30 +139,44 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 }
 
 int damageIndividual(individual *thisIndividual, individual *targetIndividual, int isCrit){
-	int totalDamage = 0, i, totalDR;
+	int totalDamage = 0, i, totalDR, maxDamTotal, minDamTotal;
 	char attackType = 'b'; //for now, default is blunt (punching)
+	item * tmpItem;
+	maxDamTotal = thisIndividual->maxDam;
+	minDamTotal = thisIndividual->minDam;
 
 	thisIndividual->hasAttacked = 1;
 
-	if(isCrit){
-		cwrite("CRITICAL HIT!!!\n");
-		totalDamage = calcCrit(thisIndividual);
-	}else{
-		totalDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
-		totalDamage = totalDamage + thisIndividual->minDam;
-	}
-
 	for(i = 0; i < thisIndividual->backpack->inventorySize; i++){
-		if(thisIndividual->backpack->inventoryArr[i]->isEquipt){
+		tmpItem = thisIndividual->backpack->inventoryArr[i];
 
-			if(thisIndividual->backpack->inventoryArr[i]->type == 'w'){
-				attackType = thisIndividual->backpack->inventoryArr[i]->weponDamageType;
+		if(tmpItem->isEquipt){
+
+			if(tmpItem->type == 'w'){
+				attackType = tmpItem->weponDamageType;
+				maxDamTotal += tmpItem->maxDamMod;
+				minDamTotal += tmpItem->minDamMod;
 			}
 
-			totalDamage += thisIndividual->backpack->inventoryArr[i]->damMod;
+			totalDamage += tmpItem->damMod;
 		}
 	}
 
+	if(minDamTotal < 0){
+		minDamTotal = 0;
+	}
+
+	if(minDamTotal > maxDamTotal){
+		maxDamTotal = minDamTotal;
+	}
+
+	if(isCrit){
+		cwrite("CRITICAL HIT!!!\n");
+		totalDamage = calcCrit(thisIndividual, maxDamTotal, minDamTotal);
+	}else{
+		totalDamage = rand() % (maxDamTotal - minDamTotal);
+		totalDamage = totalDamage + minDamTotal;
+	}
 
 	totalDamage = totalDamage - calcDR(targetIndividual, attackType);
 
@@ -218,12 +232,12 @@ int calcDR(individual * targetIndividual, char attackType){
 	return totalDR;
 }
 
-int calcCrit(individual * thisIndividual){
+int calcCrit(individual * thisIndividual, int maxDamTotal, int minDamTotal){
 	if(strcmp(thisIndividual->critType, "MAX") == 0){
 		return thisIndividual->maxDam;
 	} else if(strcmp(thisIndividual->critType, "DUB") == 0){
-		int attackDamage = rand() % (thisIndividual->maxDam - thisIndividual->minDam);
-		attackDamage = (attackDamage + thisIndividual->minDam) * 2;
+		int attackDamage = rand() % (maxDamTotal - minDamTotal);
+		attackDamage = (attackDamage + minDamTotal) * 2;
 	}
 }
 

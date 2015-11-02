@@ -269,20 +269,7 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 
 }
 
-void loadFieldItems(field * thisField, char * itemFile, char* directory){
-	char * fullEnemyFile = appendStrings(directory, itemFile);
-	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
-	FILE * itemFP = fopen(fullEnemyFile, "r");
-	char line[160];
-	item * newItem;
-
-	while (fgets(line, 160, itemFP) != NULL) {
-		addItemToFieldFromFile(line, thisField->thisFieldInventory);
-	}
-	fclose(itemFP);
-}
-
-void addItemToFieldFromFile(char line[16], fieldInventory * thisFieldInventory){
+item * createFieldItemFromFile(char line[160]){
 	item * newItem;
 	char name[32];
 	char type, weaponDamType, armorClass;
@@ -377,9 +364,25 @@ void addItemToFieldFromFile(char line[16], fieldInventory * thisFieldInventory){
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 				waterWeaknessMod, lightiningWeaknessMod, 0);
 
-		addItemToField(thisFieldInventory, newItem);
+		return newItem;
 }
 
+void loadFieldItems(field * thisField, char * itemFile, char* directory){
+	char * fullEnemyFile = appendStrings(directory, itemFile);
+	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
+	FILE * itemFP = fopen(fullEnemyFile, "r");
+	char line[160];
+	item * newItem;
+
+	while (fgets(line, 160, itemFP) != NULL) {
+		newItem = createFieldItemFromFile(line);
+		if(doesExist(newItem->ID)){
+			addItemToField(thisField->thisFieldInventory, newItem);
+		}
+
+	}
+	fclose(itemFP);
+}
 
 individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey){
 	int index;

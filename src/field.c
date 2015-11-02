@@ -415,11 +415,38 @@ void removeItemFromField(fieldInventory * thisFieldInventory, item * thisItem){
 
 	for(i = 0; i < 1000; i++){
 		if(thisFieldInventory->inventoryArr[i] == thisItem){
+			removeFromExistance(thisFieldInventory->inventoryArr[i]->ID);
 			thisFieldInventory->inventoryArr[i] = NULL;
 			break;
 		}
 	}
 
+}
+
+int attemptGetItemFromField(field * thisField, individual * thisIndividual){
+	int i, itemsProcessed = 0;
+	int itemX = thisIndividual->playerCharacter->x;
+	int itemY = thisIndividual->playerCharacter->y;
+	item * theItem = NULL;
+
+	for(i = 0; i < 1000; i++){
+		if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
+			theItem = thisField->thisFieldInventory->inventoryArr[i];
+
+			if(theItem->itemCharacter->x == itemX && theItem->itemCharacter->y == itemY){
+				removeItemFromField(thisField->thisFieldInventory, theItem);
+				addItemToIndividual(thisIndividual->backpack, theItem);
+				return 1;
+			}
+
+			itemsProcessed++;
+		}
+
+		if(itemsProcessed == thisField->thisFieldInventory->inventorySize){
+			return 0;
+		}
+	}
+	return 0;
 }
 
 field* initField(char* fieldFileName){

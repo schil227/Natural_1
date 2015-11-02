@@ -258,11 +258,14 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			initMoveMode = 1;
 			break;
 		case 0x45: //e key (enter)
-		{
-
-			attemptToTransit(&main_field,player,thisEnemies,viewShift, mapDirectory);
-
-		}
+			{
+				attemptToTransit(&main_field,player,thisEnemies,viewShift, mapDirectory);
+			}
+			break;
+		case 0x47://g key (get)
+			{
+				attemptGetItemFromField(main_field,player);
+			}
 			break;
 		case 0x57: //w key (wait)
 			player->remainingActions = player->remainingActions - 1;
