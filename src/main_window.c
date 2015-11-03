@@ -13,6 +13,7 @@
 #include "./headers/main_window.h"
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
+#include "./headers/loop_controller_pub_methods.h"
 #include"./headers/console_window_pub_methods.h"
 #include"./headers/console_pub_methods.h"
 
@@ -33,6 +34,8 @@ int postCursorMode = 0;
 int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
+
+int inventoryMode = 0;
 
 int enemyTurn = 0;
 

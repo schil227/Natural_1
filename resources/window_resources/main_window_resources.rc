@@ -100,8 +100,13 @@ END
 2561 BITMAP DISCARDABLE "../images/tree.bmp"
 
 //items
+//inventory screen
+3000 BITMAP DISCARDABLE "../images/inventory_bg.bmp"
+3001 BITMAP DISCARDABLE "../images/select_arrow.bmp"
+3002 BITMAP DISCARDABLE "../images/scroll_arrow.bmp"
+
 //weapons
-3001 BITMAP DISCARDABLE "../images/dagger.bmp"
+3020 BITMAP DISCARDABLE "../images/dagger.bmp"
 
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"
