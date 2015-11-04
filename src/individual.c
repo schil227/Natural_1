@@ -10,12 +10,19 @@
 int isRandomized = 0;
 
 individual *initIndividual(){
+	int i;
+
 	individual* toReturn = malloc(sizeof(individual));
 //	toReturn->name = malloc(sizeof(char)*32);
 	toReturn->playerCharacter = malloc(sizeof(character));
 	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
 	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
 	toReturn->backpack = malloc(sizeof(inventory));
+	toReturn->backpack->inventorySize = 0;
+
+	for (i = 0; i < 40; i++) {
+		toReturn->backpack->inventoryArr[i] = NULL;
+	}
 	return toReturn;
 }
 
@@ -51,13 +58,6 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->playerCharacter->direction = direction;
 	thisIndividual->playerCharacter->x = x;
 	thisIndividual->playerCharacter->y = y;
-
-	thisIndividual->backpack = malloc(sizeof(inventory));
-	thisIndividual->backpack->inventorySize = 0;
-
-	for(i = 0; i < 40; i++){
-		thisIndividual->backpack->inventoryArr[i] = NULL;
-	}
 
 	thisIndividual->totalHP = totalHP;
 	thisIndividual->hp = totalHP;

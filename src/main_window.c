@@ -35,6 +35,7 @@ int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
 
+int initInventoryMode = 0;
 int inventoryMode = 0;
 
 int enemyTurn = 0;
@@ -153,6 +154,10 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	}
 
+	if(inventoryMode){
+		drawInventoryView(hdc, hdcBuffer, viewShift);
+	}
+
 	drawThisConsole(hdc,hdcBuffer,prc);
 
 //	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
@@ -174,6 +179,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
+		initThisInventoryView(3000, 100, 100, 4, player->backpack);
 		initalizeTheGlobalRegister();
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
@@ -268,6 +274,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x47://g key (get)
 			{
 				attemptGetItemFromField(main_field,player);
+			}
+			break;
+		case 0x49://i key (get)
+			{
+				initInventoryMode = 1;
+				inventoryMode = 1;
 			}
 			break;
 		case 0x57: //w key (wait)
@@ -443,7 +455,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		}
 
-	return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
+		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
 	} else if(postMoveMode){
 //		printf("looping in moveMode\n");
 		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode, viewShift);
@@ -468,7 +480,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 
 		return 0;
-	} else {
+	} else if(inventoryMode){
+
+		if(initInventoryMode){
+			refreshInventory(player->backpack);
+			initInventoryMode = 0;
+		}
+
+		inventoryLoop(hwnd, msg, wParam, lParam, &inventoryMode, main_field, player, thisEnemies, viewShift);
+
+	}else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}
 
