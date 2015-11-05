@@ -15,7 +15,8 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView->playerItems = playerInventory;
 	thisInventoryView->inventoryBackground = createCharacter(imageID, RGB(255,0,255), x, y);
 	thisInventoryView->selectArrow = createCharacter(3001, RGB(255,0,255), x, y);
-	thisInventoryView->scrollArrow = createCharacter(3002, RGB(255,0,255), x, y);
+	thisInventoryView->scrollUpArrow = createCharacter(3002, RGB(255,0,255), x, y);
+	thisInventoryView->scrollDownArrow = createCharacter(3004, RGB(255,0,255), x, y);
 	thisInventoryView->itemFrame = createCharacter(3003, RGB(255,0,255), x, y);
 	thisInventoryView->slotsPerScreen = slotsPerScreen;
 	thisInventoryView->selectedItemIndex = 0;
@@ -78,6 +79,23 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 			}
 		}
 	}
+
+	if(canScrollDown()){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,
+							thisInventoryView->inventoryBackground->x+100,
+							thisInventoryView->inventoryBackground->y +
+								thisInventoryView->inventoryBackground->height - 40,
+							thisInventoryView->scrollDownArrow,
+							viewShift);
+	}
+
+	if(canScrollUp()){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,
+							thisInventoryView->inventoryBackground->x+100,
+							thisInventoryView->inventoryBackground->y + 40,
+							thisInventoryView->scrollUpArrow,
+							viewShift);
+	}
 }
 
 //is there a next item?
@@ -111,6 +129,51 @@ int canSelectPreviousItemUp(){
 	}
 }
 
+int canScrollDown(){
+	int i, index, nextItem = 0;
+	item * tmpItem;
+	if(thisInventoryView->viewedItems[0] == NULL || thisInventoryView->slotsPerScreen >= thisInventoryView->playerItems->inventorySize ){
+		return 0;
+	}
+
+	index = thisInventoryView->slotsPerScreen-1;
+
+	tmpItem = thisInventoryView->viewedItems[index];
+
+	for(i = 0; i < 40; i++){
+		if(nextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL){
+			return 1;
+		}
+
+		if(tmpItem == thisInventoryView->playerItems->inventoryArr[i]){
+			nextItem = 1;
+		}
+	}
+
+	return 0;
+}
+
+int canScrollUp(){
+	int i, nextItem = 0;
+	item * tmpItem;
+	if(thisInventoryView->viewedItems[0] == NULL || thisInventoryView->slotsPerScreen >= thisInventoryView->playerItems->inventorySize ){
+		return 0;
+	}
+
+	tmpItem = thisInventoryView->viewedItems[0];
+
+	for(i = 40; i >= 0; i--){
+		if(nextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL){
+			return 1;
+		}
+
+		if(tmpItem == thisInventoryView->playerItems->inventoryArr[i]){
+			nextItem = 1;
+		}
+	}
+
+	return 0;
+}
 int selectedIndexIsntFirstPlayerItem(){
 	int i;
 

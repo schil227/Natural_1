@@ -103,8 +103,9 @@ END
 //inventory screen
 3000 BITMAP DISCARDABLE "../images/inventory_bg.bmp"
 3001 BITMAP DISCARDABLE "../images/select_arrow.bmp"
-3002 BITMAP DISCARDABLE "../images/scroll_arrow.bmp"
+3002 BITMAP DISCARDABLE "../images/scroll_up_arrow.bmp"
 3003 BITMAP DISCARDABLE "../images/item_bg.bmp"
+3004 BITMAP DISCARDABLE "../images/scroll_down_arrow.bmp"
 
 //items
 3020 BITMAP DISCARDABLE "../images/dagger.bmp"

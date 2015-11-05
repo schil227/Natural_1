@@ -12,7 +12,8 @@ typedef struct {
 	character * inventoryBackground;
 	character * itemFrame;
 	character * selectArrow;
-	character * scrollArrow;
+	character * scrollUpArrow;
+	character * scrollDownArrow;
 	inventory * playerItems;
 	item * viewedItems[10];
 	int slotsPerScreen;
