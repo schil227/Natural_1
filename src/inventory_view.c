@@ -17,10 +17,10 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView->selectArrow = createCharacter(3001, RGB(255,0,255), x, y);
 	thisInventoryView->scrollArrow = createCharacter(3002, RGB(255,0,255), x, y);
 	thisInventoryView->itemFrame = createCharacter(3003, RGB(255,0,255), x, y);
-	thisInventoryView->selectedItem = NULL;
 	thisInventoryView->slotsPerScreen = slotsPerScreen;
+	thisInventoryView->selectedItemIndex = 0;
 
-	for(i = 0; i < 4; i++){
+	for(i = 0; i < slotsPerScreen; i++){
 		thisInventoryView->viewedItems[i] = NULL;
 	}
 
@@ -44,28 +44,99 @@ void refreshInventory(inventory * playerInventory){
 		}
 	}
 
+	if(thisInventoryView->viewedItems[0] != NULL){
+		thisInventoryView->selectedItemIndex = 0;
+	}
+
 }
 
 void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 	int i;
 	drawUnboundCharacterByPixels(hdc, hdcBuffer,
-			thisInventoryView->inventoryBackground->x,
-			thisInventoryView->inventoryBackground->y,
-			thisInventoryView->inventoryBackground, viewShift);
+		thisInventoryView->inventoryBackground->x,
+		thisInventoryView->inventoryBackground->y,
+		thisInventoryView->inventoryBackground, viewShift);
 
 	for(i = 0; i < thisInventoryView->slotsPerScreen; i++){
 		if(thisInventoryView->viewedItems[i] != NULL){
 			drawUnboundCharacterByPixels(hdc, hdcBuffer,
-								thisInventoryView->inventoryBackground->x+40,
-								thisInventoryView->inventoryBackground->y + 50+50*i,
-								thisInventoryView->itemFrame,
-								viewShift);
+				thisInventoryView->inventoryBackground->x+40,
+				thisInventoryView->inventoryBackground->y + 50+50*i,
+				thisInventoryView->itemFrame,
+				viewShift);
 			drawUnboundCharacterByPixels(hdc, hdcBuffer,
-					thisInventoryView->inventoryBackground->x+40,
-					thisInventoryView->inventoryBackground->y + 50+50*i,
-					thisInventoryView->viewedItems[i]->itemCharacter,
+				thisInventoryView->inventoryBackground->x+40,
+				thisInventoryView->inventoryBackground->y + 50+50*i,
+				thisInventoryView->viewedItems[i]->itemCharacter,
+				viewShift);
+			if(thisInventoryView->selectedItemIndex == i){
+				drawUnboundCharacterByPixels(hdc, hdcBuffer,
+					thisInventoryView->inventoryBackground->x+20,
+					thisInventoryView->inventoryBackground->y + 62+50*i,
+					thisInventoryView->selectArrow,
 					viewShift);
+			}
 		}
 	}
 }
 
+//is there a next item?
+int canSelectNextItemDown(){
+	int totalItems;
+
+	//basecase: there are no items
+	if(thisInventoryView->viewedItems[0] == NULL){
+		return 0;
+	}
+
+	if(thisInventoryView->selectedItemIndex < thisInventoryView->playerItems->inventorySize-1){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int canSelectPreviousItemUp(){
+	int totalItems;
+
+	//basecase: there are no items
+	if(thisInventoryView->viewedItems[0] == NULL){
+		return 0;
+	}
+
+	if(thisInventoryView->selectedItemIndex > 0){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+void selectNextItemDown(){
+	if(canSelectNextItemDown()){
+		//selecting last element
+		if(thisInventoryView->selectedItemIndex == thisInventoryView->slotsPerScreen){
+			shiftItemsUp();
+		}else{
+			thisInventoryView->selectedItemIndex++;
+		}
+	}
+}
+
+void selectPreviousItemUp(){
+	if(canSelectPreviousItemUp()){
+		//selecting last element
+		if(thisInventoryView->selectedItemIndex == 0){
+			shiftItemsDown();
+		}else{
+			thisInventoryView->selectedItemIndex--;
+		}
+	}
+}
+
+void shiftItemsDown(){
+
+}
+
+void shiftItemsUp(){
+
+}

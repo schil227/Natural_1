@@ -106,8 +106,8 @@ END
 3002 BITMAP DISCARDABLE "../images/scroll_arrow.bmp"
 3003 BITMAP DISCARDABLE "../images/item_bg.bmp"
 
-//weapons
+//items
 3020 BITMAP DISCARDABLE "../images/dagger.bmp"
-
+3021 BITMAP DISCARDABLE "../images/herb.bmp"
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

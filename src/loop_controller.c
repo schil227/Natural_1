@@ -105,13 +105,16 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
 			case 0x38:
-			case 0x68:
+			case 0x68:{
+				selectPreviousItemUp();
+			}
+			break;
 			case 0x32:
 			case 0x62: {
-				int direction;
-				direction = LOWORD(wParam) % 16;
+				selectNextItemDown();
 
 			}
+			break;
 				break;
 			case 0x1B: //escape
 				*inventoryMode = 0;

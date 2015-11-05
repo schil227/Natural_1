@@ -14,10 +14,9 @@ typedef struct {
 	character * selectArrow;
 	character * scrollArrow;
 	inventory * playerItems;
+	item * viewedItems[10];
 	int slotsPerScreen;
-	item * selectedItem;
-	item * viewedItems[4];
-
+	int selectedItemIndex;
 } inventoryView;
 
 #endif /* SRC_HEADERS_STRUCTS_INVENTORY_VIEW_H_ */
