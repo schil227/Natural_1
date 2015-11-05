@@ -89,7 +89,7 @@ int canSelectNextItemDown(){
 		return 0;
 	}
 
-	if(thisInventoryView->selectedItemIndex < thisInventoryView->playerItems->inventorySize-1){
+	if(selectedIndexIsntLastPlayerItem()){
 		return 1;
 	}else{
 		return 0;
@@ -104,17 +104,53 @@ int canSelectPreviousItemUp(){
 		return 0;
 	}
 
-	if(thisInventoryView->selectedItemIndex > 0){
+	if(selectedIndexIsntFirstPlayerItem()){
 		return 1;
 	}else{
 		return 0;
 	}
 }
 
+int selectedIndexIsntFirstPlayerItem(){
+	int i;
+
+	for(i = 0; i < 40; i++){
+		if(thisInventoryView->playerItems->inventoryArr[i] != NULL){
+			if( thisInventoryView->playerItems->inventoryArr[i]  ==
+					thisInventoryView->viewedItems[thisInventoryView->selectedItemIndex]){
+				return 0;
+			}else{
+				return 1;
+			}
+
+		}
+	}
+	return 0;
+}
+
+int selectedIndexIsntLastPlayerItem(){
+	int i,nextItem = 0;
+
+	for(i = 0; i < 40; i++){
+		if(thisInventoryView->playerItems->inventoryArr[i] != NULL){
+			if(nextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL){
+				return 1;
+			}
+
+			if( thisInventoryView->playerItems->inventoryArr[i]  ==
+					thisInventoryView->viewedItems[thisInventoryView->selectedItemIndex]){
+				nextItem = 1;
+			}
+
+		}
+	}
+	return 0;
+}
+
 void selectNextItemDown(){
 	if(canSelectNextItemDown()){
 		//selecting last element
-		if(thisInventoryView->selectedItemIndex == thisInventoryView->slotsPerScreen){
+		if(thisInventoryView->selectedItemIndex == thisInventoryView->slotsPerScreen-1){
 			shiftItemsUp();
 		}else{
 			thisInventoryView->selectedItemIndex++;
@@ -134,9 +170,43 @@ void selectPreviousItemUp(){
 }
 
 void shiftItemsDown(){
+	int i, getNextItem = 0;
+	item * tmpItem;
 
+	for (i = thisInventoryView->slotsPerScreen - 1; i > 0; i--) {
+		thisInventoryView->viewedItems[i] = thisInventoryView->viewedItems[i - 1];
+	}
+
+	tmpItem = thisInventoryView->viewedItems[0];
+
+	for (i = 40; i >= 0; i--) {
+		if (getNextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL) {
+			thisInventoryView->viewedItems[0] = thisInventoryView->playerItems->inventoryArr[i];
+		}
+		if (tmpItem == thisInventoryView->playerItems->inventoryArr[i]) {
+			getNextItem = 1;
+		}
+	}
 }
 
 void shiftItemsUp(){
+	int i, getNextItem = 0, lastIndex;
+	item * tmpItem;
 
+	lastIndex = thisInventoryView->slotsPerScreen - 1;
+
+	for (i = 0; i <= thisInventoryView->slotsPerScreen - 2; i++) {
+		thisInventoryView->viewedItems[i] = thisInventoryView->viewedItems[i + 1];
+	}
+
+	tmpItem = thisInventoryView->viewedItems[lastIndex];
+
+	for (i = 0; i < 40; i++) {
+		if (getNextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL) {
+			thisInventoryView->viewedItems[lastIndex] = thisInventoryView->playerItems->inventoryArr[i];
+		}
+		if (tmpItem == thisInventoryView->playerItems->inventoryArr[i]) {
+			getNextItem = 1;
+		}
+	}
 }
