@@ -77,14 +77,6 @@ void appendNewMessageNode(char * message){
 
 	printf("appended message #%d\n",thisConsole->numMessages);
 
-//	if(thisConsole->numMessages > 5){
-//		messageNode * tmpMessage = thisConsole->oldestMessageNode->nextMessageNode;
-//		free(tmpMessage->previousMessageNode);
-//		tmpMessage->previousMessageNode = NULL;
-////		free(thisConsole->oldestMessageNode);
-//		thisConsole->oldestMessageNode = tmpMessage;
-//	}
-
 }
 
 void clearMessages(){
@@ -232,8 +224,6 @@ void drawConsoleText(HDC hdcBuffer, RECT * prc){
 		strcpy(currentMessage, currentMessageNode->message);
 		sizeOfSpaceIndexArr = calcNumIndexes(currentMessage, thisConsole->rowLength, hdcBuffer, leftIndent);
 		spaceIndexArr = createSpaceIndexArr(currentMessage,sizeOfSpaceIndexArr, hdcBuffer, leftIndent);
-
-
 
 		textBoxRect.left = leftIndent; //make the indent
 

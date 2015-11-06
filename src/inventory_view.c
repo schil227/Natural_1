@@ -53,6 +53,14 @@ void refreshInventory(inventory * playerInventory){
 
 void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 	int i;
+
+	RECT textBoxRect;
+		textBoxRect.bottom = thisInventoryView->inventoryBackground->height + thisInventoryView->inventoryBackground->y;
+		textBoxRect.top =  thisInventoryView->inventoryBackground->y+60;
+		textBoxRect.right = thisInventoryView->inventoryBackground->width;
+		textBoxRect.left = thisInventoryView->inventoryBackground->x + 85;
+
+	//draw inventory view
 	drawUnboundCharacterByPixels(hdc, hdcBuffer,
 		thisInventoryView->inventoryBackground->x,
 		thisInventoryView->inventoryBackground->y,
@@ -60,16 +68,29 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 
 	for(i = 0; i < thisInventoryView->slotsPerScreen; i++){
 		if(thisInventoryView->viewedItems[i] != NULL){
+
+			//draw item frame
 			drawUnboundCharacterByPixels(hdc, hdcBuffer,
 				thisInventoryView->inventoryBackground->x+40,
 				thisInventoryView->inventoryBackground->y + 50+50*i,
 				thisInventoryView->itemFrame,
 				viewShift);
+
+			//draw item
 			drawUnboundCharacterByPixels(hdc, hdcBuffer,
 				thisInventoryView->inventoryBackground->x+40,
 				thisInventoryView->inventoryBackground->y + 50+50*i,
 				thisInventoryView->viewedItems[i]->itemCharacter,
 				viewShift);
+
+			//draw item text
+			SetTextColor(hdcBuffer, RGB(255, 200, 0));
+			SetBkMode(hdcBuffer, TRANSPARENT);
+			DrawText(hdcBuffer,thisInventoryView->viewedItems[i]->name, -1, &textBoxRect, DT_SINGLELINE); //thisInventoryView->viewedItems[i]->name
+			SetTextColor(hdcBuffer, RGB(0, 0, 0));
+			textBoxRect.top = textBoxRect.top + 50;
+
+			//draw selection arrow
 			if(thisInventoryView->selectedItemIndex == i){
 				drawUnboundCharacterByPixels(hdc, hdcBuffer,
 					thisInventoryView->inventoryBackground->x+20,
@@ -92,7 +113,7 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 	if(canScrollUp()){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer,
 							thisInventoryView->inventoryBackground->x+100,
-							thisInventoryView->inventoryBackground->y + 40,
+							thisInventoryView->inventoryBackground->y + 20,
 							thisInventoryView->scrollUpArrow,
 							viewShift);
 	}
@@ -245,6 +266,7 @@ void shiftItemsDown(){
 	for (i = 40; i >= 0; i--) {
 		if (getNextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL) {
 			thisInventoryView->viewedItems[0] = thisInventoryView->playerItems->inventoryArr[i];
+			break;
 		}
 		if (tmpItem == thisInventoryView->playerItems->inventoryArr[i]) {
 			getNextItem = 1;
@@ -267,6 +289,7 @@ void shiftItemsUp(){
 	for (i = 0; i < 40; i++) {
 		if (getNextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL) {
 			thisInventoryView->viewedItems[lastIndex] = thisInventoryView->playerItems->inventoryArr[i];
+			break;
 		}
 		if (tmpItem == thisInventoryView->playerItems->inventoryArr[i]) {
 			getNextItem = 1;
