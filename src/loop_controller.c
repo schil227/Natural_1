@@ -121,7 +121,11 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 				break;
 			case 0x0D: //enter
 			{
+				item * tmpItem = getSelectedItem();
 
+				if(tmpItem != NULL){
+					modifyItem(tmpItem, player);
+				}
 			}
 				break;
 			}

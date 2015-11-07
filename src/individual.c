@@ -294,18 +294,44 @@ int addItemToIndividual(inventory * backpack, item * newItem){
 	}
 }
 
+void modifyItem(item * theItem, individual * player) {
+	char type = theItem->type;
+	switch (type) {
+		case 'w': {
+			if(theItem->isEquipt){
+				theItem->isEquipt = 0;
+			}else{
+				tryEquipItem(player->backpack, theItem);
+			}
+		}
+		break;
+		case 'a': {
+			if(theItem->isEquipt){
+				theItem->isEquipt = 0;
+			}else{
+				tryEquipItem(player, theItem);
+			}
+		}
+		break;
+		case 'i': {
+
+		}
+	}
+}
+
 /*
  * HEY!
  * When you actually implement this, check that thisItem->type isnt
  * a normal item before hand, e.g. type != 'i'
  */
-void equipItem(inventory * backpack, item * thisItem){
+void tryEquipItem(inventory * backpack, item * thisItem){
 	int i;
+	item * tmpItem;
 
-	for(i = 0; i < backpack->inventorySize; i++){
-		if(backpack->inventoryArr[i]->type == thisItem->type){
-			backpack->inventoryArr[i]->isEquipt = 0;
-			break;
+	for(i = 0; i < 40; i++){
+		tmpItem = backpack->inventoryArr[i];
+		if(tmpItem != NULL && tmpItem != thisItem && tmpItem->type == thisItem->type && tmpItem->isEquipt){
+			return;
 		}
 	}
 
@@ -316,7 +342,7 @@ item * removeItemFromInventory(inventory * backpack, item * thisItem){
 	int i;
 	item * removedItem;
 
-	for(i = 0; i < backpack->inventorySize; i++){
+	for(i = 0; i < 40; i++){
 		if(backpack->inventoryArr[i] == thisItem){
 			removedItem = backpack->inventoryArr[i];
 			removedItem->isEquipt = 0;

@@ -57,7 +57,7 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 	RECT textBoxRect;
 		textBoxRect.bottom = thisInventoryView->inventoryBackground->height + thisInventoryView->inventoryBackground->y;
 		textBoxRect.top =  thisInventoryView->inventoryBackground->y+60;
-		textBoxRect.right = thisInventoryView->inventoryBackground->width;
+		textBoxRect.right = thisInventoryView->inventoryBackground->width + thisInventoryView->inventoryBackground->x;
 		textBoxRect.left = thisInventoryView->inventoryBackground->x + 85;
 
 	//draw inventory view
@@ -68,6 +68,8 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 
 	for(i = 0; i < thisInventoryView->slotsPerScreen; i++){
 		if(thisInventoryView->viewedItems[i] != NULL){
+			char itemStr[80];
+			buildItemStr(itemStr, thisInventoryView->viewedItems[i]);
 
 			//draw item frame
 			drawUnboundCharacterByPixels(hdc, hdcBuffer,
@@ -86,7 +88,7 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 			//draw item text
 			SetTextColor(hdcBuffer, RGB(255, 200, 0));
 			SetBkMode(hdcBuffer, TRANSPARENT);
-			DrawText(hdcBuffer,thisInventoryView->viewedItems[i]->name, -1, &textBoxRect, DT_SINGLELINE); //thisInventoryView->viewedItems[i]->name
+			DrawText(hdcBuffer, itemStr, -1, &textBoxRect, DT_SINGLELINE); //thisInventoryView->viewedItems[i]->name
 			SetTextColor(hdcBuffer, RGB(0, 0, 0));
 			textBoxRect.top = textBoxRect.top + 50;
 
@@ -116,6 +118,14 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 							thisInventoryView->inventoryBackground->y + 20,
 							thisInventoryView->scrollUpArrow,
 							viewShift);
+	}
+}
+
+void buildItemStr(char itemStr[80], item * theItem){
+	strcpy(itemStr, theItem->name);
+
+	if((theItem->type == 'w' || theItem->type == 'a') && theItem->isEquipt){
+		strcat(itemStr, " (E)");
 	}
 }
 
@@ -294,5 +304,14 @@ void shiftItemsUp(){
 		if (tmpItem == thisInventoryView->playerItems->inventoryArr[i]) {
 			getNextItem = 1;
 		}
+	}
+}
+
+item * getSelectedItem(){
+	//check if item array is empty
+	if(thisInventoryView->viewedItems[0] == 0){
+		return NULL;
+	}else{
+		return thisInventoryView->viewedItems[thisInventoryView->selectedItemIndex];
 	}
 }
