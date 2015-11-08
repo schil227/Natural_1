@@ -19,6 +19,7 @@ typedef struct {
 	//type specific info
 	char weponDamageType;//(b)lunt, (c)hop, (s)lash, (p)ierce
 	char armorClass;//(l)ight, (m)edium, (h)eavy
+	char itemType;//(c)onsumable, (d)uration
 
 	short int totalHealthMod;
 	short int healthMod;

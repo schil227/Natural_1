@@ -125,6 +125,8 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 
 				if(tmpItem != NULL){
 					modifyItem(tmpItem, player);
+					refreshInventory(player->backpack);
+//					*inventoryMode = 0;
 				}
 			}
 				break;

@@ -162,7 +162,7 @@ void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
 void createEquipItemFromFile(char line[160], enemies * enemiesList){
 	item * newItem;
 	char name[32];
-	char type, weaponDamType, armorClass;
+	char type, weaponDamType, armorClass, itemType;
 	int i, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
@@ -185,6 +185,9 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 
 		value = strtok(NULL,",");
 		armorClass = value[0];
+
+		value = strtok(NULL,",");
+		itemType = value[0];
 
 		value = strtok(NULL,",");
 		r = atoi(value);
@@ -254,7 +257,7 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 		value = strtok(NULL,",");
 		isEquipt = atoi(value);
 
-		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass,
+		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass, itemType,
 				totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
@@ -272,7 +275,7 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 item * createFieldItemFromFile(char line[160]){
 	item * newItem;
 	char name[32];
-	char type, weaponDamType, armorClass;
+	char type, weaponDamType, armorClass, itemType;
 	int i, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
@@ -292,6 +295,9 @@ item * createFieldItemFromFile(char line[160]){
 
 		value = strtok(NULL,",");
 		armorClass = value[0];
+
+		value = strtok(NULL,",");
+		itemType = value[0];
 
 		value = strtok(NULL,",");
 		r = atoi(value);
@@ -358,7 +364,7 @@ item * createFieldItemFromFile(char line[160]){
 		value = strtok(NULL,",");
 		lightiningWeaknessMod = atoi(value);
 
-		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass,
+		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, weaponDamType, armorClass, itemType,
 				totalHealthMod,healthMod,totalManaMod,manaMod,acMod, attackMod,damMod,maxDamMod,minDamMod,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,

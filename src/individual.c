@@ -95,9 +95,6 @@ void destroyIndividual(individual* thisIndividual){
 	if(thisIndividual->playerCharacter){ //Null check
 		destroyCharacter(thisIndividual->playerCharacter);
 	}
-//	if(thisIndividual->name){ //Null check
-//		free(thisIndividual->name);
-//	}
 
 	free(thisIndividual);
 
@@ -108,7 +105,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int totalAttack = d20 + thisIndividual->attack;
 	int totalDef = targetIndividual->AC;
 	int i;
-
+	item * tmpItem;
 	if(d20 == 20){
 		return damageIndividual(thisIndividual, targetIndividual, 1);
 
@@ -117,16 +114,18 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 		return 0;
 	}
 
-	for(i = 0; i < thisIndividual->backpack->inventorySize; i++){
-		if(thisIndividual->backpack->inventoryArr[i]->isEquipt){
-			 totalAttack += thisIndividual->backpack->inventoryArr[i]->attackMod;
+	for(i = 0; i < 40; i++){
+		tmpItem = thisIndividual->backpack->inventoryArr[i];
+		if(tmpItem != NULL && tmpItem->isEquipt){
+			 totalAttack += tmpItem->attackMod;
 		}
 	}
 
 
-	for(i = 0; i < targetIndividual->backpack->inventorySize; i++){
-		if(targetIndividual->backpack->inventoryArr[i]->isEquipt){
-			totalDef += targetIndividual->backpack->inventoryArr[i]->acMod;
+	for(i = 0; i < 40; i++){
+		tmpItem = thisIndividual->backpack->inventoryArr[i];
+		if(tmpItem != NULL && tmpItem->isEquipt){
+			totalDef += tmpItem->acMod;
 		}
 	}
 
@@ -147,10 +146,10 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 
 	thisIndividual->hasAttacked = 1;
 
-	for(i = 0; i < thisIndividual->backpack->inventorySize; i++){
+	for(i = 0; i < 40; i++){
 		tmpItem = thisIndividual->backpack->inventoryArr[i];
 
-		if(tmpItem->isEquipt){
+		if(tmpItem != NULL && tmpItem->isEquipt){
 
 			if(tmpItem->type == 'w'){
 				attackType = tmpItem->weponDamageType;
@@ -198,32 +197,37 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 
 int calcDR(individual * targetIndividual, char attackType){
 	int i, totalDR = 0;
+	item * tmpItem;
 	switch (attackType) {
 	case 'b':
-		for (i = 0; i < targetIndividual->backpack->inventorySize; i++) {
-			if (targetIndividual->backpack->inventoryArr[i]->isEquipt) {
-				totalDR += targetIndividual->backpack->inventoryArr[i]->bluntDRMod;
+		for (i = 0; i < 40; i++) {
+			tmpItem = targetIndividual->backpack->inventoryArr[i];
+			if (tmpItem != NULL && tmpItem->isEquipt) {
+				totalDR += tmpItem->bluntDRMod;
 			}
 		}
 		break;
 	case 'c':
-		for (i = 0; i < targetIndividual->backpack->inventorySize; i++) {
-			if (targetIndividual->backpack->inventoryArr[i]->isEquipt) {
-				totalDR += targetIndividual->backpack->inventoryArr[i]->chopDRMod;
+		for (i = 0; i < 40; i++) {
+			tmpItem = targetIndividual->backpack->inventoryArr[i];
+			if (tmpItem != NULL && tmpItem->isEquipt) {
+				totalDR += tmpItem->chopDRMod;
 			}
 		}
 		break;
 	case 's':
-		for (i = 0; i < targetIndividual->backpack->inventorySize; i++) {
-			if (targetIndividual->backpack->inventoryArr[i]->isEquipt) {
-				totalDR += targetIndividual->backpack->inventoryArr[i]->slashDRMod;
+		for (i = 0; i < 40; i++) {
+			tmpItem = targetIndividual->backpack->inventoryArr[i];
+			if (tmpItem != NULL && tmpItem->isEquipt) {
+				totalDR += tmpItem->slashDRMod;
 			}
 		}
 		break;
 	case 'p':
-		for (i = 0; i < targetIndividual->backpack->inventorySize; i++) {
-			if (targetIndividual->backpack->inventoryArr[i]->isEquipt) {
-				totalDR += targetIndividual->backpack->inventoryArr[i]->pierceDRMod;
+		for (i = 0; i < 40; i++) {
+			tmpItem = targetIndividual->backpack->inventoryArr[i];
+			if (tmpItem != NULL && tmpItem->isEquipt) {
+				totalDR += tmpItem->pierceDRMod;
 			}
 		}
 		break;
@@ -277,20 +281,20 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftDat
 
 }
 
-int addItemToIndividual(inventory * backpack, item * newItem){
-	int i, availableSpot;
-	if(backpack->inventorySize < 40){
-		for(i = 0; i < 40; i++){
-			if(backpack->inventoryArr[i] == NULL){
-				backpack->inventoryArr[backpack->inventorySize] = newItem;
-				backpack->inventorySize++;
-				return 1;
-			}
-		}
+item * removeItemFromInventory(inventory * backpack, item * thisItem){
+	int i;
+	item * removedItem;
 
-		return 0;
-	}else{
-		return 0;
+	for(i = 0; i < 40; i++){
+		if(backpack->inventoryArr[i] == thisItem){
+			removedItem = backpack->inventoryArr[i];
+			removedItem->isEquipt = 0;
+
+			backpack->inventoryArr[i] = NULL;
+			backpack->inventorySize--;
+
+			return removedItem;
+		}
 	}
 }
 
@@ -314,16 +318,14 @@ void modifyItem(item * theItem, individual * player) {
 		}
 		break;
 		case 'i': {
-
+			if(theItem->itemType = 'c'){ //consume item
+				consumeItem(player, theItem);
+				removeItemFromInventory(player->backpack, theItem);
+			}
 		}
 	}
 }
 
-/*
- * HEY!
- * When you actually implement this, check that thisItem->type isnt
- * a normal item before hand, e.g. type != 'i'
- */
 void tryEquipItem(inventory * backpack, item * thisItem){
 	int i;
 	item * tmpItem;
@@ -338,21 +340,60 @@ void tryEquipItem(inventory * backpack, item * thisItem){
 	thisItem->isEquipt = 1;
 }
 
-item * removeItemFromInventory(inventory * backpack, item * thisItem){
-	int i;
-	item * removedItem;
 
-	for(i = 0; i < 40; i++){
-		if(backpack->inventoryArr[i] == thisItem){
-			removedItem = backpack->inventoryArr[i];
-			removedItem->isEquipt = 0;
 
-			backpack->inventoryArr[i] = NULL;
-			backpack->inventorySize--;
 
-			return removedItem;
+int addItemToIndividual(inventory * backpack, item * newItem){
+	int i, availableSpot;
+	if(backpack->inventorySize < 40){
+		for(i = 0; i < 40; i++){
+			if(backpack->inventoryArr[i] == NULL){
+				backpack->inventoryArr[backpack->inventorySize] = newItem;
+				backpack->inventorySize++;
+				return 1;
+			}
 		}
+
+		return 0;
+	}else{
+		return 0;
 	}
 }
 
+/*
+ * this will affect attributes instantaniously for no duration of time,
+ * meaning atrributes like chopDR are not checked, because they have no meaningful affect.
+ */
+void consumeItem(individual * thisIndividual, item * theItem){
+
+	//note, +/- healthMod
+	if(theItem->healthMod != 0){
+		if(theItem->healthMod > 0){
+			healIndividual(thisIndividual, theItem->healthMod);
+
+		}
+	}
+
+//	if(theItem->manaMod != 0){
+//		if(theItem->manaMod > 0){
+//			restoreMana(thisIndividual, theItem->manaMod);
+//		}
+//	}
+}
+
+void healIndividual(individual * thisIndividual, int hp){
+	if(thisIndividual->totalHP - thisIndividual->hp < hp){
+		thisIndividual->hp = thisIndividual->totalHP;
+	}else{
+		thisIndividual->hp += hp;
+	}
+}
+//
+//void restoreMana(individual * thisIndividual, int mana){
+//	if(thisIndividual->totalHP - thisIndividual->hp < mana){
+//		thisIndividual->hp = thisIndividual->totalHP;
+//	}else{
+//		thisIndividual-> += mana;
+//	}
+//}
 

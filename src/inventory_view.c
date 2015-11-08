@@ -30,6 +30,13 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 
 void refreshInventory(inventory * playerInventory){
 	int i,j=0,availableSlots;
+
+	if(thisInventoryView->viewedItems[0] != NULL){
+		for(i = 0; i < thisInventoryView->slotsPerScreen; i++){
+			thisInventoryView->viewedItems[i] = NULL;
+		}
+	}
+
 	availableSlots = min(thisInventoryView->playerItems->inventorySize, thisInventoryView->slotsPerScreen);
 
 	thisInventoryView->playerItems = playerInventory;
@@ -45,7 +52,18 @@ void refreshInventory(inventory * playerInventory){
 		}
 	}
 
-	if(thisInventoryView->viewedItems[0] != NULL){
+	if(thisInventoryView->selectedItemIndex != 0){
+
+		while(thisInventoryView->selectedItemIndex > 0){
+
+			if(thisInventoryView->viewedItems[thisInventoryView->selectedItemIndex] != NULL){
+				break;
+			}
+
+			thisInventoryView->selectedItemIndex--;
+		}
+
+	}else if(thisInventoryView->viewedItems[0] != NULL){
 		thisInventoryView->selectedItemIndex = 0;
 	}
 
