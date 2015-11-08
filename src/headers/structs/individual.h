@@ -24,6 +24,8 @@ typedef struct {
 
 	short int totalHP;
 	short int hp;
+	short int totalMana;
+	short int mana;
 	short int totalActions;
 	short int remainingActions;
 	short int hasAttacked;

@@ -110,5 +110,7 @@ END
 //items
 3020 BITMAP DISCARDABLE "../images/dagger.bmp"
 3021 BITMAP DISCARDABLE "../images/herb.bmp"
+3022 BITMAP DISCARDABLE "../images/health_potion.bmp"
+3023 BITMAP DISCARDABLE "../images/mana_potion.bmp"
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

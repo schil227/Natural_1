@@ -27,12 +27,11 @@ individual *initIndividual(){
 }
 
 int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
-		int y, int totalHP, int totalActions, int AC, int attack, int maxDam, int minDam,  char critType[3],
+		int y, int totalHP, int totalActions, int totalMana, int AC, int attack, int maxDam, int minDam,  char critType[3],
 		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness){
 
-	int i;
 	BITMAP bm;
 
 	thisIndividual->playerCharacter->imageID = imageID;
@@ -63,6 +62,8 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->hp = totalHP;
 	thisIndividual->totalActions = totalActions;
 	thisIndividual->remainingActions = totalActions;
+	thisIndividual->totalMana = totalMana;
+	thisIndividual->mana = totalMana;
 	thisIndividual->AC = AC;
 	thisIndividual->attack = attack;
 	thisIndividual->maxDam = maxDam;
@@ -348,7 +349,7 @@ int addItemToIndividual(inventory * backpack, item * newItem){
 	if(backpack->inventorySize < 40){
 		for(i = 0; i < 40; i++){
 			if(backpack->inventoryArr[i] == NULL){
-				backpack->inventoryArr[backpack->inventorySize] = newItem;
+				backpack->inventoryArr[i] = newItem;
 				backpack->inventorySize++;
 				return 1;
 			}
@@ -374,11 +375,11 @@ void consumeItem(individual * thisIndividual, item * theItem){
 		}
 	}
 
-//	if(theItem->manaMod != 0){
-//		if(theItem->manaMod > 0){
-//			restoreMana(thisIndividual, theItem->manaMod);
-//		}
-//	}
+	if(theItem->manaMod != 0){
+		if(theItem->manaMod > 0){
+			restoreMana(thisIndividual, theItem->manaMod);
+		}
+	}
 }
 
 void healIndividual(individual * thisIndividual, int hp){
@@ -388,12 +389,12 @@ void healIndividual(individual * thisIndividual, int hp){
 		thisIndividual->hp += hp;
 	}
 }
-//
-//void restoreMana(individual * thisIndividual, int mana){
-//	if(thisIndividual->totalHP - thisIndividual->hp < mana){
-//		thisIndividual->hp = thisIndividual->totalHP;
-//	}else{
-//		thisIndividual-> += mana;
-//	}
-//}
+
+void restoreMana(individual * thisIndividual, int mana){
+	if(thisIndividual->totalMana - thisIndividual->mana < mana){
+		thisIndividual->mana = thisIndividual->totalMana;
+	}else{
+		thisIndividual->mana += mana;
+	}
+}
 

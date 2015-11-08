@@ -30,7 +30,7 @@ int addEnemyToEnemies(enemies * thisEnemies, individual * enemey){
 }
 
 void createEnemyFromLine(individual * newEnemy, char * line){
-	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,range,mvmt,
+	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,range,mvmt,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness;
 	char * name = malloc(sizeof(char) * 32);
@@ -63,6 +63,9 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	totalHP = atoi(value);
 	value = strtok(NULL,",");
 	totalActions = atoi(value);
+	value = strtok(NULL,",");
+	totalMana = atoi(value);
+
 	value = strtok(NULL,",");
 	ac= atoi(value);
 	value = strtok(NULL,",");
@@ -106,7 +109,7 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	lightiningWeakness = atoi(value);
 
 
-	if(defineIndividual(newEnemy,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,ac,attack,maxDam,minDam,critType,range,mvmt,
+	if(defineIndividual(newEnemy,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,critType,range,mvmt,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness)){
 		printf("failed making new enemy\n");
 	}

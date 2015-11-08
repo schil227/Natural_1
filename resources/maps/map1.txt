@@ -12,7 +12,7 @@ r^\<\>g^g^s^s^s^g^g^r>-v-v
 g^p^uvu^g^s^s^s^g^g^g^g^t^
 g^\vp^p^\^x^d^x^g^o^g^t^t^
 r<g^rvr<\vp^p^g^g^g^g^g^g^
-->g^r>c^c^-^-^-^-^-^u^g^rv
+->g^r>c^-^-^-^-^-^-^u^g^rv
 c^r<g^-<c^-vc^c^c^r^g^rvc^
 c^->g^r>r^g^-<c^->g^uvc^c^
 c^->g^g^g^g^r>c^c^u^g^-<c^
