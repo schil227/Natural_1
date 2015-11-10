@@ -292,7 +292,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					enemyAction((thisEnemies->enemies[i]), main_field, player);
 					printField(main_field);
 				}
+
+				startTurn(player);
 			}
+
 
 			break;
 		}
@@ -426,7 +429,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			for (i = 0; i < thisEnemies->numEnemies; i++) {
 				enemyAction((thisEnemies->enemies[i]), main_field, player);
 			}
+
+			startTurn(player);
 		}
+
 
 	} else if(moveMode){
 
@@ -471,7 +477,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				for(i = 0; i < thisEnemies->numEnemies; i++){
 					enemyAction((thisEnemies->enemies[i]), main_field, player);
 				}
+
+				startTurn(player);
 			}
+
 
 			free(thisMoveNodeMeta->rootMoveNode);
 			free(thisMoveNodeMeta);

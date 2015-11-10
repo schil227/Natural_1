@@ -15,12 +15,23 @@ typedef struct{
 	item * inventoryArr[40];
 } inventory;
 
+typedef struct{
+	int remaningTurns;
+	item * thisItem;
+} activeItem;
+
+typedef struct{
+	int activeItemsTotal;
+	activeItem * activeItemArr[40];
+} activeItemList;
+
 typedef struct {
 	character* playerCharacter;
 	char name[32];
 	int ID;
 
 	inventory * backpack;
+	activeItemList * activeItems;
 
 	short int totalHP;
 	short int hp;

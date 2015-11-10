@@ -8,9 +8,9 @@
 
 item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, char name[32],
 		char weaponDamageType, char armorClass, char itemType, int totalHealthMod, int healthMod, int totalManaMod,
-		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int mvmtMod, int rangeMod, int bluntDRMod,
-		int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod, int fireDRMod,
-		int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
+		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
+		int mvmtMod, int rangeMod, int bluntDRMod, int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod,
+		int fireDRMod, int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
 		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt){
 
 	item * thisItem = malloc(sizeof(item));
@@ -58,6 +58,8 @@ item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, ch
 	thisItem->damMod = damMod;
 	thisItem->maxDamMod = maxDamMod;
 	thisItem->minDamMod = minDamMod;
+	thisItem->minTurns = minTurns;
+	thisItem->maxTurns = maxTurns;
 	thisItem->mvmtMod = mvmtMod;
 	thisItem->rangeMod = rangeMod;
 	thisItem->bluntDRMod = bluntDRMod;

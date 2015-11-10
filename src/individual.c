@@ -17,11 +17,16 @@ individual *initIndividual(){
 	toReturn->playerCharacter = malloc(sizeof(character));
 	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
 	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
+
 	toReturn->backpack = malloc(sizeof(inventory));
 	toReturn->backpack->inventorySize = 0;
 
+	toReturn->activeItems = malloc(sizeof(activeItemList));
+	toReturn->activeItems->activeItemsTotal = 0;
+
 	for (i = 0; i < 40; i++) {
 		toReturn->backpack->inventoryArr[i] = NULL;
+		toReturn->activeItems->activeItemArr[i] = NULL;
 	}
 	return toReturn;
 }
@@ -103,8 +108,8 @@ void destroyIndividual(individual* thisIndividual){
 
 int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int d20 = rand() % 20 + 1;
-	int totalAttack = d20 + thisIndividual->attack;
-	int totalDef = targetIndividual->AC;
+	int totalAttack = d20 + getAttributeSum(thisIndividual, "attack");
+	int totalAC = getAttributeSum(targetIndividual,"ac");
 	int i;
 	item * tmpItem;
 	if(d20 == 20){
@@ -115,25 +120,10 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 		return 0;
 	}
 
-	for(i = 0; i < 40; i++){
-		tmpItem = thisIndividual->backpack->inventoryArr[i];
-		if(tmpItem != NULL && tmpItem->isEquipt){
-			 totalAttack += tmpItem->attackMod;
-		}
-	}
-
-
-	for(i = 0; i < 40; i++){
-		tmpItem = thisIndividual->backpack->inventoryArr[i];
-		if(tmpItem != NULL && tmpItem->isEquipt){
-			totalDef += tmpItem->acMod;
-		}
-	}
-
-	if(totalAttack >= totalDef){ //Tie goes to attacker, of course.
+	if(totalAttack >= totalAC){ //Tie goes to attacker, of course.
 		return damageIndividual(thisIndividual, targetIndividual, 0);
 	}else{ //miss
-		sendMissedDialog(thisIndividual->name,targetIndividual->name,d20,totalDef);
+		sendMissedDialog(thisIndividual->name,targetIndividual->name,d20,totalAC);
 		return 0;
 	}
 }
@@ -142,23 +132,17 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 	int totalDamage = 0, i, totalDR, maxDamTotal, minDamTotal;
 	char attackType = 'b'; //for now, default is blunt (punching)
 	item * tmpItem;
-	maxDamTotal = thisIndividual->maxDam;
-	minDamTotal = thisIndividual->minDam;
+	maxDamTotal = getAttributeSum(thisIndividual, "maxDam");
+	minDamTotal = getAttributeSum(thisIndividual, "minDam");
 
 	thisIndividual->hasAttacked = 1;
 
 	for(i = 0; i < 40; i++){
 		tmpItem = thisIndividual->backpack->inventoryArr[i];
 
-		if(tmpItem != NULL && tmpItem->isEquipt){
-
-			if(tmpItem->type == 'w'){
-				attackType = tmpItem->weponDamageType;
-				maxDamTotal += tmpItem->maxDamMod;
-				minDamTotal += tmpItem->minDamMod;
-			}
-
-			totalDamage += tmpItem->damMod;
+		if(tmpItem != NULL && tmpItem->isEquipt && tmpItem->type == 'w'){
+			attackType = tmpItem->weponDamageType;
+			break;
 		}
 	}
 
@@ -201,36 +185,16 @@ int calcDR(individual * targetIndividual, char attackType){
 	item * tmpItem;
 	switch (attackType) {
 	case 'b':
-		for (i = 0; i < 40; i++) {
-			tmpItem = targetIndividual->backpack->inventoryArr[i];
-			if (tmpItem != NULL && tmpItem->isEquipt) {
-				totalDR += tmpItem->bluntDRMod;
-			}
-		}
+		totalDR += getAttributeSum(targetIndividual, "bluntDR");
 		break;
 	case 'c':
-		for (i = 0; i < 40; i++) {
-			tmpItem = targetIndividual->backpack->inventoryArr[i];
-			if (tmpItem != NULL && tmpItem->isEquipt) {
-				totalDR += tmpItem->chopDRMod;
-			}
-		}
+		totalDR += getAttributeSum(targetIndividual, "chopDR");
 		break;
 	case 's':
-		for (i = 0; i < 40; i++) {
-			tmpItem = targetIndividual->backpack->inventoryArr[i];
-			if (tmpItem != NULL && tmpItem->isEquipt) {
-				totalDR += tmpItem->slashDRMod;
-			}
-		}
+		totalDR += getAttributeSum(targetIndividual, "slashDR");
 		break;
 	case 'p':
-		for (i = 0; i < 40; i++) {
-			tmpItem = targetIndividual->backpack->inventoryArr[i];
-			if (tmpItem != NULL && tmpItem->isEquipt) {
-				totalDR += tmpItem->pierceDRMod;
-			}
-		}
+		totalDR += getAttributeSum(targetIndividual, "pierceDR");
 		break;
 	}
 
@@ -239,10 +203,38 @@ int calcDR(individual * targetIndividual, char attackType){
 
 int calcCrit(individual * thisIndividual, int maxDamTotal, int minDamTotal){
 	if(strcmp(thisIndividual->critType, "MAX") == 0){
-		return thisIndividual->maxDam;
+		return getAttributeSum(thisIndividual, "maxDam");
 	} else if(strcmp(thisIndividual->critType, "DUB") == 0){
 		int attackDamage = rand() % (maxDamTotal - minDamTotal);
 		attackDamage = (attackDamage + minDamTotal) * 2;
+	}
+}
+
+void startTurn(individual * thisIndividual){
+	int i, itemsPassed = 0;
+	activeItem * tmpActiveItem;
+
+	for(i = 0; i < 40; i++){
+		tmpActiveItem = thisIndividual->activeItems->activeItemArr[i];
+
+		if(tmpActiveItem != NULL){
+			tmpActiveItem->remaningTurns--;
+
+			if(tmpActiveItem->remaningTurns <= 0){
+				free(tmpActiveItem->thisItem);
+				free(tmpActiveItem);
+				thisIndividual->activeItems->activeItemArr[i] = NULL;
+				thisIndividual->activeItems->activeItemsTotal--;
+			}else{
+				consumeItem(thisIndividual,tmpActiveItem->thisItem);
+				itemsPassed++;
+			}
+
+		}
+
+		if(itemsPassed >= thisIndividual->activeItems->activeItemsTotal){
+			break;
+		}
 	}
 }
 
@@ -299,14 +291,14 @@ item * removeItemFromInventory(inventory * backpack, item * thisItem){
 	}
 }
 
-void modifyItem(item * theItem, individual * player) {
+void modifyItem(item * theItem, individual * thisIndividual) {
 	char type = theItem->type;
 	switch (type) {
 		case 'w': {
 			if(theItem->isEquipt){
 				theItem->isEquipt = 0;
 			}else{
-				tryEquipItem(player->backpack, theItem);
+				tryEquipItem(thisIndividual->backpack, theItem);
 			}
 		}
 		break;
@@ -314,14 +306,20 @@ void modifyItem(item * theItem, individual * player) {
 			if(theItem->isEquipt){
 				theItem->isEquipt = 0;
 			}else{
-				tryEquipItem(player, theItem);
+				tryEquipItem(thisIndividual, theItem);
 			}
 		}
 		break;
 		case 'i': {
-			if(theItem->itemType = 'c'){ //consume item
-				consumeItem(player, theItem);
-				removeItemFromInventory(player->backpack, theItem);
+			if(theItem->itemType == 'c'){
+				consumeItem(thisIndividual, theItem);
+				free(removeItemFromInventory(thisIndividual->backpack, theItem));
+			}else if(theItem->itemType == 'd'){
+				if(thisIndividual->activeItems->activeItemsTotal < 40){
+					consumeItem(thisIndividual, theItem);
+					addItemToActiveItemList(thisIndividual, theItem);
+					removeItemFromInventory(thisIndividual->backpack, theItem);
+				}
 			}
 		}
 	}
@@ -341,8 +339,30 @@ void tryEquipItem(inventory * backpack, item * thisItem){
 	thisItem->isEquipt = 1;
 }
 
+void addItemToActiveItemList(individual * thisIndividual, item * theItem){
+	int i, numTurns = 0;
 
+		for(i = 0; i < 40; i++){
 
+			if(thisIndividual->activeItems->activeItemArr[i] == NULL){
+				activeItem * newActiveItem = malloc(sizeof(activeItem));
+				newActiveItem->thisItem = theItem;
+
+				if(theItem->maxTurns <= theItem->minTurns){
+					numTurns = theItem->minTurns;
+				}else{
+					numTurns = (rand() % (theItem->maxTurns - theItem->minTurns)) + theItem->minTurns;
+				}
+
+				newActiveItem->remaningTurns = numTurns;
+
+				thisIndividual->activeItems->activeItemArr[i] = newActiveItem;
+				thisIndividual->activeItems->activeItemsTotal++;
+				break;
+			}
+		}
+
+}
 
 int addItemToIndividual(inventory * backpack, item * newItem){
 	int i, availableSpot;
@@ -354,11 +374,9 @@ int addItemToIndividual(inventory * backpack, item * newItem){
 				return 1;
 			}
 		}
-
-		return 0;
-	}else{
-		return 0;
 	}
+
+	return 0;
 }
 
 /*
@@ -382,6 +400,10 @@ void consumeItem(individual * thisIndividual, item * theItem){
 	}
 }
 
+void activateDurationItem(individual * individual, item * thisItem){
+
+}
+
 void healIndividual(individual * thisIndividual, int hp){
 	if(thisIndividual->totalHP - thisIndividual->hp < hp){
 		thisIndividual->hp = thisIndividual->totalHP;
@@ -398,3 +420,272 @@ void restoreMana(individual * thisIndividual, int mana){
 	}
 }
 
+
+int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
+	int toReturn = 0;
+
+	if(strcmp("totalHealth",attribute) == 0 ){
+		return thisIndividual->totalHP;
+	} else if(strcmp("health",attribute) == 0 ){
+		return thisIndividual->hp;
+	} else if(strcmp("totalMana",attribute) == 0 ){
+		return thisIndividual->totalMana;
+	} else if(strcmp("mana",attribute) == 0 ){
+		return thisIndividual->mana;
+	} else if(strcmp("minTurns",attribute) == 0 ){
+		return 0;
+	} else if(strcmp("maxTurns",attribute) == 0 ){
+		return 0;
+	} else if(strcmp("ac",attribute) == 0 ){
+		return thisIndividual->AC;
+	} else if(strcmp("attack",attribute) == 0 ){
+		return thisIndividual->attack;
+	} else if(strcmp("dam",attribute) == 0 ){
+		return 0;
+	} else if(strcmp("maxDam",attribute) == 0 ){
+		return thisIndividual->maxDam;
+	} else if(strcmp("minDam",attribute) == 0 ){
+		return thisIndividual->minDam;
+	} else if(strcmp("mvmt",attribute) == 0 ){
+		return thisIndividual->mvmt;
+	} else if(strcmp("range",attribute) == 0 ){
+		return thisIndividual->range;
+	} else if(strcmp("bluntDR",attribute) == 0 ){
+		return thisIndividual->bluntDR;
+	} else if(strcmp("chopDR",attribute) == 0 ){
+		return thisIndividual->chopDR;
+	} else if(strcmp("slashDR",attribute) == 0 ){
+		return thisIndividual->slashDR;
+	} else if(strcmp("pierceDR",attribute) == 0 ){
+		return thisIndividual->pierceDR;
+	} else if(strcmp("earthDR",attribute) == 0 ){
+		return thisIndividual->earthDR;
+	} else if(strcmp("fireDR",attribute) == 0 ){
+		return thisIndividual->fireDR;
+	} else if(strcmp("waterDR",attribute) == 0 ){
+		return thisIndividual->waterDR;
+	} else if(strcmp("lightningDR",attribute) == 0 ){
+		return thisIndividual->lightningDR;
+	} else if(strcmp("earthWeakness",attribute) == 0 ){
+		return thisIndividual->earthWeakness;
+	} else if(strcmp("fireWeakness",attribute) == 0 ){
+		return thisIndividual->fireWeakness;
+	} else if(strcmp("waterWeakness",attribute) == 0 ){
+		return thisIndividual->waterWeakness;
+	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
+		return thisIndividual->lightiningWeakness;
+	}
+
+	return toReturn;
+}
+
+int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
+	int toReturn = 0;
+	if(strcmp("totalHealth",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->totalHealthMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->totalHealthMod;
+		 }
+	} else if(strcmp("health",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->healthMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->healthMod;
+		 }
+	} else if(strcmp("totalMana",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->totalManaMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->totalManaMod;
+		 }
+	} else if(strcmp("mana",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->manaMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->manaMod;
+		 }
+	} else if(strcmp("minTurns",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->minTurns;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->minTurns;
+		 }
+	} else if(strcmp("maxTurns",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->maxTurns;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->maxTurns;
+		 }
+	} else if(strcmp("ac",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->acMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->acMod;
+		 }
+	} else if(strcmp("attack",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->attackMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->attackMod;
+		 }
+	} else if(strcmp("dam",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->damMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->damMod;
+		 }
+	} else if(strcmp("maxDam",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->maxDamMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->maxDamMod;
+		 }
+	} else if(strcmp("minDam",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->minDamMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->minDamMod;
+		 }
+	} else if(strcmp("mvmt",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->mvmtMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->mvmtMod;
+		 }
+	} else if(strcmp("range",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->rangeMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->rangeMod;
+		 }
+	} else if(strcmp("bluntDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->bluntDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->bluntDRMod;
+		 }
+	} else if(strcmp("chopDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->chopDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->chopDRMod;
+		 }
+	} else if(strcmp("slashDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->slashDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->slashDRMod;
+		 }
+	} else if(strcmp("pierceDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->pierceDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->pierceDRMod;
+		 }
+	} else if(strcmp("earthDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->earthDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->earthDRMod;
+		 }
+	} else if(strcmp("fireDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->fireDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->fireDRMod;
+		 }
+	} else if(strcmp("waterDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->waterDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->waterDRMod;
+		 }
+	} else if(strcmp("lightningDR",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->lightningDRMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->lightningDRMod;
+		 }
+	} else if(strcmp("earthWeakness",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->earthWeaknessMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->earthWeaknessMod;
+		 }
+	} else if(strcmp("fireWeakness",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->fireWeaknessMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->fireWeaknessMod;
+		 }
+	} else if(strcmp("waterWeakness",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->waterWeaknessMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->waterWeaknessMod;
+		 }
+	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
+		 if(thisItem != NULL){
+			 toReturn += thisItem->lightiningWeaknessMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->lightiningWeaknessMod;
+		 }
+	}
+	return toReturn;
+}
+
+int getAttributeSum(individual * thisIndividual, char * attribute){
+	int toReturn = 0, i, itemTotal = 0, activeItemTotal = 0;
+
+	toReturn += getAttributeFromIndividual(thisIndividual, attribute);
+
+	for(i = 0; i < 40; i++){
+
+		// have all items been used?
+		if(itemTotal == thisIndividual->backpack->inventorySize &&
+			activeItemTotal == thisIndividual->activeItems->activeItemsTotal){
+			break;
+		}
+		if(thisIndividual->activeItems->activeItemArr[i] != NULL){
+			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i],
+								thisIndividual->activeItems->activeItemArr[i]->thisItem, attribute);
+			activeItemTotal++;
+		}else{
+			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i],
+								NULL, attribute);
+		}
+
+		if(thisIndividual->backpack->inventoryArr[i] != NULL){
+			itemTotal++;
+		}
+
+	}
+
+	return toReturn;
+}

@@ -27,6 +27,9 @@ typedef struct {
 	short int totalManaMod;
 	short int manaMod;
 
+	short int minTurns;
+	short int maxTurns;
+
 	short int acMod;
 	short int attackMod;
 	short int damMod;
