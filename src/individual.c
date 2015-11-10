@@ -482,175 +482,175 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 	int toReturn = 0;
 	if(strcmp("totalHealth",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->totalHealthMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->totalHealthMod;
 		 }
 	} else if(strcmp("health",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->healthMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->healthMod;
 		 }
 	} else if(strcmp("totalMana",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->totalManaMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->totalManaMod;
 		 }
 	} else if(strcmp("mana",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->manaMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->manaMod;
 		 }
 	} else if(strcmp("minTurns",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->minTurns;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->minTurns;
 		 }
 	} else if(strcmp("maxTurns",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->maxTurns;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->maxTurns;
 		 }
 	} else if(strcmp("ac",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->acMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->acMod;
 		 }
 	} else if(strcmp("attack",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->attackMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->attackMod;
 		 }
 	} else if(strcmp("dam",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->damMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->damMod;
 		 }
 	} else if(strcmp("maxDam",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->maxDamMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->maxDamMod;
 		 }
 	} else if(strcmp("minDam",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->minDamMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->minDamMod;
 		 }
 	} else if(strcmp("mvmt",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->mvmtMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->mvmtMod;
 		 }
 	} else if(strcmp("range",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->rangeMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->rangeMod;
 		 }
 	} else if(strcmp("bluntDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->bluntDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->bluntDRMod;
 		 }
 	} else if(strcmp("chopDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->chopDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->chopDRMod;
 		 }
 	} else if(strcmp("slashDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->slashDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->slashDRMod;
 		 }
 	} else if(strcmp("pierceDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->pierceDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->pierceDRMod;
 		 }
 	} else if(strcmp("earthDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->earthDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->earthDRMod;
 		 }
 	} else if(strcmp("fireDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->fireDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->fireDRMod;
 		 }
 	} else if(strcmp("waterDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->waterDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->waterDRMod;
 		 }
 	} else if(strcmp("lightningDR",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->lightningDRMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->lightningDRMod;
 		 }
 	} else if(strcmp("earthWeakness",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->earthWeaknessMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->earthWeaknessMod;
 		 }
 	} else if(strcmp("fireWeakness",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->fireWeaknessMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->fireWeaknessMod;
 		 }
 	} else if(strcmp("waterWeakness",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->waterWeaknessMod;
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->waterWeaknessMod;
 		 }
 	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
-		 if(thisItem != NULL){
+		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->lightiningWeaknessMod;
 		 }
 		 if(activeItem != NULL){
@@ -666,7 +666,7 @@ int getAttributeSum(individual * thisIndividual, char * attribute){
 	toReturn += getAttributeFromIndividual(thisIndividual, attribute);
 
 	for(i = 0; i < 40; i++){
-
+		activeItem * tmpActiveItem;
 		// have all items been used?
 		if(itemTotal == thisIndividual->backpack->inventorySize &&
 			activeItemTotal == thisIndividual->activeItems->activeItemsTotal){

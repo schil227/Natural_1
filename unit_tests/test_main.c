@@ -130,6 +130,47 @@ int path_and_attack_test() {
 
 	free(resultArr);
 
+	//warping player to space with herb
+	setIndividualSpace(main_test_field,testPlayer,3,3);
+	attemptGetItemFromField(main_test_field,testPlayer);
+
+	//warping player to space with dagger
+	setIndividualSpace(main_test_field,testPlayer,3,4);
+	attemptGetItemFromField(main_test_field,testPlayer);
+
+	assert(testPlayer->backpack->inventorySize == 2);
+
+	//pre-dagger equip:
+	assert(getAttributeSum(testPlayer,"attack") == 3);
+
+	//equip the dagger
+	modifyItem(testPlayer->backpack->inventoryArr[1], testPlayer);
+
+	//check attack for increase after equip
+	assert(getAttributeSum(testPlayer,"attack") == 4);
+
+	//stunt hp to test herb healing over duration
+	testPlayer->hp -= 8;
+	assert(testPlayer->hp ==  12);
+
+	//consume herb as active duration item
+	modifyItem(testPlayer->backpack->inventoryArr[0], testPlayer);
+
+	//herb heals the player for two
+	assert(testPlayer->hp ==  14);
+
+	startTurn(testPlayer);
+	assert(testPlayer->hp ==  16);
+	startTurn(testPlayer);
+	assert(testPlayer->hp ==  18);
+	startTurn(testPlayer);
+	assert(testPlayer->hp ==  20);
+	startTurn(testPlayer);
+	assert(testPlayer->hp ==  20);
+
+	//warp player back to original spot
+	setIndividualSpace(main_test_field,testPlayer,1,1);
+
 	//move the enemies two more times, attack the player
 	for(i = 0; i < thisTestEnemies->numEnemies; i++){
 		enemyAction((thisTestEnemies->enemies[i]), main_test_field, testPlayer);
