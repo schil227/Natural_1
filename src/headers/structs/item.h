@@ -15,6 +15,7 @@ typedef struct {
 	int ID;
 	char type; // (w)eapon/(a)rmor/(i)tem
 	char name[32];
+	char description[256];
 
 	//type specific info
 	char weponDamageType;//(b)lunt, (c)hop, (s)lash, (p)ierce

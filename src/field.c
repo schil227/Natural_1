@@ -358,19 +358,19 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 		int id, x, y, targetID;
 		char * targetTransitMap = malloc(sizeof(char) * 32);
 
-		char * transitInstance = strtok(line,",");
+		char * transitInstance = strtok(line,";");
 		id = atoi(transitInstance);
 
-		transitInstance = strtok(NULL, ",");
+		transitInstance = strtok(NULL, ";");
 		x = atoi(transitInstance);
 
-		transitInstance = strtok(NULL, ",");
+		transitInstance = strtok(NULL, ";");
 		y = atoi(transitInstance);
 
-		transitInstance = strtok(NULL, ",");
+		transitInstance = strtok(NULL, ";");
 		targetTransitMap = transitInstance;
 
-		transitInstance = strtok(NULL, ",");
+		transitInstance = strtok(NULL, ";");
 		targetID = atoi(transitInstance);
 
 		tmpSpace = getSpaceFromField(thisField,x,y);
