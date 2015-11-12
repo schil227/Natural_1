@@ -439,10 +439,13 @@ int attemptToTransit(field ** thisField, individual * player, enemies * thisEnem
 
 		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
 			int x, y, imageID;
+			char mapName[256];
+			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
-			free(*thisField);
-			*thisField = loadMap(tmpSpace->thisTransitInfo->transitMap,  mapDirectory, player, thisEnemies);
+			destroyField(*thisField);
+			clearEnemies(thisEnemies);
+			*thisField = loadMap(mapName, mapDirectory, player, thisEnemies);
 
 			viewShift->xShift = 0;
 			viewShift->yShift = 0;
@@ -450,8 +453,6 @@ int attemptToTransit(field ** thisField, individual * player, enemies * thisEnem
 			for (y = 0; y < (*thisField)->totalY; y++) {
 				for (x = 0; x < (*thisField)->totalX; x++) {
 					imageID = ((*thisField)->grid[x][y]->background)->imageID;
-					(*thisField)->grid[x][y]->background->image = malloc(
-							sizeof(HBITMAP));
 					(*thisField)->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
 					if ((*thisField)->grid[x][y]->background->image == NULL) {
 						printf("failed\n");

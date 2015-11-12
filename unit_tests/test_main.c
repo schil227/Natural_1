@@ -184,8 +184,6 @@ int path_and_attack_test() {
 	tmpIndividual = thisTestEnemies->enemies[4];
 	assert(tmpIndividual->playerCharacter->x == 3 && tmpIndividual->playerCharacter->y == 1 );
 
-
-
 	//after being attacked 3 times, player health is 14
 	assert(testPlayer->hp == 14);
 
@@ -217,11 +215,9 @@ int path_and_attack_test() {
 	//player was transported to new map, new position is [2,3]
 	assert(testPlayer->playerCharacter->x == 2 && testPlayer->playerCharacter->y == 3);
 
-	free(testPlayer);
 	destroyIndividual(testPlayer);
-	destroyIndividual(tmpIndividual);
-	free(thisTestEnemies);
-	free(main_test_field);
+	clearEnemies(thisTestEnemies);
+	destroyField(main_test_field);
 	destroyConsoleInstance();
 	destroyTheGlobalRegister();
 	return 0;

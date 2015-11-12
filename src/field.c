@@ -328,7 +328,7 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 	fclose(fp);
 
-	clearEnemies(thisEnemies);
+
 	loadEnemies(thisEnemies, enemyMap, directory);
 	loadEnemyItems(thisEnemies, enemyItemMap,directory);
 
@@ -342,6 +342,26 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 	setEnemiesToField(thisField, thisEnemies);
 
 	return thisField;
+}
+
+destroyField(field * thisField){
+	int i,j;
+
+	if(thisField->thisFieldInventory != NULL){
+		free(thisField->thisFieldInventory);
+	}
+
+	for(i = 0; i < 100; i++){
+		for(j = 0; j < 100; j++){
+			if(thisField->grid[i][j] != NULL){
+				free(thisField->grid[i][j]->background);
+				free(thisField->grid[i][j]->thisTransitInfo);
+				free(thisField->grid[i][j]);
+			}
+		}
+	}
+
+	free(thisField);
 }
 
 void makeTransitSpaces(char * transitMap, char* directory, field * thisField, individual * player){
@@ -453,13 +473,20 @@ field* initField(char* fieldFileName){
 	field* thisField = malloc(sizeof(field));
 	FILE * fp = fopen(fieldFileName, "r");
 	char line[80];
-	int init_y = 0, init_x = 0, xIndex, i;
+	int init_y = 0, init_x = 0, xIndex, i, j;
 
 	//used to get rid of the first 4 lines of data (see loadMap)
 	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);
+
+	//init field to null
+	for(i = 0; i < 100; i++){
+		for(j = 0; j < 100; j++){
+			thisField->grid[i][j] = NULL;
+		}
+	}
 
 	while(fgets(line,80,fp) != NULL){
 		init_x = 0;
@@ -507,20 +534,16 @@ field* initField(char* fieldFileName){
 			newSpace->background = backgroundCharacter;
 			newSpace->currentIndividual = NULL;
 			newSpace->thisTransitInfo = NULL;
-//			newSpace->targetMapTransitID = 0;
-//			newSpace->transitID = 0;
-//			newSpace->transitMap = "";
 			thisField->grid[init_x][init_y] = newSpace;
 			init_x++;
 		}
 
 		init_y++;
 
-//		puts(line);
-//		printf("len:%d\n", strlen(line));
 	}
 
 	fclose(fp);
+
 
 	thisField->thisFieldInventory = malloc(sizeof(fieldInventory));
 	thisField->thisFieldInventory->inventorySize = 0;

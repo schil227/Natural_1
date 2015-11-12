@@ -15,8 +15,8 @@ individual *initIndividual(){
 	individual* toReturn = malloc(sizeof(individual));
 //	toReturn->name = malloc(sizeof(char)*32);
 	toReturn->playerCharacter = malloc(sizeof(character));
-	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
-	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
+//	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
+//	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
 
 	toReturn->backpack = malloc(sizeof(inventory));
 	toReturn->backpack->inventorySize = 0;
@@ -98,9 +98,43 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 }
 
 void destroyIndividual(individual* thisIndividual){
+	int i, itemsPassed;
 	if(thisIndividual->playerCharacter){ //Null check
 		destroyCharacter(thisIndividual->playerCharacter);
 	}
+
+	if(thisIndividual->activeItems != NULL){
+		itemsPassed = 0;
+		for(i = 0; i < 40; i++){
+			if(thisIndividual->activeItems->activeItemArr[i] != NULL){
+				free(thisIndividual->activeItems->activeItemArr[i]->thisItem);
+				free(thisIndividual->activeItems->activeItemArr[i]);
+				itemsPassed++;
+			}
+			if(itemsPassed >= thisIndividual->activeItems->activeItemsTotal){
+				break;
+			}
+
+		}
+	}
+
+	free(thisIndividual->activeItems);
+
+	if(thisIndividual->backpack != NULL){
+		itemsPassed = 0;
+		for(i = 0; i < 40; i++){
+			if(thisIndividual->backpack->inventoryArr[i] != NULL){
+				free(thisIndividual->backpack->inventoryArr[i]);
+				itemsPassed++;
+			}
+			if(itemsPassed >= thisIndividual->backpack->inventorySize){
+				break;
+			}
+
+		}
+	}
+
+	free(thisIndividual->backpack);
 
 	free(thisIndividual);
 
