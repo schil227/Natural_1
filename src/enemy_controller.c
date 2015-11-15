@@ -45,7 +45,7 @@ void addNodeToList(node * newNode, node ** nodeList){
 
 
 node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField){
-	node** newActiveNodes = malloc(sizeof(node*)*9);
+	node** newActiveNodes = malloc(sizeof(node)*9);
 	int x;
 	for(x = 0; x < 9; x++){
 		newActiveNodes[x] = NULL;
@@ -139,8 +139,8 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 //	printf("starting!\n");
 	node * startingNode = createNewNode(0,thisX,thisY); //startingSpace);
 	startingNode->previousNode = NULL;
-	node ** allNodes = malloc(sizeof(node*)*300);
-	node ** activeNodes = malloc(sizeof(node*)*100);
+	node ** allNodes = malloc(sizeof(node)*300);
+	node ** activeNodes = malloc(sizeof(node)*100);
 	allNodes[0] = NULL;
 	activeNodes[0] = NULL;
 
@@ -170,7 +170,7 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 		}
 
 		resultArr->size = size;
-		resultArr->nodeArray = malloc(sizeof(node*)*size);
+		resultArr->nodeArray = malloc(sizeof(node)*size);
 
 		tmpNode = endNode;
 
@@ -211,7 +211,7 @@ int spaceIsTaken(node * thisNode, field * thisField){
 
 node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes){
 	int i = 0;
-	node ** newActiveNodes = malloc(sizeof(node*)*300);
+	node ** newActiveNodes = malloc(sizeof(node)*300);
 
 	for(i; i < 300; i++){
 		newActiveNodes[i] = NULL;
@@ -275,14 +275,15 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 }
 
 nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
+	int i;
 	int nodeIndex = max(min(nodePath->size, thisIndividaul->mvmt)-1, 0);
-	nodeArr * nullNode = malloc(sizeof(nodeArr*));
+	nodeArr * nullNode = malloc(sizeof(nodeArr));
 	nullNode->size = 0;
 
 	if(nodeIndex > 0){ //going somewhere
 		node * endNode = nodePath->nodeArray[nodeIndex];
-		node ** allNodes = malloc(sizeof(node*)*300);
-		node ** activeNodes= malloc(sizeof(node*)*300);
+		node ** allNodes = malloc(sizeof(node)*300);
+		node ** activeNodes= malloc(sizeof(node)*300);
 		int i;
 		for(i = 0; i < 300; i++){
 			activeNodes[i] = NULL;
@@ -294,9 +295,23 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes);
 
 		if(targetNode != NULL){
+//			free(endNode);
+//			destroyNodeArr(nodePath);
+//			for(i = 0; i< 300; i++){
+//				free(allNodes[i]);
+//				free(activeNodes[i]);
+//			}
+
 			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetNode->x, targetNode->y);
 		} else {
 			printf("returning null\n");
+//			free(endNode);
+//			destroyNodeArr(nodePath);
+//			for(i = 0; i< 300; i++){
+//				free(allNodes[i]);
+//				free(activeNodes[i]);
+//			}
+
 			return nullNode;
 		}
 	}
@@ -342,7 +357,20 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 		}
 
 	}
+
+	destroyNodeArr(resultArr);
+
 	printf("\n");
 
 	attackIfInRange(enemy,player);
+}
+
+void destroyNodeArr(nodeArr * thisNodeArr){
+	int i;
+
+	for(i = 0; i < thisNodeArr->size; i++){
+		free(thisNodeArr->nodeArray[i]);
+	}
+
+	free(thisNodeArr);
 }

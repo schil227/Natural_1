@@ -376,7 +376,6 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		{
 //			printf("got the time!\n");
 			RECT rec;
-			PAINTSTRUCT ps;
 			HDC hdc = GetDC(hwnd);
 
 			GetClientRect(hwnd, &rec);
@@ -384,7 +383,6 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 			DrawSideBar(hwnd,hdc, rec, player);
 
 
-			EndPaint(hwnd,&ps);
 			ReleaseDC(hwnd, hdc);
 		}
 		break;

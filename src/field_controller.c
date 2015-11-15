@@ -130,6 +130,7 @@ void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 	}
 
 	fclose(enemyFP);
+	free(fullEnemyFile);
 }
 
 void clearEnemies(enemies * thisEnemies){
@@ -153,16 +154,17 @@ void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, itemFile);
 	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
 	FILE * itemFP = fopen(fullEnemyFile, "r");
-	char line[160];
+	char line[512];
 	item * newItem;
 
-	while (fgets(line, 160, itemFP) != NULL) {
+	while (fgets(line, 512, itemFP) != NULL) {
 		createEquipItemFromFile(line, enemiesList);
 	}
 	fclose(itemFP);
+	free(fullEnemyFile);
 }
 
-void createEquipItemFromFile(char line[160], enemies * enemiesList){
+void createEquipItemFromFile(char line[512], enemies * enemiesList){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
@@ -284,7 +286,7 @@ void createEquipItemFromFile(char line[160], enemies * enemiesList){
 
 }
 
-item * createFieldItemFromFile(char line[160]){
+item * createFieldItemFromFile(char line[512]){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
@@ -398,10 +400,10 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, itemFile);
 	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
 	FILE * itemFP = fopen(fullEnemyFile, "r");
-	char line[160];
+	char line[512];
 	item * newItem;
 
-	while (fgets(line, 160, itemFP) != NULL) {
+	while (fgets(line, 512, itemFP) != NULL) {
 		newItem = createFieldItemFromFile(line);
 		if(doesExist(newItem->ID)){
 			addItemToField(thisField->thisFieldInventory, newItem);
@@ -409,6 +411,7 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 
 	}
 	fclose(itemFP);
+	free(fullEnemyFile);
 }
 
 individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey){
@@ -443,7 +446,7 @@ int attemptToTransit(field ** thisField, individual * player, enemies * thisEnem
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
-			destroyField(*thisField);
+			destroyField(*thisField, player);
 			clearEnemies(thisEnemies);
 			*thisField = loadMap(mapName, mapDirectory, player, thisEnemies);
 

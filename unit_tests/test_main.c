@@ -217,7 +217,7 @@ int path_and_attack_test() {
 
 	destroyIndividual(testPlayer);
 	clearEnemies(thisTestEnemies);
-	destroyField(main_test_field);
+	destroyField(main_test_field, NULL);
 	destroyConsoleInstance();
 	destroyTheGlobalRegister();
 	return 0;

@@ -130,6 +130,20 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 				}
 			}
 				break;
+			case 0x44: //(d)escription
+			{
+				item * tmpItem = getSelectedItem();
+
+				if(tmpItem != NULL){
+					char tmpDescription[256];
+					strcpy(tmpDescription, tmpItem->description);
+					char * value = strtok(tmpDescription,"\\");
+					cwrite(value);
+					value = strtok(NULL,"\\");
+					cwrite(value);
+				}
+			}
+				break;
 			}
 		case WM_TIMER:
 		{

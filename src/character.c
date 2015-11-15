@@ -54,7 +54,6 @@ HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
 	SRCINVERT);
 
 	//clean up
-
 	DeleteDC(hdcMemColor);
 	DeleteDC(hdcMemMask);
 
