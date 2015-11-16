@@ -16,7 +16,8 @@
 #include"../src/headers/field_pub_methods.h"
 #include"../src/headers/console_pub_methods.h"
 #include"../src/headers/enemy_controller_pub_methods.h"
-	char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";// "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";
+
+char * mapTestDirectory = ".\\unit_tests\\testMaps\\";//"C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";
 
 individual* testPlayer;
 enemies* thisTestEnemies;

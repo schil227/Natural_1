@@ -28,6 +28,16 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	return 0;
 }
 
+void destroyTheInventoryView(){
+	destroyCharacter(thisInventoryView->inventoryBackground);
+	destroyCharacter(thisInventoryView->itemFrame);
+	destroyCharacter(thisInventoryView->scrollDownArrow);
+	destroyCharacter(thisInventoryView->scrollUpArrow);
+	destroyCharacter(thisInventoryView->selectArrow);
+
+	free(thisInventoryView);
+}
+
 void refreshInventory(inventory * playerInventory){
 	int i,j=0,availableSlots;
 

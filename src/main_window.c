@@ -20,7 +20,7 @@
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameCons[] = "MyConsoleClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
-const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";
+const char * mapDirectory = ".\\resources\\maps\\";//"C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";//".\\resources\\maps\\";
 int mainWindowWidth = 640;
 int mainWindowHeight = 820;
 
@@ -248,7 +248,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		break;
 	case WM_DESTROY:
 		destroyIndividual(player);
+		destroyField(main_field, NULL);
 		destroyConsoleInstance();
+		destroyTheInventoryView();
+		destroyTheGlobalRegister();
 		PostQuitMessage(0);
 		break;
 	case WM_LBUTTONDOWN:
@@ -523,7 +526,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	srand(0);
 	int i;
 
-	test_main();
+//	test_main();
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){

@@ -366,10 +366,10 @@ destroyField(field * thisField, individual * player){
 	for(i = 0; i < 100; i++){
 		for(j = 0; j < 100; j++){
 			if(thisField->grid[i][j] != NULL){
-				free(thisField->grid[i][j]->background);
-				free(thisField->grid[i][j]->thisTransitInfo);
-				thisField->grid[i][j]->currentIndividual = NULL;
-					free(thisField->grid[i][j]->currentIndividual);
+				destroyCharacter(thisField->grid[i][j]->background);
+				if(thisField->grid[i][j]->thisTransitInfo != NULL){
+					free(thisField->grid[i][j]->thisTransitInfo);
+				}
 				free(thisField->grid[i][j]);
 			}
 		}
@@ -507,8 +507,8 @@ field* initField(char* fieldFileName){
 		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
 
 			space* newSpace = malloc(sizeof(space));
-			newSpace->currentIndividual = malloc(sizeof(individual));
-			newSpace->thisTransitInfo = malloc(sizeof(transitInfo));
+			newSpace->currentIndividual = NULL;//malloc(sizeof(individual));
+			newSpace->thisTransitInfo = NULL;// malloc(sizeof(transitInfo));
 			character* backgroundCharacter = malloc(sizeof(character));
 			char currentChar = line[xIndex];
 
@@ -546,8 +546,8 @@ field* initField(char* fieldFileName){
 			}
 
 			newSpace->background = backgroundCharacter;
-			newSpace->currentIndividual = NULL;
-			newSpace->thisTransitInfo = NULL;
+//			newSpace->currentIndividual = NULL;
+//			newSpace->thisTransitInfo = NULL;
 			thisField->grid[init_x][init_y] = newSpace;
 			init_x++;
 		}
