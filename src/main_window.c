@@ -20,7 +20,7 @@
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameCons[] = "MyConsoleClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
-const char * mapDirectory = ".\\resources\\maps\\";//"C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";//".\\resources\\maps\\";
+const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";//".\\resources\\maps\\";//
 int mainWindowWidth = 640;
 int mainWindowHeight = 820;
 
@@ -184,7 +184,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 1, 1, 20, 2, 4, 13, 3, 10, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0)) {
+		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 6, 8, 20, 2, 4, 13, 3, 10, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}

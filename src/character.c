@@ -9,9 +9,6 @@
 #include"./headers/character_pub_methods.h"
 
 
-void destroyCharacter(character* thisCharacter){
-	free(thisCharacter);
-}
 
 void moveCharacter(character* thisCharacter, int newX, int newY){
 	thisCharacter->x = newX;
@@ -83,6 +80,20 @@ character * createCharacter(int imageID, COLORREF rgb, int x, int y){
 
 	return thisCharacter;
 }
+
+void destroyCharacter(character* thisCharacter){
+	if(thisCharacter != NULL){
+		if(thisCharacter->image != NULL){
+			DeleteObject(thisCharacter->image);
+		}
+
+		if(thisCharacter->imageMask != NULL){
+			DeleteObject(thisCharacter->imageMask);
+		}
+	}
+	free(thisCharacter);
+}
+
 
 void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift){
 	HDC hdcMem = CreateCompatibleDC(hdc);

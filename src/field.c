@@ -546,8 +546,6 @@ field* initField(char* fieldFileName){
 			}
 
 			newSpace->background = backgroundCharacter;
-//			newSpace->currentIndividual = NULL;
-//			newSpace->thisTransitInfo = NULL;
 			thisField->grid[init_x][init_y] = newSpace;
 			init_x++;
 		}
