@@ -113,6 +113,8 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness)){
 		printf("failed making new enemy\n");
 	}
+
+	free(name);
 }
 
 void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){

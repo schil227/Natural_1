@@ -422,8 +422,11 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 			setIndividualSpaceFromJump(thisField,player,x,y);
 			player->jumpTarget = 0;
 		}
+
+		free(targetTransitMap);
 	}
 
+	free(fullTransitFile);
 	fclose(enemyFP);
 
 }

@@ -61,9 +61,6 @@ character * createCharacter(int imageID, COLORREF rgb, int x, int y){
 	character * thisCharacter = malloc(sizeof(character));
 	BITMAP bm;
 
-	thisCharacter->image = malloc(sizeof(HBITMAP));
-	thisCharacter->imageMask = malloc(sizeof(HBITMAP));
-
 	thisCharacter->imageID = imageID;
 	thisCharacter->x = x;
 	thisCharacter->y = y;

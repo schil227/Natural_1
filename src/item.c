@@ -14,32 +14,12 @@ item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, ch
 		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt){
 
 	item * thisItem = malloc(sizeof(item));
-	thisItem->itemCharacter = malloc(sizeof(character));
+	thisItem->itemCharacter = createCharacter(imageID,rgb,x,y);
 
-	BITMAP bm;
-
-	thisItem->itemCharacter->imageID = imageID;
-	thisItem->itemCharacter->image = LoadBitmap(GetModuleHandle(NULL),
-	MAKEINTRESOURCE(imageID));
 
 	if (thisItem->itemCharacter->image == NULL) {
-		return 1;
+		return NULL;
 	}
-
-	thisItem->itemCharacter->imageMask = CreateBitmapMask(
-			thisItem->itemCharacter->image, rgb);
-
-	GetObjectA(thisItem->itemCharacter->image, sizeof(bm), &bm);
-
-	thisItem->itemCharacter->height = bm.bmHeight;
-	thisItem->itemCharacter->width = bm.bmWidth;
-
-	thisItem->itemCharacter->x = x;
-	thisItem->itemCharacter->y = y;
-
-	thisItem->itemCharacter->direction = 0;
-
-	thisItem->itemCharacter->rgb = rgb;
 
 	thisItem->ID = ID;
 	thisItem->type = type;

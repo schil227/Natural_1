@@ -196,8 +196,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		for (y = 0; y < main_field->totalY; y++) {
 			for (x = 0; x < main_field->totalX; x++) {
 				imageID = (main_field->grid[x][y]->background)->imageID;
-				main_field->grid[x][y]->background->image = malloc(
-						sizeof(HBITMAP));
 				main_field->grid[x][y]->background->image = LoadBitmap(
 						GetModuleHandle(NULL), imageID);
 				if (main_field->grid[x][y]->background->image == NULL) {

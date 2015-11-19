@@ -25,7 +25,6 @@ console * initConsole(int imageID, int x, int y, int width, int height){
 	thisNewConsole->consoleCharacter->width = width;
 	thisNewConsole->consoleCharacter->height = height;
 	thisNewConsole->consoleCharacter->imageID = imageID;
-	thisNewConsole->consoleCharacter->image = malloc(sizeof(HBITMAP));
 	thisNewConsole->consoleCharacter->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
 
 	thisNewConsole->rowLength = 40;
