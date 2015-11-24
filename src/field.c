@@ -353,7 +353,7 @@ destroyField(field * thisField, individual * player){
 		itemsPassed = 0;
 		for(i = 0; i < 1000; i++){
 			if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
-				free(thisField->thisFieldInventory->inventoryArr[i]);
+				destroyItem(thisField->thisFieldInventory->inventoryArr[i]);
 				itemsPassed++;
 			}
 			if(itemsPassed >= thisField->thisFieldInventory->inventorySize){
@@ -390,7 +390,7 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 	while(fgets(line,80,enemyFP) != NULL){
 		space * tmpSpace;
 		int id, x, y, targetID;
-		char * targetTransitMap = malloc(sizeof(char) * 32);
+		char targetTransitMap[32];// = malloc(sizeof(char) * 32);
 
 		char * transitInstance = strtok(line,";");
 		id = atoi(transitInstance);
@@ -402,19 +402,24 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 		y = atoi(transitInstance);
 
 		transitInstance = strtok(NULL, ";");
-		targetTransitMap = transitInstance;
+		strcpy(targetTransitMap,transitInstance);
 
 		transitInstance = strtok(NULL, ";");
 		targetID = atoi(transitInstance);
 
 		tmpSpace = getSpaceFromField(thisField,x,y);
 
+		if(thisField->grid[x][y]->thisTransitInfo != NULL){
+			free(thisField->grid[x][y]->thisTransitInfo);
+			thisField->grid[x][y]->thisTransitInfo = NULL;
+		}
+
 		thisField->grid[x][y]->thisTransitInfo = malloc(sizeof(transitInfo));
 		thisField->grid[x][y]->thisTransitInfo->transitID = id;
 		strcpy(thisField->grid[x][y]->thisTransitInfo->transitMap,targetTransitMap);
 		thisField->grid[x][y]->thisTransitInfo->targetMapTransitID = targetID;
 
-		printf("defined transit space [%d,%d]: id:%d, map:%s, targetID:%d\n",x,y, id, targetTransitMap, targetID);
+//		printf("defined transit space [%d,%d]: id:%d, map:%s, targetID:%d\n",x,y, id, targetTransitMap, targetID);
 
 		//spawn player at this location
 		if(player->jumpTarget == id){
@@ -423,7 +428,7 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 			player->jumpTarget = 0;
 		}
 
-		free(targetTransitMap);
+//		free(targetTransitMap);
 	}
 
 	free(fullTransitFile);

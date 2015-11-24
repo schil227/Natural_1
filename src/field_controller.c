@@ -409,6 +409,8 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 		newItem = createFieldItemFromFile(line);
 		if(doesExist(newItem->ID)){
 			addItemToField(thisField->thisFieldInventory, newItem);
+		}else{
+			free(newItem);
 		}
 
 	}

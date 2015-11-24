@@ -60,3 +60,13 @@ item * createItem(int imageID, COLORREF rgb, int x, int y, int ID, char type, ch
 	return thisItem;
 }
 
+void destroyItem(item * thisItem){
+	if(thisItem->itemCharacter != NULL){
+		destroyCharacter(thisItem->itemCharacter);
+	}
+
+	free(thisItem->name);
+	free(thisItem->description);
+
+	free(thisItem);
+}
