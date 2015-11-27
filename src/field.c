@@ -387,48 +387,48 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 
 	printf("%s\n",fullTransitFile);
 
-	while(fgets(line,80,enemyFP) != NULL){
-		space * tmpSpace;
-		int id, x, y, targetID;
-		char targetTransitMap[32];// = malloc(sizeof(char) * 32);
+	while (fgets(line, 80, enemyFP) != NULL) {
+		if (line[0] != '#') { //ignore commented-out lines
+			space * tmpSpace;
+			int id, x, y, targetID;
+			char targetTransitMap[32]; // = malloc(sizeof(char) * 32);
 
-		char * transitInstance = strtok(line,";");
-		id = atoi(transitInstance);
+			char * transitInstance = strtok(line, ";");
+			id = atoi(transitInstance);
 
-		transitInstance = strtok(NULL, ";");
-		x = atoi(transitInstance);
+			transitInstance = strtok(NULL, ";");
+			x = atoi(transitInstance);
 
-		transitInstance = strtok(NULL, ";");
-		y = atoi(transitInstance);
+			transitInstance = strtok(NULL, ";");
+			y = atoi(transitInstance);
 
-		transitInstance = strtok(NULL, ";");
-		strcpy(targetTransitMap,transitInstance);
+			transitInstance = strtok(NULL, ";");
+			strcpy(targetTransitMap, transitInstance);
 
-		transitInstance = strtok(NULL, ";");
-		targetID = atoi(transitInstance);
+			transitInstance = strtok(NULL, ";");
+			targetID = atoi(transitInstance);
 
-		tmpSpace = getSpaceFromField(thisField,x,y);
+			tmpSpace = getSpaceFromField(thisField, x, y);
 
-		if(thisField->grid[x][y]->thisTransitInfo != NULL){
-			free(thisField->grid[x][y]->thisTransitInfo);
-			thisField->grid[x][y]->thisTransitInfo = NULL;
+			if (thisField->grid[x][y]->thisTransitInfo != NULL) {
+				free(thisField->grid[x][y]->thisTransitInfo);
+				thisField->grid[x][y]->thisTransitInfo = NULL;
+			}
+
+			thisField->grid[x][y]->thisTransitInfo = malloc(sizeof(transitInfo));
+			thisField->grid[x][y]->thisTransitInfo->transitID = id;
+			strcpy(thisField->grid[x][y]->thisTransitInfo->transitMap,targetTransitMap);
+			thisField->grid[x][y]->thisTransitInfo->targetMapTransitID = targetID;
+
+
+			//spawn player at this location
+			if(player->jumpTarget == id){
+				printf("Jumping player:[%d,%d]\n", x, y);
+				setIndividualSpaceFromJump(thisField,player,x,y);
+				player->jumpTarget = 0;
+			}
+
 		}
-
-		thisField->grid[x][y]->thisTransitInfo = malloc(sizeof(transitInfo));
-		thisField->grid[x][y]->thisTransitInfo->transitID = id;
-		strcpy(thisField->grid[x][y]->thisTransitInfo->transitMap,targetTransitMap);
-		thisField->grid[x][y]->thisTransitInfo->targetMapTransitID = targetID;
-
-//		printf("defined transit space [%d,%d]: id:%d, map:%s, targetID:%d\n",x,y, id, targetTransitMap, targetID);
-
-		//spawn player at this location
-		if(player->jumpTarget == id){
-			printf("Jumping player:[%d,%d]\n", x, y);
-			setIndividualSpaceFromJump(thisField,player,x,y);
-			player->jumpTarget = 0;
-		}
-
-//		free(targetTransitMap);
 	}
 
 	free(fullTransitFile);
@@ -577,48 +577,6 @@ field* initField(char* fieldFileName){
 
 	return thisField;
 }
-
-
-void updateFiled(field* thisField, char* fieldFileName){
-	int x=0,y=0;
-	puts(fieldFileName);
-	FILE * fp = fopen(fieldFileName, "r");
-	char line[80];
-	int fieldSize = (thisField->displayedWidth +1 )* thisField->displayedHeight;
-	int mapIndex = 0;
-	char* theMapChars = malloc(sizeof(char)*fieldSize + 1);
-	printf("fieldsize: %d\n", sizeof(char)*fieldSize + 1);
-//	printf("The Map size %d:\n",strlen(theMapChars));
-	//move down to the right level
-	while(y < thisField->displayedY){
-		fgets(line,100,fp);
-		y++;
-	}
-
-	while(y < (thisField->displayedY + thisField->displayedHeight)){
-		fgets(line,100,fp);
-		x = thisField->displayedX;
-		while(x < thisField->displayedX + thisField->displayedWidth){
-			theMapChars[mapIndex] = line[x];
-			printf("%c\n",line[x]);
-			x++;
-			mapIndex++;
-//			printf("map: %s\n",theMapChars);
-		}
-		y++;
-		theMapChars[mapIndex] ='\n';
-		mapIndex++;
-	}
-	theMapChars[mapIndex] ='\0';
-	//printf("The Map size %d:\n",strlen(theMapChars));
-	printf("%d\n",mapIndex);
-	printf("%s",theMapChars);
-
-
-//	free(theMapChars); //breaking here for some reason
-	fclose(fp);
-}
-
 
 void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
 

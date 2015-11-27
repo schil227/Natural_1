@@ -64,7 +64,7 @@ typedef struct {
 } node;
 
 typedef struct {
-	node ** nodeArray;
+	node * nodeArray[20];
 	int size;
 } nodeArr;
 

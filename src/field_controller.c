@@ -124,10 +124,12 @@ void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 	char line[160];
 
 	while(fgets(line,160,enemyFP) != NULL){
-		individual * newEnemy = initIndividual();
-		createEnemyFromLine(newEnemy, line);
-		if(doesExist(newEnemy->ID)){
-			addEnemyToEnemies(enemiesList,newEnemy);
+		if (line[0] != '#') {
+			individual * newEnemy = initIndividual();
+			createEnemyFromLine(newEnemy, line);
+			if (doesExist(newEnemy->ID)) {
+				addEnemyToEnemies(enemiesList, newEnemy);
+			}
 		}
 	}
 
@@ -160,7 +162,9 @@ void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
 	item * newItem;
 
 	while (fgets(line, 512, itemFP) != NULL) {
-		createEquipItemFromFile(line, enemiesList);
+		if (line[0] != '#') {
+			createEquipItemFromFile(line, enemiesList);
+		}
 	}
 	fclose(itemFP);
 	free(fullEnemyFile);
@@ -406,11 +410,13 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 	item * newItem;
 
 	while (fgets(line, 512, itemFP) != NULL) {
-		newItem = createFieldItemFromFile(line);
-		if(doesExist(newItem->ID)){
-			addItemToField(thisField->thisFieldInventory, newItem);
-		}else{
-			free(newItem);
+		if (line[0] != '#') {
+			newItem = createFieldItemFromFile(line);
+			if (doesExist(newItem->ID)) {
+				addItemToField(thisField->thisFieldInventory, newItem);
+			} else {
+				free(newItem);
+			}
 		}
 
 	}

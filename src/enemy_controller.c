@@ -81,14 +81,13 @@ node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField
 }
 
 node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, field * thisField){
-	node ** newActiveNodes = malloc(sizeof(node*)*100);
-	int x;
+	node * newActiveNodes[100];
+	int x, i=0, numNewActiveNodes = 0;
 	for(x = 0; x < 100; x++){
 		newActiveNodes[x] = NULL;
 	}
-	int numNewActiveNodes = 0;
-	int i = 0;
-//	printf("New pathFind iteration \n");
+
+	//	printf("New pathFind iteration \n");
 
 	while(activeNodes[i] != NULL){
 	//	printf("active node %d \n", i);
@@ -99,8 +98,10 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 		//	printf("checking new node: [%d,%d] == [%d,%d] \n", newNodes[j]->x, newNodes[j]->y, targetX, targetY);
 
 			if(newNodes[j]->x == targetX && newNodes[j]->y == targetY){ //found target space
-		//		printf("found the target space!!! \n");
-				return (newNodes[j]);
+				node * foundTargetSpace = newNodes[j];
+				free(newNodes);
+
+				return (foundTargetSpace);
 			}
 
 			numNewActiveNodes++;
@@ -112,7 +113,7 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 		i++;
 	}
 
-	free(activeNodes);
+//	free(activeNodes);
 
 	if(numNewActiveNodes == 0){
 //		printf("Path not found.");
@@ -127,7 +128,7 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 }
 
 /*
- * getSpaceClosestToPlayer:
+ * getFullNodePath:
  * This is the pathfinding algorithm, which finds the shortest path between two individuals.
  * This function returns a struct nodeArr, which is a list of node pointers (node closest to
  *  thisIndividual first) and the size of the nodePointers
@@ -136,22 +137,19 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
  *  the same movement-cost to traverse (
  */
 nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, int targetY){
-//	printf("starting!\n");
+	int i, size = 0;
 	node * startingNode = createNewNode(0,thisX,thisY); //startingSpace);
 	startingNode->previousNode = NULL;
-	node ** allNodes = malloc(sizeof(node)*300);
-	node ** activeNodes = malloc(sizeof(node)*100);
-	allNodes[0] = NULL;
-	activeNodes[0] = NULL;
+	node * allNodes[300];
 
-	int i;
+	node * activeNodes[100];
 	for(i = 0; i < 300; i++){
 		if(i < 100){
 			activeNodes[i] = NULL;
 		}
 		allNodes[i] = NULL;
 	}
-	allNodes[0] = startingNode; //this works, the other doesn't
+	allNodes[0] = startingNode;
 	activeNodes[0] = startingNode;
 //	printf("starting:3\n");
 	node * endNode = pathFind(targetX, targetY, allNodes, activeNodes, thisField);
@@ -160,7 +158,6 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 	resultArr->size = 0;
 
 	if(endNode->pathLength != -1){
-		int size = 0;
 
 		node * tmpNode = endNode;
 		while(tmpNode->previousNode != NULL){
@@ -170,7 +167,7 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 		}
 
 		resultArr->size = size;
-		resultArr->nodeArray = malloc(sizeof(node)*size);
+//		resultArr->nodeArray = malloc(sizeof(node*)*size);
 
 		tmpNode = endNode;
 
@@ -210,10 +207,10 @@ int spaceIsTaken(node * thisNode, field * thisField){
 }
 
 node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes){
-	int i = 0;
-	node ** newActiveNodes = malloc(sizeof(node)*300);
+	int i;
+	node * newActiveNodes[300];
 
-	for(i; i < 300; i++){
+	for(i = 0; i < 300; i++){
 		newActiveNodes[i] = NULL;
 	}
 
@@ -277,13 +274,12 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
 	int i;
 	int nodeIndex = max(min(nodePath->size, thisIndividaul->mvmt)-1, 0);
-	nodeArr * nullNode = malloc(sizeof(nodeArr));
-	nullNode->size = 0;
+
 
 	if(nodeIndex > 0){ //going somewhere
 		node * endNode = nodePath->nodeArray[nodeIndex];
-		node ** allNodes = malloc(sizeof(node)*300);
-		node ** activeNodes= malloc(sizeof(node)*300);
+		node * allNodes[300];
+		node * activeNodes[300];
 		int i;
 		for(i = 0; i < 300; i++){
 			activeNodes[i] = NULL;
@@ -291,30 +287,23 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 		}
 
 		addNodeToList(endNode, activeNodes);
-//		printf("called from c\n");
+
 		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes);
 
 		if(targetNode != NULL){
-//			free(endNode);
-//			destroyNodeArr(nodePath);
-//			for(i = 0; i< 300; i++){
-//				free(allNodes[i]);
-//				free(activeNodes[i]);
-//			}
 
 			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetNode->x, targetNode->y);
 		} else {
 			printf("returning null\n");
-//			free(endNode);
-//			destroyNodeArr(nodePath);
-//			for(i = 0; i< 300; i++){
-//				free(allNodes[i]);
-//				free(activeNodes[i]);
-//			}
 
+			nodeArr * nullNode = malloc(sizeof(nodeArr));
+			nullNode->size = 0;
 			return nullNode;
 		}
 	}
+
+	nodeArr * nullNode = malloc(sizeof(nodeArr));
+	nullNode->size = 0;
 
 	return nullNode;
 }
@@ -322,7 +311,10 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
 	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 
-	return processPath(thisField, resultArr, thisIndividual);
+	nodeArr * actualPath = processPath(thisField, resultArr, thisIndividual);
+	destroyNodeArr(resultArr);
+
+	return actualPath;
 }
 
 
