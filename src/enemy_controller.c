@@ -45,13 +45,11 @@ void addNodeToList(node * newNode, node ** nodeList){
 
 
 node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField){
-	node** newActiveNodes = malloc(sizeof(node)*9);
-	int x;
+	node** newActiveNodes = malloc(sizeof(node*)*9);
+	int x,dx,dy,newX,newY, index=0;
 	for(x = 0; x < 9; x++){
 		newActiveNodes[x] = NULL;
 	}
-//	space** tmpSpace = NULL;
-	int dx,dy,newX,newY, index=0;
 
 //	printf("getting new active nodes \n");
 	if (parentNode->pathLength < 10) {
@@ -176,6 +174,8 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 			tmpNode = (node*) tmpNode->previousNode;
 		}
 
+	}else{
+		free(endNode);
 	}
 
 	i = 0;
@@ -228,11 +228,7 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 		addNodeToList(activeNodes[i], allNodes);
 
 		if(moveRange > 0){
-//			printf("before 1st call\n");
-			fflush(stdout);
 			node ** tmpNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField); // filters out blocked nodes and nodes in allNodes
-//			printf("1st getNewActiveNodes Call\n");
-			fflush(stdout);
 			int j = 0;
 
 			while(tmpNodes[j] != NULL){
@@ -243,10 +239,12 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 //				printf("j: %d\n",j);
 				j++;
 			}
+			free(tmpNodes);
 		}
 
 		i++;
 	}
+
 
 	if(newActiveNodes[0] == NULL){
 		if( endNode->previousNode == NULL){
@@ -291,10 +289,27 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes);
 
 		if(targetNode != NULL){
+			int targetx, targety;
+			targetx = targetNode->x;
+			targety = targetNode->y;
 
-			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetNode->x, targetNode->y);
+			for (i = 0; i < 300; i++) {
+				free(activeNodes[i]);
+				free(allNodes[i]);
+			}
+
+			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetx, targety);
 		} else {
 			printf("returning null\n");
+
+			for (i = 0; i < 300; i++) {
+				if(activeNodes[i] != NULL){
+					free(activeNodes[i]);
+				}
+				if(allNodes[i] != NULL){
+					free(allNodes[i]);
+				}
+			}
 
 			nodeArr * nullNode = malloc(sizeof(nodeArr));
 			nullNode->size = 0;
@@ -361,7 +376,9 @@ void destroyNodeArr(nodeArr * thisNodeArr){
 	int i;
 
 	for(i = 0; i < thisNodeArr->size; i++){
-		free(thisNodeArr->nodeArray[i]);
+		if(thisNodeArr->nodeArray[i] != NULL){
+			free(thisNodeArr->nodeArray[i]);
+		}
 	}
 
 	free(thisNodeArr);

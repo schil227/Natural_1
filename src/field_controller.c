@@ -129,6 +129,8 @@ void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 			createEnemyFromLine(newEnemy, line);
 			if (doesExist(newEnemy->ID)) {
 				addEnemyToEnemies(enemiesList, newEnemy);
+			}else{
+				destroyIndividual(newEnemy);
 			}
 		}
 	}

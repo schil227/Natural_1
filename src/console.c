@@ -295,25 +295,25 @@ char* appendStrings(char* str1, char* str2){
 
 void sendMissedDialog(char* individualName, char* targetName, int attackRoll, int targetAC){
 
-	char* missedStr;
+	char missedStr[256];
+
+	strcpy(missedStr, individualName);
+
 	if(attackRoll +1 == targetAC){
-		missedStr = appendStrings(individualName, " just barely missed!\n");
+		strcat(missedStr, " just barely missed!\n");
 
 	}else if(attackRoll > 6){
-		missedStr = appendStrings(individualName, " missed!\n");
+		strcat(missedStr, " missed!\n");
 
 	}else if(attackRoll <= 6 && attackRoll > 3){
-		char* tmp1 = appendStrings(individualName, " wiffed trying to hit ");
-		char* tmp2 = appendStrings(targetName, "!\n");
-		missedStr = appendStrings(tmp1,tmp2);
-		free(tmp1);
-		free(tmp2);
+		strcat(missedStr, " wiffed trying to hit ");
+		strcat(missedStr, targetName);
+		strcat(missedStr, "!\n");
 	}else{
-		missedStr = appendStrings(individualName, " nearly fell down trying to attack.\n");
+		strcat(missedStr, " nearly fell down trying to attack.\n");
 
 	}
 	cwrite(missedStr);
-	free(missedStr);
 }
 
 int calcUpperPercentileThreshold(int num, int topPercentile){
@@ -330,36 +330,38 @@ int damageUpperPercentile(int damage, int maxDam, int nthP){
 
 void sendHitDialog(char* individualName, char* targetName, int maxDam, int damage){
 
-	char* hitStr;
+	char hitStr[256];
 	char takeOut[32]; //" takes %d damage!\n"
 
 	if(damageUpperPercentile(damage, maxDam, 20)){
-		char* highDam = appendStrings(individualName, " executes a brutal strike!\n");
+		char highDam[256];
+
+		strcpy(highDam, individualName);
+		strcat(highDam, " executes a brutal strike!\n");
 		cwrite(highDam);
-		free(highDam);
 	}
 
 	if(damage == 0){
-		sprintf(takeOut, " deflected the blow\n");
-		hitStr = appendStrings(targetName, takeOut);
+		strcpy(hitStr, targetName);
+		strcat(hitStr, " deflected the blow\n");
 	}else{
 		sprintf(takeOut, " takes %d damage!\n", damage);
-		hitStr = appendStrings(targetName, takeOut);
+		strcpy(hitStr, targetName);
+		strcat(hitStr, takeOut);
 	}
 
 	cwrite(hitStr);
-	free(hitStr);
 }
 
 void sendDeathDialog(char* name, char* killer){
-	char* deathStr;
+	char deathStr[256];
 
-	deathStr = appendStrings(name, " was slain by ");
-	deathStr = appendStrings(deathStr, killer);
-	deathStr = appendStrings(deathStr, "!\n");
+	strcpy(deathStr, name);
+	strcat(deathStr, " was slain by ");
+	strcat(deathStr, killer);
+	strcat(deathStr, "!\n");
 
 	cwrite(deathStr);
-	free(deathStr);
 }
 
 void cwrite(char* text){

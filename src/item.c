@@ -65,8 +65,5 @@ void destroyItem(item * thisItem){
 		destroyCharacter(thisItem->itemCharacter);
 	}
 
-	free(thisItem->name);
-	free(thisItem->description);
-
 	free(thisItem);
 }

@@ -482,6 +482,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 
 			free(thisMoveNodeMeta->rootMoveNode);
+			free(thisMoveNodeMeta->shadowCharacter);
 			free(thisMoveNodeMeta);
 		}
 
@@ -524,7 +525,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	srand(0);
 	int i;
 
-	test_main();
+//	test_main();
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){
