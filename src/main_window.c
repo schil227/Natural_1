@@ -442,7 +442,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 								player->playerCharacter->x, player->playerCharacter->y);
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-			thisMoveNodeMeta->shadowCharacter = malloc(sizeof(character));
+//			thisMoveNodeMeta->shadowCharacter = malloc(sizeof(character));
 			thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
 			thisMoveNodeMeta->sum = 0;
 			thisMoveNodeMeta->pathLength = 0;
@@ -482,7 +482,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 
 			free(thisMoveNodeMeta->rootMoveNode);
-			free(thisMoveNodeMeta->shadowCharacter);
+			destroyCharacter(thisMoveNodeMeta->shadowCharacter);
 			free(thisMoveNodeMeta);
 		}
 

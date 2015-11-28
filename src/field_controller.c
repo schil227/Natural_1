@@ -176,7 +176,7 @@ void createEquipItemFromFile(char line[512], enemies * enemiesList){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
-	int i, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int i, itemAdded=0, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns,  maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
@@ -288,8 +288,13 @@ void createEquipItemFromFile(char line[512], enemies * enemiesList){
 	for(i = 0; i < enemiesList->numEnemies; i++){
 		if(enemiesList->enemies[i]->ID == enemyId){
 			addItemToIndividual(enemiesList->enemies[i]->backpack, newItem);
+			itemAdded = 1;
 			break;
 		}
+	}
+
+	if(!itemAdded){
+		destroyItem(newItem);
 	}
 
 }
@@ -417,7 +422,7 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 			if (doesExist(newItem->ID)) {
 				addItemToField(thisField->thisFieldInventory, newItem);
 			} else {
-				free(newItem);
+				destroyItem(newItem);
 			}
 		}
 
