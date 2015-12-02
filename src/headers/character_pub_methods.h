@@ -9,6 +9,7 @@
 #define SRC_HEADERS_CHARACTER_PUB_METHODS_H_
 #include "./structs/character.h"
 
+character * createCharacter(int imageID, COLORREF rgb, int x, int y);
 void nameCharacter(character* thisCharacter, char* name);
 void destroyCharacter(character* thisCharacter);
 void moveCharacter(character* thisCharacter, int newX, int newY);

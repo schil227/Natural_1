@@ -35,6 +35,10 @@ int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
 
+int initEnemyActionMode = 0;
+int enemyActionMode = 0;
+int postEnemyActionMode = 0;
+
 int initInventoryMode = 0;
 int inventoryMode = 0;
 
@@ -288,13 +292,16 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			if (player->remainingActions <= 0) {
 				endTurn(player);
-				int i;
-				for(i = 0; i < thisEnemies->numEnemies; i++){
-					enemyAction((thisEnemies->enemies[i]), main_field, player);
-					printField(main_field);
-				}
+				enemyActionMode = 1;
+				initEnemyActionMode = 1;
 
-				startTurn(player);
+//				int i;
+//				for(i = 0; i < thisEnemies->numEnemies; i++){
+//					enemyAction((thisEnemies->enemies[i]), main_field, player);
+////					printField(main_field);
+//				}
+//
+//				startTurn(player);
 			}
 
 
@@ -424,12 +431,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		if (player->remainingActions <= 0) {
 			endTurn(player);
-			int i;
-			for (i = 0; i < thisEnemies->numEnemies; i++) {
-				enemyAction((thisEnemies->enemies[i]), main_field, player);
-			}
+			enemyActionMode = 1;
+			initEnemyActionMode = 1;
 
-			startTurn(player);
+//			int i;
+//			for (i = 0; i < thisEnemies->numEnemies; i++) {
+//				enemyAction((thisEnemies->enemies[i]), main_field, player);
+//			}
+//
+//			startTurn(player);
 		}
 
 
@@ -463,7 +473,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
 	} else if(postMoveMode){
 //		printf("looping in moveMode\n");
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode, viewShift);
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode, viewShift, 1);
 		if (!postMoveMode) {
 
 			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
@@ -472,14 +482,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			if (player->remainingActions <= 0) {
 				endTurn(player);
-				int i;
-				for(i = 0; i < thisEnemies->numEnemies; i++){
-					enemyAction((thisEnemies->enemies[i]), main_field, player);
-				}
 
-				startTurn(player);
+				enemyActionMode = 1;
+				initEnemyActionMode = 1;
+
 			}
-
 
 			free(thisMoveNodeMeta->rootMoveNode);
 			destroyCharacter(thisMoveNodeMeta->shadowCharacter);
@@ -497,6 +504,100 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		inventoryLoop(hwnd, msg, wParam, lParam, &inventoryMode, main_field, player, thisEnemies, viewShift);
+
+
+
+
+
+
+
+
+	}else if(enemyActionMode){
+		if(initEnemyActionMode){
+			initEnemyActionMode = 0;
+
+			if(thisEnemies->numEnemies == 0){
+				postEnemyActionMode = 1;
+				enemyActionMode = 0;
+				return 0;
+			}
+
+			int i;
+			individual * tmpIndividual = thisEnemies->enemies[thisEnemies->currentEnemyIndex];
+			nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field,tmpIndividual, player);
+
+			if(enemyNodeArr->size == 0){
+				enemyActionMode = 0;
+				postEnemyActionMode = 1;
+				thisEnemies->currentEnemyIndex++;
+				return 0;
+			}
+
+			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
+
+
+			moveNode * currentNode = malloc(sizeof(moveNode));
+			moveNode ** ptrToCurrentNode = &currentNode;
+			thisMoveNodeMeta->rootMoveNode = *(ptrToCurrentNode);
+			thisMoveNodeMeta->sum = 0;
+
+
+
+			for(i = 0; i < enemyNodeArr->size; i++){
+				if(i == 0){
+					currentNode->hasTraversed = 0;
+					currentNode->x = enemyNodeArr->nodeArray[i]->x;
+					currentNode->y = enemyNodeArr->nodeArray[i]->y;
+					currentNode->nextMoveNode = NULL;
+				}else{
+					moveNode * tmpMoveNode = malloc(sizeof(moveNode));
+					tmpMoveNode->hasTraversed = 0;
+					tmpMoveNode->x = enemyNodeArr->nodeArray[i]->x;
+					tmpMoveNode->y = enemyNodeArr->nodeArray[i]->y;
+					tmpMoveNode->nextMoveNode = NULL;
+					(*ptrToCurrentNode)->nextMoveNode = tmpMoveNode;
+					*ptrToCurrentNode = tmpMoveNode;
+				}
+			}
+
+
+		}
+
+		//run animation loop
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,(thisEnemies->enemies[thisEnemies->currentEnemyIndex]),thisMoveNodeMeta,5,&enemyActionMode, viewShift, 0);
+
+		if(!enemyActionMode){
+
+			if(thisMoveNodeMeta->rootMoveNode != NULL){
+				freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
+			}
+			free(thisMoveNodeMeta);
+
+			postEnemyActionMode = 1;
+			attackIfInRange(thisEnemies->enemies[thisEnemies->currentEnemyIndex],player);
+			thisEnemies->currentEnemyIndex++;
+		}
+
+	}else if(postEnemyActionMode){
+		postEnemyActionMode = 0;
+
+
+
+		if(thisEnemies->currentEnemyIndex < thisEnemies->numEnemies){
+			enemyActionMode = 1;
+			initEnemyActionMode = 1;
+		}else{
+			startTurn(player);
+			thisEnemies->currentEnemyIndex = 0;
+		}
+
+
+
+
+
+
+
+
 
 	}else {
 		return mainLoop(hwnd, msg, wParam, lParam);
@@ -525,7 +626,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	srand(0);
 	int i;
 
-//	test_main();
+	test_main();
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){

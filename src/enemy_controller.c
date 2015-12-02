@@ -42,8 +42,6 @@ void addNodeToList(node * newNode, node ** nodeList){
 
 }
 
-
-
 node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField){
 	node** newActiveNodes = malloc(sizeof(node*)*9);
 	int x,dx,dy,newX,newY, index=0;
@@ -190,8 +188,8 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 }
 
 void initializeArr(node ** nodeArr, int size){
-	int i = 0;
-	for(i; i < size; i++){
+	int i;
+	for(i = 0; i < size; i++){
 		nodeArr[size] = NULL;
 	}
 }
@@ -375,11 +373,11 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 void destroyNodeArr(nodeArr * thisNodeArr){
 	int i;
 
-	for(i = 0; i < thisNodeArr->size; i++){
-		if(thisNodeArr->nodeArray[i] != NULL){
-			free(thisNodeArr->nodeArray[i]);
-		}
-	}
+//	for(i = 0; i < thisNodeArr->size; i++){
+//		if(thisNodeArr->nodeArray[i] != NULL){
+//			free(thisNodeArr->nodeArray[i]);
+//		}
+//	}
 
 	free(thisNodeArr);
 }

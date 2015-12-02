@@ -15,6 +15,6 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 		field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode, shiftData * viewShift);
 
 void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
-		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode,
-		shiftData * viewShift);
+		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed,
+		int * postMoveMode, shiftData * viewShift, int updateViewShift);
 #endif /* SRC_HEADERS_LOOP_CONTROLLER_PUB_METHODS_H_ */

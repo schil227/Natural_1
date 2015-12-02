@@ -8,5 +8,9 @@
 #ifndef SRC_HEADERS_CONSOLE_PUB_METHODS_H_
 #define SRC_HEADERS_CONSOLE_PUB_METHODS_H_
 #include "./structs/console.h"
+void appendNewMessageNode(char * message);
+char* appendStrings(char* str1, char* str2);
+void clearMessages();
+void cwrite(char* text);
 
 #endif /* SRC_HEADERS_CONSOLE_PUB_METHODS_H_ */

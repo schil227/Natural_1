@@ -209,7 +209,7 @@ int path_and_attack_test() {
 	setIndividualSpace(main_test_field,testPlayer,6,8);
 
 	//works, player is in a transitional space - new field is loaded
-	assert(attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData));
+	assert(attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData,mapTestDirectory));
 
 	printf("Player location %d,%d\n", testPlayer->playerCharacter->x,testPlayer->playerCharacter->y);
 

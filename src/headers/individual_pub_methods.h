@@ -16,5 +16,12 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* player, shiftData * view
 int attackIndividual(individual *thisIndividual, individual *targetIndividual);
 int individualWithinRange(individual * thisIndividual, individual * target);
 int calcDR(individual * targetIndividual, char attackType);
+int addItemToIndividual(inventory * backpack, item * newItem);
+
+int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
+		int y, int totalHP, int totalActions, int totalMana, int AC, int attack, int maxDam, int minDam,  char critType[3],
+		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
+		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
+		int lightiningWeakness);
 
 #endif /* SRC_HEADERS_INDIVIDUAL_PUB_METHODS_H_ */

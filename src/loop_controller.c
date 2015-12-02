@@ -284,8 +284,8 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 }
 
 void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
-		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode,
-		shiftData * viewShift){
+		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed,
+		int * postMoveMode, shiftData * viewShift, int updateViewShift){
 	switch (msg) {
 
 		case WM_TIMER: {
@@ -309,8 +309,10 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 
 			setIndividualSpace(thisField,thisIndividual,(*tmpMoveNode)->x, (*tmpMoveNode)->y);
 
-			tryUpdateXShift(viewShift, (*tmpMoveNode)->x);
-			tryUpdateYShift(viewShift, (*tmpMoveNode)->y);
+			if(updateViewShift){
+				tryUpdateXShift(viewShift, (*tmpMoveNode)->x);
+				tryUpdateYShift(viewShift, (*tmpMoveNode)->y);
+			}
 
 			if((*tmpMoveNode)->nextMoveNode == NULL){
 				*postMoveMode = 0;

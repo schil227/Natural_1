@@ -379,7 +379,6 @@ destroyField(field * thisField, individual * player){
 }
 
 void makeTransitSpaces(char * transitMap, char* directory, field * thisField, individual * player){
-	int i;
 	char * fullTransitFile = appendStrings(directory, transitMap);
 	fullTransitFile[strlen(fullTransitFile)-1] = '\0'; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullTransitFile, "r");

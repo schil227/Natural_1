@@ -20,6 +20,14 @@ int moveCursor(field *thisField, cursor *thisCursor, int direction, shiftData * 
 space** getAdjacentSpaces(field *thisField, int x, int y);
 space* getSpaceFromField(field* thisField, int x, int y);
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode, shiftData * viewShift);
-void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed, int * postMoveMode, shiftData * viewShift);
 int removeIndividualFromField(field * thisField, int x, int y);
+int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int y);
+int isSpacePassable(field* thisField, int x, int y);
+individual* getIndividualAddressFromField(field* thisField, int x, int y);
+int addItemToField(fieldInventory * thisFieldInventory, item * thisItem);
+moveNode * alreadyContainsNode(moveNode * rootNode, int x, int y);
+int attemptGetItemFromField(field * thisField, individual * thisIndividual);
+int calcXMod(int direction, character * backgroundCharacter, shiftData * viewShift);
+int calcYMod(int direction, character * backgroundCharacter, shiftData * viewShift);
+
 #endif /* SRC_HEADERS_FIELD_PUB_METHODS_H_ */

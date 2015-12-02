@@ -12,6 +12,7 @@
 typedef struct {
 	size_t size;
 	int numEnemies;
+	int currentEnemyIndex;
 	individual * enemies[50];
 } enemies;
 

@@ -12,6 +12,7 @@ enemies * initEnemies(){
 	int index;
 	enemies * thisEnemies = malloc(sizeof(enemies));
 	thisEnemies->numEnemies = 0;
+	thisEnemies->currentEnemyIndex = 0;
 	for(index = 0; index < 50; index++){
 		thisEnemies->enemies[index] = NULL;
 	}
