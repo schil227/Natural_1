@@ -153,6 +153,10 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 	nodeArr * resultArr = malloc(sizeof(nodeArr));
 	resultArr->size = 0;
 
+	for(i = 0; i < 20; i++){
+		resultArr->nodeArray[i] = NULL;
+	}
+
 	if(endNode->pathLength != -1){
 
 		node * tmpNode = endNode;
@@ -267,13 +271,22 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 
 }
 
+node * cloneNode(node * thisNode){
+	node * newNode = malloc(sizeof(node));
+	newNode->pathLength = thisNode->pathLength;
+	newNode->isFinalPathNode = thisNode->isFinalPathNode;
+	newNode->x = thisNode->x;
+	newNode->y = thisNode->y;
+	return newNode;
+}
+
 nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
 	int i;
 	int nodeIndex = max(min(nodePath->size, thisIndividaul->mvmt)-1, 0);
 
 
 	if(nodeIndex > 0){ //going somewhere
-		node * endNode = nodePath->nodeArray[nodeIndex];
+		node * endNode = cloneNode(nodePath->nodeArray[nodeIndex]);
 		node * allNodes[300];
 		node * activeNodes[300];
 		int i;
@@ -373,11 +386,11 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 void destroyNodeArr(nodeArr * thisNodeArr){
 	int i;
 
-//	for(i = 0; i < thisNodeArr->size; i++){
-//		if(thisNodeArr->nodeArray[i] != NULL){
-//			free(thisNodeArr->nodeArray[i]);
-//		}
-//	}
+	for(i = 0; i < thisNodeArr->size; i++){
+		if(thisNodeArr->nodeArray[i] != NULL){
+			free(thisNodeArr->nodeArray[i]);
+		}
+	}
 
 	free(thisNodeArr);
 }

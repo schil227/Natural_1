@@ -505,13 +505,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		inventoryLoop(hwnd, msg, wParam, lParam, &inventoryMode, main_field, player, thisEnemies, viewShift);
 
-
-
-
-
-
-
-
 	}else if(enemyActionMode){
 		if(initEnemyActionMode){
 			initEnemyActionMode = 0;
@@ -534,14 +527,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-
-
 			moveNode * currentNode = malloc(sizeof(moveNode));
 			moveNode ** ptrToCurrentNode = &currentNode;
 			thisMoveNodeMeta->rootMoveNode = *(ptrToCurrentNode);
 			thisMoveNodeMeta->sum = 0;
-
-
 
 			for(i = 0; i < enemyNodeArr->size; i++){
 				if(i == 0){
@@ -560,10 +549,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 
+			destroyNodeArr(enemyNodeArr);
 
 		}
 
-		//run animation loop
 		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,(thisEnemies->enemies[thisEnemies->currentEnemyIndex]),thisMoveNodeMeta,5,&enemyActionMode, viewShift, 0);
 
 		if(!enemyActionMode){
@@ -581,8 +570,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if(postEnemyActionMode){
 		postEnemyActionMode = 0;
 
-
-
 		if(thisEnemies->currentEnemyIndex < thisEnemies->numEnemies){
 			enemyActionMode = 1;
 			initEnemyActionMode = 1;
@@ -590,14 +577,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			startTurn(player);
 			thisEnemies->currentEnemyIndex = 0;
 		}
-
-
-
-
-
-
-
-
 
 	}else {
 		return mainLoop(hwnd, msg, wParam, lParam);
