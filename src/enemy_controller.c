@@ -272,17 +272,6 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 
 }
 
-int nodeArrContains(node * thisNode, nodeArr * thisNodeArr){
-	int i;
-	for(i = 0; i < thisNodeArr->size; i++){
-		if(thisNode == thisNodeArr->nodeArray[i]){
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
 	int i;
 	int nodeIndex = max(min(nodePath->size, thisIndividaul->mvmt)-1, 0);
@@ -290,6 +279,7 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 
 	if(nodeIndex > 0){ //going somewhere
 		node * endNode = nodePath->nodeArray[nodeIndex];
+		nodePath->nodeArray[nodeIndex] = NULL;
 		node * allNodes[300];
 		node * activeNodes[300];
 		int i;
@@ -308,10 +298,10 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			targety = targetNode->y;
 
 			for (i = 0; i < 300; i++) {
-				if(activeNodes[i] != NULL && !nodeArrContains(activeNodes[i], nodePath)){
+				if(activeNodes[i] != NULL){
 					free(activeNodes[i]);
 				}
-				if(allNodes[i] != NULL && !nodeArrContains(allNodes[i], nodePath)){
+				if(allNodes[i] != NULL){
 					free(allNodes[i]);
 				}
 			}
@@ -321,10 +311,10 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			printf("returning null\n");
 
 			for (i = 0; i < 300; i++) {
-				if(activeNodes[i] != NULL && !nodeArrContains(activeNodes[i], nodePath)){
+				if(activeNodes[i] != NULL){
 					free(activeNodes[i]);
 				}
-				if(allNodes[i] != NULL&& !nodeArrContains(allNodes[i], nodePath)){
+				if(allNodes[i] != NULL){
 					free(allNodes[i]);
 				}
 			}
