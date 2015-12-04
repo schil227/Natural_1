@@ -527,23 +527,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-			moveNode * currentNode = malloc(sizeof(moveNode));
-			moveNode ** ptrToCurrentNode = &currentNode;
-			thisMoveNodeMeta->rootMoveNode = *(ptrToCurrentNode);
+//			moveNode * currentNode = malloc(sizeof(moveNode));
+			moveNode ** ptrToCurrentNode;// = &currentNode;
+			*ptrToCurrentNode = NULL;
+//			thisMoveNodeMeta->rootMoveNode = *(ptrToCurrentNode);
 			thisMoveNodeMeta->sum = 0;
 
 			for(i = 0; i < enemyNodeArr->size; i++){
-				if(i == 0){
-					currentNode->hasTraversed = 0;
-					currentNode->x = enemyNodeArr->nodeArray[i]->x;
-					currentNode->y = enemyNodeArr->nodeArray[i]->y;
-					currentNode->nextMoveNode = NULL;
+				moveNode * tmpMoveNode = malloc(sizeof(moveNode));
+				tmpMoveNode->hasTraversed = 0;
+				tmpMoveNode->x = enemyNodeArr->nodeArray[i]->x;
+				tmpMoveNode->y = enemyNodeArr->nodeArray[i]->y;
+				tmpMoveNode->nextMoveNode = NULL;
+				if(*ptrToCurrentNode == NULL){
+					*ptrToCurrentNode = tmpMoveNode;
+					thisMoveNodeMeta->rootMoveNode = tmpMoveNode;
 				}else{
-					moveNode * tmpMoveNode = malloc(sizeof(moveNode));
-					tmpMoveNode->hasTraversed = 0;
-					tmpMoveNode->x = enemyNodeArr->nodeArray[i]->x;
-					tmpMoveNode->y = enemyNodeArr->nodeArray[i]->y;
-					tmpMoveNode->nextMoveNode = NULL;
 					(*ptrToCurrentNode)->nextMoveNode = tmpMoveNode;
 					*ptrToCurrentNode = tmpMoveNode;
 				}

@@ -13,6 +13,7 @@ node * createNewNode(int pathLength, int x, int y){
 	thisNode->x = x;
 	thisNode->y = y;
 	thisNode->isFinalPathNode = 0;
+	thisNode->previousNode = NULL;
 	return thisNode;
 }
 
@@ -271,13 +272,35 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 
 }
 
-node * cloneNode(node * thisNode){
-	node * newNode = malloc(sizeof(node));
-	newNode->pathLength = thisNode->pathLength;
-	newNode->isFinalPathNode = thisNode->isFinalPathNode;
-	newNode->x = thisNode->x;
-	newNode->y = thisNode->y;
-	return newNode;
+node * cloneNode(nodeArr * thisNodeArr, int nodeIndex){
+	int i;
+	node * toReturn = malloc(sizeof(node));
+	node * currentNode[1];
+	currentNode[0] = toReturn;
+
+	for(i = nodeIndex; i >= 0; i--){
+		node * tmpNode = thisNodeArr->nodeArray[i];
+		node * newNode;
+
+		if(i != 0){
+			newNode = malloc(sizeof(node));
+		}
+
+		(currentNode[0])->pathLength = tmpNode->pathLength;
+		(currentNode[0])->isFinalPathNode = tmpNode->isFinalPathNode;
+		(currentNode[0])->x = tmpNode->x;
+		(currentNode[0])->y = tmpNode->y;
+
+		if(i != 0){
+			(currentNode[0])->previousNode = newNode;
+			currentNode[0] = newNode;
+		}else{
+			(currentNode[0])->previousNode = NULL;
+		}
+
+	}
+
+	return toReturn;
 }
 
 nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
@@ -286,7 +309,8 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 
 
 	if(nodeIndex > 0){ //going somewhere
-		node * endNode = cloneNode(nodePath->nodeArray[nodeIndex]);
+//		nodePath->nodeArray[nodePath->size-1]->previousNode=NULL;
+		node * endNode = cloneNode(nodePath,nodeIndex);
 		node * allNodes[300];
 		node * activeNodes[300];
 		int i;
