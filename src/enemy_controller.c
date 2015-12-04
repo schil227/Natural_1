@@ -272,35 +272,15 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 
 }
 
-node * cloneNode(nodeArr * thisNodeArr, int nodeIndex){
+int nodeArrContains(node * thisNode, nodeArr * thisNodeArr){
 	int i;
-	node * toReturn = malloc(sizeof(node));
-	node * currentNode[1];
-	currentNode[0] = toReturn;
-
-	for(i = nodeIndex; i >= 0; i--){
-		node * tmpNode = thisNodeArr->nodeArray[i];
-		node * newNode;
-
-		if(i != 0){
-			newNode = malloc(sizeof(node));
+	for(i = 0; i < thisNodeArr->size; i++){
+		if(thisNode == thisNodeArr->nodeArray[i]){
+			return 1;
 		}
-
-		(currentNode[0])->pathLength = tmpNode->pathLength;
-		(currentNode[0])->isFinalPathNode = tmpNode->isFinalPathNode;
-		(currentNode[0])->x = tmpNode->x;
-		(currentNode[0])->y = tmpNode->y;
-
-		if(i != 0){
-			(currentNode[0])->previousNode = newNode;
-			currentNode[0] = newNode;
-		}else{
-			(currentNode[0])->previousNode = NULL;
-		}
-
 	}
 
-	return toReturn;
+	return 0;
 }
 
 nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
@@ -309,8 +289,7 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 
 
 	if(nodeIndex > 0){ //going somewhere
-//		nodePath->nodeArray[nodePath->size-1]->previousNode=NULL;
-		node * endNode = cloneNode(nodePath,nodeIndex);
+		node * endNode = nodePath->nodeArray[nodeIndex];
 		node * allNodes[300];
 		node * activeNodes[300];
 		int i;
@@ -329,8 +308,12 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			targety = targetNode->y;
 
 			for (i = 0; i < 300; i++) {
-				free(activeNodes[i]);
-				free(allNodes[i]);
+				if(activeNodes[i] != NULL && !nodeArrContains(activeNodes[i], nodePath)){
+					free(activeNodes[i]);
+				}
+				if(allNodes[i] != NULL && !nodeArrContains(allNodes[i], nodePath)){
+					free(allNodes[i]);
+				}
 			}
 
 			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetx, targety);
@@ -338,10 +321,10 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			printf("returning null\n");
 
 			for (i = 0; i < 300; i++) {
-				if(activeNodes[i] != NULL){
+				if(activeNodes[i] != NULL && !nodeArrContains(activeNodes[i], nodePath)){
 					free(activeNodes[i]);
 				}
-				if(allNodes[i] != NULL){
+				if(allNodes[i] != NULL&& !nodeArrContains(allNodes[i], nodePath)){
 					free(allNodes[i]);
 				}
 			}
