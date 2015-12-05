@@ -209,7 +209,15 @@ int spaceIsTaken(node * thisNode, field * thisField){
 	}
 }
 
-node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes){
+node * shallowCloneNode(node * thisNode){
+	node * newNode = malloc(sizeof(node));
+	newNode->pathLength = thisNode->pathLength;
+	newNode->x = thisNode->x;
+	newNode->y = thisNode->y;
+	return newNode;
+}
+
+node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes, nodeArr * nodePath){
 	int i;
 	node * newActiveNodes[300];
 
@@ -221,14 +229,11 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 	printf("endnode: [%d,%d]\n", endNode->x,endNode->y);
 	//check for free spaces in active nodes
 	while(activeNodes[i] != NULL){
-//		printf("currentNode:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
+//		addNodeToList(activeNodes[i], allNodes);
+
 		if( !spaceIsTaken(activeNodes[i], thisField)){
 			return activeNodes[i];
-		}else{
-//			printf("space was taken:[%d,%d]\n",activeNodes[i]->x, activeNodes[i]->y);
 		}
-
-		addNodeToList(activeNodes[i], allNodes);
 
 		if(moveRange > 0){
 			node ** tmpNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField); // filters out blocked nodes and nodes in allNodes
@@ -253,21 +258,22 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 		if( endNode->previousNode == NULL){
 			return NULL;
 		}else{
-			node * tmpPreviousEndNodeNode = endNode->previousNode;
+			node * tmpNode = shallowCloneNode(endNode->previousNode);
 
-			if(containsNode(tmpPreviousEndNodeNode->x, tmpPreviousEndNodeNode->y, allNodes)){
+			if(containsNode(tmpNode->x, tmpNode->y, allNodes)){
 				return NULL;
 
 			}else{
-				addNodeToList(endNode->previousNode, newActiveNodes);
-				addNodeToList(endNode->previousNode,allNodes);
+				addNodeToList(tmpNode, newActiveNodes);
+
+				addNodeToList(tmpNode,allNodes);
 //				printf("called from a\n");
-				return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes);
+				return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes, nodePath);
 			}
 		}
 	}else{
 //		printf("called from b\n");
-		return findOpenNode(endNode, newActiveNodes, thisIndividual, moveRange-1, distanceFromLastNode, thisField, allNodes);
+		return findOpenNode(endNode, newActiveNodes, thisIndividual, moveRange-1, distanceFromLastNode, thisField, allNodes,nodePath);
 	}
 
 }
@@ -279,7 +285,6 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 
 	if(nodeIndex > 0){ //going somewhere
 		node * endNode = nodePath->nodeArray[nodeIndex];
-		nodePath->nodeArray[nodeIndex] = NULL;
 		node * allNodes[300];
 		node * activeNodes[300];
 		int i;
@@ -288,9 +293,11 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			allNodes[i] = NULL;
 		}
 
-		addNodeToList(endNode, activeNodes);
+		node * endNodeCopy = shallowCloneNode(endNode);
+		addNodeToList(endNodeCopy, activeNodes);
+		addNodeToList(endNodeCopy, allNodes);
 
-		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes);
+		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes, nodePath);
 
 		if(targetNode != NULL){
 			int targetx, targety;
@@ -298,9 +305,9 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			targety = targetNode->y;
 
 			for (i = 0; i < 300; i++) {
-				if(activeNodes[i] != NULL){
-					free(activeNodes[i]);
-				}
+//				if(activeNodes[i] != NULL){
+//					free(activeNodes[i]);
+//				}
 				if(allNodes[i] != NULL){
 					free(allNodes[i]);
 				}
@@ -311,9 +318,9 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			printf("returning null\n");
 
 			for (i = 0; i < 300; i++) {
-				if(activeNodes[i] != NULL){
-					free(activeNodes[i]);
-				}
+//				if(activeNodes[i] != NULL){
+//					free(activeNodes[i]);
+//				}
 				if(allNodes[i] != NULL){
 					free(allNodes[i]);
 				}
