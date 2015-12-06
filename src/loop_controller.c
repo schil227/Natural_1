@@ -252,6 +252,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 			*moveMode = 0;
 			if(thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
 				*postMoveMode = 1;
+				getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y)->currentIndividual = NULL;
 				viewShift->xShift = viewShift->xShiftOld;
 				viewShift->yShift = viewShift->yShiftOld;
 			}
@@ -307,7 +308,9 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 
 			(*tmpMoveNode)->hasTraversed = 1;
 
-			setIndividualSpace(thisField,thisIndividual,(*tmpMoveNode)->x, (*tmpMoveNode)->y);
+//			moveIndividualSpace(thisField,thisIndividual,(*tmpMoveNode)->x, (*tmpMoveNode)->y);
+			thisIndividual->playerCharacter->x = (*tmpMoveNode)->x;
+			thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
 
 			if(updateViewShift){
 				tryUpdateXShift(viewShift, (*tmpMoveNode)->x);
@@ -315,6 +318,7 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 			}
 
 			if((*tmpMoveNode)->nextMoveNode == NULL){
+				setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
 				*postMoveMode = 0;
 //				freeUpMovePath((moveNode *) rootMoveNode->nextMoveNode);
 //				rootMoveNode->nextMoveNode = NULL;

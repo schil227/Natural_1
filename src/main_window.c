@@ -141,6 +141,11 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, thisEnemies->enemies[index], viewShift);
 	}
 
+	//draw animated enemy over others
+	if(thisEnemies->currentEnemyIndex != -1){
+		drawIndividual(hdc, hdcBuffer, thisEnemies->enemies[thisEnemies->currentEnemyIndex], viewShift);
+	}
+
 	if (cursorMode) {
 		drawCursor(hdc, hdcBuffer, thisCursor, viewShift);
 	}
@@ -509,6 +514,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		if(initEnemyActionMode){
 			initEnemyActionMode = 0;
 
+			if(thisEnemies->currentEnemyIndex == -1){
+				thisEnemies->currentEnemyIndex = 0;
+			}
+
 			if(thisEnemies->numEnemies == 0){
 				postEnemyActionMode = 1;
 				enemyActionMode = 0;
@@ -522,9 +531,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(enemyNodeArr->size == 0){
 				enemyActionMode = 0;
 				postEnemyActionMode = 1;
-				thisEnemies->currentEnemyIndex++;
 				return 0;
 			}
+
+			getSpaceFromField(main_field,tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
 //			moveNode * currentNode = malloc(sizeof(moveNode));
@@ -562,19 +572,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			free(thisMoveNodeMeta);
 
 			postEnemyActionMode = 1;
-			attackIfInRange(thisEnemies->enemies[thisEnemies->currentEnemyIndex],player);
-			thisEnemies->currentEnemyIndex++;
 		}
 
 	}else if(postEnemyActionMode){
 		postEnemyActionMode = 0;
 
+		attackIfInRange(thisEnemies->enemies[thisEnemies->currentEnemyIndex],player);
+		thisEnemies->currentEnemyIndex++;
 		if(thisEnemies->currentEnemyIndex < thisEnemies->numEnemies){
 			enemyActionMode = 1;
 			initEnemyActionMode = 1;
 		}else{
 			startTurn(player);
-			thisEnemies->currentEnemyIndex = 0;
+			thisEnemies->currentEnemyIndex = -1;
 		}
 
 	}else {

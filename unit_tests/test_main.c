@@ -132,11 +132,11 @@ int path_and_attack_test() {
 	free(resultArr);
 
 	//warping player to space with herb
-	setIndividualSpace(main_test_field,testPlayer,3,3);
+	moveIndividualSpace(main_test_field,testPlayer,3,3);
 	attemptGetItemFromField(main_test_field,testPlayer);
 
 	//warping player to space with dagger
-	setIndividualSpace(main_test_field,testPlayer,3,4);
+	moveIndividualSpace(main_test_field,testPlayer,3,4);
 	attemptGetItemFromField(main_test_field,testPlayer);
 
 	assert(testPlayer->backpack->inventorySize == 2);
@@ -170,7 +170,7 @@ int path_and_attack_test() {
 	assert(testPlayer->hp ==  20);
 
 	//warp player back to original spot
-	setIndividualSpace(main_test_field,testPlayer,1,1);
+	moveIndividualSpace(main_test_field,testPlayer,1,1);
 
 	//move the enemies two more times, attack the player
 	for(i = 0; i < thisTestEnemies->numEnemies; i++){
@@ -200,13 +200,13 @@ int path_and_attack_test() {
 	assert(attackIndividual(testPlayer,thisTestEnemies->enemies[4]));
 
 	//warping player next to doorway
-	setIndividualSpace(main_test_field,testPlayer,6,9);
+	moveIndividualSpace(main_test_field,testPlayer,6,9);
 
 	//fails, not a transitional space
 	assert(!attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData, mapTestDirectory));
 
 	//warping player to doorway
-	setIndividualSpace(main_test_field,testPlayer,6,8);
+	moveIndividualSpace(main_test_field,testPlayer,6,8);
 
 	//works, player is in a transitional space - new field is loaded
 	assert(attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData,mapTestDirectory));

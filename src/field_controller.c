@@ -153,7 +153,7 @@ void setEnemiesToField(field * thisField, enemies * enemiesList){
 	int i;
 	for(i = 0; i < enemiesList->numEnemies; i++){
 		tmpEnemy = enemiesList->enemies[i];
-		setIndividualSpace(thisField,tmpEnemy,tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
+		moveIndividualSpace(thisField,tmpEnemy,tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
 	}
 }
 

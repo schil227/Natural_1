@@ -172,7 +172,7 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 	}
 }
 
-int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int y){
+int moveIndividualSpace(field *thisField, individual *thisIndividual, int x, int y){
 
 	//check if in bounds
 	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
@@ -195,7 +195,7 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 /*
  * FromJump: the players old space may not exist anymore - removing logic to remove currentIndividual from old space
  */
-int setIndividualSpaceFromJump(field *thisField, individual *thisIndividual, int x, int y){
+int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int y){
 
 	//check if in bounds
 	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
@@ -338,7 +338,7 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 
 	makeTransitSpaces(transitMap, directory, thisField, player);
 
-	setIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
+	moveIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
 	setEnemiesToField(thisField, thisEnemies);
 
 	free(fullMapName);
@@ -423,7 +423,7 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 			//spawn player at this location
 			if(player->jumpTarget == id){
 				printf("Jumping player:[%d,%d]\n", x, y);
-				setIndividualSpaceFromJump(thisField,player,x,y);
+				setIndividualSpace(thisField,player,x,y);
 				player->jumpTarget = 0;
 			}
 
