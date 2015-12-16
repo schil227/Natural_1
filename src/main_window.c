@@ -16,6 +16,7 @@
 #include "./headers/loop_controller_pub_methods.h"
 #include"./headers/console_window_pub_methods.h"
 #include"./headers/console_pub_methods.h"
+#include"./headers/dialog_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameCons[] = "MyConsoleClass";
@@ -169,6 +170,10 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawThisConsole(hdc,hdcBuffer,prc);
 
+	if(shouldDrawDialogBox()){
+		drawDialogBox(hdc, hdcBuffer,prc);
+	}
+
 //	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -188,15 +193,20 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisEnemies = initEnemies();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
+		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
 		initalizeTheGlobalRegister();
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 6, 8, 20, 2, 4, 13, 3, 10, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0)) {
+		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 3, 4, 20, 2, 4, 13, 3, 10, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
+
+		dialogMessage * thisMessage = malloc(sizeof(dialogMessage));
+		strcpy(thisMessage->message,"I am a message!\0");
+		setCurrentMessage(thisMessage);
 
 		int x, y;
 		main_field = loadMap("map1.txt", mapDirectory, player, thisEnemies);

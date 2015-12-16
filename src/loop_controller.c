@@ -103,18 +103,27 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
-		switch (LOWORD(wParam)) {
+
+		if(shouldDrawDialogBox()){
+			switch (LOWORD(wParam)) {
+				case 0x1B:
+				{	//stop drawing dialog box
+					toggleDrawDialogBox();
+				}
+			}
+		}else{
+			switch (LOWORD(wParam)) {
 			case 0x38:
-			case 0x68:{
+			case 0x68: {
 				selectPreviousItemUp();
 			}
-			break;
+				break;
 			case 0x32:
 			case 0x62: {
 				selectNextItemDown();
 
 			}
-			break;
+				break;
 				break;
 			case 0x1B: //escape
 				*inventoryMode = 0;
@@ -123,7 +132,7 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 			{
 				item * tmpItem = getSelectedItem();
 
-				if(tmpItem != NULL){
+				if (tmpItem != NULL) {
 					modifyItem(tmpItem, player);
 					refreshInventory(player->backpack);
 //					*inventoryMode = 0;
@@ -134,17 +143,21 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 			{
 				item * tmpItem = getSelectedItem();
 
-				if(tmpItem != NULL){
-					char tmpDescription[256];
-					strcpy(tmpDescription, tmpItem->description);
-					char * value = strtok(tmpDescription,"\\");
-					cwrite(value);
-					value = strtok(NULL,"\\");
-					cwrite(value);
+				if (tmpItem != NULL) {
+					toggleDrawDialogBox();
+//					char tmpDescription[256];
+//					strcpy(tmpDescription, tmpItem->description);
+//					char * value = strtok(tmpDescription, "\\");
+//					cwrite(value);
+//					value = strtok(NULL, "\\");
+//					cwrite(value);
+
+					setSimpleDialogMessage(tmpItem->description);
 				}
 			}
 				break;
 			}
+		}
 		case WM_TIMER:
 		{
 			RECT rect;

@@ -69,6 +69,7 @@ END
 2011 BITMAP DISCARDABLE "../images/red_skelly.bmp"
 
 2010 BITMAP DISCARDABLE "../images/console_bg.bmp"
+2012 BITMAP DISCARDABLE "../images/dialog_box.bmp"
 
 2500 BITMAP DISCARDABLE "../images/black.bmp"
 2501 BITMAP DISCARDABLE "../images/grass.bmp"
