@@ -7,7 +7,7 @@
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, enemies  * thisEnemies, shiftData * viewShift) {
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
@@ -40,7 +40,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 			viewShift->xShift = viewShift->xShiftOld;
 			viewShift->yShift = viewShift->yShiftOld;
 			break;
-		case 0x0D: //enter
+		case 0x0D: //enter //TODO: when attacking, supply both enemies and NPCs, ensure the character cannot attack themselves
 		{
 			int cX, cY, index;
 			cX = thisCursor->cursorCharacter->x;
@@ -48,14 +48,14 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 
 			individual ** tmp = (individual**) getIndividualAddressFromField(main_field, cX, cY);
 
-			for (index = 0; index < thisEnemies->numEnemies; index++) {
+			for (index = 0; index < thisEnemies->individuals; index++) {
 
-				individual * tmpEnemy = thisEnemies->enemies[index];
+				individual * tmpEnemy = thisEnemies->individuals[index];
 
 				if (*tmp == tmpEnemy && individualWithinRange(player, tmpEnemy)) {
 					printf("attacked!");
 					if(attackIndividual(player, tmpEnemy)){
-						deleteEnemyFromEnemies(thisEnemies,tmpEnemy);
+						deleteIndividiaulFromGroup(thisEnemies,tmpEnemy);
 						removeIndividualFromField(main_field, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
 						destroyIndividual(tmpEnemy);
 					}
@@ -99,7 +99,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 	return 0;
 }
 
-int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inventoryMode, field * main_field, individual * player, enemies  * thisEnemies, shiftData * viewShift) {
+int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inventoryMode, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {

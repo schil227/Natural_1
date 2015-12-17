@@ -306,7 +306,7 @@ int generateBackground(char backgroundSymbol){
 	}
 }
 
-field * loadMap(char * mapName, char* directory, individual * player, enemies* thisEnemies){
+field * loadMap(char * mapName, char* directory, individual * player, individualGroup* thisEnemies){
 
 	char transitMap[80], enemyMap[80], enemyItemMap[80], fieldItemMap[80];
 	char * fullMapName = appendStrings(directory, mapName);
@@ -339,7 +339,7 @@ field * loadMap(char * mapName, char* directory, individual * player, enemies* t
 	makeTransitSpaces(transitMap, directory, thisField, player);
 
 	moveIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
-	setEnemiesToField(thisField, thisEnemies);
+	setGroupToField(thisField, thisEnemies);
 
 	free(fullMapName);
 

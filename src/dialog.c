@@ -31,17 +31,17 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	int rowLength;
 
 	RECT textBoxRect;
-		textBoxRect.top =  thisDialogBox->dialogWindow->y + 23;// prc->bottom - 30;
 		textBoxRect.left = thisDialogBox->dialogWindow->x + 10;//prc->right - prc->right*0.95;
 		textBoxRect.bottom = thisDialogBox->dialogWindow->y +  thisDialogBox->dialogWindow->height;  // prc->bottom;
-		textBoxRect.right = thisDialogBox->dialogWindow->x +  thisDialogBox->dialogWindow->width;
+		textBoxRect.top = textBoxRect.bottom - 30;
+		textBoxRect.right = textBoxRect.left +  thisDialogBox->dialogWindow->width;
 
 	messageNode drawMessageNode;
 	strcpy(drawMessageNode.message,thisDialogBox->currentMessage->message);
 	drawMessageNode.nextMessageNode = NULL;
 	drawMessageNode.previousMessageNode = NULL;
 
-	rowLength = (thisDialogBox->dialogWindow->width - thisDialogBox->dialogWindow->width * 0.1);
+	rowLength = textBoxRect.right - textBoxRect.left;//(thisDialogBox->dialogWindow->width - thisDialogBox->dialogWindow->width * 0.1);
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 

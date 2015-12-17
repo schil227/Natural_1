@@ -8,22 +8,22 @@
 #include "./headers/field_controller_pub_methods.h"
 #include<stdio.h>
 
-enemies * initEnemies(){
+individualGroup * initGroup(){
 	int index;
-	enemies * thisEnemies = malloc(sizeof(enemies));
-	thisEnemies->numEnemies = 0;
-	thisEnemies->currentEnemyIndex = 0;
+	individualGroup * thisGroup = malloc(sizeof(individualGroup));
+	thisGroup->numIndividuals = 0;
+	thisGroup->currentIndividualIndex = 0;
 	for(index = 0; index < 50; index++){
-		thisEnemies->enemies[index] = NULL;
+		thisGroup->individuals[index] = NULL;
 	}
-	return thisEnemies;
+	return thisGroup;
 }
 
-int addEnemyToEnemies(enemies * thisEnemies, individual * enemey){
-	if(thisEnemies->numEnemies < 50){
-		int index = thisEnemies->numEnemies;
-		thisEnemies->enemies[index] = enemey;
-		thisEnemies->numEnemies = thisEnemies->numEnemies + 1;
+int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividual){
+	if(thisGroup->numIndividuals < 50){
+		int index = thisGroup->numIndividuals;
+		thisGroup->individuals[index] = thisIndividual;
+		thisGroup->numIndividuals = thisGroup->numIndividuals + 1;
 		return 1;
 	}
 
@@ -118,7 +118,7 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	free(name);
 }
 
-void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
+void loadEnemies(individualGroup * enemiesList, char * enemyFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, enemyFile);
 	fullEnemyFile[strlen(fullEnemyFile)-1] = '\0'; //remove '\n' at end of line
 	FILE * enemyFP = fopen(fullEnemyFile, "r");
@@ -129,7 +129,7 @@ void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 			individual * newEnemy = initIndividual();
 			createEnemyFromLine(newEnemy, line);
 			if (doesExist(newEnemy->ID)) {
-				addEnemyToEnemies(enemiesList, newEnemy);
+				addIndividualToGroup(enemiesList, newEnemy);
 			}else{
 				destroyIndividual(newEnemy);
 			}
@@ -140,24 +140,24 @@ void loadEnemies(enemies * enemiesList, char * enemyFile, char* directory){
 	free(fullEnemyFile);
 }
 
-void clearEnemies(enemies * thisEnemies){
+void clearGroup(individualGroup * thisGroup){
 	int i;
-	for(i = 0; i < thisEnemies->numEnemies; i++){
-		destroyIndividual(thisEnemies->enemies[i]);
+	for(i = 0; i < thisGroup->numIndividuals; i++){
+		destroyIndividual(thisGroup->individuals[i]);
 	}
-	thisEnemies->numEnemies = 0;
+	thisGroup->numIndividuals = 0;
 }
 
-void setEnemiesToField(field * thisField, enemies * enemiesList){
+void setGroupToField(field * thisField, individualGroup * thisGroup){
 	individual * tmpEnemy;
 	int i;
-	for(i = 0; i < enemiesList->numEnemies; i++){
-		tmpEnemy = enemiesList->enemies[i];
+	for(i = 0; i < thisGroup->numIndividuals; i++){
+		tmpEnemy = thisGroup->individuals[i];
 		moveIndividualSpace(thisField,tmpEnemy,tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
 	}
 }
 
-void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
+void loadEnemyItems(individualGroup * enemiesList, char * itemFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, itemFile);
 	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
 	FILE * itemFP = fopen(fullEnemyFile, "r");
@@ -173,7 +173,7 @@ void loadEnemyItems(enemies * enemiesList, char * itemFile, char* directory){
 	free(fullEnemyFile);
 }
 
-void createEquipItemFromFile(char line[512], enemies * enemiesList){
+void createEquipItemFromFile(char line[512], individualGroup * enemiesList){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
@@ -286,9 +286,9 @@ void createEquipItemFromFile(char line[512], enemies * enemiesList){
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 				waterWeaknessMod, lightiningWeaknessMod, isEquipt);
 
-	for(i = 0; i < enemiesList->numEnemies; i++){
-		if(enemiesList->enemies[i]->ID == enemyId){
-			addItemToIndividual(enemiesList->enemies[i]->backpack, newItem);
+	for(i = 0; i < enemiesList->numIndividuals; i++){
+		if(enemiesList->individuals[i]->ID == enemyId){
+			addItemToIndividual(enemiesList->individuals[i]->backpack, newItem);
 			itemAdded = 1;
 			break;
 		}
@@ -432,20 +432,20 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 	free(fullEnemyFile);
 }
 
-individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey){
+individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual * thisIndividual){
 	int index;
-	int numEnemies = thisEnemies->numEnemies;
-	for( index = 0; index < numEnemies; index++){
-		if(thisEnemies->enemies[index] == enemey){
-			individual * toReturn = thisEnemies->enemies[index];
-			if(index == numEnemies - 1){ //last index
-				thisEnemies->enemies[index] = NULL;
+	int numIndividuals = thisGroup->numIndividuals;
+	for( index = 0; index < numIndividuals; index++){
+		if(thisGroup->individuals[index] == thisIndividual){
+			individual * toReturn = thisGroup->individuals[index];
+			if(index == numIndividuals - 1){ //last index
+				thisGroup->individuals[index] = NULL;
 			}else{
-				thisEnemies->enemies[index] = thisEnemies->enemies[numEnemies-1];
-				thisEnemies->enemies[numEnemies-1] = NULL;
+				thisGroup->individuals[index] = thisGroup->individuals[numIndividuals-1];
+				thisGroup->individuals[numIndividuals-1] = NULL;
 			}
 
-			thisEnemies->numEnemies = thisEnemies->numEnemies - 1;
+			thisGroup->numIndividuals = thisGroup->numIndividuals - 1;
 			return toReturn;
 
 		}
@@ -455,7 +455,7 @@ individual *  deleteEnemyFromEnemies(enemies * thisEnemies, individual * enemey)
 
 }
 
-int attemptToTransit(field ** thisField, individual * player, enemies * thisEnemies, shiftData * viewShift, char * mapDirectory){
+int attemptToTransit(field ** thisField, individual * player, individualGroup * thisEnemies, shiftData * viewShift, char * mapDirectory){
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
 		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
@@ -465,7 +465,7 @@ int attemptToTransit(field ** thisField, individual * player, enemies * thisEnem
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
 			destroyField(*thisField, player);
-			clearEnemies(thisEnemies);
+			clearGroup(thisEnemies);
 			*thisField = loadMap(mapName, mapDirectory, player, thisEnemies);
 
 			viewShift->xShift = 0;

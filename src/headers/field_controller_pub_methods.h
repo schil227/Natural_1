@@ -9,8 +9,8 @@
 #define SRC_HEADERS_FIELD_CONTROLLER_PUB_METHODS_H_
 #include "./structs/field_controller.h"
 
-int addEnemyToEnemies(enemies * thisEnemies, individual * enemey);
-int attemptToTransit(field ** thisField, individual * player, enemies * thisEnemies, shiftData * viewShift, char * mapDirectory);
-void clearEnemies(enemies * thisEnemies);
+int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividual);
+int attemptToTransit(field ** thisField, individual * player, individualGroup * thisGroup, shiftData * viewShift, char * mapDirectory);
+void clearGroup(individualGroup * thisGroup);
 
 #endif /* SRC_HEADERS_FIELD_CONTROLLER_PUB_METHODS_H_ */

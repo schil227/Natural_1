@@ -239,14 +239,14 @@ void drawConsoleText(HDC hdcBuffer, RECT * textBoxRect, messageNode * currentMes
 				//create the substring
 				int numCharactersToIndex = spaceIndexArr[index] - spaceIndexArr[index - 1];
 
-				if(index != sizeOfSpaceIndexArr-1 && (theMessage[spaceIndexArr[index]] != ' ' || theMessage[spaceIndexArr[index]] != '&')){
+				if(index != sizeOfSpaceIndexArr-1 && (theMessage[spaceIndexArr[index]] != ' ' && theMessage[spaceIndexArr[index]] != '&')){
 					numCharactersToIndex++;
 				}
 
 				char messageSubLine[numCharactersToIndex];
 				strncpy(messageSubLine, theMessage + spaceIndexArr[index - 1], numCharactersToIndex);
 
-				if(index != sizeOfSpaceIndexArr-1 && (theMessage[spaceIndexArr[index]] != ' ' || theMessage[spaceIndexArr[index]] != '&')){
+				if(index != sizeOfSpaceIndexArr-1 && (theMessage[spaceIndexArr[index]] != ' ' && theMessage[spaceIndexArr[index]] != '&')){
 					messageSubLine[numCharactersToIndex-1] = '-';
 				}
 

@@ -11,9 +11,9 @@
 
 typedef struct {
 	size_t size;
-	int numEnemies;
-	int currentEnemyIndex;
-	individual * enemies[50];
-} enemies;
+	int numIndividuals;
+	int currentIndividualIndex;
+	individual * individuals[50];
+} individualGroup;
 
 #endif /* SRC_HEADERS_STRUCTS_FIELD_CONTROLLER_H_ */
