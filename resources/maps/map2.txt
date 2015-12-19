@@ -1,6 +1,8 @@
 map2_transit.txt
 map2_enemies.txt
 map2_enemy_items.txt
+map2_npcs.txt
+map2_npc_items.txt
 map2_items.txt
 s^x^x^x^s
 s^f^f^f^s

@@ -20,7 +20,8 @@
 char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";//".\\unit_tests\\testMaps\\";//
 
 individual* testPlayer;
-individualGroup* thisTestEnemies;
+individualGroup* testEnemies;
+individualGroup* testNPCs;
 field* main_test_field;
 cursor* thisTestCursor;
 shiftData* testShiftData;
@@ -32,7 +33,8 @@ int path_and_attack_test() {
 	UINT ret;
 
 	testPlayer = initIndividual();
-	thisTestEnemies = initGroup();
+	testEnemies = initGroup();
+	testNPCs = initGroup();
 	testShiftData = initShiftData();
 	initThisConsole(2010,0,0,300,200);
 	initalizeTheGlobalRegister();
@@ -41,11 +43,13 @@ int path_and_attack_test() {
 	}
 
 	int x, y;
-	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, thisTestEnemies);
+	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, testEnemies, testNPCs);
 	int imageID;
 
 
-	assert(thisTestEnemies->numIndividuals == 6);
+	assert(testEnemies->numIndividuals == 6);
+
+	assert(testNPCs->numIndividuals == 1);
 
 	for (y = 0; y < main_test_field->totalY; y++) {
 		for (x = 0; x < main_test_field->totalX; x++) {
@@ -66,55 +70,55 @@ int path_and_attack_test() {
 	assert(!strcmp(tmpIndividual->name,	testPlayer->name));
 
 	//enemies are on field at their coordinates, name check
-	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->individuals[0]->playerCharacter->x, thisTestEnemies->individuals[0]->playerCharacter->y);
-	assert(!strcmp(tmpIndividual->name, thisTestEnemies->individuals[0]->name));
+	tmpIndividual = getIndividualFromField( main_test_field,testEnemies->individuals[0]->playerCharacter->x, testEnemies->individuals[0]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, testEnemies->individuals[0]->name));
 
-	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->individuals[1]->playerCharacter->x, thisTestEnemies->individuals[1]->playerCharacter->y);
-	assert(!strcmp(tmpIndividual->name, thisTestEnemies->individuals[1]->name));
+	tmpIndividual = getIndividualFromField( main_test_field,testEnemies->individuals[1]->playerCharacter->x, testEnemies->individuals[1]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, testEnemies->individuals[1]->name));
 
-	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->individuals[2]->playerCharacter->x, thisTestEnemies->individuals[2]->playerCharacter->y);
-	assert(!strcmp(tmpIndividual->name, thisTestEnemies->individuals[2]->name));
+	tmpIndividual = getIndividualFromField( main_test_field,testEnemies->individuals[2]->playerCharacter->x, testEnemies->individuals[2]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, testEnemies->individuals[2]->name));
 
-	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->individuals[3]->playerCharacter->x, thisTestEnemies->individuals[3]->playerCharacter->y);
-	assert(!strcmp(tmpIndividual->name, thisTestEnemies->individuals[3]->name));
+	tmpIndividual = getIndividualFromField( main_test_field,testEnemies->individuals[3]->playerCharacter->x, testEnemies->individuals[3]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, testEnemies->individuals[3]->name));
 
-	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->individuals[4]->playerCharacter->x, thisTestEnemies->individuals[4]->playerCharacter->y);
-	assert(!strcmp(tmpIndividual->name, thisTestEnemies->individuals[4]->name));
+	tmpIndividual = getIndividualFromField( main_test_field,testEnemies->individuals[4]->playerCharacter->x, testEnemies->individuals[4]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, testEnemies->individuals[4]->name));
 
-	tmpIndividual = getIndividualFromField( main_test_field,thisTestEnemies->individuals[5]->playerCharacter->x, thisTestEnemies->individuals[5]->playerCharacter->y);
-	assert(!strcmp(tmpIndividual->name, thisTestEnemies->individuals[5]->name));
+	tmpIndividual = getIndividualFromField( main_test_field,testEnemies->individuals[5]->playerCharacter->x, testEnemies->individuals[5]->playerCharacter->y);
+	assert(!strcmp(tmpIndividual->name, testEnemies->individuals[5]->name));
 
 	int i;
-	for(i = 0; i < thisTestEnemies->numIndividuals; i++){
-		enemyAction((thisTestEnemies->individuals[i]), main_test_field, testPlayer);
+	for(i = 0; i < testEnemies->numIndividuals; i++){
+		enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
 	}
 
 	//skeleton 1&5 too far away, same starting position
-	tmpIndividual =thisTestEnemies->individuals[0];
+	tmpIndividual =testEnemies->individuals[0];
 	assert(tmpIndividual->playerCharacter->x == 10 &&
 			tmpIndividual->playerCharacter->y == 0 );
-	tmpIndividual =thisTestEnemies->individuals[5];
+	tmpIndividual =testEnemies->individuals[5];
 	assert(tmpIndividual->playerCharacter->x == 9 &&
 			tmpIndividual->playerCharacter->y == 15 );
 
 //	//skeletons 2,3,4,5 move towards the player
-	tmpIndividual =thisTestEnemies->individuals[1];
+	tmpIndividual =testEnemies->individuals[1];
 	assert(tmpIndividual->playerCharacter->x == 8 &&
 			tmpIndividual->playerCharacter->y == 2 );
-	tmpIndividual =thisTestEnemies->individuals[2];
+	tmpIndividual =testEnemies->individuals[2];
 	assert(tmpIndividual->playerCharacter->x == 7 &&
 			tmpIndividual->playerCharacter->y == 1 );
-	tmpIndividual =thisTestEnemies->individuals[3];
+	tmpIndividual =testEnemies->individuals[3];
 	assert(tmpIndividual->playerCharacter->x == 8 &&
 			tmpIndividual->playerCharacter->y == 1 );
-	tmpIndividual =thisTestEnemies->individuals[4];
+	tmpIndividual =testEnemies->individuals[4];
 	assert(tmpIndividual->playerCharacter->x == 6 &&
 			tmpIndividual->playerCharacter->y == 0 );
 
 
 	//get full node path of closest skeleton to player
 	nodeArr * resultArr = getFullNodePath(main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y,
-			thisTestEnemies->individuals[4]->playerCharacter->x, thisTestEnemies->individuals[4]->playerCharacter->y);
+			testEnemies->individuals[4]->playerCharacter->x, testEnemies->individuals[4]->playerCharacter->y);
 
 	assert(resultArr->nodeArray[0]->x == 2 && resultArr->nodeArray[0]->y == 0);
 	assert(resultArr->nodeArray[1]->x == 3 && resultArr->nodeArray[1]->y == 0);
@@ -123,7 +127,7 @@ int path_and_attack_test() {
 	assert(resultArr->nodeArray[4]->x == 6 && resultArr->nodeArray[4]->y == 0);
 
 	//get the node path to the first open space within the movement range
-	resultArr = getSpaceClosestToPlayer(main_test_field, thisTestEnemies->individuals[4], testPlayer);
+	resultArr = getSpaceClosestToPlayer(main_test_field, testEnemies->individuals[4], testPlayer);
 
 	assert(resultArr->nodeArray[0]->x == 5 && resultArr->nodeArray[0]->y == 0);
 	assert(resultArr->nodeArray[1]->x == 4 && resultArr->nodeArray[0]->y == 0);
@@ -173,43 +177,43 @@ int path_and_attack_test() {
 	moveIndividualSpace(main_test_field,testPlayer,1,1);
 
 	//move the enemies two more times, attack the player
-	for(i = 0; i < thisTestEnemies->numIndividuals; i++){
-		enemyAction((thisTestEnemies->individuals[i]), main_test_field, testPlayer);
+	for(i = 0; i < testEnemies->numIndividuals; i++){
+		enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
 	}
-	for(i = 0; i < thisTestEnemies->numIndividuals; i++){
-		enemyAction((thisTestEnemies->individuals[i]), main_test_field, testPlayer);
+	for(i = 0; i < testEnemies->numIndividuals; i++){
+		enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
 	}
 
 	//while skeletons 2, 3, and 4 all moved without being blocked, 5 reacts to the blocked path
 	//and moves to [3,1]
-	tmpIndividual = thisTestEnemies->individuals[4];
+	tmpIndividual = testEnemies->individuals[4];
 	assert(tmpIndividual->playerCharacter->x == 3 && tmpIndividual->playerCharacter->y == 1 );
 
 	//after being attacked 3 times, player health is 14
 	assert(testPlayer->hp == 14);
 
 	//skeleton0 cannot attack the player, vis versa
-	assert(!individualWithinRange(thisTestEnemies->individuals[0],testPlayer));
-	assert(!individualWithinRange(testPlayer,thisTestEnemies->individuals[0]));
+	assert(!individualWithinRange(testEnemies->individuals[0],testPlayer));
+	assert(!individualWithinRange(testPlayer,testEnemies->individuals[0]));
 
 	//skeleton5 cannot reach the player, but the player can attack
-	assert(!individualWithinRange(thisTestEnemies->individuals[4],testPlayer));
-	assert(individualWithinRange(testPlayer,thisTestEnemies->individuals[4]));
+	assert(!individualWithinRange(testEnemies->individuals[4],testPlayer));
+	assert(individualWithinRange(testPlayer,testEnemies->individuals[4]));
 
 	//player attacks skeleton5, skeleton5 dies
-	assert(attackIndividual(testPlayer,thisTestEnemies->individuals[4]));
+	assert(attackIndividual(testPlayer,testEnemies->individuals[4]));
 
 	//warping player next to doorway
 	moveIndividualSpace(main_test_field,testPlayer,6,9);
 
 	//fails, not a transitional space
-	assert(!attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData, mapTestDirectory));
+	assert(!attemptToTransit(&main_test_field, testPlayer, testEnemies, testNPCs, testShiftData, mapTestDirectory));
 
 	//warping player to doorway
 	moveIndividualSpace(main_test_field,testPlayer,6,8);
 
 	//works, player is in a transitional space - new field is loaded
-	assert(attemptToTransit(&main_test_field, testPlayer, thisTestEnemies, testShiftData,mapTestDirectory));
+	assert(attemptToTransit(&main_test_field, testPlayer, testEnemies, testNPCs, testShiftData,mapTestDirectory));
 
 	printf("Player location %d,%d\n", testPlayer->playerCharacter->x,testPlayer->playerCharacter->y);
 
@@ -217,7 +221,8 @@ int path_and_attack_test() {
 	assert(testPlayer->playerCharacter->x == 2 && testPlayer->playerCharacter->y == 3);
 
 	destroyIndividual(testPlayer);
-	clearGroup(thisTestEnemies);
+	clearGroup(testEnemies);
+	clearGroup(testNPCs);
 	destroyField(main_test_field, NULL);
 	destroyConsoleInstance();
 	destroyTheGlobalRegister();

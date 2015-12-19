@@ -12,7 +12,7 @@ individualGroup * initGroup(){
 	int index;
 	individualGroup * thisGroup = malloc(sizeof(individualGroup));
 	thisGroup->numIndividuals = 0;
-	thisGroup->currentIndividualIndex = 0;
+	thisGroup->currentIndividualIndex = -1;
 	for(index = 0; index < 50; index++){
 		thisGroup->individuals[index] = NULL;
 	}
@@ -30,7 +30,7 @@ int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividua
 	return 0;
 }
 
-void createEnemyFromLine(individual * newEnemy, char * line){
+void createIndividualFromLine(individual * newIndividual, char * line){
 	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,range,mvmt,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness;
@@ -110,34 +110,34 @@ void createEnemyFromLine(individual * newEnemy, char * line){
 	lightiningWeakness = atoi(value);
 
 
-	if(defineIndividual(newEnemy,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,critType,range,mvmt,
+	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,critType,range,mvmt,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness)){
-		printf("failed making new enemy\n");
+		printf("failed making new individual\n");
 	}
 
 	free(name);
 }
 
-void loadEnemies(individualGroup * enemiesList, char * enemyFile, char* directory){
-	char * fullEnemyFile = appendStrings(directory, enemyFile);
-	fullEnemyFile[strlen(fullEnemyFile)-1] = '\0'; //remove '\n' at end of line
-	FILE * enemyFP = fopen(fullEnemyFile, "r");
+void loadGroup(individualGroup * group, char * fileName, char* directory){
+	char * fullFileName = appendStrings(directory, fileName);
+	fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
+	FILE * FP = fopen(fullFileName, "r");
 	char line[160];
 
-	while(fgets(line,160,enemyFP) != NULL){
+	while(fgets(line,160,FP) != NULL){
 		if (line[0] != '#') {
-			individual * newEnemy = initIndividual();
-			createEnemyFromLine(newEnemy, line);
-			if (doesExist(newEnemy->ID)) {
-				addIndividualToGroup(enemiesList, newEnemy);
+			individual * newIndividual = initIndividual();
+			createIndividualFromLine(newIndividual, line);
+			if (doesExist(newIndividual->ID)) {
+				addIndividualToGroup(group, newIndividual);
 			}else{
-				destroyIndividual(newEnemy);
+				destroyIndividual(newIndividual);
 			}
 		}
 	}
 
-	fclose(enemyFP);
-	free(fullEnemyFile);
+	fclose(FP);
+	free(fullFileName);
 }
 
 void clearGroup(individualGroup * thisGroup){
@@ -157,23 +157,23 @@ void setGroupToField(field * thisField, individualGroup * thisGroup){
 	}
 }
 
-void loadEnemyItems(individualGroup * enemiesList, char * itemFile, char* directory){
-	char * fullEnemyFile = appendStrings(directory, itemFile);
-	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
-	FILE * itemFP = fopen(fullEnemyFile, "r");
+void loadGroupItems(individualGroup * group, char * itemFile, char* directory){
+	char * fullItemFile = appendStrings(directory, itemFile);
+	fullItemFile[strlen(fullItemFile) - 1] = '\0'; //remove '\n' at end of line
+	FILE * itemFP = fopen(fullItemFile, "r");
 	char line[512];
 	item * newItem;
 
 	while (fgets(line, 512, itemFP) != NULL) {
 		if (line[0] != '#') {
-			createEquipItemFromFile(line, enemiesList);
+			createEquipItemFromFile(line, group);
 		}
 	}
 	fclose(itemFP);
-	free(fullEnemyFile);
+	free(fullItemFile);
 }
 
-void createEquipItemFromFile(char line[512], individualGroup * enemiesList){
+void createEquipItemFromFile(char line[512], individualGroup * group){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
@@ -286,9 +286,9 @@ void createEquipItemFromFile(char line[512], individualGroup * enemiesList){
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 				waterWeaknessMod, lightiningWeaknessMod, isEquipt);
 
-	for(i = 0; i < enemiesList->numIndividuals; i++){
-		if(enemiesList->individuals[i]->ID == enemyId){
-			addItemToIndividual(enemiesList->individuals[i]->backpack, newItem);
+	for(i = 0; i < group->numIndividuals; i++){
+		if(group->individuals[i]->ID == enemyId){
+			addItemToIndividual(group->individuals[i]->backpack, newItem);
 			itemAdded = 1;
 			break;
 		}
@@ -455,7 +455,7 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 
 }
 
-int attemptToTransit(field ** thisField, individual * player, individualGroup * thisEnemies, shiftData * viewShift, char * mapDirectory){
+int attemptToTransit(field ** thisField, individual * player, individualGroup * enemies, individualGroup * npcs, shiftData * viewShift, char * mapDirectory){
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
 		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
@@ -465,8 +465,9 @@ int attemptToTransit(field ** thisField, individual * player, individualGroup * 
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
 			destroyField(*thisField, player);
-			clearGroup(thisEnemies);
-			*thisField = loadMap(mapName, mapDirectory, player, thisEnemies);
+			clearGroup(enemies);
+			clearGroup(npcs);
+			*thisField = loadMap(mapName, mapDirectory, player, enemies, npcs);
 
 			viewShift->xShift = 0;
 			viewShift->yShift = 0;

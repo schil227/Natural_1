@@ -47,7 +47,8 @@ int enemyTurn = 0;
 
 individual* player;
 
-individualGroup* thisEnemies;
+individualGroup* enemies;
+individualGroup* npcs;
 cursor* thisCursor;
 field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
@@ -138,13 +139,21 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}
 
-	for(index = 0; index < thisEnemies->numIndividuals; index++){
-		drawIndividual(hdc, hdcBuffer, thisEnemies->individuals[index], viewShift);
+	for(index = 0; index < npcs->numIndividuals; index++){
+		drawIndividual(hdc, hdcBuffer, npcs->individuals[index], viewShift);
 	}
 
-	//draw animated enemy over others
-	if(thisEnemies->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, thisEnemies->individuals[thisEnemies->currentIndividualIndex], viewShift);
+	for(index = 0; index < enemies->numIndividuals; index++){
+		drawIndividual(hdc, hdcBuffer, enemies->individuals[index], viewShift);
+	}
+
+	//draw animated enemy/npc over others
+	if(enemies->currentIndividualIndex != -1){
+		drawIndividual(hdc, hdcBuffer, enemies->individuals[enemies->currentIndividualIndex], viewShift);
+	}
+
+	if(npcs->currentIndividualIndex != -1){
+		drawIndividual(hdc, hdcBuffer, npcs->individuals[npcs->currentIndividualIndex], viewShift);
 	}
 
 	if (cursorMode) {
@@ -190,7 +199,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		UINT ret;
 
 		player = initIndividual();
-		thisEnemies = initGroup();
+		enemies = initGroup();
+		npcs = initGroup();
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
@@ -209,7 +219,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		setCurrentMessage(thisMessage);
 
 		int x, y;
-		main_field = loadMap("map1.txt", mapDirectory, player, thisEnemies);
+		main_field = loadMap("map1.txt", mapDirectory, player, enemies, npcs);
 		int imageID;
 
 		for (y = 0; y < main_field->totalY; y++) {
@@ -244,7 +254,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		GetClientRect(hwnd, &rect);
 		drawAll(hdc, &rect);
-//		drawPlayer(hdc, &rect);
 
 		EndPaint(hwnd, &ps);
 		ReleaseDC(hwnd, hdc);
@@ -288,7 +297,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x45: //e key (enter)
 			{
-				attemptToTransit(&main_field,player,thisEnemies,viewShift, mapDirectory);
+				attemptToTransit(&main_field, player, enemies, npcs, viewShift, mapDirectory);
 			}
 			break;
 		case 0x47://g key (get)
@@ -438,7 +447,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		}
 
-		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, thisEnemies, viewShift);
+		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, enemies, viewShift);
 	} else if(postCursorMode){
 		postCursorMode = 0;
 
@@ -518,24 +527,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			initInventoryMode = 0;
 		}
 
-		inventoryLoop(hwnd, msg, wParam, lParam, &inventoryMode, main_field, player, thisEnemies, viewShift);
+		inventoryLoop(hwnd, msg, wParam, lParam, &inventoryMode, main_field, player, enemies, viewShift);
 
 	}else if(enemyActionMode){
 		if(initEnemyActionMode){
 			initEnemyActionMode = 0;
 
-			if(thisEnemies->currentIndividualIndex == -1){
-				thisEnemies->currentIndividualIndex = 0;
+			if(enemies->currentIndividualIndex == -1){
+				enemies->currentIndividualIndex = 0;
 			}
 
-			if(thisEnemies->numIndividuals == 0){
+			if(enemies->numIndividuals == 0){
 				postEnemyActionMode = 1;
 				enemyActionMode = 0;
 				return 0;
 			}
 
 			int i;
-			individual * tmpIndividual = thisEnemies->individuals[thisEnemies->currentIndividualIndex];
+			individual * tmpIndividual = enemies->individuals[enemies->currentIndividualIndex];
 			nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field,tmpIndividual, player);
 
 			if(enemyNodeArr->size == 0){
@@ -572,7 +581,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		}
 
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,(thisEnemies->individuals[thisEnemies->currentIndividualIndex]),thisMoveNodeMeta,5,&enemyActionMode, viewShift, 0);
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,(enemies->individuals[enemies->currentIndividualIndex]),thisMoveNodeMeta,5,&enemyActionMode, viewShift, 0);
 
 		if(!enemyActionMode){
 
@@ -587,14 +596,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if(postEnemyActionMode){
 		postEnemyActionMode = 0;
 
-		attackIfInRange(thisEnemies->individuals[thisEnemies->currentIndividualIndex],player);
-		thisEnemies->currentIndividualIndex++;
-		if(thisEnemies->currentIndividualIndex < thisEnemies->numIndividuals){
+		attackIfInRange(enemies->individuals[enemies->currentIndividualIndex],player);
+		enemies->currentIndividualIndex++;
+		if(enemies->currentIndividualIndex < enemies->numIndividuals){
 			enemyActionMode = 1;
 			initEnemyActionMode = 1;
 		}else{
 			startTurn(player);
-			thisEnemies->currentIndividualIndex = -1;
+			enemies->currentIndividualIndex = -1;
 		}
 
 	}else {

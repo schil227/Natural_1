@@ -306,9 +306,9 @@ int generateBackground(char backgroundSymbol){
 	}
 }
 
-field * loadMap(char * mapName, char* directory, individual * player, individualGroup* thisEnemies){
+field * loadMap(char * mapName, char* directory, individual * player, individualGroup* enemies, individualGroup * npcs){
 
-	char transitMap[80], enemyMap[80], enemyItemMap[80], fieldItemMap[80];
+	char transitMap[80], enemyMap[80], enemyItemMap[80], npcMap[80], npcItemMap[80], fieldItemMap[80];
 	char * fullMapName = appendStrings(directory, mapName);
 //	fullMapName[strlen(fullMapName)-1] = '\0'; //remove /n at end
 
@@ -323,14 +323,22 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 	//enemy item filename
 	fgets(enemyItemMap,80,fp);
 
+	//enemy filename
+	fgets(npcMap,80,fp);
+
+	//enemy item filename
+	fgets(npcItemMap,80,fp);
+
 	//field item filename
 	fgets(fieldItemMap,80,fp);
 
 	fclose(fp);
 
 
-	loadEnemies(thisEnemies, enemyMap, directory);
-	loadEnemyItems(thisEnemies, enemyItemMap,directory);
+	loadGroup(enemies, enemyMap, directory);
+	loadGroupItems(enemies, enemyItemMap,directory);
+	loadGroup(npcs, npcMap, directory);
+	loadGroupItems(npcs, npcItemMap,directory);
 
 	field* thisField = initField(fullMapName);
 
@@ -339,7 +347,8 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 	makeTransitSpaces(transitMap, directory, thisField, player);
 
 	moveIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
-	setGroupToField(thisField, thisEnemies);
+	setGroupToField(thisField, enemies);
+	setGroupToField(thisField, npcs);
 
 	free(fullMapName);
 
@@ -496,7 +505,9 @@ field* initField(char* fieldFileName){
 	char line[80];
 	int init_y = 0, init_x = 0, xIndex, i, j;
 
-	//used to get rid of the first 4 lines of data (see loadMap)
+	//used to get rid of the first 6 lines of data (see loadMap)
+	fgets(line,80,fp);
+	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);

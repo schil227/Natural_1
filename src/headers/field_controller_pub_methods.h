@@ -10,7 +10,7 @@
 #include "./structs/field_controller.h"
 
 int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividual);
-int attemptToTransit(field ** thisField, individual * player, individualGroup * thisGroup, shiftData * viewShift, char * mapDirectory);
+int attemptToTransit(field ** thisField, individual * player, individualGroup * enemies, individualGroup * npcs, shiftData * viewShift, char * mapDirectory);
 void clearGroup(individualGroup * thisGroup);
 
 #endif /* SRC_HEADERS_FIELD_CONTROLLER_PUB_METHODS_H_ */

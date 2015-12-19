@@ -67,6 +67,7 @@ END
 2008 BITMAP DISCARDABLE "../images/skelly4.bmp"
 2009 BITMAP DISCARDABLE "../images/skelly5.bmp"
 2011 BITMAP DISCARDABLE "../images/red_skelly.bmp"
+2013 BITMAP DISCARDABLE "../images/red_robed.bmp"
 
 2010 BITMAP DISCARDABLE "../images/console_bg.bmp"
 2012 BITMAP DISCARDABLE "../images/dialog_box.bmp"
