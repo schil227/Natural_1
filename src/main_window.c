@@ -311,6 +311,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				inventoryMode = 1;
 			}
 			break;
+		case 0x54://t key (get)
+			{
+				cursorMode = 2;
+				initCursorMode = 1;
+			}
+			break;
 		case 0x57: //w key (wait)
 			player->remainingActions = player->remainingActions - 1;
 
@@ -447,7 +453,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		}
 
-		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, enemies, viewShift);
+		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, enemies, npcs, viewShift);
 	} else if(postCursorMode){
 		postCursorMode = 0;
 
@@ -556,10 +562,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			getSpaceFromField(main_field,tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-//			moveNode * currentNode = malloc(sizeof(moveNode));
-			moveNode ** ptrToCurrentNode;// = &currentNode;
-			*ptrToCurrentNode = NULL;
-//			thisMoveNodeMeta->rootMoveNode = *(ptrToCurrentNode);
+			moveNode * ptrToCurrentNode[1];
+			ptrToCurrentNode[0] = NULL;
 			thisMoveNodeMeta->sum = 0;
 
 			for(i = 0; i < enemyNodeArr->size; i++){

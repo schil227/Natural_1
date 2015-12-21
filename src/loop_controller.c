@@ -7,7 +7,8 @@
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor,
+		field * main_field, individual * player, individualGroup  * enemies, individualGroup  * npcs, shiftData * viewShift) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
@@ -42,31 +43,37 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 			break;
 		case 0x0D: //enter //TODO: when attacking, supply both enemies and NPCs, ensure the character cannot attack themselves
 		{
-			int cX, cY, index;
-			cX = thisCursor->cursorCharacter->x;
-			cY = thisCursor->cursorCharacter->y;
+			if (*cursorMode == 1) {//attack the individual
+				int cX, cY, index;
+				cX = thisCursor->cursorCharacter->x;
+				cY = thisCursor->cursorCharacter->y;
 
-			individual ** tmp = (individual**) getIndividualAddressFromField(main_field, cX, cY);
+//				individual ** tmp = (individual**) getIndividualAddressFromField(main_field, cX, cY);
 
-			for (index = 0; index < thisEnemies->individuals; index++) {
+				for (index = 0; index < enemies->numIndividuals; index++) {
 
-				individual * tmpEnemy = thisEnemies->individuals[index];
+					individual * tmpEnemy = enemies->individuals[index];
 
-				if (*tmp == tmpEnemy && individualWithinRange(player, tmpEnemy)) {
-					printf("attacked!");
-					if(attackIndividual(player, tmpEnemy)){
-						deleteIndividiaulFromGroup(thisEnemies,tmpEnemy);
-						removeIndividualFromField(main_field, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
-						destroyIndividual(tmpEnemy);
+//					if (*tmp == tmpEnemy && individualWithinRange(player, tmpEnemy)) {
+					if (tmpEnemy->playerCharacter->x == cX && tmpEnemy->playerCharacter->y == cY && individualWithinRange(player, tmpEnemy)) {
+						printf("attacked!");
+						if (attackIndividual(player, tmpEnemy)) {
+							deleteIndividiaulFromGroup(enemies, tmpEnemy);
+							removeIndividualFromField(main_field, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
+							destroyIndividual(tmpEnemy);
+						}
+						*cursorMode = 0;
+						*postCursorMode = 1;
+
+						viewShift->xShift = viewShift->xShiftOld;
+						viewShift->yShift = viewShift->yShiftOld;
+						break;
 					}
-					*cursorMode = 0;
-					*postCursorMode = 1;
 
-					viewShift->xShift = viewShift->xShiftOld;
-					viewShift->yShift = viewShift->yShiftOld;
-					break;
 				}
-
+			}else if(*cursorMode == 2){ //talk to the individual
+				*cursorMode = 0;
+				*postCursorMode = 1;
 			}
 
 //					destroyIndividual(tmp);
@@ -252,7 +259,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 				}
 
-				free(currentNode);
+//				free(currentNode);
 			}
 			break;
 		case 0x1B: //escape
