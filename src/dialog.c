@@ -52,7 +52,6 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	DeleteDC(hdcMem);
 
-//	DrawText(hdcBuffer, thisDialogBox->currentMessage->message, -1, &textBoxRect, DT_SINGLELINE);
 	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, 5, rowLength);
 }
 
@@ -67,4 +66,72 @@ void setSimpleDialogMessage(char * string){
 
 void toggleDrawDialogBox(){
 	thisDialogBox->drawBox = (thisDialogBox->drawBox+1)%2;
+}
+
+dialogDecision * createDialogDecisionFromLine(char * line){
+	dialogDecision * newDialogDecision = malloc(sizeof(dialogDecision));
+
+	char * value = strtok(line,";");
+	newDialogDecision->rootMessageID = atoi(value);
+
+	value = strtok(NULL,";");
+	strcpy(newDialogDecision->message, value);
+
+	value = strtok(line,";");
+	newDialogDecision->targetMessageID = atoi(value);
+
+	return newDialogDecision;
+}
+
+dialogMessage * createDialogMessageFromLine(char * line){
+	dialogMessage * newDialogMessage = malloc(sizeof(dialogMessage));
+	int eventType;
+
+	char * value = strtok(line,";");
+	newDialogMessage->messageID = atoi(value);
+
+	value = strtok(NULL,";");
+	strcpy(newDialogMessage->message, value);
+
+	value = strtok(NULL,";");
+	newDialogMessage->numDialogDecision = atoi(value);
+
+	value = strtok(NULL,";");
+	newDialogMessage->nextMessageID = atoi(value);
+
+	value = strtok(NULL,";");
+	eventType = atoi(value);
+
+	if(eventType){
+		eventFlag * newEventFlag = malloc(sizeof(eventFlag));
+		newEventFlag->eventType = eventType;
+
+		value = strtok(NULL,";");
+		newEventFlag->individualID = atoi(value);
+
+		value = strtok(NULL,";");
+		newEventFlag->itemID = atoi(value);
+
+		newDialogMessage->event = newEventFlag;
+	}else{
+		newDialogMessage->event = NULL;
+	}
+
+	return newDialogMessage;
+}
+
+dialogMessage * findNextDialogMessage(dialogMessage * thisMessage, dialogMessage ** messageArr, int numMessages){
+	int i;
+
+	if(thisMessage->nextMessageID != 0){
+		return NULL;
+	}
+	for (i = 0; i < numMessages; i++) {
+		if (thisMessage->nextMessageID == messageArr[i]->nextMessageID) {
+			return messageArr[i];
+		}
+	}
+
+	cwrite("*NEXT NODE ID NOT FOUND!!*");
+	return NULL;
 }
