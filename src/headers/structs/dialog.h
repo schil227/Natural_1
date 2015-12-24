@@ -33,18 +33,21 @@ typedef struct{
 typedef struct{
 	int rootMessageID;
 	int targetMessageID;
-	char message[256];
+	char message[64];
 	dialogMessage * targetMessage;
 } dialogDecision;
 
 
 typedef struct{
 	int drawBox;
+	int numRows;
 	int numDialogMessages;
 	int decisionIndex;
+	int decisionIndexRow[10];
 	dialogMessage ** dialogMessages;
 	dialogMessage * currentMessage;
 	character * dialogWindow;
+	character * selectArrow;
 } dialogBox;
 
 #endif /* SRC_DIALOG_H_ */

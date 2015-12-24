@@ -13,9 +13,11 @@ dialogBox * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	dialogBox * toReturn = malloc(sizeof(dialogBox));
 	toReturn->currentMessage = NULL;
 	toReturn->dialogMessages = NULL;
+	toReturn->numRows = 6;
 	toReturn->numDialogMessages = 0;
 	toReturn->decisionIndex = 0;
 	toReturn->dialogWindow = createCharacter(imageID, rgb, x, y);
+	toReturn->selectArrow = createCharacter(3001, RGB(255,0,255), x + 20, y);
 	toReturn->drawBox = 0;
 
 	return toReturn;
@@ -63,16 +65,41 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	BitBlt(hdcBuffer, thisDialogBox->dialogWindow->x, thisDialogBox->dialogWindow->y,
 			thisDialogBox->dialogWindow->width, thisDialogBox->dialogWindow->height, hdcMem, 0, 0, SRCCOPY);
 
+	if(thisDialogBox->currentMessage->numDialogDecision > 0){
+		int i, rowToStartOn;
+
+		for(i = 0; i < thisDialogBox->currentMessage->numDialogDecision; i++){
+			rowToStartOn = calcNumIndexes(drawMessageNode.message, rowLength,hdcBuffer, (textBoxRect.right - textBoxRect.right*0.9));
+			thisDialogBox->decisionIndexRow[i] = rowToStartOn;
+			dialogDecision * tmpDecision = thisDialogBox->currentMessage->decisions[i];
+			char tmpDecisionStr[70];
+			strcpy(tmpDecisionStr, "&     ");
+			strcat(tmpDecisionStr, tmpDecision->message);
+
+			strcat(drawMessageNode.message, tmpDecisionStr);
+		}
+
+
+
+
+
+		SelectObject(hdcMem, thisDialogBox->selectArrow->image);
+
+		BitBlt(hdcBuffer, thisDialogBox->selectArrow->x, thisDialogBox->selectArrow->y + thisDialogBox->dialogWindow->height - (15*(thisDialogBox->numRows -  thisDialogBox->decisionIndexRow[thisDialogBox->decisionIndex])),
+				thisDialogBox->selectArrow->width, thisDialogBox->selectArrow->height, hdcMem, 0, 0, SRCCOPY);
+
+	}
+
 	DeleteDC(hdcMem);
 
-	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, 5, rowLength);
+	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, thisDialogBox->numRows, rowLength);
 }
 
 void setCurrentMessage(dialogMessage * currentMessage){
 	thisDialogBox->currentMessage = currentMessage;
 }
 
-void nextDecision(){
+void nextDialogDecision(){
 	if(thisDialogBox->decisionIndex+1 < thisDialogBox->currentMessage->numDialogDecision){
 		thisDialogBox->decisionIndex++;
 	}else{ //roll over to 0
@@ -80,7 +107,7 @@ void nextDecision(){
 	}
 }
 
-void previousDecision(){
+void previousDialogDecision(){
 	if(thisDialogBox->decisionIndex != 0){
 		thisDialogBox->decisionIndex--;
 	}else{
@@ -94,10 +121,13 @@ void selectDecision(){
 }
 
 void advanceDialog(){
-	if(thisDialogBox->currentMessage->nextMessage != NULL){
-		thisDialogBox->currentMessage = thisDialogBox->currentMessage->nextMessage;
-	}else if(thisDialogBox->currentMessage->numDialogDecision > 0){
-
+	if(thisDialogBox->currentMessage->nextMessage != NULL || thisDialogBox->currentMessage->numDialogDecision > 0){
+		if(thisDialogBox->currentMessage->nextMessage != NULL){
+			thisDialogBox->currentMessage = thisDialogBox->currentMessage->nextMessage;
+		}else{
+			selectDecision();
+			thisDialogBox->decisionIndex = 0;
+		}
 	}else{ //no more messages, stop drawing
 		thisDialogBox->currentMessage->nextMessage = NULL;
 		toggleDrawDialogBox();

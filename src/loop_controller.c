@@ -117,7 +117,19 @@ int dialogLoop(hwnd, msg, wParam, lParam){
 			case 0x1B: //esc
 			case 0x0D: { //enter
 				advanceDialog();
+				break;
 			}
+			case 0x38:
+			case 0x68:{ //'8'
+				previousDialogDecision();
+				break;
+			}
+			case 0x32:
+			case 0x62:{ //'2' key
+				nextDialogDecision();
+				break;
+			}
+
 		}
 		case WM_TIMER:
 		{
