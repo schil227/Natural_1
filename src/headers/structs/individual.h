@@ -66,6 +66,8 @@ typedef struct {
 	short int waterWeakness;
 	short int lightiningWeakness;
 
+	int dialogID;
+
 	int jumpTarget;
 
 } individual;

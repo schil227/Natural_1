@@ -41,6 +41,7 @@ typedef struct{
 typedef struct{
 	int drawBox;
 	int numDialogMessages;
+	int decisionIndex;
 	dialogMessage ** dialogMessages;
 	dialogMessage * currentMessage;
 	character * dialogWindow;

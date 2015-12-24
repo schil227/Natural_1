@@ -33,7 +33,7 @@ int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividua
 void createIndividualFromLine(individual * newIndividual, char * line){
 	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,range,mvmt,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
-	fireWeakness,waterWeakness,lightiningWeakness;
+	fireWeakness,waterWeakness,lightiningWeakness,dialogID;
 	char * name = malloc(sizeof(char) * 32);
 	char critType[3];
 
@@ -109,9 +109,11 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok(NULL,";");
 	lightiningWeakness = atoi(value);
 
+	value = strtok(NULL,";");
+	dialogID = atoi(value);
 
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,critType,range,mvmt,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness)){
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID)){
 		printf("failed making new individual\n");
 	}
 
@@ -487,5 +489,21 @@ int attemptToTransit(field ** thisField, individual * player, individualGroup * 
 			clearMessages();
 			return 1;
 		}
+	return 0;
+}
+
+int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursorX, int cursorY){
+	int index;
+	for (index = 0; index < thisGroup->numIndividuals; index++) {
+
+		individual * tmpIndividual = thisGroup->individuals[index];
+
+		if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
+			if(setCurrentMessageByID(tmpIndividual->dialogID)){
+				toggleDrawDialogBox();
+			}
+			return 1;
+		}
+	}
 	return 0;
 }

@@ -14,8 +14,8 @@ dialogBox * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->currentMessage = NULL;
 	toReturn->dialogMessages = NULL;
 	toReturn->numDialogMessages = 0;
+	toReturn->decisionIndex = 0;
 	toReturn->dialogWindow = createCharacter(imageID, rgb, x, y);
-
 	toReturn->drawBox = 0;
 
 	return toReturn;
@@ -72,8 +72,28 @@ void setCurrentMessage(dialogMessage * currentMessage){
 	thisDialogBox->currentMessage = currentMessage;
 }
 
-void advanceDialog(){
+void nextDecision(){
+	if(thisDialogBox->decisionIndex+1 < thisDialogBox->currentMessage->numDialogDecision){
+		thisDialogBox->decisionIndex++;
+	}else{ //roll over to 0
+		thisDialogBox->decisionIndex = 0;
+	}
+}
 
+void previousDecision(){
+	if(thisDialogBox->decisionIndex != 0){
+		thisDialogBox->decisionIndex--;
+	}else{
+		thisDialogBox->decisionIndex = thisDialogBox->currentMessage->numDialogDecision-1;
+	}
+}
+
+void selectDecision(){
+	dialogDecision * theDecision = thisDialogBox->currentMessage->decisions[thisDialogBox->decisionIndex];
+	setCurrentMessage(theDecision->targetMessage);
+}
+
+void advanceDialog(){
 	if(thisDialogBox->currentMessage->nextMessage != NULL){
 		thisDialogBox->currentMessage = thisDialogBox->currentMessage->nextMessage;
 	}else if(thisDialogBox->currentMessage->numDialogDecision > 0){
@@ -95,15 +115,18 @@ void toggleDrawDialogBox(){
 	thisDialogBox->drawBox = (thisDialogBox->drawBox+1)%2;
 }
 
-void setCurrentMessageByID(int messageID){
+int setCurrentMessageByID(int messageID){
 	int i;
 
 	for(i = 0; i < thisDialogBox->numDialogMessages; i++){
 		if(thisDialogBox->dialogMessages[i]->messageID == messageID){
 			setCurrentMessage(thisDialogBox->dialogMessages[i]);
-			return;
+			return 1;
 		}
 	}
+
+	//dialog ID not found
+	return 0;
 }
 
 dialogDecision * createDialogDecisionFromLine(char * line){

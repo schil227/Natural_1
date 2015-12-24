@@ -48,13 +48,10 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 				cX = thisCursor->cursorCharacter->x;
 				cY = thisCursor->cursorCharacter->y;
 
-//				individual ** tmp = (individual**) getIndividualAddressFromField(main_field, cX, cY);
-
 				for (index = 0; index < enemies->numIndividuals; index++) {
 
 					individual * tmpEnemy = enemies->individuals[index];
 
-//					if (*tmp == tmpEnemy && individualWithinRange(player, tmpEnemy)) {
 					if (tmpEnemy->playerCharacter->x == cX && tmpEnemy->playerCharacter->y == cY && individualWithinRange(player, tmpEnemy)) {
 						printf("attacked!");
 						if (attackIndividual(player, tmpEnemy)) {
@@ -72,11 +69,18 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 
 				}
 			}else if(*cursorMode == 2){ //talk to the individual
+				int cX, cY;
+				cX = thisCursor->cursorCharacter->x;
+				cY = thisCursor->cursorCharacter->y;
+
+				if(!tryTalk(npcs,player,cX,cY) && !tryTalk(enemies,player,cX,cY)){
+					cwrite("There's nobody there.");
+				}
+
 				*cursorMode = 0;
 				*postCursorMode = 1;
 			}
 
-//					destroyIndividual(tmp);
 		}
 			break;
 		}
