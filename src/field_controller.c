@@ -118,36 +118,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	free(name);
 }
 
-void loadDialog(char * fileName, char * directory){
-	char * fullFileName = appendStrings(directory, fileName);
-	fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
-	FILE * FP = fopen(fullFileName, "r");
-	int numMessages, i, j, foundNode = 0, nextNotNull;
-	char line[512];
 
-	fgets(line,160,FP); //get num messages
-
-	numMessages = atoi(line);
-
-	dialogMessage * messageArr[numMessages];
-
-	for(i = 0; i < numMessages; i++){
-		fgets(line, 512, FP);
-		messageArr[i] = createDialogMessageFromLine(line);
-	}
-
-	//Populate DialogMessage's next DialogMessage
-	for(i = 0; i < numMessages; i++){
-		findNextDialogMessage(messageArr[i], messageArr, numMessages);
-	}
-
-	while(!fgets(line, 512,FP)){
-		dialogDecision * tmpDecision = createDialogDecisionFromLine(line);
-
-		//I'm kinda hungry - make a function that goes through each digMsg and
-		//add tmpD to it, as well as set tmpD's target msg
-	}
-}
 
 void loadGroup(individualGroup * group, char * fileName, char* directory){
 	char * fullFileName = appendStrings(directory, fileName);

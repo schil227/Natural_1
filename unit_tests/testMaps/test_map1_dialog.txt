@@ -1,0 +1,7 @@
+4
+1000;Hello, adventurer.;0;1001;0;0;0;0
+1001;Do you fancy these robes?;2;0;1;0;0;0
+1002;I agree - I found them in the graveyard to the east.;0;0;0;0;0;0
+1003;Hmph. It's better than what you have.;0;0;0;0;0;0
+1001;Yes;1002
+1001;No;1003

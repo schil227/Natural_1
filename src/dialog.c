@@ -5,13 +5,15 @@
  *      Author: Adrian
  */
 #include"./headers/dialog_pub_methods.h"
+#include<stdio.h>
 
 dialogBox * thisDialogBox;
 
 dialogBox * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	dialogBox * toReturn = malloc(sizeof(dialogBox));
 	toReturn->currentMessage = NULL;
-	toReturn->rootMessage = NULL;
+	toReturn->dialogMessages = NULL;
+	toReturn->numDialogMessages = 0;
 	toReturn->dialogWindow = createCharacter(imageID, rgb, x, y);
 
 	toReturn->drawBox = 0;
@@ -25,6 +27,17 @@ void initThisDialogBox(int imageID, int x, int y, COLORREF rgb){
 
 int shouldDrawDialogBox(){
 	return thisDialogBox->drawBox;
+}
+
+void setDialogMessages(dialogMessage ** messageArr, int numMessages){
+	thisDialogBox->dialogMessages = messageArr;
+	thisDialogBox->numDialogMessages = numMessages;
+}
+
+void clearDialogMessages(){
+	//TODO: step through and free all messages
+	thisDialogBox->dialogMessages = NULL;
+	thisDialogBox->numDialogMessages = 0;
 }
 
 void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
@@ -59,13 +72,38 @@ void setCurrentMessage(dialogMessage * currentMessage){
 	thisDialogBox->currentMessage = currentMessage;
 }
 
+void advanceDialog(){
+
+	if(thisDialogBox->currentMessage->nextMessage != NULL){
+		thisDialogBox->currentMessage = thisDialogBox->currentMessage->nextMessage;
+	}else if(thisDialogBox->currentMessage->numDialogDecision > 0){
+
+	}else{ //no more messages, stop drawing
+		thisDialogBox->currentMessage->nextMessage = NULL;
+		toggleDrawDialogBox();
+	}
+}
+
 void setSimpleDialogMessage(char * string){
 	thisDialogBox->currentMessage = malloc(sizeof(dialogMessage));
 	strcpy(thisDialogBox->currentMessage->message, string);
+	thisDialogBox->currentMessage->numDialogDecision = 0;
+	thisDialogBox->currentMessage->nextMessage = NULL;
 }
 
 void toggleDrawDialogBox(){
 	thisDialogBox->drawBox = (thisDialogBox->drawBox+1)%2;
+}
+
+void setCurrentMessageByID(int messageID){
+	int i;
+
+	for(i = 0; i < thisDialogBox->numDialogMessages; i++){
+		if(thisDialogBox->dialogMessages[i]->messageID == messageID){
+			setCurrentMessage(thisDialogBox->dialogMessages[i]);
+			return;
+		}
+	}
 }
 
 dialogDecision * createDialogDecisionFromLine(char * line){
@@ -77,7 +115,7 @@ dialogDecision * createDialogDecisionFromLine(char * line){
 	value = strtok(NULL,";");
 	strcpy(newDialogDecision->message, value);
 
-	value = strtok(line,";");
+	value = strtok(NULL,";");
 	newDialogDecision->targetMessageID = atoi(value);
 
 	return newDialogDecision;
@@ -100,6 +138,9 @@ dialogMessage * createDialogMessageFromLine(char * line){
 	newDialogMessage->nextMessageID = atoi(value);
 
 	value = strtok(NULL,";");
+	newDialogMessage->dialogCheckpoint = atoi(value);
+
+	value = strtok(NULL,";");
 	eventType = atoi(value);
 
 	if(eventType){
@@ -117,21 +158,92 @@ dialogMessage * createDialogMessageFromLine(char * line){
 		newDialogMessage->event = NULL;
 	}
 
+	newDialogMessage->decisions[0] = NULL;
+
 	return newDialogMessage;
 }
 
 dialogMessage * findNextDialogMessage(dialogMessage * thisMessage, dialogMessage ** messageArr, int numMessages){
 	int i;
 
-	if(thisMessage->nextMessageID != 0){
+	if(thisMessage->nextMessageID == 0){
 		return NULL;
 	}
 	for (i = 0; i < numMessages; i++) {
-		if (thisMessage->nextMessageID == messageArr[i]->nextMessageID) {
+		if (thisMessage->nextMessageID == messageArr[i]->messageID) {
 			return messageArr[i];
 		}
 	}
 
-	cwrite("*NEXT NODE ID NOT FOUND!!*");
+	cwrite("*CONFIGURATION ERROR: NEXT NODE ID NOT FOUND!!*");
 	return NULL;
+}
+
+void addDecisionToDialogMessage(dialogMessage * thisMessage, dialogDecision * thisDecision){
+	int i;
+
+	for(i = 0; i < 10; i++){
+		if(thisMessage->decisions[i] == NULL){
+			thisMessage->decisions[i] = thisDecision;
+
+			if(i+1 < 10){
+				thisMessage->decisions[i+1] = NULL;
+			}
+
+			return;
+		}
+	}
+
+}
+
+void loadDialog(char * fileName, char * directory){
+	char * fullFileName = appendStrings(directory, fileName);
+	fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
+	FILE * FP = fopen(fullFileName, "r");
+	int numMessages, i, j, foundNode = 0, nextNotNull;
+	char line[512];
+
+	if(!fgets(line,160,FP)){ //get num messages, exit if file is empty
+		return;
+	}
+
+	numMessages = atoi(line);
+
+	dialogMessage ** messageArr = malloc(sizeof(dialogMessage)*numMessages);
+
+	for(i = 0; i < numMessages; i++){
+		fgets(line, 512, FP);
+		messageArr[i] = createDialogMessageFromLine(line);
+	}
+
+	//Populate DialogMessage's next DialogMessage
+	for(i = 0; i < numMessages; i++){
+		messageArr[i]->nextMessage = findNextDialogMessage(messageArr[i], messageArr, numMessages);
+	}
+
+	int rootFound = 0, targetFound = 0;
+	while(fgets(line, 512,FP)){
+		dialogDecision * tmpDecision = createDialogDecisionFromLine(line);
+
+		for(i = 0; i < numMessages; i++){
+			if(messageArr[i]->messageID == tmpDecision->rootMessageID){
+				rootFound = 1;
+				addDecisionToDialogMessage(messageArr[i], tmpDecision);
+			}
+
+			if(messageArr[i]->messageID == tmpDecision->targetMessageID){
+				targetFound = 1;
+				tmpDecision->targetMessage = messageArr[i];
+			}
+
+			if(rootFound && targetFound){
+				rootFound = 0;
+				targetFound = 0;
+
+				break;
+			}
+		}
+	}
+
+	setDialogMessages(messageArr, numMessages);
 }

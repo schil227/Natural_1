@@ -4,6 +4,7 @@ test_map2_enemy_items.txt
 test_map2_npcs.txt
 test_map2_npc_items.txt
 test_map2_items.txt
+test_map2_dialog.txt
 s^x^x^x^s
 s^f^f^f^s
 s^f^f^f^s

@@ -308,7 +308,7 @@ int generateBackground(char backgroundSymbol){
 
 field * loadMap(char * mapName, char* directory, individual * player, individualGroup* enemies, individualGroup * npcs){
 
-	char transitMap[80], enemyMap[80], enemyItemMap[80], npcMap[80], npcItemMap[80], fieldItemMap[80];
+	char transitMap[80], enemyMap[80], enemyItemMap[80], npcMap[80], npcItemMap[80], fieldItemMap[80], dialog[80];
 	char * fullMapName = appendStrings(directory, mapName);
 //	fullMapName[strlen(fullMapName)-1] = '\0'; //remove /n at end
 
@@ -332,6 +332,9 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 	//field item filename
 	fgets(fieldItemMap,80,fp);
 
+	//dialog filename
+	fgets(dialog, 80,fp);
+
 	fclose(fp);
 
 
@@ -339,6 +342,7 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 	loadGroupItems(enemies, enemyItemMap,directory);
 	loadGroup(npcs, npcMap, directory);
 	loadGroupItems(npcs, npcItemMap,directory);
+	loadDialog(dialog, directory);
 
 	field* thisField = initField(fullMapName);
 
@@ -505,7 +509,8 @@ field* initField(char* fieldFileName){
 	char line[80];
 	int init_y = 0, init_x = 0, xIndex, i, j;
 
-	//used to get rid of the first 6 lines of data (see loadMap)
+	//used to get rid of the first 7 lines which are file names
+	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);

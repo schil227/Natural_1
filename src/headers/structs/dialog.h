@@ -40,7 +40,8 @@ typedef struct{
 
 typedef struct{
 	int drawBox;
-	dialogMessage * rootMessage;
+	int numDialogMessages;
+	dialogMessage ** dialogMessages;
 	dialogMessage * currentMessage;
 	character * dialogWindow;
 } dialogBox;

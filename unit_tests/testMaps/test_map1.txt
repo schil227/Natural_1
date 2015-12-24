@@ -4,6 +4,7 @@ test_map1_enemy_items.txt
 test_map1_npcs.txt
 test_map1_npc_items.txt
 test_map1_items.txt
+test_map1_dialog.txt
 g^g^g^g^g^g^g^r>-v->g^g^r>
 g^g^g^g^g^g^g^g^g^=>g^g^g^
 g^p^p^t^t^t^g^u<g^u>g^g^g^

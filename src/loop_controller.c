@@ -106,19 +106,49 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 	return 0;
 }
 
+int dialogLoop(hwnd, msg, wParam, lParam){
+	switch(msg){
+	case WM_KEYDOWN:{
+		switch (LOWORD(wParam)) {
+			case 0x1B: //esc
+			case 0x0D: { //enter
+				advanceDialog();
+			}
+		}
+		case WM_TIMER:
+		{
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+			ReleaseDC(hwnd, hdc);
+		}
+			break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	}
+}
+
 int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inventoryMode, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
 
-		if(shouldDrawDialogBox()){
-			switch (LOWORD(wParam)) {
-				case 0x1B:
-				{	//stop drawing dialog box
-					toggleDrawDialogBox();
-				}
-			}
-		}else{
+//		if(shouldDrawDialogBox()){
+//			switch (LOWORD(wParam)) {
+//				case 0x1B:
+//				{	//stop drawing dialog box
+//					toggleDrawDialogBox();
+//				}
+//			}
+//		}else{
 			switch (LOWORD(wParam)) {
 			case 0x38:
 			case 0x68: {
@@ -164,7 +194,7 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 			}
 				break;
 			}
-		}
+//		}
 		case WM_TIMER:
 		{
 			RECT rect;
