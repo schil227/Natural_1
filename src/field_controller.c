@@ -112,6 +112,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok(NULL,";");
 	dialogID = atoi(value);
 
+	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,critType,range,mvmt,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID)){
 		printf("failed making new individual\n");
@@ -499,7 +500,8 @@ int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursor
 		individual * tmpIndividual = thisGroup->individuals[index];
 
 		if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
-			if(setCurrentMessageByID(tmpIndividual->dialogID)){
+			if(setCurrentMessageByIndividualID(tmpIndividual->ID)){
+				setSpeakingIndividualID(tmpIndividual->ID);
 				toggleDrawDialogBox();
 			}
 			return 1;

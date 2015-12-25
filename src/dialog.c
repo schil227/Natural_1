@@ -7,10 +7,10 @@
 #include"./headers/dialog_pub_methods.h"
 #include<stdio.h>
 
-dialogBox * thisDialogBox;
+dialogInstance * thisDialogInstance;
 
-dialogBox * initDialogBox(int imageID, int x, int y, COLORREF rgb){
-	dialogBox * toReturn = malloc(sizeof(dialogBox));
+dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
+	dialogInstance * toReturn = malloc(sizeof(dialogInstance));
 	toReturn->currentMessage = NULL;
 	toReturn->dialogMessages = NULL;
 	toReturn->numRows = 6;
@@ -19,40 +19,42 @@ dialogBox * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->dialogWindow = createCharacter(imageID, rgb, x, y);
 	toReturn->selectArrow = createCharacter(3001, RGB(255,0,255), x + 20, y);
 	toReturn->drawBox = 0;
+	toReturn->speakingIndividualID = 0;
+	toReturn->individualDialogRegistry[0] = NULL;
 
 	return toReturn;
 }
 
 void initThisDialogBox(int imageID, int x, int y, COLORREF rgb){
-	thisDialogBox = initDialogBox(imageID, x, y, rgb);
+	thisDialogInstance = initDialogBox(imageID, x, y, rgb);
 }
 
 int shouldDrawDialogBox(){
-	return thisDialogBox->drawBox;
+	return thisDialogInstance->drawBox;
 }
 
 void setDialogMessages(dialogMessage ** messageArr, int numMessages){
-	thisDialogBox->dialogMessages = messageArr;
-	thisDialogBox->numDialogMessages = numMessages;
+	thisDialogInstance->dialogMessages = messageArr;
+	thisDialogInstance->numDialogMessages = numMessages;
 }
 
 void clearDialogMessages(){
 	//TODO: step through and free all messages
-	thisDialogBox->dialogMessages = NULL;
-	thisDialogBox->numDialogMessages = 0;
+	thisDialogInstance->dialogMessages = NULL;
+	thisDialogInstance->numDialogMessages = 0;
 }
 
 void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	int rowLength;
 
 	RECT textBoxRect;
-		textBoxRect.left = thisDialogBox->dialogWindow->x + 10;//prc->right - prc->right*0.95;
-		textBoxRect.bottom = thisDialogBox->dialogWindow->y +  thisDialogBox->dialogWindow->height;  // prc->bottom;
+		textBoxRect.left = thisDialogInstance->dialogWindow->x + 10;//prc->right - prc->right*0.95;
+		textBoxRect.bottom = thisDialogInstance->dialogWindow->y +  thisDialogInstance->dialogWindow->height;  // prc->bottom;
 		textBoxRect.top = textBoxRect.bottom - 30;
-		textBoxRect.right = textBoxRect.left +  thisDialogBox->dialogWindow->width;
+		textBoxRect.right = textBoxRect.left +  thisDialogInstance->dialogWindow->width;
 
 	messageNode drawMessageNode;
-	strcpy(drawMessageNode.message,thisDialogBox->currentMessage->message);
+	strcpy(drawMessageNode.message,thisDialogInstance->currentMessage->message);
 	drawMessageNode.nextMessageNode = NULL;
 	drawMessageNode.previousMessageNode = NULL;
 
@@ -60,18 +62,18 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
-	SelectObject(hdcMem, thisDialogBox->dialogWindow->image);
+	SelectObject(hdcMem, thisDialogInstance->dialogWindow->image);
 
-	BitBlt(hdcBuffer, thisDialogBox->dialogWindow->x, thisDialogBox->dialogWindow->y,
-			thisDialogBox->dialogWindow->width, thisDialogBox->dialogWindow->height, hdcMem, 0, 0, SRCCOPY);
+	BitBlt(hdcBuffer, thisDialogInstance->dialogWindow->x, thisDialogInstance->dialogWindow->y,
+			thisDialogInstance->dialogWindow->width, thisDialogInstance->dialogWindow->height, hdcMem, 0, 0, SRCCOPY);
 
-	if(thisDialogBox->currentMessage->numDialogDecision > 0){
+	if(thisDialogInstance->currentMessage->numDialogDecision > 0){
 		int i, rowToStartOn;
 
-		for(i = 0; i < thisDialogBox->currentMessage->numDialogDecision; i++){
+		for(i = 0; i < thisDialogInstance->currentMessage->numDialogDecision; i++){
 			rowToStartOn = calcNumIndexes(drawMessageNode.message, rowLength,hdcBuffer, (textBoxRect.right - textBoxRect.right*0.9));
-			thisDialogBox->decisionIndexRow[i] = rowToStartOn;
-			dialogDecision * tmpDecision = thisDialogBox->currentMessage->decisions[i];
+			thisDialogInstance->decisionIndexRow[i] = rowToStartOn;
+			dialogDecision * tmpDecision = thisDialogInstance->currentMessage->decisions[i];
 			char tmpDecisionStr[70];
 			strcpy(tmpDecisionStr, "&     ");
 			strcat(tmpDecisionStr, tmpDecision->message);
@@ -79,84 +81,142 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 			strcat(drawMessageNode.message, tmpDecisionStr);
 		}
 
+		SelectObject(hdcMem, thisDialogInstance->selectArrow->image);
 
-
-
-
-		SelectObject(hdcMem, thisDialogBox->selectArrow->image);
-
-		BitBlt(hdcBuffer, thisDialogBox->selectArrow->x, thisDialogBox->selectArrow->y + thisDialogBox->dialogWindow->height - (15*(thisDialogBox->numRows -  thisDialogBox->decisionIndexRow[thisDialogBox->decisionIndex])),
-				thisDialogBox->selectArrow->width, thisDialogBox->selectArrow->height, hdcMem, 0, 0, SRCCOPY);
+		BitBlt(hdcBuffer, thisDialogInstance->selectArrow->x, thisDialogInstance->selectArrow->y + thisDialogInstance->dialogWindow->height - (15*(thisDialogInstance->numRows -  thisDialogInstance->decisionIndexRow[thisDialogInstance->decisionIndex])),
+				thisDialogInstance->selectArrow->width, thisDialogInstance->selectArrow->height, hdcMem, 0, 0, SRCCOPY);
 
 	}
 
 	DeleteDC(hdcMem);
 
-	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, thisDialogBox->numRows, rowLength);
+	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, thisDialogInstance->numRows, rowLength);
 }
 
 void setCurrentMessage(dialogMessage * currentMessage){
-	thisDialogBox->currentMessage = currentMessage;
+	thisDialogInstance->currentMessage = currentMessage;
+}
+
+void setSpeakingIndividualID(int ID){
+	thisDialogInstance->speakingIndividualID = ID;
 }
 
 void nextDialogDecision(){
-	if(thisDialogBox->decisionIndex+1 < thisDialogBox->currentMessage->numDialogDecision){
-		thisDialogBox->decisionIndex++;
+	if(thisDialogInstance->decisionIndex+1 < thisDialogInstance->currentMessage->numDialogDecision){
+		thisDialogInstance->decisionIndex++;
 	}else{ //roll over to 0
-		thisDialogBox->decisionIndex = 0;
+		thisDialogInstance->decisionIndex = 0;
 	}
 }
 
 void previousDialogDecision(){
-	if(thisDialogBox->decisionIndex != 0){
-		thisDialogBox->decisionIndex--;
+	if(thisDialogInstance->decisionIndex != 0){
+		thisDialogInstance->decisionIndex--;
 	}else{
-		thisDialogBox->decisionIndex = thisDialogBox->currentMessage->numDialogDecision-1;
+		thisDialogInstance->decisionIndex = thisDialogInstance->currentMessage->numDialogDecision-1;
 	}
 }
 
 void selectDecision(){
-	dialogDecision * theDecision = thisDialogBox->currentMessage->decisions[thisDialogBox->decisionIndex];
+	dialogDecision * theDecision = thisDialogInstance->currentMessage->decisions[thisDialogInstance->decisionIndex];
 	setCurrentMessage(theDecision->targetMessage);
 }
 
 void advanceDialog(){
-	if(thisDialogBox->currentMessage->nextMessage != NULL || thisDialogBox->currentMessage->numDialogDecision > 0){
-		if(thisDialogBox->currentMessage->nextMessage != NULL){
-			thisDialogBox->currentMessage = thisDialogBox->currentMessage->nextMessage;
+	if(thisDialogInstance->currentMessage->nextMessage != NULL || thisDialogInstance->currentMessage->numDialogDecision > 0){
+		if(thisDialogInstance->currentMessage->nextMessage != NULL){
+			thisDialogInstance->currentMessage = thisDialogInstance->currentMessage->nextMessage;
 		}else{
 			selectDecision();
-			thisDialogBox->decisionIndex = 0;
+			thisDialogInstance->decisionIndex = 0;
+		}
+
+		if (thisDialogInstance->currentMessage->dialogCheckpoint) {
+			setIndividualDialog(thisDialogInstance->currentMessage->messageID);
 		}
 	}else{ //no more messages, stop drawing
-		thisDialogBox->currentMessage->nextMessage = NULL;
+		thisDialogInstance->currentMessage->nextMessage = NULL;
+		thisDialogInstance->speakingIndividualID = 0;
 		toggleDrawDialogBox();
 	}
 }
 
 void setSimpleDialogMessage(char * string){
-	thisDialogBox->currentMessage = malloc(sizeof(dialogMessage));
-	strcpy(thisDialogBox->currentMessage->message, string);
-	thisDialogBox->currentMessage->numDialogDecision = 0;
-	thisDialogBox->currentMessage->nextMessage = NULL;
+	thisDialogInstance->currentMessage = malloc(sizeof(dialogMessage));
+	strcpy(thisDialogInstance->currentMessage->message, string);
+	thisDialogInstance->currentMessage->numDialogDecision = 0;
+	thisDialogInstance->currentMessage->nextMessage = NULL;
 }
 
 void toggleDrawDialogBox(){
-	thisDialogBox->drawBox = (thisDialogBox->drawBox+1)%2;
+	thisDialogInstance->drawBox = (thisDialogInstance->drawBox+1)%2;
 }
 
-int setCurrentMessageByID(int messageID){
+int setCurrentMessageByIndividualID(int individualID){
 	int i;
 
-	for(i = 0; i < thisDialogBox->numDialogMessages; i++){
-		if(thisDialogBox->dialogMessages[i]->messageID == messageID){
-			setCurrentMessage(thisDialogBox->dialogMessages[i]);
-			return 1;
+	for(i = 0; i < 500; i++){
+		if(thisDialogInstance->individualDialogRegistry[i] == NULL){
+			return 0;
+		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){
+			return setCurrentMessageByMessageID(thisDialogInstance->individualDialogRegistry[i]->dialogID);
 		}
 	}
 
 	//dialog ID not found
 	return 0;
+}
+
+int setCurrentMessageByMessageID(int messageID){
+	int i;
+
+	for (i = 0; i < thisDialogInstance->numDialogMessages; i++) {
+		if (thisDialogInstance->dialogMessages[i]->messageID == messageID) {
+			setCurrentMessage(thisDialogInstance->dialogMessages[i]);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int loadOrAddIndividualDialog(int individualID, int dialogID){
+	int i;
+
+	if(dialogID == 0){
+		return 0;
+	}
+
+	for(i = 0; i < 500; i++){
+		if(thisDialogInstance->individualDialogRegistry[i] == NULL){ //entry not found, create new entry
+			individualDialog * thisDialogEntry = malloc(sizeof(individualDialog));
+			thisDialogEntry->individualID = individualID;
+			thisDialogEntry->dialogID = dialogID;
+
+			thisDialogInstance->individualDialogRegistry[i] = thisDialogEntry;
+			if(i+1 < 500){
+				thisDialogInstance->individualDialogRegistry[i+1] = NULL;
+			}
+
+			return dialogID;
+		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){ //entry already exists
+			return thisDialogInstance->individualDialogRegistry[i]->dialogID;
+		}
+	}
+
+	cwrite("*MAX NPCs IN individualDialogRegistry!*");
+	return -1;
+}
+
+void setIndividualDialog(int dialogID){
+	int i;
+
+	for(i = 0; i < 500; i++){
+		if(thisDialogInstance->individualDialogRegistry[i]->individualID == thisDialogInstance->speakingIndividualID){
+			thisDialogInstance->individualDialogRegistry[i]->dialogID = dialogID;
+			return;
+		}
+	}
 }
 
 dialogDecision * createDialogDecisionFromLine(char * line){

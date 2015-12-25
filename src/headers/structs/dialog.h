@@ -14,8 +14,12 @@ typedef struct{
 
 	int	individualID;
 	int itemID;
-
 } eventFlag;
+
+typedef struct{
+	int individualID;
+	int dialogID;
+} individualDialog;
 
 typedef struct{
 	int messageID;
@@ -44,10 +48,12 @@ typedef struct{
 	int numDialogMessages;
 	int decisionIndex;
 	int decisionIndexRow[10];
+	int speakingIndividualID;
 	dialogMessage ** dialogMessages;
 	dialogMessage * currentMessage;
 	character * dialogWindow;
 	character * selectArrow;
-} dialogBox;
+	individualDialog * individualDialogRegistry[500];
+} dialogInstance;
 
 #endif /* SRC_DIALOG_H_ */
