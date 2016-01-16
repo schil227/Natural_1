@@ -7,7 +7,7 @@
 #include"./headers/dialog_pub_methods.h"
 #include<stdio.h>
 
-dialogInstance * thisDialogInstance;
+static dialogInstance * thisDialogInstance;
 
 dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	dialogInstance * toReturn = malloc(sizeof(dialogInstance));
@@ -51,7 +51,7 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 		textBoxRect.left = thisDialogInstance->dialogWindow->x + 10;//prc->right - prc->right*0.95;
 		textBoxRect.bottom = thisDialogInstance->dialogWindow->y +  thisDialogInstance->dialogWindow->height;  // prc->bottom;
 		textBoxRect.top = textBoxRect.bottom - 30;
-		textBoxRect.right = textBoxRect.left +  thisDialogInstance->dialogWindow->width;
+		textBoxRect.right = textBoxRect.left +  thisDialogInstance->dialogWindow->width - 20;
 
 	messageNode drawMessageNode;
 	strcpy(drawMessageNode.message,thisDialogInstance->currentMessage->message);

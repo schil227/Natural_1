@@ -6,7 +6,7 @@
  */
 #include"./headers/console_pub_methods.h"
 
-console * thisConsole;
+static console * thisConsole;
 
 console * initConsole(int imageID, int x, int y, int width, int height){
 	console *  thisNewConsole = malloc(sizeof(console));

@@ -667,8 +667,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 0;
 	}
 
-
-
 	wc2.cbSize = sizeof(WNDCLASSEX); //Size of the structure
 	wc2.style = 0; //Class styles (usually zero)
 	wc2.lpfnWndProc = ConsWndProc; //Pointer to the window procedure for this window class
