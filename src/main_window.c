@@ -204,6 +204,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
+		initTheEventQueue();
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
 		initalizeTheGlobalRegister();
 		appendNewMessageNode("You leave the forest.");
@@ -436,11 +437,10 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	return 0;
 }
 
-
-
-
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if(shouldDrawDialogBox()){
+	if(eventsToProcess()){
+		processAllEvents(player, npcs, enemies, main_field);
+	}else if(shouldDrawDialogBox()){
 		return dialogLoop(hwnd, msg, wParam, lParam);
 	} else if (cursorMode) {
 		if (initCursorMode) {

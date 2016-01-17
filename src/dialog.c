@@ -30,7 +30,11 @@ void initThisDialogBox(int imageID, int x, int y, COLORREF rgb){
 }
 
 int shouldDrawDialogBox(){
-	return thisDialogInstance->drawBox;
+	if(thisDialogInstance != NULL){
+		return thisDialogInstance->drawBox;
+	}
+
+	return 0;
 }
 
 void setDialogMessages(dialogMessage ** messageArr, int numMessages){
@@ -236,7 +240,6 @@ dialogDecision * createDialogDecisionFromLine(char * line){
 
 dialogMessage * createDialogMessageFromLine(char * line){
 	dialogMessage * newDialogMessage = malloc(sizeof(dialogMessage));
-	int eventType;
 
 	char * value = strtok(line,";");
 	newDialogMessage->messageID = atoi(value);
@@ -254,22 +257,7 @@ dialogMessage * createDialogMessageFromLine(char * line){
 	newDialogMessage->dialogCheckpoint = atoi(value);
 
 	value = strtok(NULL,";");
-	eventType = atoi(value);
-
-	if(eventType){
-		eventFlag * newEventFlag = malloc(sizeof(eventFlag));
-		newEventFlag->eventType = eventType;
-
-		value = strtok(NULL,";");
-		newEventFlag->individualID = atoi(value);
-
-		value = strtok(NULL,";");
-		newEventFlag->itemID = atoi(value);
-
-		newDialogMessage->event = newEventFlag;
-	}else{
-		newDialogMessage->event = NULL;
-	}
+	newDialogMessage->eventID = atoi(value);
 
 	newDialogMessage->decisions[0] = NULL;
 

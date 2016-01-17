@@ -10,13 +10,6 @@
 #include "../console_pub_methods.h"
 
 typedef struct{
-	int eventType;
-
-	int	individualID;
-	int itemID;
-} eventFlag;
-
-typedef struct{
 	int individualID;
 	int dialogID;
 } individualDialog;
@@ -27,7 +20,7 @@ typedef struct{
 	int numDialogDecision;
 
 	int dialogCheckpoint; //if the user should start at this message
-	eventFlag * event; //the event this flag triggers
+	int eventID; //the event this flag triggers
 
 	int nextMessageID;
 	struct dialogMessage * nextMessage;
