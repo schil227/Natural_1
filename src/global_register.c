@@ -7,7 +7,7 @@
 #include<math.h>
 #include"./headers/structs/global_register.h"
 
-globalRegister * thisGlobalRegister;
+static globalRegister * thisGlobalRegister;
 
 void initalizeTheGlobalRegister(){
 	int i;
@@ -23,9 +23,133 @@ void initalizeTheGlobalRegister(){
 		thisGlobalRegister->existanceArray[i] = maxInt;
 	}
 
+	thisGlobalRegister->MAX_INDIVIDUALS = 1000;
+	thisGlobalRegister->numIndividuals = 0;
+	thisGlobalRegister->MAX_ITEMS = 5000;
+	thisGlobalRegister->numItems = 0;
+
 }
 
+individual * getIndividualFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numIndividuals; i++){
+		if(thisGlobalRegister->individualRegistry[i]->ID == id){
+			return thisGlobalRegister->individualRegistry[i];
+		}
+	}
+
+	cwrite("!!INDIVIDUAL NOT FOUND IN REGISTRY!!");
+
+	return NULL;
+}
+
+item * getItemFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numItems; i++){
+		if(thisGlobalRegister->itemRegistry[i]->ID == id){
+			return thisGlobalRegister->itemRegistry[i];
+		}
+	}
+
+	cwrite("!!ITEM NOT FOUND IN REGISTRY!!");
+
+	return NULL;
+}
+
+int addIndividualToRegistry(individual * thisIndividual){
+	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
+		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
+		thisGlobalRegister->numIndividuals++;
+		return 1;
+	}
+
+	cwrite("!!MAX INDIVIDUALS IN REGISTRY!!");
+
+	return 0;
+}
+
+int addItemToRegistry(item * thisItem){
+	if(thisGlobalRegister->numItems < thisGlobalRegister->MAX_ITEMS){
+		thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = thisItem;
+		thisGlobalRegister->numItems++;
+		return 1;
+	}
+
+	cwrite("!!MAX ITEMS IN REGISTRY!!");
+
+	return 0;
+}
+
+int removeIndividualFromRegistryByID(int id){
+	int i;
+
+	if(thisGlobalRegister->numIndividuals == 0){
+		cwrite("!!CANNOT REMOVE: INDIVIDUAL REGISTRY EMPTY!!");
+		return 0;
+	}
+
+	for(i = 0; i < thisGlobalRegister->numIndividuals; i++){
+		if(thisGlobalRegister->individualRegistry[i]->ID == id){
+			destroyIndividual(thisGlobalRegister->individualRegistry[i]);
+
+			//rebalance, place last element at i
+			thisGlobalRegister->numIndividuals;
+			thisGlobalRegister->individualRegistry[i] = thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals];
+			thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = NULL;
+
+			return 1;
+		}
+	}
+
+	cwrite("!!CANNOT REMOVE: INDIVIDUAL NOT FOUND!!");
+
+	return 0;
+
+}
+
+int removeItemFromRegistryByID(int id){
+	int i;
+
+	if(thisGlobalRegister->numItems == 0){
+		cwrite("!!CANNOT REMOVE: ITEM REGISTRY EMPTY!!");
+		return 0;
+	}
+
+	for(i = 0; i < thisGlobalRegister->numItems; i++){
+		if(thisGlobalRegister->itemRegistry[i]->ID == id){
+			destroyItem(thisGlobalRegister->itemRegistry[i]);
+
+			//rebalance, place last element at i
+			thisGlobalRegister->numItems;
+			thisGlobalRegister->itemRegistry[i] = thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems];
+			thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = NULL;
+
+			return 1;
+		}
+	}
+
+	cwrite("!!CANNOT REMOVE: ITEM NOT FOUND!!");
+
+	return 0;
+}
+
+/*
+ * TODO: On cutover, make sure destroy individual doesn't destroy items.
+ * That will be handed at the registry level
+ */
 void destroyTheGlobalRegister(){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numIndividuals; i++){
+		destroyIndividual(thisGlobalRegister->individualRegistry[i]);
+	}
+
+	for(i = 0; i < thisGlobalRegister->numItems; i++){
+		destroyItem(thisGlobalRegister->itemRegistry[i]);
+	}
+
 	free(thisGlobalRegister);
 }
 

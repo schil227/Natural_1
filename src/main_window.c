@@ -438,9 +438,11 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if(eventsToProcess()){
-		processAllEvents(player, npcs, enemies, main_field);
-	}else if(shouldDrawDialogBox()){
+//	if(eventsToProcess()){
+//		processAllEvents(player, npcs, enemies, main_field);
+//	}else
+
+	if(shouldDrawDialogBox()){
 		return dialogLoop(hwnd, msg, wParam, lParam);
 	} else if (cursorMode) {
 		if (initCursorMode) {
