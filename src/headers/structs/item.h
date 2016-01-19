@@ -13,6 +13,7 @@
 typedef struct {
 	character * itemCharacter;
 	int ID;
+	short int npcID;
 	char type; // (w)eapon/(a)rmor/(i)tem
 	char name[32];
 	char description[256];

@@ -364,15 +364,15 @@ destroyField(field * thisField, individual * player){
 
 	if(thisField->thisFieldInventory != NULL){
 		itemsPassed = 0;
-		for(i = 0; i < 1000; i++){
-			if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
-				destroyItem(thisField->thisFieldInventory->inventoryArr[i]);
-				itemsPassed++;
-			}
-			if(itemsPassed >= thisField->thisFieldInventory->inventorySize){
-				break;
-			}
-		}
+//		for(i = 0; i < 1000; i++){
+//			if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
+//				destroyItem(thisField->thisFieldInventory->inventoryArr[i]);
+//				itemsPassed++;
+//			}
+//			if(itemsPassed >= thisField->thisFieldInventory->inventorySize){
+//				break;
+//			}
+//		}
 		free(thisField->thisFieldInventory);
 	}
 

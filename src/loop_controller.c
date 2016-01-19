@@ -57,7 +57,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 						if (attackIndividual(player, tmpEnemy)) {
 							deleteIndividiaulFromGroup(enemies, tmpEnemy);
 							removeIndividualFromField(main_field, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
-							destroyIndividual(tmpEnemy);
+//							destroyIndividual(tmpEnemy);
 						}
 						*cursorMode = 0;
 						*postCursorMode = 1;
@@ -98,8 +98,6 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 		DestroyWindow(hwnd);
 		break;
 		case WM_DESTROY:
-//		DeleteObject(g_hbmPlayerMask);
-		destroyIndividual(player);
 		destroyCursor(thisCursor);
 		PostQuitMessage(0);
 		break;
@@ -225,7 +223,6 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 			DestroyWindow(hwnd);
 			break;
 		case WM_DESTROY:
-			destroyIndividual(player);
 			destroyTheGlobalRegister();
 			PostQuitMessage(0);
 			break;
@@ -340,7 +337,6 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 		break;
 		case WM_DESTROY:
 
-		destroyIndividual(thisIndividual);
 		PostQuitMessage(0);
 		break;
 		default:

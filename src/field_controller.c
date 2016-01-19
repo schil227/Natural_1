@@ -131,13 +131,21 @@ void loadGroup(individualGroup * group, char * fileName, char* directory){
 
 	while(fgets(line,160,FP) != NULL){
 		if (line[0] != '#') {
-			individual * newIndividual = initIndividual();
-			createIndividualFromLine(newIndividual, line);
-			if (doesExist(newIndividual->ID)) {
-				addIndividualToGroup(group, newIndividual);
+			char * value = strtok(line,";");
+			int id = atoi(value);
+
+			individual * newIndividual = getIndividualFromRegistry(id);
+			if(newIndividual != NULL){
+				if (doesExist(newIndividual->ID)) {
+					addIndividualToGroup(group, newIndividual);
+				}
 			}else{
-				destroyIndividual(newIndividual);
+				char * errLog[128];
+				sprintf(errLog, "!!INDIVIDUAL NOT FOUND : %d!!", id);
+				cwrite(errLog);
 			}
+
+
 		}
 	}
 
@@ -148,7 +156,7 @@ void loadGroup(individualGroup * group, char * fileName, char* directory){
 void clearGroup(individualGroup * thisGroup){
 	int i;
 	for(i = 0; i < thisGroup->numIndividuals; i++){
-		destroyIndividual(thisGroup->individuals[i]);
+		thisGroup->individuals[i] = NULL;
 	}
 	thisGroup->numIndividuals = 0;
 }
@@ -169,11 +177,11 @@ void loadGroupItems(individualGroup * group, char * itemFile, char* directory){
 	char line[512];
 	item * newItem;
 
-	while (fgets(line, 512, itemFP) != NULL) {
-		if (line[0] != '#') {
-			createEquipItemFromFile(line, group);
-		}
-	}
+//	while (fgets(line, 512, itemFP) != NULL) {
+//		if (line[0] != '#') {
+//			createEquipItemFromFile(line, group);
+//		}
+//	}
 	fclose(itemFP);
 	free(fullItemFile);
 }
@@ -182,13 +190,13 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
-	int i, itemAdded=0, enemyId, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int i, itemAdded=0, npcID, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns,  maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
 
 	char * value = strtok(line,";");
-		enemyId = atoi(value);
+		npcID = atoi(value);
 
 		value = strtok(NULL,";");
 		imageID = atoi(value);
@@ -285,14 +293,14 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 		value = strtok(NULL,";");
 		strcpy(description, value);
 
-		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType,
+		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType,
 				totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 				waterWeaknessMod, lightiningWeaknessMod, isEquipt);
 
 	for(i = 0; i < group->numIndividuals; i++){
-		if(group->individuals[i]->ID == enemyId){
+		if(group->individuals[i]->ID == npcID){
 			addItemToIndividual(group->individuals[i]->backpack, newItem);
 			itemAdded = 1;
 			break;
@@ -309,12 +317,15 @@ item * createFieldItemFromFile(char line[512]){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
-	int i, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int i, npcID, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod;
 
 	char * value = strtok(line,";");
+	npcID = atoi(value);
+
+	value = strtok(NULL,";");
 		imageID = atoi(value);
 
 		value = strtok(NULL,";");
@@ -406,7 +417,7 @@ item * createFieldItemFromFile(char line[512]){
 		value = strtok(NULL,";");
 		strcpy(description, value);
 
-		newItem = createItem(imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType,
+		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType,
 				totalHealthMod,healthMod,totalManaMod,manaMod,acMod, attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
@@ -420,15 +431,20 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
 	FILE * itemFP = fopen(fullEnemyFile, "r");
 	char line[512];
-	item * newItem;
 
 	while (fgets(line, 512, itemFP) != NULL) {
 		if (line[0] != '#') {
-			newItem = createFieldItemFromFile(line);
-			if (doesExist(newItem->ID)) {
-				addItemToField(thisField->thisFieldInventory, newItem);
-			} else {
-				destroyItem(newItem);
+			char * value = strtok(line,";");
+			int id = atoi(value);
+
+			item * newItem = getItemFromRegistry(id);//createFieldItemFromFile(line);
+			if(newItem != NULL){
+				if (doesExist(newItem->ID)) {
+					addItemToField(thisField->thisFieldInventory, newItem);
+				}
+			}else{
+				char * errLog[128];
+				sprintf(errLog, "!! ITEM NOT FOUND : %d !!", id);
 			}
 		}
 

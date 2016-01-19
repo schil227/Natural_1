@@ -9,6 +9,7 @@
 #define SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_
 
 #include"../individual_pub_methods.h"
+#include<stdio.h>
 
 typedef struct {
 	unsigned int existanceArray[1000];

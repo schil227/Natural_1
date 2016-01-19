@@ -153,6 +153,56 @@ void destroyTheGlobalRegister(){
 	free(thisGlobalRegister);
 }
 
+void * loadIndividualsToRegistry(char* directory, char * individualsFileName){
+	char * fullFileName = appendStrings(directory, individualsFileName);
+	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
+	FILE * FP = fopen(fullFileName, "r");
+	char line[160];
+
+
+	while(fgets(line,160,FP) != NULL){
+		if (line[0] != '#') {
+			individual * newIndividual = initIndividual();
+			createIndividualFromLine(newIndividual, line);
+			addIndividualToRegistry(newIndividual);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void * loadItemsToRegistry(char* directory, char * itemsFileName){
+	char * fullFileName = appendStrings(directory, itemsFileName);
+	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
+	FILE * FP = fopen(fullFileName, "r");
+	char line[512];
+
+
+	while(fgets(line,512,FP) != NULL){
+		if (line[0] != '#') {
+			item * newItem = createFieldItemFromFile(line);
+
+			if(newItem->npcID != 0){ // equip item to individual
+				individual * tmpIndividual = getIndividualFromRegistry(newItem->npcID);
+
+				if(tmpIndividual != NULL){
+					addItemToIndividual(tmpIndividual, newItem);
+				}else{
+					char * errStr[128];
+					sprintf(errStr, "!!FAILED ADDING ITEM TO INDIVIDUAL ID : %d!!\0", newItem->npcID);
+					cwrite(errStr);
+				}
+			}
+			addItemToRegistry(newItem);
+
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);
 }

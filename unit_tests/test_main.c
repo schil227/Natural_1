@@ -41,6 +41,9 @@ int path_and_attack_test() {
 	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 	initalizeTheGlobalRegister();
 
+	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
+	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
+
 	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 4, 13, 3, 10, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0)) {
 	}
 
