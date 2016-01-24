@@ -108,13 +108,19 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 	return 0;
 }
 
-int dialogLoop(hwnd, msg, wParam, lParam){
+int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
 	switch(msg){
 	case WM_KEYDOWN:{
 		switch (LOWORD(wParam)) {
 			case 0x1B: //esc
 			case 0x0D: { //enter
 				advanceDialog();
+				int eventID = getEventFromCurrentMessage();
+
+				if(eventID != 0){
+					processEvent(eventID, player, npcs, enemies, thisField);
+				}
+
 				break;
 			}
 			case 0x38:

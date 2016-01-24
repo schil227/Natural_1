@@ -145,6 +145,10 @@ void advanceDialog(){
 	}
 }
 
+int getEventFromCurrentMessage(){
+	return thisDialogInstance->currentMessage->eventID;
+}
+
 void setSimpleDialogMessage(char * string){
 	thisDialogInstance->currentMessage = malloc(sizeof(dialogMessage));
 	strcpy(thisDialogInstance->currentMessage->message, string);

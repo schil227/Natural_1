@@ -40,7 +40,7 @@ int path_and_attack_test() {
 	initThisConsole(2010,0,0,300,200);
 	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 	initalizeTheGlobalRegister();
-
+	initEventHandlers();
 	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
 	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
 
@@ -231,6 +231,7 @@ int path_and_attack_test() {
 	destroyField(main_test_field, NULL);
 	destroyConsoleInstance();
 	destroyTheGlobalRegister();
+	destroyEventHandlers();
 	return 0;
 }
 

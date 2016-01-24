@@ -148,6 +148,9 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int totalAC = getAttributeSum(targetIndividual,"ac");
 	int i;
 	item * tmpItem;
+
+	triggerEventOnAttack(targetIndividual->ID);
+
 	if(d20 == 20){
 		return damageIndividual(thisIndividual, targetIndividual, 1);
 
@@ -204,11 +207,16 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		totalDamage = 0;
 	}
 
+	if(totalDamage > 0){
+		triggerEventOnHarm(targetIndividual->ID);
+	}
+
 	sendHitDialog(thisIndividual->name, targetIndividual->name, thisIndividual->maxDam, totalDamage);
 	targetIndividual->hp = targetIndividual->hp - totalDamage;
 
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
+		triggerEventOnDeath(targetIndividual->ID);
 		removeFromExistance(targetIndividual->ID);
 		return 1;
 	}else{ //non-fatal blow

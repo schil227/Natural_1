@@ -145,7 +145,6 @@ void loadGroup(individualGroup * group, char * fileName, char* directory){
 				cwrite(errLog);
 			}
 
-
 		}
 	}
 

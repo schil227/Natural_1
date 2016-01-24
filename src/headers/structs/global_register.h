@@ -9,6 +9,7 @@
 #define SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_
 
 #include"../individual_pub_methods.h"
+#include"../event_pub_methods.h"
 #include<stdio.h>
 
 typedef struct {
@@ -17,11 +18,14 @@ typedef struct {
 
 	individual * individualRegistry[1000];
 	item * itemRegistry[5000];
+	event * eventRegistry[1000];
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
 	int MAX_ITEMS;
 	int numItems;
+	int MAX_EVENTS;
+	int numEvents;
 } globalRegister;
 
 #endif /* SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_ */

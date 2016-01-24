@@ -27,6 +27,8 @@ void initalizeTheGlobalRegister(){
 	thisGlobalRegister->numIndividuals = 0;
 	thisGlobalRegister->MAX_ITEMS = 5000;
 	thisGlobalRegister->numItems = 0;
+	thisGlobalRegister->MAX_EVENTS = 1000;
+	thisGlobalRegister->numEvents = 0;
 
 }
 
@@ -39,7 +41,9 @@ individual * getIndividualFromRegistry(int id){
 		}
 	}
 
-	cwrite("!!INDIVIDUAL NOT FOUND IN REGISTRY!!");
+	char * errLog[128];
+	sprintf(errLog, "!!INDIVIDUAL NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
 
 	return NULL;
 }
@@ -53,7 +57,25 @@ item * getItemFromRegistry(int id){
 		}
 	}
 
-	cwrite("!!ITEM NOT FOUND IN REGISTRY!!");
+	char * errLog[128];
+	sprintf(errLog, "!!ITEM NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
+event * getEventFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numEvents; i++){
+		if(thisGlobalRegister->eventRegistry[i]->ID == id){
+			return thisGlobalRegister->eventRegistry[i];
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!EVENT NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
 
 	return NULL;
 }
@@ -82,6 +104,18 @@ int addItemToRegistry(item * thisItem){
 	return 0;
 }
 
+int addEventToRegistry(event * thisEvent){
+	if(thisGlobalRegister->numEvents < thisGlobalRegister->MAX_EVENTS){
+		thisGlobalRegister->eventRegistry[thisGlobalRegister->numEvents] = thisEvent;
+		thisGlobalRegister->numEvents++;
+		return 1;
+	}
+
+	cwrite("!!MAX EVENTS IN REGISTRY!!");
+
+	return 0;
+}
+
 int removeIndividualFromRegistryByID(int id){
 	int i;
 
@@ -95,7 +129,7 @@ int removeIndividualFromRegistryByID(int id){
 			destroyIndividual(thisGlobalRegister->individualRegistry[i]);
 
 			//rebalance, place last element at i
-			thisGlobalRegister->numIndividuals;
+			thisGlobalRegister->numIndividuals--;
 			thisGlobalRegister->individualRegistry[i] = thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals];
 			thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = NULL;
 
@@ -103,7 +137,9 @@ int removeIndividualFromRegistryByID(int id){
 		}
 	}
 
-	cwrite("!!CANNOT REMOVE: INDIVIDUAL NOT FOUND!!");
+	char * errLog[128];
+	sprintf(errLog, "!!CANNOT REMOVE: INDIVIDUAL NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
 
 	return 0;
 
@@ -122,7 +158,7 @@ int removeItemFromRegistryByID(int id){
 			destroyItem(thisGlobalRegister->itemRegistry[i]);
 
 			//rebalance, place last element at i
-			thisGlobalRegister->numItems;
+			thisGlobalRegister->numItems--;
 			thisGlobalRegister->itemRegistry[i] = thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems];
 			thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = NULL;
 
@@ -130,7 +166,37 @@ int removeItemFromRegistryByID(int id){
 		}
 	}
 
-	cwrite("!!CANNOT REMOVE: ITEM NOT FOUND!!");
+	char * errLog[128];
+	sprintf(errLog, "!!CANNOT REMOVE: ITEM NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return 0;
+}
+
+int removeEventFromRegistry(int id){
+	int i;
+
+	if(thisGlobalRegister->numEvents == 0){
+		cwrite("!!CANNOT REMOVE: EVENT REGISTRY EMPTY!!");
+		return 0;
+	}
+
+	for(i = 0; i < thisGlobalRegister->numEvents; i++){
+		if(thisGlobalRegister->eventRegistry[i]->ID == id){
+			free(thisGlobalRegister->eventRegistry[i]);
+
+			//rebalance, place last item at i
+			thisGlobalRegister->numEvents--;
+			thisGlobalRegister->eventRegistry[i] = thisGlobalRegister->eventRegistry[thisGlobalRegister->numEvents];
+			thisGlobalRegister->eventRegistry[thisGlobalRegister->numEvents] = NULL;
+
+			return 1;
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!CANNOT REMOVE: EVENT NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
 
 	return 0;
 }
