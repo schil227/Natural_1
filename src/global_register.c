@@ -219,7 +219,7 @@ void destroyTheGlobalRegister(){
 	free(thisGlobalRegister);
 }
 
-void * loadIndividualsToRegistry(char* directory, char * individualsFileName){
+void loadIndividualsToRegistry(char* directory, char * individualsFileName){
 	char * fullFileName = appendStrings(directory, individualsFileName);
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
@@ -238,7 +238,7 @@ void * loadIndividualsToRegistry(char* directory, char * individualsFileName){
 	free(fullFileName);
 }
 
-void * loadItemsToRegistry(char* directory, char * itemsFileName){
+void loadItemsToRegistry(char* directory, char * itemsFileName){
 	char * fullFileName = appendStrings(directory, itemsFileName);
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
@@ -268,6 +268,25 @@ void * loadItemsToRegistry(char* directory, char * itemsFileName){
 	fclose(FP);
 	free(fullFileName);
 }
+
+void loadEventsToRegistry(char* directory, char* eventsFileName){
+	char * fullFileName = appendStrings(directory, eventsFileName);
+	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
+	FILE * FP = fopen(fullFileName, "r");
+	char line[512];
+
+
+	while(fgets(line,512,FP) != NULL){
+		if (line[0] != '#') {
+			event * newEvent = createEventFromFile(line);
+			addEventToRegistry(newEvent);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
 
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);

@@ -106,6 +106,36 @@ event * triggerEventOnDeath(int thisIndividualID){
 	return 0;
 }
 
+event * createEventFromFile(line){
+	event * newEvent = malloc(sizeof(event));
+
+	char * value = strtok(line,";");
+	newEvent->ID = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->eventType = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->nextEventID = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->individualID = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->itemID = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->a = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->b = atoi(value);
+
+	value = strtok(NULL, ";");
+	strcpy(newEvent->message, value);
+
+	return newEvent;
+}
+
 void processEvent(int eventID, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
 
 }

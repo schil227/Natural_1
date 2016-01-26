@@ -265,8 +265,8 @@ void startTurn(individual * thisIndividual){
 			tmpActiveItem->remaningTurns--;
 
 			if(tmpActiveItem->remaningTurns <= 0){
-				free(tmpActiveItem->thisItem);
-				free(tmpActiveItem);
+				//free(tmpActiveItem->thisItem);
+				//free(tmpActiveItem);
 				thisIndividual->activeItems->activeItemArr[i] = NULL;
 				thisIndividual->activeItems->activeItemsTotal--;
 			}else{

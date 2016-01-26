@@ -13,10 +13,11 @@
 typedef struct{
 	int ID;
 	int eventType;
+	int nextEventID;
 
 	int	individualID;
 	int itemID;
-	int nextEventID;
+
 
 	int a;
 	int b;
