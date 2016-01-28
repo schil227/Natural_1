@@ -105,20 +105,20 @@ void destroyIndividual(individual* thisIndividual){
 		destroyCharacter(thisIndividual->playerCharacter);
 	}
 
-	if(thisIndividual->activeItems != NULL){
-		itemsPassed = 0;
-		for(i = 0; i < 40; i++){
-			if(thisIndividual->activeItems->activeItemArr[i] != NULL){
-				destroyItem(thisIndividual->activeItems->activeItemArr[i]->thisItem);
-				free(thisIndividual->activeItems->activeItemArr[i]);
-				itemsPassed++;
-			}
-			if(itemsPassed >= thisIndividual->activeItems->activeItemsTotal){
-				break;
-			}
-
-		}
-	}
+//	if(thisIndividual->activeItems != NULL){
+//		itemsPassed = 0;
+//		for(i = 0; i < 40; i++){
+//			if(thisIndividual->activeItems->activeItemArr[i] != NULL){
+////				destroyItem(thisIndividual->activeItems->activeItemArr[i]->thisItem);
+////				free(thisIndividual->activeItems->activeItemArr[i]);
+//				itemsPassed++;
+//			}
+//			if(itemsPassed >= thisIndividual->activeItems->activeItemsTotal){
+//				break;
+//			}
+//
+//		}
+//	}
 
 	free(thisIndividual->activeItems);
 

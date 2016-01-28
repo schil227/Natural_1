@@ -5,6 +5,7 @@
  *      Author: Adrian
  */
 #include"./headers/event_pub_methods.h"
+#include<stdio.h>
 
 static eventQueue * theEventQueue;
 static eventTriggerManager * theEventTriggerManager;
@@ -72,7 +73,7 @@ event * triggerEventOnAttack(int thisIndividualID){
 
 	for(i = 0; i < theEventTriggerManager->onAttackTriggerMap->numIndividualEvents; i++){
 		if(theEventTriggerManager->onAttackTriggerMap->map[i]->individualID == thisIndividualID){
-			triggerEvent(theEventTriggerManager->onHarmTriggerMap->map[i]->eventID);
+			triggerEvent(theEventTriggerManager->onAttackTriggerMap->map[i]->eventID);
 			return 1;
 		}
 	}
@@ -98,7 +99,7 @@ event * triggerEventOnDeath(int thisIndividualID){
 
 	for(i = 0; i < theEventTriggerManager->onDeathTriggerMap->numIndividualEvents; i++){
 		if(theEventTriggerManager->onDeathTriggerMap->map[i]->individualID == thisIndividualID){
-			triggerEvent(theEventTriggerManager->onHarmTriggerMap->map[i]->eventID);
+			triggerEvent(theEventTriggerManager->onDeathTriggerMap->map[i]->eventID);
 			return 1;
 		}
 	}
@@ -106,7 +107,7 @@ event * triggerEventOnDeath(int thisIndividualID){
 	return 0;
 }
 
-event * createEventFromFile(line){
+event * createEventFromFile(char * line){
 	event * newEvent = malloc(sizeof(event));
 
 	char * value = strtok(line,";");
@@ -136,6 +137,89 @@ event * createEventFromFile(line){
 	return newEvent;
 }
 
+void loadTriggerMaps(char* directory, char* onAttackTriggerFileName, char* onHarmTriggerFileName, char* onDeathTriggerFileName){
+	loadIndividualEventsToTriggerManager(directory, onAttackTriggerFileName, theEventTriggerManager->onAttackTriggerMap);
+	loadIndividualEventsToTriggerManager(directory, onHarmTriggerFileName, theEventTriggerManager->onHarmTriggerMap);
+	loadIndividualEventsToTriggerManager(directory, onDeathTriggerFileName, theEventTriggerManager->onDeathTriggerMap);
+}
+
+individualEvent * createIndividualEventFromLine(char * line){
+	individualEvent * newIE = malloc(sizeof(individualEvent));
+
+	char * value = strtok(line,";");
+	newIE->individualID = atoi(value);
+
+	value = strtok(NULL, ";");
+	newIE->eventID = atoi(value);
+
+	return newIE;
+}
+
+void loadIndividualEventsToTriggerManager(char* directory, char* triggerFileName, individualEventMap * triggerMap){
+	char * fullFileName = appendStrings(directory, triggerFileName);
+	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
+	FILE * FP = fopen(fullFileName, "r");
+	char line[32];
+
+
+	while(fgets(line,32,FP) != NULL){
+		if (line[0] != '#') {
+			individualEvent * newIndividualEvent = createIndividualEventFromLine(line);
+			addIndividualEventToMap(newIndividualEvent, triggerMap);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void addIndividualEventToMap(individualEvent * newIndividualEvent, individualEventMap * triggerMap){
+	if(triggerMap->numIndividualEvents +1 == triggerMap->MAX_MAP_SIZE){
+		char * errLog[128];
+		sprintf(errLog, "!! COULD NOT ADD TO EVENT TRIGGER MAP: INDIVIDUAL ID: %d, EVENT ID: %d", newIndividualEvent->individualID, newIndividualEvent->eventID);
+		cwrite(errLog);
+	}
+
+	triggerMap->map[triggerMap->numIndividualEvents] = newIndividualEvent;
+	triggerMap->numIndividualEvents++;
+	triggerMap->map[triggerMap->numIndividualEvents] = NULL;
+}
+
+void removeIndividualEventFromMap(individualEvent * thisIndividualEvent, individualEventMap * triggerMap){
+	int i;
+
+	for(i = 0; i < triggerMap->numIndividualEvents; i++){
+		if(triggerMap->map[i] == thisIndividualEvent){
+			free(triggerMap->map[i]);
+
+			//rebalance array
+			triggerMap->numIndividualEvents--;
+			triggerMap->map[i] = triggerMap->map[triggerMap->numIndividualEvents];
+			triggerMap->map[triggerMap->numIndividualEvents] = NULL;
+		}
+	}
+}
+
+///// Process Event Functions /////
+
+void becomeEnemy(int individualID, individualGroup * npcs, individualGroup * enemies){
+	individual * thisIndividual = getIndividualFromRegistry(individualID);
+
+	deleteIndividiaulFromGroup(npcs, thisIndividual);
+	addIndividualToGroup(enemies, thisIndividual);
+
+}
+
+
 void processEvent(int eventID, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
+
+	event * thisEvent = getEventFromRegistry(eventID);
+
+	switch(thisEvent->eventType){
+		case 2: // become enemy
+			becomeEnemy(thisEvent->individualID, npcs, enemies);
+			break;
+
+	}
 
 }
