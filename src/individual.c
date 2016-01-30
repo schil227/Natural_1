@@ -122,19 +122,19 @@ void destroyIndividual(individual* thisIndividual){
 
 	free(thisIndividual->activeItems);
 
-	if(thisIndividual->backpack != NULL){
-		itemsPassed = 0;
-		for(i = 0; i < 40; i++){
-			if(thisIndividual->backpack->inventoryArr[i] != NULL){
-				destroyItem(thisIndividual->backpack->inventoryArr[i]);
-				itemsPassed++;
-			}
-			if(itemsPassed >= thisIndividual->backpack->inventorySize){
-				break;
-			}
-
-		}
-	}
+//	if(thisIndividual->backpack != NULL){
+//		itemsPassed = 0;
+//		for(i = 0; i < 40; i++){
+//			if(thisIndividual->backpack->inventoryArr[i] != NULL){
+//				destroyItem(thisIndividual->backpack->inventoryArr[i]);
+//				itemsPassed++;
+//			}
+//			if(itemsPassed >= thisIndividual->backpack->inventorySize){
+//				break;
+//			}
+//
+//		}
+//	}
 
 	free(thisIndividual->backpack);
 

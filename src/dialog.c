@@ -140,6 +140,7 @@ void advanceDialog(){
 		}
 	}else{ //no more messages, stop drawing
 		thisDialogInstance->currentMessage->nextMessage = NULL;
+		thisDialogInstance->currentMessage->eventID = 0;
 		thisDialogInstance->speakingIndividualID = 0;
 		toggleDrawDialogBox();
 	}

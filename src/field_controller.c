@@ -23,7 +23,7 @@ int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividua
 	if(thisGroup->numIndividuals < 50){
 		int index = thisGroup->numIndividuals;
 		thisGroup->individuals[index] = thisIndividual;
-		thisGroup->numIndividuals = thisGroup->numIndividuals + 1;
+		thisGroup->numIndividuals++;
 		return 1;
 	}
 
@@ -452,6 +452,17 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 	free(fullEnemyFile);
 }
 
+int individualInGroup(individual * thisIndividual, individualGroup * thisIndividualGroup){
+	int i;
+	for(i = 0; i < thisIndividualGroup->numIndividuals; i++){
+		if(thisIndividualGroup->individuals[i] == thisIndividual){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual * thisIndividual){
 	int index;
 	int numIndividuals = thisGroup->numIndividuals;
@@ -465,7 +476,7 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 				thisGroup->individuals[numIndividuals-1] = NULL;
 			}
 
-			thisGroup->numIndividuals = thisGroup->numIndividuals - 1;
+			thisGroup->numIndividuals--;
 			return toReturn;
 
 		}

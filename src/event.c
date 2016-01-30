@@ -205,8 +205,10 @@ void removeIndividualEventFromMap(individualEvent * thisIndividualEvent, individ
 void becomeEnemy(int individualID, individualGroup * npcs, individualGroup * enemies){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
-	deleteIndividiaulFromGroup(npcs, thisIndividual);
-	addIndividualToGroup(enemies, thisIndividual);
+	if(!individualInGroup(thisIndividual, enemies)){
+		deleteIndividiaulFromGroup(npcs, thisIndividual);
+		addIndividualToGroup(enemies, thisIndividual);
+	}
 
 }
 
