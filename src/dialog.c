@@ -29,6 +29,14 @@ void initThisDialogBox(int imageID, int x, int y, COLORREF rgb){
 	thisDialogInstance = initDialogBox(imageID, x, y, rgb);
 }
 
+void destroyThisDialogBox(){
+	destroyCharacter(thisDialogInstance->dialogWindow);
+	destroyCharacter(thisDialogInstance->selectArrow);
+	free(thisDialogInstance);
+
+	thisDialogInstance = NULL;
+}
+
 int shouldDrawDialogBox(){
 	if(thisDialogInstance != NULL){
 		return thisDialogInstance->drawBox;

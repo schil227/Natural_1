@@ -41,8 +41,10 @@ int path_and_attack_test() {
 	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 	initalizeTheGlobalRegister();
 	initEventHandlers();
+	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
 	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
 	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
+	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
 
 	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 4, 13, 3, 10, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0)) {
 	}
@@ -225,10 +227,50 @@ int path_and_attack_test() {
 	//player was transported to new map, new position is [2,3]
 	assert(testPlayer->playerCharacter->x == 2 && testPlayer->playerCharacter->y == 3);
 
+	//transport back
+	assert(attemptToTransit(&main_test_field, testPlayer, testEnemies, testNPCs, testShiftData,mapTestDirectory));
+
+	//player is back at map1 doorway
+	assert(testPlayer->playerCharacter->x == 6 && testPlayer->playerCharacter->y == 8);
+
+	//try talking to npc, too far away
+	assert(!tryTalk(testNPCs, testPlayer,0,2));
+
+	//warp player closer to npc
+	moveIndividualSpace(main_test_field,testPlayer,1,1);
+
+	//talking will be successful now:
+	assert(tryTalk(testNPCs, testPlayer,0,2));
+
+	//advance dialog (enter) "Hello"
+	advanceDialog();
+
+	//select dialog "Do you like my robes?
+	nextDialogDecision(); //"no"
+
+	//select no - npc will be mad
+	advanceDialog();
+
+	//event attached to dialog, npc becomes hostile
+	assert(getEventFromCurrentMessage());
+
+	individual * tmpNPC = getIndividualFromRegistry(testNPCs->individuals[0]->ID);
+
+	//process the becomeEnemy() function, npc is removed from testNPCs and is added to enemies
+	processEvent(getEventFromCurrentMessage(), testPlayer, testNPCs, testEnemies, main_test_field);
+
+	//npc not in NPCs
+	assert(!individualInGroup(tmpNPC, testNPCs));
+
+	//npc is in testEnemies
+	assert(individualInGroup(tmpNPC, testEnemies));
+
+	//break down mock up
 	destroyIndividual(testPlayer);
 	clearGroup(testEnemies);
 	clearGroup(testNPCs);
 	destroyField(main_test_field, NULL);
+	destroyThisDialogBox();
 	destroyConsoleInstance();
 	destroyTheGlobalRegister();
 	destroyEventHandlers();
