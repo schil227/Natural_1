@@ -46,7 +46,7 @@ int path_and_attack_test() {
 	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
 	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
 
-	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 4, 13, 3, 10, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0)) {
+	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 20, 2, 4, 13, 3, 10, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
 	}
 
 	int x, y;
@@ -197,7 +197,7 @@ int path_and_attack_test() {
 	assert(tmpIndividual->playerCharacter->x == 3 && tmpIndividual->playerCharacter->y == 1 );
 
 	//after being attacked 3 times, player health is 14
-	assert(testPlayer->hp == 14);
+	assert(testPlayer->hp == 15);
 
 	//skeleton0 cannot attack the player, vis versa
 	assert(!individualWithinRange(testEnemies->individuals[0],testPlayer));

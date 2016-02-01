@@ -68,6 +68,8 @@ typedef struct {
 
 	int dialogID;
 
+	int gold;
+
 	int jumpTarget;
 
 } individual;

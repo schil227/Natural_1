@@ -20,6 +20,7 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView->itemFrame = createCharacter(3003, RGB(255,0,255), x, y);
 	thisInventoryView->slotsPerScreen = slotsPerScreen;
 	thisInventoryView->selectedItemIndex = 0;
+	thisInventoryView->buyMode = 0;
 
 	for(i = 0; i < slotsPerScreen; i++){
 		thisInventoryView->viewedItems[i] = NULL;
@@ -117,6 +118,16 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 			SetTextColor(hdcBuffer, RGB(255, 200, 0));
 			SetBkMode(hdcBuffer, TRANSPARENT);
 			DrawText(hdcBuffer, itemStr, -1, &textBoxRect, DT_SINGLELINE); //thisInventoryView->viewedItems[i]->name
+
+			//draw item cost
+			if(thisInventoryView->buyMode){
+				char * cost[16];
+				sprintf(cost, "$%d", thisInventoryView->viewedItems[i]->price);
+				textBoxRect.left = textBoxRect.left + 125;
+				DrawText(hdcBuffer, cost, -1, &textBoxRect, DT_SINGLELINE);
+				textBoxRect.left = textBoxRect.left - 125;
+			}
+
 			SetTextColor(hdcBuffer, RGB(0, 0, 0));
 			textBoxRect.top = textBoxRect.top + 50;
 
@@ -342,4 +353,12 @@ item * getSelectedItem(){
 	}else{
 		return thisInventoryView->viewedItems[thisInventoryView->selectedItemIndex];
 	}
+}
+
+void enableInventoryBuyMode(){
+	thisInventoryView->buyMode = 1;
+}
+
+void disableInventoryBuyMode(){
+	thisInventoryView->buyMode = 0;
 }

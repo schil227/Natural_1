@@ -22,6 +22,6 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 		int y, int totalHP, int totalActions, int totalMana, int AC, int attack, int maxDam, int minDam,  char critType[3],
 		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
-		int lightiningWeakness, int dialogID);
+		int lightiningWeakness, int dialogID, int gold);
 
 #endif /* SRC_HEADERS_INDIVIDUAL_PUB_METHODS_H_ */

@@ -57,7 +57,7 @@ typedef struct {
 	short int lightiningWeaknessMod;
 
 	short int isEquipt;
-
+	short int price;
 } item;
 
 #endif /* SRC_HEADERS_STRUCTS_ITEM_H_ */

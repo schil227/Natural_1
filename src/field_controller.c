@@ -33,7 +33,7 @@ int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividua
 void createIndividualFromLine(individual * newIndividual, char * line){
 	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,range,mvmt,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
-	fireWeakness,waterWeakness,lightiningWeakness,dialogID;
+	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold;
 	char * name = malloc(sizeof(char) * 32);
 	char critType[3];
 
@@ -112,9 +112,12 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok(NULL,";");
 	dialogID = atoi(value);
 
+	value = strtok(NULL,";");
+	gold = atoi(value);
+
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,critType,range,mvmt,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID)){
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold)){
 		printf("failed making new individual\n");
 	}
 
@@ -189,7 +192,7 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
-	int i, itemAdded=0, npcID, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int i, itemAdded=0, npcID, imageID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns,  maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
@@ -214,6 +217,9 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 
 		value = strtok(NULL,";");
 		itemType = value[0];
+
+		value = strtok(NULL,";");
+		price = atoi(value);
 
 		value = strtok(NULL,";");
 		r = atoi(value);
@@ -292,7 +298,7 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 		value = strtok(NULL,";");
 		strcpy(description, value);
 
-		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType,
+		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType, price,
 				totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
@@ -316,113 +322,119 @@ item * createFieldItemFromFile(char line[512]){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
-	int i, npcID, imageID, ID, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int i, npcID, imageID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
-	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod;
+	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
 
 	char * value = strtok(line,";");
 	npcID = atoi(value);
 
 	value = strtok(NULL,";");
-		imageID = atoi(value);
+	imageID = atoi(value);
 
-		value = strtok(NULL,";");
-		ID = atoi(value);
+	value = strtok(NULL,";");
+	ID = atoi(value);
 
-		value = strtok(NULL,";");
-		type = value[0];
+	value = strtok(NULL,";");
+	type = value[0];
 
-		value = strtok(NULL,";");
-		weaponDamType = value[0];
+	value = strtok(NULL,";");
+	weaponDamType = value[0];
 
-		value = strtok(NULL,";");
-		armorClass = value[0];
+	value = strtok(NULL,";");
+	armorClass = value[0];
 
-		value = strtok(NULL,";");
-		itemType = value[0];
+	value = strtok(NULL,";");
+	itemType = value[0];
 
-		value = strtok(NULL,";");
-		r = atoi(value);
-		value = strtok(NULL,";");
-		g = atoi(value);
-		value = strtok(NULL,";");
-		b = atoi(value);
+	value = strtok(NULL,";");
+	price = atoi(value);
 
-		value = strtok(NULL,";");
-		strcpy(name, value);
-		value = strtok(NULL,";");
-		x = atoi(value);
-		value = strtok(NULL,";");
-		y = atoi(value);
+	value = strtok(NULL,";");
+	r = atoi(value);
+	value = strtok(NULL,";");
+	g = atoi(value);
+	value = strtok(NULL,";");
+	b = atoi(value);
 
-		value = strtok(NULL,";");
-		totalHealthMod = atoi(value);
-		value = strtok(NULL,";");
-		healthMod = atoi(value);
-		value = strtok(NULL,";");
-		totalManaMod = atoi(value);
-		value = strtok(NULL,";");
-		manaMod = atoi(value);
+	value = strtok(NULL,";");
+	strcpy(name, value);
+	value = strtok(NULL,";");
+	x = atoi(value);
+	value = strtok(NULL,";");
+	y = atoi(value);
 
-		value = strtok(NULL,";");
-		acMod = atoi(value);
-		value = strtok(NULL,";");
-		attackMod = atoi(value);
-		value = strtok(NULL,";");
-		damMod = atoi(value);
-		value = strtok(NULL,";");
-		maxDamMod = atoi(value);
-		value = strtok(NULL,";");
-		minDamMod = atoi(value);
+	value = strtok(NULL,";");
+	totalHealthMod = atoi(value);
+	value = strtok(NULL,";");
+	healthMod = atoi(value);
+	value = strtok(NULL,";");
+	totalManaMod = atoi(value);
+	value = strtok(NULL,";");
+	manaMod = atoi(value);
 
-		value = strtok(NULL,";");
-		minTurns = atoi(value);
-		value = strtok(NULL,";");
-		maxTurns = atoi(value);
+	value = strtok(NULL,";");
+	acMod = atoi(value);
+	value = strtok(NULL,";");
+	attackMod = atoi(value);
+	value = strtok(NULL,";");
+	damMod = atoi(value);
+	value = strtok(NULL,";");
+	maxDamMod = atoi(value);
+	value = strtok(NULL,";");
+	minDamMod = atoi(value);
 
-		value = strtok(NULL,";");
-		mvmtMod = atoi(value);
-		value = strtok(NULL,";");
-		rangeMod = atoi(value);
+	value = strtok(NULL,";");
+	minTurns = atoi(value);
+	value = strtok(NULL,";");
+	maxTurns = atoi(value);
 
-		value = strtok(NULL,";");
-		bluntDRMod = atoi(value);
-		value = strtok(NULL,";");
-		chopDRMod = atoi(value);
-		value = strtok(NULL,";");
-		slashDRMod = atoi(value);
-		value = strtok(NULL,";");
-		pierceDRMod = atoi(value);
+	value = strtok(NULL,";");
+	mvmtMod = atoi(value);
+	value = strtok(NULL,";");
+	rangeMod = atoi(value);
 
-		value = strtok(NULL,";");
-		earthDRMod = atoi(value);
-		value = strtok(NULL,";");
-		fireDRMod = atoi(value);
-		value = strtok(NULL,";");
-		waterDRMod = atoi(value);
-		value = strtok(NULL,";");
-		lightningDRMod = atoi(value);
+	value = strtok(NULL,";");
+	bluntDRMod = atoi(value);
+	value = strtok(NULL,";");
+	chopDRMod = atoi(value);
+	value = strtok(NULL,";");
+	slashDRMod = atoi(value);
+	value = strtok(NULL,";");
+	pierceDRMod = atoi(value);
 
-		value = strtok(NULL,";");
-		earthWeaknessMod = atoi(value);
-		value = strtok(NULL,";");
-		fireWeaknessMod = atoi(value);
-		value = strtok(NULL,";");
-		waterWeaknessMod = atoi(value);
-		value = strtok(NULL,";");
-		lightiningWeaknessMod = atoi(value);
+	value = strtok(NULL,";");
+	earthDRMod = atoi(value);
+	value = strtok(NULL,";");
+	fireDRMod = atoi(value);
+	value = strtok(NULL,";");
+	waterDRMod = atoi(value);
+	value = strtok(NULL,";");
+	lightningDRMod = atoi(value);
 
-		value = strtok(NULL,";");
-		strcpy(description, value);
+	value = strtok(NULL,";");
+	earthWeaknessMod = atoi(value);
+	value = strtok(NULL,";");
+	fireWeaknessMod = atoi(value);
+	value = strtok(NULL,";");
+	waterWeaknessMod = atoi(value);
+	value = strtok(NULL,";");
+	lightiningWeaknessMod = atoi(value);
 
-		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType,
-				totalHealthMod,healthMod,totalManaMod,manaMod,acMod, attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
-				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
-				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
-				waterWeaknessMod, lightiningWeaknessMod, 0);
+	value = strtok(NULL,";");
+	isEquipt = atoi(value);
 
-		return newItem;
+	value = strtok(NULL,";");
+	strcpy(description, value);
+
+	newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType, price,
+			totalHealthMod,healthMod,totalManaMod,manaMod,acMod, attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
+			mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
+			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
+			waterWeaknessMod, lightiningWeaknessMod, isEquipt);
+
+	return newItem;
 }
 
 void loadFieldItems(field * thisField, char * itemFile, char* directory){
