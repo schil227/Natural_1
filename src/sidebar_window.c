@@ -36,6 +36,10 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	char mvmtRng[17];
 	sprintf(mvmtRng, "Movement Range:%d", player->mvmt);
 
+	//Gold: %d => 7 bytes
+	char goldOut[7];
+	sprintf(goldOut,"Gold: %d", player->gold);
+
 //	HFONT hfont = CreateFont(textYStep, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "Courier");
 //	HFONT oldfont = (HFONT)SelectObject(hdc, hfont);
 
@@ -59,6 +63,8 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	TextOut(hdc, 47, 120+textYStep*6, ":0", 2);
 	TextOut(hdc, 17, 120+textYStep*7, "CHR", 3);
 	TextOut(hdc, 47, 120+textYStep*7, ":0", 2);
+
+	TextOut(hdc, 17, 120+textYStep*9, goldOut, strlen(goldOut));
 
 //	SelectObject(hdc, oldfont);
 //	DeleteObject(hfont);

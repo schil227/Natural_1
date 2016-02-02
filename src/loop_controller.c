@@ -190,9 +190,13 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 				item * tmpItem = getSelectedItem();
 
 				if (tmpItem != NULL) {
-					modifyItem(tmpItem, player);
-					refreshInventory(player->backpack);
-//					*inventoryMode = 0;
+					if(inBuyMode()){
+						attemptToBuyItem(tmpItem, player);
+					}else{
+						modifyItem(tmpItem, player);
+						refreshInventory(player->backpack);
+					}
+
 				}
 			}
 				break;

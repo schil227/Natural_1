@@ -27,7 +27,7 @@ item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, ch
 	strcpy(thisItem->name, name);
 	strcpy(thisItem->description, description);
 
-	thisItem->weponDamageType= weaponDamageType;
+	thisItem->weaponDamageType= weaponDamageType;
 	thisItem->armorClass = armorClass;
 	thisItem->itemType = itemType;
 	thisItem->price = price;
@@ -68,4 +68,54 @@ void destroyItem(item * thisItem){
 	}
 
 	free(thisItem);
+}
+
+item * cloneItem(item * thisItem){
+	item * newItem = malloc(sizeof(item));
+	newItem->itemCharacter = createCharacter(thisItem->itemCharacter->imageID, thisItem->itemCharacter->rgb,
+								thisItem->itemCharacter->x, thisItem->itemCharacter->y);
+
+	if (thisItem->itemCharacter->image == NULL) {
+			return NULL;
+	}
+
+	newItem->npcID = thisItem->npcID;
+	newItem->ID = thisItem->ID;
+	newItem->type = thisItem->type;
+	strcpy(newItem->name, thisItem->name);
+	strcpy(newItem->description, thisItem->description);
+
+	newItem->weaponDamageType= thisItem->weaponDamageType;
+	newItem->armorClass = thisItem->armorClass;
+	newItem->itemType = thisItem->itemType;
+	newItem->price = thisItem->price;
+
+	newItem->totalHealthMod = thisItem->totalHealthMod;
+	newItem->healthMod = thisItem->healthMod;
+	newItem->totalManaMod = thisItem->totalManaMod;
+	newItem->manaMod = thisItem->manaMod;
+	newItem->acMod = thisItem->acMod;
+	newItem->attackMod = thisItem->attackMod;
+	newItem->damMod = thisItem->damMod;
+	newItem->maxDamMod = thisItem->maxDamMod;
+	newItem->minDamMod = thisItem->minDamMod;
+	newItem->minTurns = thisItem->minTurns;
+	newItem->maxTurns = thisItem->maxTurns;
+	newItem->mvmtMod = thisItem->mvmtMod;
+	newItem->rangeMod = thisItem->rangeMod;
+	newItem->bluntDRMod = thisItem->bluntDRMod;
+	newItem->chopDRMod = thisItem->chopDRMod;
+	newItem->slashDRMod = thisItem->slashDRMod;
+	newItem->pierceDRMod = thisItem->pierceDRMod;
+	newItem->earthDRMod = thisItem->earthDRMod;
+	newItem->fireDRMod = thisItem->fireDRMod;
+	newItem->waterDRMod = thisItem->waterDRMod;
+	newItem->lightningDRMod = thisItem->lightningDRMod;
+	newItem->earthWeaknessMod = thisItem->earthWeaknessMod;
+	newItem->fireWeaknessMod = thisItem->fireWeaknessMod;
+	newItem->waterWeaknessMod = thisItem->waterWeaknessMod;
+	newItem->lightiningWeaknessMod = thisItem->lightiningWeaknessMod;
+	newItem->isEquipt = thisItem->isEquipt;
+
+	return newItem;
 }

@@ -19,7 +19,7 @@ typedef struct {
 	char description[256];
 
 	//type specific info
-	char weponDamageType;//(b)lunt, (c)hop, (s)lash, (p)ierce
+	char weaponDamageType;//(b)lunt, (c)hop, (s)lash, (p)ierce
 	char armorClass;//(l)ight, (m)edium, (h)eavy
 	char itemType;//(c)onsumable, (d)uration
 

@@ -182,7 +182,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		tmpItem = thisIndividual->backpack->inventoryArr[i];
 
 		if(tmpItem != NULL && tmpItem->isEquipt && tmpItem->type == 'w'){
-			attackType = tmpItem->weponDamageType;
+			attackType = tmpItem->weaponDamageType;
 			break;
 		}
 	}
@@ -466,6 +466,26 @@ void restoreMana(individual * thisIndividual, int mana){
 	}
 }
 
+int attemptToBuyItem(item * thisItem, individual * thisIndividual){
+
+	if(thisItem->price <= thisIndividual->gold){
+		item * newItem = cloneItem(thisItem);
+
+		if(newItem == NULL){
+			char * errLog[128];
+			sprintf(errLog, "!! ITEM %d COULD NOT BE CLONED!!", thisItem->ID);
+			return 0;
+		}
+
+		addItemToRegistry(newItem);
+		addItemToIndividual(thisIndividual->backpack, newItem);
+
+		thisIndividual->gold -= thisItem->price;
+		return 1;
+	}
+	return 0;
+
+}
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	int toReturn = 0;

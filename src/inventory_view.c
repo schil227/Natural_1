@@ -362,3 +362,7 @@ void enableInventoryBuyMode(){
 void disableInventoryBuyMode(){
 	thisInventoryView->buyMode = 0;
 }
+
+int inBuyMode(){
+	return thisInventoryView->buyMode;
+}
