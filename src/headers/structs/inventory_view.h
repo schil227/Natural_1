@@ -18,6 +18,7 @@ typedef struct {
 	item * viewedItems[10];
 	int slotsPerScreen;
 	int selectedItemIndex;
+	int viewMode;
 	int buyMode;
 } inventoryView;
 

@@ -274,6 +274,8 @@ dialogMessage * createDialogMessageFromLine(char * line){
 
 	newDialogMessage->decisions[0] = NULL;
 
+	newDialogMessage->isFirstDialogMessage = 0;
+
 	return newDialogMessage;
 }
 
@@ -360,4 +362,24 @@ void loadDialog(char * fileName, char * directory){
 	}
 
 	setDialogMessages(messageArr, numMessages);
+}
+
+int isFirstDialogMessage(){
+	if(thisDialogInstance->currentMessage != NULL){
+		return thisDialogInstance->currentMessage->isFirstDialogMessage;
+	}
+
+	return 0;
+}
+
+void enableFirstDialogMessage(){
+	if(thisDialogInstance->currentMessage != NULL){
+		thisDialogInstance->currentMessage->isFirstDialogMessage = 1;
+	}
+}
+
+void disableFirstDialogMessage(){
+	if(thisDialogInstance->currentMessage != NULL){
+		thisDialogInstance->currentMessage->isFirstDialogMessage = 0;
+	}
 }

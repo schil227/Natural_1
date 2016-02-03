@@ -156,7 +156,7 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 	}
 }
 
-int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inventoryMode, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
+int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
 	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
@@ -183,7 +183,12 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * inven
 				break;
 				break;
 			case 0x1B: //escape
-				*inventoryMode = 0;
+				disableInventoryViewMode();
+
+				if(inBuyMode()){
+					disableInventoryBuyMode();
+				}
+
 				break;
 			case 0x0D: //enter
 			{

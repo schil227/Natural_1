@@ -540,6 +540,7 @@ int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursor
 		if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
 			if(setCurrentMessageByIndividualID(tmpIndividual->ID)){
 				setSpeakingIndividualID(tmpIndividual->ID);
+				enableFirstDialogMessage();
 				toggleDrawDialogBox();
 			}
 			return 1;

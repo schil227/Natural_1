@@ -98,6 +98,8 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 
 	thisIndividual->jumpTarget = 0;
 
+
+
 	return 0;
 }
 

@@ -202,6 +202,16 @@ void removeIndividualEventFromMap(individualEvent * thisIndividualEvent, individ
 
 ///// Process Event Functions /////
 
+void becomeNPC(int individualID, individualGroup * npcs, individualGroup * enemies){
+	individual * thisIndividual = getIndividualFromRegistry(individualID);
+
+	if(!individualInGroup(thisIndividual, npcs)){
+		deleteIndividiaulFromGroup(enemies, thisIndividual);
+		addIndividualToGroup(npcs, thisIndividual);
+	}
+
+}
+
 void becomeEnemy(int individualID, individualGroup * npcs, individualGroup * enemies){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
@@ -212,15 +222,26 @@ void becomeEnemy(int individualID, individualGroup * npcs, individualGroup * ene
 
 }
 
+void enterBuyMode(int individualID){
+	individual * merchant = getIndividualFromRegistry(individualID);
+	enableInventoryBuyMode();
+	enableInventoryViewMode(merchant->backpack);
+}
+
 
 void processEvent(int eventID, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
 
 	event * thisEvent = getEventFromRegistry(eventID);
 
 	switch(thisEvent->eventType){
+		case 1://become npc
+			becomeNPC(thisEvent->individualID, npcs, enemies);
+			break;
 		case 2: // become enemy
 			becomeEnemy(thisEvent->individualID, npcs, enemies);
 			break;
+		case 3: // enable buy mode
+			enterBuyMode(thisEvent->individualID);
 
 	}
 

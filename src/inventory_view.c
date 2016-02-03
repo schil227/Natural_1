@@ -20,6 +20,7 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView->itemFrame = createCharacter(3003, RGB(255,0,255), x, y);
 	thisInventoryView->slotsPerScreen = slotsPerScreen;
 	thisInventoryView->selectedItemIndex = 0;
+	thisInventoryView->viewMode = 0;
 	thisInventoryView->buyMode = 0;
 
 	for(i = 0; i < slotsPerScreen; i++){
@@ -37,6 +38,24 @@ void destroyTheInventoryView(){
 	destroyCharacter(thisInventoryView->selectArrow);
 
 	free(thisInventoryView);
+}
+
+int inInventoryViewMode(){
+	if(thisInventoryView != NULL){
+		return thisInventoryView->viewMode;
+	}
+
+	return 0;
+}
+
+void enableInventoryViewMode(inventory * individualInventory){
+	thisInventoryView->viewMode = 1;
+	thisInventoryView->playerItems = individualInventory;
+	refreshInventory(individualInventory);
+}
+
+void disableInventoryViewMode(){
+	thisInventoryView->viewMode = 0;
 }
 
 void refreshInventory(inventory * playerInventory){

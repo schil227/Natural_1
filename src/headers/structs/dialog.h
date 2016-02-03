@@ -22,6 +22,7 @@ typedef struct{
 	int dialogCheckpoint; //if the user should start at this message
 	int eventID; //the event this flag triggers
 
+	int isFirstDialogMessage;
 	int nextMessageID;
 	struct dialogMessage * nextMessage;
 	struct dialogDecision * decisions[10];

@@ -37,7 +37,7 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	sprintf(mvmtRng, "Movement Range:%d", player->mvmt);
 
 	//Gold: %d => 7 bytes
-	char goldOut[7];
+	char goldOut[8];
 	sprintf(goldOut,"Gold: %d", player->gold);
 
 //	HFONT hfont = CreateFont(textYStep, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "Courier");

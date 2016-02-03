@@ -253,7 +253,7 @@ void loadItemsToRegistry(char* directory, char * itemsFileName){
 				individual * tmpIndividual = getIndividualFromRegistry(newItem->npcID);
 
 				if(tmpIndividual != NULL){
-					addItemToIndividual(tmpIndividual, newItem);
+					addItemToIndividual(tmpIndividual->backpack, newItem);
 				}else{
 					char * errStr[128];
 					sprintf(errStr, "!!FAILED ADDING ITEM TO INDIVIDUAL ID : %d!!\0", newItem->npcID);

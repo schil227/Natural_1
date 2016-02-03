@@ -40,8 +40,8 @@ int initEnemyActionMode = 0;
 int enemyActionMode = 0;
 int postEnemyActionMode = 0;
 
-int initInventoryMode = 0;
-int inventoryMode = 0;
+//int initInventoryMode = 0;
+//int inventoryMode = 0;
 
 int enemyTurn = 0;
 
@@ -173,7 +173,7 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	}
 
-	if(inventoryMode){
+	if(inInventoryViewMode()){
 		drawInventoryView(hdc, hdcBuffer, viewShift);
 	}
 
@@ -215,7 +215,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadItemsToRegistry(mapDirectory, "items.txt");
 		loadEventsToRegistry(mapDirectory, "events.txt");
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 1, 1, 20, 2, 4, 13, 3, 10, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
+		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 6, 8, 20, 2, 4, 13, 3, 10, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -314,8 +314,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x49://i key (get)
 			{
-				initInventoryMode = 1;
-				inventoryMode = 1;
+				enableInventoryViewMode(player->backpack);
+//				initInventoryMode = 1;
+//				inventoryMode = 1;
 			}
 			break;
 		case 0x54://t key (get)
@@ -449,6 +450,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //	}else
 
 	if(shouldDrawDialogBox()){
+		if(isFirstDialogMessage()){
+			disableFirstDialogMessage();
+			int eventID = getEventFromCurrentMessage();
+
+			if(eventID != 0){
+				processEvent(eventID, player, npcs, enemies, main_field);
+			}
+		}
 		return dialogLoop(hwnd, msg, wParam, lParam, player, npcs, enemies, main_field);
 	} else if (cursorMode) {
 		if (initCursorMode) {
@@ -535,76 +544,88 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 
 		return 0;
-	} else if(inventoryMode){
+	} else if(inInventoryViewMode()){
 
-		if(initInventoryMode){
-			refreshInventory(player->backpack);
-			initInventoryMode = 0;
-			enableInventoryBuyMode();
-		}
+//		if(initInventoryMode){
+//			refreshInventory(player->backpack);
+//			initInventoryMode = 0;
+//		}
 
-		inventoryLoop(hwnd, msg, wParam, lParam, &inventoryMode, main_field, player, enemies, viewShift);
+		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, enemies, viewShift);
 
 	}else if(enemyActionMode){
-		if(initEnemyActionMode){
+		if(enemies->numIndividuals == 0){
+			enemyActionMode = 0;
 			initEnemyActionMode = 0;
+			startTurn(player);
+			enemies->currentIndividualIndex = -1;
+		} else {
+			if (initEnemyActionMode) {
+				initEnemyActionMode = 0;
 
-			if(enemies->currentIndividualIndex == -1){
-				enemies->currentIndividualIndex = 0;
-			}
-
-			if(enemies->numIndividuals == 0){
-				postEnemyActionMode = 1;
-				enemyActionMode = 0;
-				return 0;
-			}
-
-			int i;
-			individual * tmpIndividual = enemies->individuals[enemies->currentIndividualIndex];
-			nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field,tmpIndividual, player);
-
-			if(enemyNodeArr->size == 0){
-				enemyActionMode = 0;
-				postEnemyActionMode = 1;
-				return 0;
-			}
-
-			getSpaceFromField(main_field,tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
-
-			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-			moveNode * ptrToCurrentNode[1];
-			ptrToCurrentNode[0] = NULL;
-			thisMoveNodeMeta->sum = 0;
-
-			for(i = 0; i < enemyNodeArr->size; i++){
-				moveNode * tmpMoveNode = malloc(sizeof(moveNode));
-				tmpMoveNode->hasTraversed = 0;
-				tmpMoveNode->x = enemyNodeArr->nodeArray[i]->x;
-				tmpMoveNode->y = enemyNodeArr->nodeArray[i]->y;
-				tmpMoveNode->nextMoveNode = NULL;
-				if(*ptrToCurrentNode == NULL){
-					*ptrToCurrentNode = tmpMoveNode;
-					thisMoveNodeMeta->rootMoveNode = tmpMoveNode;
-				}else{
-					(*ptrToCurrentNode)->nextMoveNode = tmpMoveNode;
-					*ptrToCurrentNode = tmpMoveNode;
+				if (enemies->currentIndividualIndex == -1) {
+					enemies->currentIndividualIndex = 0;
 				}
+
+				if (enemies->numIndividuals == 0) {
+					postEnemyActionMode = 1;
+					enemyActionMode = 0;
+					return 0;
+				}
+
+				int i;
+				individual * tmpIndividual =
+						enemies->individuals[enemies->currentIndividualIndex];
+				nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field,
+						tmpIndividual, player);
+
+				if (enemyNodeArr->size == 0) {
+					enemyActionMode = 0;
+					postEnemyActionMode = 1;
+					return 0;
+				}
+
+				getSpaceFromField(main_field, tmpIndividual->playerCharacter->x,
+						tmpIndividual->playerCharacter->y)->currentIndividual =
+						NULL;
+
+				thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
+				moveNode * ptrToCurrentNode[1];
+				ptrToCurrentNode[0] = NULL;
+				thisMoveNodeMeta->sum = 0;
+
+				for (i = 0; i < enemyNodeArr->size; i++) {
+					moveNode * tmpMoveNode = malloc(sizeof(moveNode));
+					tmpMoveNode->hasTraversed = 0;
+					tmpMoveNode->x = enemyNodeArr->nodeArray[i]->x;
+					tmpMoveNode->y = enemyNodeArr->nodeArray[i]->y;
+					tmpMoveNode->nextMoveNode = NULL;
+					if (*ptrToCurrentNode == NULL) {
+						*ptrToCurrentNode = tmpMoveNode;
+						thisMoveNodeMeta->rootMoveNode = tmpMoveNode;
+					} else {
+						(*ptrToCurrentNode)->nextMoveNode = tmpMoveNode;
+						*ptrToCurrentNode = tmpMoveNode;
+					}
+				}
+
+				destroyNodeArr(enemyNodeArr);
+
 			}
 
-			destroyNodeArr(enemyNodeArr);
+			animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
+					(enemies->individuals[enemies->currentIndividualIndex]),
+					thisMoveNodeMeta, 5, &enemyActionMode, viewShift, 0);
 
-		}
+			if (!enemyActionMode) {
 
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,(enemies->individuals[enemies->currentIndividualIndex]),thisMoveNodeMeta,5,&enemyActionMode, viewShift, 0);
+				if (thisMoveNodeMeta->rootMoveNode != NULL) {
+					freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
+				}
+				free(thisMoveNodeMeta);
 
-		if(!enemyActionMode){
-
-			if(thisMoveNodeMeta->rootMoveNode != NULL){
-				freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
+				postEnemyActionMode = 1;
 			}
-			free(thisMoveNodeMeta);
-
-			postEnemyActionMode = 1;
 		}
 
 	}else if(postEnemyActionMode){
