@@ -18,9 +18,11 @@ typedef struct{
 	int	individualID;
 	int itemID;
 
+	int intA;
+	int intB;
 
-	int a;
-	int b;
+	int dialogIDA;
+	int dialogIDB;
 
 	char * message[256];
 } event;

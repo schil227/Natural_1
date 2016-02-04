@@ -450,14 +450,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //	}else
 
 	if(shouldDrawDialogBox()){
-		if(isFirstDialogMessage()){
-			disableFirstDialogMessage();
-			int eventID = getEventFromCurrentMessage();
-
-			if(eventID != 0){
-				processEvent(eventID, player, npcs, enemies, main_field);
-			}
-		}
 		return dialogLoop(hwnd, msg, wParam, lParam, player, npcs, enemies, main_field);
 	} else if (cursorMode) {
 		if (initCursorMode) {

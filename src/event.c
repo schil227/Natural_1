@@ -126,10 +126,16 @@ event * createEventFromFile(char * line){
 	newEvent->itemID = atoi(value);
 
 	value = strtok(NULL, ";");
-	newEvent->a = atoi(value);
+	newEvent->intA = atoi(value);
 
 	value = strtok(NULL, ";");
-	newEvent->b = atoi(value);
+	newEvent->intB = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->dialogIDA = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->dialogIDB = atoi(value);
 
 	value = strtok(NULL, ";");
 	strcpy(newEvent->message, value);

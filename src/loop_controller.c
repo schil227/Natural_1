@@ -114,12 +114,14 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 		switch (LOWORD(wParam)) {
 			case 0x1B: //esc
 			case 0x0D: { //enter
-				advanceDialog();
+
 				int eventID = getEventFromCurrentMessage();
 
 				if(eventID != 0){
 					processEvent(eventID, player, npcs, enemies, thisField);
 				}
+
+				advanceDialog();
 
 				break;
 			}
