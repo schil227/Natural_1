@@ -46,7 +46,7 @@ typedef struct{
 	dialogMessage * currentMessage;
 	character * dialogWindow;
 	character * selectArrow;
-	individualDialog * individualDialogRegistry[500];
+	individualDialog * individualDialogRegistry[1000];
 } dialogInstance;
 
 #endif /* SRC_DIALOG_H_ */

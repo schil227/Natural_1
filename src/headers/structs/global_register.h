@@ -19,7 +19,6 @@ typedef struct {
 	individual * individualRegistry[1000];
 	item * itemRegistry[5000];
 	event * eventRegistry[1000];
-
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
 	int MAX_ITEMS;

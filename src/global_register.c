@@ -25,11 +25,12 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_INDIVIDUALS = 1000;
 	thisGlobalRegister->numIndividuals = 0;
+
 	thisGlobalRegister->MAX_ITEMS = 5000;
 	thisGlobalRegister->numItems = 0;
+
 	thisGlobalRegister->MAX_EVENTS = 1000;
 	thisGlobalRegister->numEvents = 0;
-
 }
 
 individual * getIndividualFromRegistry(int id){
