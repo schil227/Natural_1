@@ -33,9 +33,20 @@ typedef struct {
 	inventory * backpack;
 	activeItemList * activeItems;
 
+	short int STR;
+	short int DEX;
+	short int CON;
+	short int WILL;
+	short int INT;
+	short int WIS;
+	short int CHR;
+	short int LUCK;
+
 	short int totalHP;
+	short int baseHP;
 	short int hp;
 	short int totalMana;
+	short int baseMana;
 	short int mana;
 	short int totalActions;
 	short int remainingActions;

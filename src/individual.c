@@ -32,7 +32,7 @@ individual *initIndividual(){
 }
 
 int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
-		int y, int totalHP, int totalActions, int totalMana, int AC, int attack, int maxDam, int minDam,  char critType[3],
+		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam,  char critType[3],
 		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness, int dialogID, int gold){
@@ -63,13 +63,20 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->playerCharacter->x = x;
 	thisIndividual->playerCharacter->y = y;
 
-	thisIndividual->totalHP = totalHP;
-	thisIndividual->hp = totalHP;
+	thisIndividual->STR = STR;
+	thisIndividual->DEX = DEX;
+	thisIndividual->CON = CON;
+	thisIndividual->WILL = WILL;
+	thisIndividual->INT = INT;
+	thisIndividual->WIS = WIS;
+	thisIndividual->CHR = CHR;
+	thisIndividual->LUCK = LUCK;
+
+	thisIndividual->baseHP = baseHP;
 	thisIndividual->totalActions = totalActions;
 	thisIndividual->remainingActions = totalActions;
-	thisIndividual->totalMana = totalMana;
-	thisIndividual->mana = totalMana;
-	thisIndividual->AC = AC;
+	thisIndividual->baseMana = baseMana;
+	thisIndividual->AC = baseAC;
 	thisIndividual->attack = attack;
 	thisIndividual->maxDam = maxDam;
 	thisIndividual->minDam = minDam;
@@ -98,6 +105,11 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 
 	thisIndividual->jumpTarget = 0;
 
+	thisIndividual->totalHP = baseHP + 2*CON;
+	thisIndividual->hp = thisIndividual->totalHP;
+
+	thisIndividual->totalMana = baseMana + 2*WILL;
+	thisIndividual->mana = thisIndividual->totalMana;
 
 
 	return 0;
