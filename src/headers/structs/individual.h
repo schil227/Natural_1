@@ -9,6 +9,7 @@
 #define SRC_HEADERS_STRUCTS_INDIVIDUAL_H_
 //#include"../character_pub_methods.h"
 #include"../item_pub_methods.h"
+#include<math.h>
 
 typedef struct{
 	int inventorySize;
@@ -56,6 +57,7 @@ typedef struct {
 	short int attack;
 	short int maxDam;
 	short int minDam;
+	short int baseDam;
 	short int range;
 	char critType[3];
 	short int mvmt;

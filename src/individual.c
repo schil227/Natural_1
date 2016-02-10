@@ -32,7 +32,7 @@ individual *initIndividual(){
 }
 
 int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
-		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam,  char critType[3],
+		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness, int dialogID, int gold){
@@ -80,6 +80,7 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->attack = attack;
 	thisIndividual->maxDam = maxDam;
 	thisIndividual->minDam = minDam;
+	thisIndividual->baseDam = baseDam;
 	strcpy(thisIndividual->critType,critType);
 	thisIndividual->range = range;
 	thisIndividual->mvmt = mvmt;
@@ -158,6 +159,23 @@ void destroyIndividual(individual* thisIndividual){
 
 }
 
+item * getActiveWeapon(inventory * backpack){
+	int i;
+	item * tmpItem = NULL;
+
+	for(i = 0; i < 40; i++){
+		if(backpack->inventoryArr[i] != NULL){
+			tmpItem = backpack->inventoryArr[i];
+			if(tmpItem->type == 'w' && tmpItem->isEquipt){
+				return tmpItem;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+
 int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int d20 = rand() % 20 + 1;
 	int totalAttack = d20 + getAttributeSum(thisIndividual, "attack");
@@ -184,22 +202,24 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 }
 
 int damageIndividual(individual *thisIndividual, individual *targetIndividual, int isCrit){
-	int totalDamage = 0, i, totalDR, maxDamTotal, minDamTotal;
+	int totalDamage = 0, i, totalDR, maxDamTotal, minDamTotal, baseDam;
 	char attackType = 'b'; //for now, default is blunt (punching)
-	item * tmpItem;
-	maxDamTotal = getAttributeSum(thisIndividual, "maxDam");
-	minDamTotal = getAttributeSum(thisIndividual, "minDam");
+	item * weapon = getActiveWeapon(thisIndividual->backpack);
+
+	baseDam = getAttributeSum(thisIndividual,"baseDam"); //doesn't include STR mod
+
+	if(weapon == NULL){
+		maxDamTotal = thisIndividual->maxDam;
+		minDamTotal = thisIndividual->minDam;
+		baseDam += thisIndividual->STR; //unarmed, just + STR
+	} else {
+		maxDamTotal = weapon->maxDamMod;
+		minDamTotal = weapon->minDamMod;
+		attackType = weapon->weaponDamageType;
+		baseDam += floor((weapon->strMod)*(thisIndividual->STR));
+	}
 
 	thisIndividual->hasAttacked = 1;
-
-	for(i = 0; i < 40; i++){
-		tmpItem = thisIndividual->backpack->inventoryArr[i];
-
-		if(tmpItem != NULL && tmpItem->isEquipt && tmpItem->type == 'w'){
-			attackType = tmpItem->weaponDamageType;
-			break;
-		}
-	}
 
 	if(minDamTotal < 0){
 		minDamTotal = 0;
@@ -211,10 +231,14 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 
 	if(isCrit){
 		cwrite("CRITICAL HIT!!!\n");
-		totalDamage = calcCrit(thisIndividual, maxDamTotal, minDamTotal);
+		totalDamage = calcCrit(thisIndividual, maxDamTotal, minDamTotal, baseDam);
 	}else{
-		totalDamage = rand() % (maxDamTotal - minDamTotal);
-		totalDamage = totalDamage + minDamTotal;
+		if(maxDamTotal-minDamTotal == 0){ //max/min are the same!
+			totalDamage = maxDamTotal;
+		}else{
+			totalDamage = rand() % (maxDamTotal - minDamTotal);
+		}
+		totalDamage = totalDamage + minDamTotal + baseDam;
 	}
 
 	totalDamage = totalDamage - calcDR(targetIndividual, attackType);
@@ -261,12 +285,17 @@ int calcDR(individual * targetIndividual, char attackType){
 	return totalDR;
 }
 
-int calcCrit(individual * thisIndividual, int maxDamTotal, int minDamTotal){
+int calcCrit(individual * thisIndividual, int maxDamTotal, int minDamTotal, int baseDam){
 	if(strcmp(thisIndividual->critType, "MAX") == 0){
-		return getAttributeSum(thisIndividual, "maxDam");
+		return maxDamTotal + baseDam;
 	} else if(strcmp(thisIndividual->critType, "DUB") == 0){
-		int attackDamage = rand() % (maxDamTotal - minDamTotal);
-		attackDamage = (attackDamage + minDamTotal) * 2;
+		int attackDamage = 0;
+		if(maxDamTotal - minDamTotal == 0){ //max/min are the same!
+			attackDamage = maxDamTotal;
+		}else{
+			attackDamage = rand() % (maxDamTotal - minDamTotal);
+		}
+		return (attackDamage + minDamTotal + baseDam) * 2;
 	}
 }
 
@@ -460,6 +489,7 @@ void consumeItem(individual * thisIndividual, item * theItem){
 	}
 }
 
+
 void activateDurationItem(individual * individual, item * thisItem){
 
 }
@@ -517,11 +547,11 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	} else if(strcmp("maxTurns",attribute) == 0 ){
 		return 0;
 	} else if(strcmp("ac",attribute) == 0 ){
-		return thisIndividual->AC;
+		return thisIndividual->AC + thisIndividual->DEX;
 	} else if(strcmp("attack",attribute) == 0 ){
 		return thisIndividual->attack;
-	} else if(strcmp("dam",attribute) == 0 ){
-		return 0;
+	} else if(strcmp("baseDam",attribute) == 0 ){
+		return thisIndividual->baseDam;
 	} else if(strcmp("maxDam",attribute) == 0 ){
 		return thisIndividual->maxDam;
 	} else if(strcmp("minDam",attribute) == 0 ){
@@ -617,7 +647,7 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 		 if(activeItem != NULL){
 			 toReturn += activeItem->attackMod;
 		 }
-	} else if(strcmp("dam",attribute) == 0 ){
+	} else if(strcmp("baseDam",attribute) == 0 ){
 		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->damMod;
 		 }

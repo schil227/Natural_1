@@ -33,7 +33,7 @@ int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividua
 void createIndividualFromLine(individual * newIndividual, char * line){
 	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,range,mvmt,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
-	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK;
+	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam;
 	char * name = malloc(sizeof(char) * 32);
 	char critType[3];
 
@@ -93,6 +93,8 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok(NULL,";");
 	minDam= atoi(value);
 	value = strtok(NULL,";");
+	baseDam = atoi(value);
+	value = strtok(NULL,";");
 	strcpy(critType,value);
 	value = strtok(NULL,";");
 	range = atoi(value);
@@ -133,7 +135,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	gold = atoi(value);
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
-	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,critType,range,mvmt,
+	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold)){
 		printf("failed making new individual\n");
 	}
@@ -212,7 +214,7 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 	int i, itemAdded=0, npcID, imageID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns,  maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
-	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
+	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 
 	char * value = strtok(line,";");
 		npcID = atoi(value);
@@ -251,6 +253,24 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 		x = atoi(value);
 		value = strtok(NULL,";");
 		y = atoi(value);
+
+		value = strtok(NULL, ";");
+		strMod = atoi(value);
+		value = strtok(NULL, ";");
+		dexMod = atoi(value);
+		value = strtok(NULL, ";");
+		conMod = atoi(value);
+		value = strtok(NULL, ";");
+		willMod = atoi(value);
+		value = strtok(NULL, ";");
+		intMod = atoi(value);
+		value = strtok(NULL, ";");
+		wisMod = atoi(value);
+		value = strtok(NULL, ";");
+		chrMod= atoi(value);
+		value = strtok(NULL, ";");
+		luckMod = atoi(value);
+
 
 		value = strtok(NULL,";");
 		totalHealthMod = atoi(value);
@@ -315,7 +335,9 @@ void createEquipItemFromFile(char line[512], individualGroup * group){
 		value = strtok(NULL,";");
 		strcpy(description, value);
 
-		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType, price,
+		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description,
+				strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
+				weaponDamType, armorClass, itemType, price,
 				totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
@@ -342,7 +364,7 @@ item * createFieldItemFromFile(char line[512]){
 	int i, npcID, imageID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
-	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt;
+	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 
 	char * value = strtok(line,";");
 	npcID = atoi(value);
@@ -381,6 +403,23 @@ item * createFieldItemFromFile(char line[512]){
 	x = atoi(value);
 	value = strtok(NULL,";");
 	y = atoi(value);
+
+	value = strtok(NULL, ";");
+	strMod = atoi(value);
+	value = strtok(NULL, ";");
+	dexMod = atoi(value);
+	value = strtok(NULL, ";");
+	conMod = atoi(value);
+	value = strtok(NULL, ";");
+	willMod = atoi(value);
+	value = strtok(NULL, ";");
+	intMod = atoi(value);
+	value = strtok(NULL, ";");
+	wisMod = atoi(value);
+	value = strtok(NULL, ";");
+	chrMod= atoi(value);
+	value = strtok(NULL, ";");
+	luckMod = atoi(value);
 
 	value = strtok(NULL,";");
 	totalHealthMod = atoi(value);
@@ -445,8 +484,10 @@ item * createFieldItemFromFile(char line[512]){
 	value = strtok(NULL,";");
 	strcpy(description, value);
 
-	newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description, weaponDamType, armorClass, itemType, price,
-			totalHealthMod,healthMod,totalManaMod,manaMod,acMod, attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
+	newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description,
+			strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
+			weaponDamType, armorClass, itemType, price,
+			totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 			mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 			waterWeaknessMod, lightiningWeaknessMod, isEquipt);

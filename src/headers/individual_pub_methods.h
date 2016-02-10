@@ -19,7 +19,7 @@ int calcDR(individual * targetIndividual, char attackType);
 int addItemToIndividual(inventory * backpack, item * newItem);
 
 int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
-		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam,  char critType[3],
+		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam, char critType[3],
 		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness, int dialogID, int gold);

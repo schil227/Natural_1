@@ -215,7 +215,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadItemsToRegistry(mapDirectory, "items.txt");
 		loadEventsToRegistry(mapDirectory, "events.txt");
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 6, 8, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 10, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
+		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 6, 8, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}

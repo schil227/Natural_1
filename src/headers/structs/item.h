@@ -23,6 +23,15 @@ typedef struct {
 	char armorClass;//(l)ight, (m)edium, (h)eavy
 	char itemType;//(c)onsumable, (d)uration
 
+	short int strMod;
+	short int dexMod;
+	short int conMod;
+	short int willMod;
+	short int intMod;
+	short int wisMod;
+	short int chrMod;
+	short int luckMod;
+
 	short int totalHealthMod;
 	short int healthMod;
 
