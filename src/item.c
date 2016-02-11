@@ -6,7 +6,7 @@
  */
 #include"./headers/item_pub_methods.h"
 
-item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, char type, char name[32], char description[256],
+item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description,double weaponStrMod,
 		int strMod, int dexMod, int conMod, int willMod, int intMod, int wisMod, int chrMod, int luckMod,
 		char weaponDamageType, char armorClass, char itemType, int price, int totalHealthMod, int healthMod, int totalManaMod,
 		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
@@ -32,6 +32,7 @@ item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, ch
 	thisItem->armorClass = armorClass;
 	thisItem->itemType = itemType;
 	thisItem->price = price;
+	thisItem->weaponStrMod = weaponStrMod;
 
 	thisItem->strMod = strMod;
 	thisItem->dexMod = dexMod;

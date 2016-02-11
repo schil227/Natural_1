@@ -163,22 +163,22 @@ int path_and_attack_test() {
 
 	//stunt hp to test herb healing over duration
 	testPlayer->hp -= 8;
-	assert(testPlayer->hp ==  12);
+	assert(testPlayer->hp ==  14);
 
 	//consume herb as active duration item
 	modifyItem(testPlayer->backpack->inventoryArr[0], testPlayer);
 
 	//herb heals the player for two
-	assert(testPlayer->hp ==  14);
-
-	startTurn(testPlayer);
 	assert(testPlayer->hp ==  16);
+
 	startTurn(testPlayer);
 	assert(testPlayer->hp ==  18);
 	startTurn(testPlayer);
 	assert(testPlayer->hp ==  20);
 	startTurn(testPlayer);
-	assert(testPlayer->hp ==  20);
+	assert(testPlayer->hp ==  22);
+	startTurn(testPlayer);
+	assert(testPlayer->hp ==  22);
 
 	//warp player back to original spot
 	moveIndividualSpace(main_test_field,testPlayer,1,1);
@@ -196,8 +196,8 @@ int path_and_attack_test() {
 	tmpIndividual = testEnemies->individuals[4];
 	assert(tmpIndividual->playerCharacter->x == 3 && tmpIndividual->playerCharacter->y == 1 );
 
-	//after being attacked 3 times, player health is 14
-	assert(testPlayer->hp == 15);
+	//after being attacked 3 times, player health is 15
+	assert(testPlayer->hp == 17);
 
 	//skeleton0 cannot attack the player, vis versa
 	assert(!individualWithinRange(testEnemies->individuals[0],testPlayer));

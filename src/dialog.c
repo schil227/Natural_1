@@ -163,6 +163,7 @@ void setSimpleDialogMessage(char * string){
 	strcpy(thisDialogInstance->currentMessage->message, string);
 	thisDialogInstance->currentMessage->numDialogDecision = 0;
 	thisDialogInstance->currentMessage->nextMessage = NULL;
+	thisDialogInstance->currentMessage->eventID = 0;
 }
 
 void toggleDrawDialogBox(){

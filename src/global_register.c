@@ -224,10 +224,10 @@ void loadIndividualsToRegistry(char* directory, char * individualsFileName){
 	char * fullFileName = appendStrings(directory, individualsFileName);
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
-	char line[160];
+	char line[256];
 
 
-	while(fgets(line,160,FP) != NULL){
+	while(fgets(line,256,FP) != NULL){
 		if (line[0] != '#') {
 			individual * newIndividual = initIndividual();
 			createIndividualFromLine(newIndividual, line);

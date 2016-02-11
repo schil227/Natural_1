@@ -23,6 +23,8 @@ typedef struct {
 	char armorClass;//(l)ight, (m)edium, (h)eavy
 	char itemType;//(c)onsumable, (d)uration
 
+	double weaponStrMod;
+
 	short int strMod;
 	short int dexMod;
 	short int conMod;

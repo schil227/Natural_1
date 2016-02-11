@@ -211,12 +211,12 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 	if(weapon == NULL){
 		maxDamTotal = thisIndividual->maxDam;
 		minDamTotal = thisIndividual->minDam;
-		baseDam += thisIndividual->STR; //unarmed, just + STR
+		baseDam += getAttributeSum(thisIndividual,"STR"); //unarmed, just + STR
 	} else {
 		maxDamTotal = weapon->maxDamMod;
 		minDamTotal = weapon->minDamMod;
 		attackType = weapon->weaponDamageType;
-		baseDam += floor((weapon->strMod)*(thisIndividual->STR));
+		baseDam += floor((weapon->weaponStrMod)*(getAttributeSum(thisIndividual, "STR"))); //TODO: round to .1 then floor? 3.9 -> 4, 4.5->4
 	}
 
 	thisIndividual->hasAttacked = 1;
@@ -534,7 +534,23 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	int toReturn = 0;
 
-	if(strcmp("totalHealth",attribute) == 0 ){
+	if(strcmp("STR",attribute) == 0 ){
+			return thisIndividual->STR;
+	}else if(strcmp("DEX",attribute) == 0){
+		return thisIndividual->DEX;
+	}else if(strcmp("CON",attribute) == 0){
+		return thisIndividual->CON;
+	}else if(strcmp("WILL",attribute) == 0){
+		return thisIndividual->WILL;
+	}else if(strcmp("INT",attribute) == 0){
+		return thisIndividual->INT;
+	}else if(strcmp("WIS",attribute) == 0){
+		return thisIndividual->WIS;
+	}else if(strcmp("CHR",attribute) == 0){
+		return thisIndividual->CHR;
+	}else if(strcmp("LUCK",attribute) == 0){
+		return thisIndividual->LUCK;
+	}else if(strcmp("totalHealth",attribute) == 0 ){
 		return thisIndividual->totalHP;
 	} else if(strcmp("health",attribute) == 0 ){
 		return thisIndividual->hp;
@@ -542,9 +558,9 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 		return thisIndividual->totalMana;
 	} else if(strcmp("mana",attribute) == 0 ){
 		return thisIndividual->mana;
-	} else if(strcmp("minTurns",attribute) == 0 ){
+	} else if(strcmp("minTurns",attribute) == 0 ){ //item only for now
 		return 0;
-	} else if(strcmp("maxTurns",attribute) == 0 ){
+	} else if(strcmp("maxTurns",attribute) == 0 ){ //item only for now
 		return 0;
 	} else if(strcmp("ac",attribute) == 0 ){
 		return thisIndividual->AC + thisIndividual->DEX;
@@ -591,7 +607,63 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 
 int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 	int toReturn = 0;
-	if(strcmp("totalHealth",attribute) == 0 ){
+	if(strcmp("STR",attribute) == 0 ){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->strMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->strMod;
+		 }
+	}else if(strcmp("DEX",attribute) == 0){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->dexMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->dexMod;
+		 }
+	}else if(strcmp("CON",attribute) == 0){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->conMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->conMod;
+		 }
+	}else if(strcmp("WILL",attribute) == 0){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->willMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->willMod;
+		 }
+	}else if(strcmp("INT",attribute) == 0){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->intMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->intMod;
+		 }
+	}else if(strcmp("WIS",attribute) == 0){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->wisMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->wisMod;
+		 }
+	}else if(strcmp("CHR",attribute) == 0){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->chrMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->chrMod;
+		 }
+	}else if(strcmp("LUCK",attribute) == 0){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->luckMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->luckMod;
+		 }
+	}else if(strcmp("totalHealth",attribute) == 0 ){
 		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->totalHealthMod;
 		 }
