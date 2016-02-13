@@ -16,28 +16,22 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	Rectangle(hdc, 0,0,rec.right, rec.bottom);
 	DeleteObject(NewBrush);
 
-	//HP: %d/%d => 10 bytes (short ints)
-	char hpOut[10];
+	char hpOut[32];
 	sprintf(hpOut, "HP: %d/%d", player->hp, player->totalHP);
 
-	//Mana: %d/%d => 12 bytes (short ints)
-	char manaOut[12];
+	char manaOut[32];
 	sprintf(manaOut, "Mana: %d/%d", player->mana, player->totalMana);
 
-	//Actions:%d => 20 bytes
-	char actionOut[10];
+	char actionOut[16];
 	sprintf(actionOut, "Actions:%d",player->remainingActions);
 
-	//Damage Spread:[%d-%d] => 21 bytes
-	char damSpread[21];
+	char damSpread[32];
 	sprintf(damSpread, "Damage Spread:[%d-%d]",player->minDam, player->maxDam);
 
-	//Movement Range:%d => 17 bytes
-	char mvmtRng[17];
+	char mvmtRng[32];
 	sprintf(mvmtRng, "Movement Range:%d", player->mvmt);
 
-	//Gold: %d => 7 bytes
-	char goldOut[8];
+	char goldOut[16];
 	sprintf(goldOut,"Gold: %d", player->gold);
 
 
@@ -46,7 +40,7 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 //	HFONT hfont = CreateFont(textYStep, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "Courier");
 //	HFONT oldfont = (HFONT)SelectObject(hdc, hfont);
 
-	char tmpNum[2];
+	char tmpNum[3];
 
 	TextOut(hdc, 10, 10, hpOut, strlen(hpOut));
 	TextOut(hdc, 10, 10+textYStep, manaOut, strlen(manaOut));
@@ -57,10 +51,10 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	TextOut(hdc, 17, 120+textYStep, "STR:", 4);
 	sprintf(tmpNum,"%d",player->STR);
 	TextOut(hdc, player->STR >=0? 61 : 57, 120+textYStep, tmpNum, strlen(tmpNum));
-	TextOut(hdc, 17, 120+textYStep*3, "DEX:", 4);
+	TextOut(hdc, 17, 120+textYStep*2, "DEX:", 4);
 	sprintf(tmpNum,"%d",player->DEX);
 	TextOut(hdc, player->DEX >=0? 61 : 57, 120+textYStep*2, tmpNum, strlen(tmpNum));
-	TextOut(hdc, 17, 120+textYStep*2, "CON:", 4);
+	TextOut(hdc, 17, 120+textYStep*3, "CON:", 4);
 	sprintf(tmpNum,"%d",player->CON);
 	TextOut(hdc, player->CON >=0? 61 : 57, 120+textYStep*3, tmpNum, strlen(tmpNum));
 	TextOut(hdc, 17, 120+textYStep*4, "INT:", 4);

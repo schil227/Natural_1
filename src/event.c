@@ -234,6 +234,23 @@ void enterBuyMode(int individualID){
 	enableInventoryViewMode(merchant->backpack);
 }
 
+void statCheck(individual * player, event * thisEvent){
+	int statValue = 0, d20;
+
+	statValue = getAttributeSum(player, thisEvent->message);
+	d20 = rand() % 20 + 1;
+
+	char statOut[128];
+	sprintf(statOut, "%s Check: %d + 2*%d = %d", thisEvent->message, d20, statValue, (d20 + statValue*2));
+	cwrite(statOut);
+
+	if((d20 + statValue*2) >= thisEvent->intA){
+		setNextMessageByID(thisEvent->dialogIDA);
+	}else{//failed
+		setNextMessageByID(thisEvent->dialogIDB);
+	}
+
+}
 
 void processEvent(int eventID, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
 
@@ -248,7 +265,10 @@ void processEvent(int eventID, individual * player, individualGroup * npcs, indi
 			break;
 		case 3: // enable buy mode
 			enterBuyMode(thisEvent->individualID);
-
+			break;
+		case 4: // stat check
+			statCheck(player, thisEvent);
+			break;
 	}
 
 }

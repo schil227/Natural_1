@@ -185,6 +185,29 @@ int setCurrentMessageByIndividualID(int individualID){
 	return 0;
 }
 
+int setNextMessageByID(int nextMessageID){
+	int i;
+
+	if(thisDialogInstance->currentMessage->nextMessageID != 0){
+		cwrite("!!CANNOT SET nextMessage - currentMessage->nextMessage IS NOT NULL!!");
+		return 0;
+	}
+
+	for (i = 0; i < thisDialogInstance->numDialogMessages; i++) {
+		if (thisDialogInstance->dialogMessages[i]->messageID == nextMessageID) {
+			setNextMessage(thisDialogInstance->dialogMessages[i]);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int setNextMessage(dialogMessage * nextMessage){
+	thisDialogInstance->currentMessage->nextMessageID = nextMessage->messageID;
+	thisDialogInstance->currentMessage->nextMessage = nextMessage;
+}
+
 int setCurrentMessageByMessageID(int messageID){
 	int i;
 

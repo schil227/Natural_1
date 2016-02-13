@@ -251,19 +251,22 @@ int path_and_attack_test() {
 	//select no - npc will be mad
 	advanceDialog();
 
+	//select dialog "are you trying to anger me?
+	nextDialogDecision(); //"no - CHR Check"
+
+	//select no - do CHR Check
+	advanceDialog();
+
+	//
+	advanceDialog();
+
 	//event attached to dialog, npc becomes hostile
 	assert(getEventFromCurrentMessage());
 
 	individual * tmpNPC = getIndividualFromRegistry(testNPCs->individuals[0]->ID);
 
-	//process the becomeEnemy() function, npc is removed from testNPCs and is added to enemies
+	//process the CHR Check, successful
 	processEvent(getEventFromCurrentMessage(), testPlayer, testNPCs, testEnemies, main_test_field);
-
-	//npc not in NPCs
-	assert(!individualInGroup(tmpNPC, testNPCs));
-
-	//npc is in testEnemies
-	assert(individualInGroup(tmpNPC, testEnemies));
 
 	//break down mock up
 	destroyIndividual(testPlayer);

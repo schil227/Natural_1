@@ -24,7 +24,7 @@ typedef struct{
 	int dialogIDA;
 	int dialogIDB;
 
-	char * message[256];
+	char message[256];
 } event;
 
 typedef struct{
