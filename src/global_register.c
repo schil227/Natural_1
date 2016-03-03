@@ -288,6 +288,9 @@ void loadEventsToRegistry(char* directory, char* eventsFileName){
 	free(fullFileName);
 }
 
+void loadEffectsToRegistry(char* directory, char* eventsFileName){
+
+}
 
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);
