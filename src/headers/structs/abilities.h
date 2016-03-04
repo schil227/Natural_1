@@ -22,41 +22,68 @@ typedef struct{
 } effectAndManaMapList;
 
 typedef struct{
-	int damageTypeEnabled;
-	char damageType;
-	int rangeEnabled;
-	effectAndManaMapList * range;
-	int targetedEnabled;
-	effectAndManaMapList * targeted;
-	int diceDamageEnabled;
-	effectAndManaMapList * diceDamage;
-	int diceDamageDurationEnabled;
-	effectAndManaMapList * diceDamageDuration;
-
-	int acEnabled;
-	effectAndManaMapList * ac;
-	int damageModEnabled;
-	effectAndManaMapList * damageMod;
-
-	//Note: for DR, ignore mana cost per effect, calculate by total DR
-	// roundUp((bluntDR + chop + pierce + slash)/2)
-	int bluntDREnabled;
-	effectAndManaMapList * bluntDR;
-	int chopDREnabled;
-	effectAndManaMapList * chopDR;
-	int pierceDREnabled;
-	effectAndManaMapList * pierceDR;
-	int slashDREnabled;
-	effectAndManaMapList * slashDR;
-
-} property;
-
-typedef struct{
 	char name[32];
 	char description[128];
 	int totalManaCost;
 
-	property properties[16];
+	short int damageTypeEnabled;
+	char damageType;
+	short int rangeEnabled;
+	effectAndManaMapList * range;
+	short int targetedEnabled;
+	effectAndManaMapList * targeted;
+	short int diceDamageEnabled;
+	effectAndManaMapList * diceDamage;
+	short int diceDamageDurationEnabled;
+	effectAndManaMapList * diceDamageDuration;
+
+	short int STREnabled;
+	effectAndManaMapList * STR;
+	short int DEXEnabled;
+	effectAndManaMapList * DEX;
+	short int CONEnabled;
+	effectAndManaMapList * CON;
+	short int WILLEnabled;
+	effectAndManaMapList * WILL;
+	short int INTEnabled;
+	effectAndManaMapList * INT;
+	short int WISEnabled;
+	effectAndManaMapList * WIS;
+	short int CHREnabled;
+	effectAndManaMapList * CHR;
+	short int LUCKEnabled;
+	effectAndManaMapList * LUCK;
+
+	short int acEnabled;
+	effectAndManaMapList * ac;
+	short int damageModEnabled;
+	effectAndManaMapList * damageMod;
+	short int hpEnabled;
+	effectAndManaMapList * hp;
+	short int totalHPEnabled;
+	effectAndManaMapList * totalHP;
+	short int totalManaEnabled;
+	effectAndManaMapList * totalMana;
+
+	//Note: for DR, ignore mana cost per effect, calculate by total DR
+	// roundUp((bluntDR + chop + pierce + slash)/2)
+	short int bluntDREnabled;
+	effectAndManaMapList * bluntDR;
+	short int chopDREnabled;
+	effectAndManaMapList * chopDR;
+	short int pierceDREnabled;
+	effectAndManaMapList * pierceDR;
+	short int slashDREnabled;
+	effectAndManaMapList * slashDR;
+
+	short int earthDREnabled;
+	effectAndManaMapList * earthDR;
+	short int fireDREnabled;
+	effectAndManaMapList * fireDR;
+	short int waterDREnabled;
+	effectAndManaMapList * waterDR;
+	short int lightningDREnabled;
+	effectAndManaMapList * lightningDR;
 } effect;
 
 typedef struct{

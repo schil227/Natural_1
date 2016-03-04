@@ -6,6 +6,8 @@
  */
 #include"./headers/abilities_pub_methods.h"
 
-void createEffectFromLine(){
+effect * createEffectFromLine(char line[1024]){
+	effect * newEffect = malloc(sizeof(effect));
 
+	return newEffect;
 }

@@ -117,6 +117,18 @@ int addEventToRegistry(event * thisEvent){
 	return 0;
 }
 
+int addEffectToRegistry(effect * thisEffect){
+	if(thisGlobalRegister->numEffects < thisGlobalRegister->MAX_EFFECTS){
+		thisGlobalRegister->effectRegistry[thisGlobalRegister->numEffects] = thisEffect;
+		thisGlobalRegister->numEffects++;
+		return 1;
+	}
+
+	cwrite("!!MAX EFFECTS IN REGISTRY!!");
+
+	return 0;
+}
+
 int removeIndividualFromRegistryByID(int id){
 	int i;
 
@@ -276,7 +288,6 @@ void loadEventsToRegistry(char* directory, char* eventsFileName){
 	FILE * FP = fopen(fullFileName, "r");
 	char line[512];
 
-
 	while(fgets(line,512,FP) != NULL){
 		if (line[0] != '#') {
 			event * newEvent = createEventFromFile(line);
@@ -289,7 +300,19 @@ void loadEventsToRegistry(char* directory, char* eventsFileName){
 }
 
 void loadEffectsToRegistry(char* directory, char* eventsFileName){
+	char * fullFileName = appendStrings(directory, eventsFileName);
+	FILE * FP = fopen(fullFileName, "r");
+	char line[1024];
 
+	while(fgets(line,1024,FP) != NULL){
+		if (line[0] != '#') {
+			effect * newEffect = createEffectFromLine(line);
+			addEffectToRegistry(newEffect);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
 }
 
 void removeFromExistance(int id){
