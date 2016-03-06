@@ -8,6 +8,8 @@
 #ifndef SRC_HEADERS_STRUCTS_ABILITIES_H_
 #define SRC_HEADERS_STRUCTS_ABILITIES_H_
 
+#include<stdlib.h>
+
 typedef struct{
 	short int effectMagnitude;
 	short int manaCost;
@@ -15,13 +17,15 @@ typedef struct{
 
 typedef struct{
 	int size;
+	int MAX_SIZE;
 	int selectedIndex;
 	int defaultStartingIndex; //if things can go positive/negitive, start with 0 cost index
-	effectAndMana effectAndManaArray[32];
+	effectAndMana * effectAndManaArray[32];
 
 } effectAndManaMapList;
 
 typedef struct{
+	int ID;
 	char name[32];
 	char description[128];
 	int totalManaCost;

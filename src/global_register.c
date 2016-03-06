@@ -31,6 +31,9 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_EVENTS = 1000;
 	thisGlobalRegister->numEvents = 0;
+
+	thisGlobalRegister->MAX_EFFECTS = 500;
+	thisGlobalRegister->numEffects = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -299,8 +302,8 @@ void loadEventsToRegistry(char* directory, char* eventsFileName){
 	free(fullFileName);
 }
 
-void loadEffectsToRegistry(char* directory, char* eventsFileName){
-	char * fullFileName = appendStrings(directory, eventsFileName);
+void loadEffectsToRegistry(char* directory, char* effectsFileName){
+	char * fullFileName = appendStrings(directory, effectsFileName);
 	FILE * FP = fopen(fullFileName, "r");
 	char line[1024];
 
