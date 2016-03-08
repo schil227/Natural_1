@@ -62,14 +62,14 @@ void addEffectManaMaptoMapList(effectAndMana * map, effectAndManaMapList * mapLi
 	}
 }
 
-effectAndManaMapList * makeEffectManaMapList(char * line, char * effectName){
+effectAndManaMapList * makeEffectManaMapList(char * line, int startingIndex, char * effectName){
 	int i, effect, mana;
 	char * number = strtok(line,",");
 	effectAndManaMapList *  mapList = malloc(sizeof(effectAndManaMapList));
 
 	mapList->defaultStartingIndex = 0;
 	mapList->size = 0;
-	mapList->selectedIndex = 0;
+	mapList->selectedIndex = startingIndex;
 	mapList->MAX_SIZE = 32;
 
 	while(number != NULL){
@@ -96,6 +96,7 @@ effectAndManaMapList * makeEffectManaMapList(char * line, char * effectName){
 
 effect * createEffectFromLine(char line[1024]){
 	char * strtok_save_pointer;
+	int mapSize;
 	effect * newEffect = malloc(sizeof(effect));
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
@@ -118,9 +119,12 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->rangeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->rangeEnabled){
 		char *tmpStr = strdup(value);
-		newEffect->range = makeEffectManaMapList(tmpStr, newEffect->name);
+		newEffect->range = makeEffectManaMapList(tmpStr, mapSize, newEffect->name);
 		free(tmpStr);
 	}else{
 		newEffect->range = NULL;
@@ -130,8 +134,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->targetedEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->targetedEnabled){
-		newEffect->targeted = makeEffectManaMapList(value, newEffect->name);
+		newEffect->targeted = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->targeted = NULL;
 	}
@@ -140,8 +147,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->diceDamageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->diceDamageEnabled){
-		newEffect->diceDamage = makeEffectManaMapList(value, newEffect->name);
+		newEffect->diceDamage = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->diceDamage = NULL;
 	}
@@ -150,8 +160,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->diceDamageDurationEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->diceDamageDurationEnabled){
-		newEffect->diceDamageDuration = makeEffectManaMapList(value, newEffect->name);
+		newEffect->diceDamageDuration = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->diceDamageDuration = NULL;
 	}
@@ -160,41 +173,50 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->STREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->STREnabled){
-		newEffect->STR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->STR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->STR = NULL;
 	}
-
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newEffect->DEXEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->DEXEnabled){
-		newEffect->DEX = makeEffectManaMapList(value, newEffect->name);
+		newEffect->DEX = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->DEX = NULL;
 	}
-
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newEffect->CONEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->CONEnabled){
-		newEffect->CON = makeEffectManaMapList(value, newEffect->name);
+		newEffect->CON = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->CON = NULL;
 	}
-
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newEffect->WILLEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->WILLEnabled){
-		newEffect->WILL = makeEffectManaMapList(value, newEffect->name);
+		newEffect->WILL = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->WILL = NULL;
 	}
@@ -203,8 +225,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->INTEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->INTEnabled){
-		newEffect->INT = makeEffectManaMapList(value, newEffect->name);
+		newEffect->INT = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->INT = NULL;
 	}
@@ -213,8 +238,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->WISEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->WISEnabled){
-		newEffect->WIS = makeEffectManaMapList(value, newEffect->name);
+		newEffect->WIS = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->WIS = NULL;
 	}
@@ -223,8 +251,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->CHREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->CHREnabled){
-		newEffect->CHR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->CHR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->CHR = NULL;
 	}
@@ -233,8 +264,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->LUCKEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->LUCKEnabled){
-		newEffect->LUCK = makeEffectManaMapList(value, newEffect->name);
+		newEffect->LUCK = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->LUCK = NULL;
 	}
@@ -243,8 +277,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->acEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->acEnabled){
-		newEffect->ac = makeEffectManaMapList(value, newEffect->name);
+		newEffect->ac = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->ac = NULL;
 	}
@@ -253,8 +290,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->damageModEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->damageModEnabled){
-		newEffect->damageMod = makeEffectManaMapList(value, newEffect->name);
+		newEffect->damageMod = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->damageMod = NULL;
 	}
@@ -263,8 +303,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->hpEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->hpEnabled){
-		newEffect->hp = makeEffectManaMapList(value, newEffect->name);
+		newEffect->hp = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->hp = NULL;
 	}
@@ -273,8 +316,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->totalHPEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->totalHPEnabled){
-		newEffect->totalHP = makeEffectManaMapList(value, newEffect->name);
+		newEffect->totalHP = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->totalHP = NULL;
 	}
@@ -283,8 +329,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->totalManaEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->totalManaEnabled){
-		newEffect->totalMana = makeEffectManaMapList(value, newEffect->name);
+		newEffect->totalMana = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->totalMana = NULL;
 	}
@@ -293,8 +342,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->bluntDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->bluntDREnabled){
-		newEffect->bluntDR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->bluntDR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->bluntDR = NULL;
 	}
@@ -303,8 +355,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->chopDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->chopDREnabled){
-		newEffect->chopDR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->chopDR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->chopDR = NULL;
 	}
@@ -313,8 +368,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->pierceDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->pierceDREnabled){
-		newEffect->pierceDR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->pierceDR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->pierceDR = NULL;
 	}
@@ -323,8 +381,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->slashDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->slashDREnabled){
-		newEffect->slashDR  = makeEffectManaMapList(value, newEffect->name);
+		newEffect->slashDR  = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->slashDR = NULL;
 	}
@@ -333,8 +394,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->earthDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->earthDREnabled){
-		newEffect->earthDR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->earthDR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->earthDR = NULL;
 	}
@@ -343,8 +407,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->fireDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->fireDREnabled){
-		newEffect->fireDR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->fireDR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->fireDR = NULL;
 	}
@@ -353,8 +420,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->waterDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->waterDREnabled){
-		newEffect->waterDR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->waterDR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->waterDR = NULL;
 	}
@@ -363,8 +433,11 @@ effect * createEffectFromLine(char line[1024]){
 	newEffect->lightningDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newEffect->lightningDREnabled){
-		newEffect->lightningDR = makeEffectManaMapList(value, newEffect->name);
+		newEffect->lightningDR = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->lightningDR = NULL;
 	}
