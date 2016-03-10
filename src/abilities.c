@@ -94,13 +94,16 @@ effectAndManaMapList * makeEffectManaMapList(char * line, int startingIndex, cha
 	return mapList;
 }
 
-effect * createEffectFromLine(char line[1024]){
+effect * createEffectFromLine(char line[2048]){
 	char * strtok_save_pointer;
 	int mapSize;
 	effect * newEffect = malloc(sizeof(effect));
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	newEffect->ID = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newEffect->type = *value;
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(newEffect->name , value);
@@ -297,6 +300,19 @@ effect * createEffectFromLine(char line[1024]){
 		newEffect->damageMod = makeEffectManaMapList(value, mapSize, newEffect->name);
 	}else{
 		newEffect->damageMod = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newEffect->mvmtEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newEffect->mvmtEnabled){
+		newEffect->mvmt = makeEffectManaMapList(value, mapSize, newEffect->name);
+	}else{
+		newEffect->mvmt = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);

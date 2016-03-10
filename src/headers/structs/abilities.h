@@ -26,6 +26,7 @@ typedef struct{
 
 typedef struct{
 	int ID;
+	char type;
 	char name[32];
 	char description[128];
 	int totalManaCost;
@@ -62,6 +63,8 @@ typedef struct{
 	effectAndManaMapList * ac;
 	short int damageModEnabled;
 	effectAndManaMapList * damageMod;
+	short int mvmtEnabled;
+	effectAndManaMapList * mvmt;
 	short int hpEnabled;
 	effectAndManaMapList * hp;
 	short int totalHPEnabled;

@@ -305,9 +305,9 @@ void loadEventsToRegistry(char* directory, char* eventsFileName){
 void loadEffectsToRegistry(char* directory, char* effectsFileName){
 	char * fullFileName = appendStrings(directory, effectsFileName);
 	FILE * FP = fopen(fullFileName, "r");
-	char line[1024];
+	char line[2048];
 
-	while(fgets(line,1024,FP) != NULL){
+	while(fgets(line,2048,FP) != NULL){
 		if (line[0] != '#') {
 			effect * newEffect = createEffectFromLine(line);
 			addEffectToRegistry(newEffect);
