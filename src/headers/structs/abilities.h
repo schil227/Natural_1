@@ -39,8 +39,16 @@ typedef struct{
 	effectAndManaMapList * targeted;
 	short int diceDamageEnabled;
 	effectAndManaMapList * diceDamage;
+	short int damageEnabled;
+	effectAndManaMapList * damage;
 	short int diceDamageDurationEnabled;
 	effectAndManaMapList * diceDamageDuration;
+	short int diceDamageDurationModEnabled;
+	effectAndManaMapList * diceDamageDurationMod;
+	short int durationEnabled;
+	effectAndManaMapList * duration;
+	short int durationModEnabled;
+	effectAndManaMapList * durationMod;
 
 	short int STREnabled;
 	effectAndManaMapList * STR;
@@ -72,8 +80,6 @@ typedef struct{
 	short int totalManaEnabled;
 	effectAndManaMapList * totalMana;
 
-	//Note: for DR, ignore mana cost per effect, calculate by total DR
-	// roundUp((bluntDR + chop + pierce + slash)/2)
 	short int bluntDREnabled;
 	effectAndManaMapList * bluntDR;
 	short int chopDREnabled;
@@ -91,14 +97,6 @@ typedef struct{
 	effectAndManaMapList * waterDR;
 	short int lightningDREnabled;
 	effectAndManaMapList * lightningDR;
-} effect;
-
-typedef struct{
-	char type;
-	char name[32];
-	int totalManaCost;
-
-	effect effects[16];
-}ability;
+} ability;
 
 #endif /* SRC_HEADERS_STRUCTS_ABILITIES_H_ */

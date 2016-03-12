@@ -51,6 +51,150 @@ char* strtok_r(
     return ret;
 }
 
+int calculateManaCost(ability * thisAbility){
+	int sum = 0;
+	int dam = 0;
+	int duration = 0;
+	int DRSum = 0;
+
+	if(thisAbility->rangeEnabled){
+		sum += thisAbility->range->effectAndManaArray[thisAbility->range->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->targetedEnabled){
+		sum += thisAbility->targeted->effectAndManaArray[thisAbility->targeted->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->diceDamageEnabled){
+		dam += thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->damageEnabled){
+		dam += thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->diceDamageDurationEnabled){
+		duration += thisAbility->diceDamageDuration->effectAndManaArray[thisAbility->diceDamageDuration->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->diceDamageDurationModEnabled){
+		duration += thisAbility->diceDamageDurationMod->effectAndManaArray[thisAbility->diceDamageDurationMod->selectedIndex]->manaCost;
+	}
+
+	if(duration > 0){
+	sum += dam*duration;
+	}else{
+		sum += dam;
+	}
+
+	if(thisAbility->STREnabled){
+		sum += thisAbility->STR->effectAndManaArray[thisAbility->STR->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->DEXEnabled){
+		sum += thisAbility->DEX->effectAndManaArray[thisAbility->DEX->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->CONEnabled){
+		sum += thisAbility->CON->effectAndManaArray[thisAbility->CON->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->WILLEnabled){
+		sum += thisAbility->WILL->effectAndManaArray[thisAbility->WILL->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->INTEnabled){
+		sum += thisAbility->INT->effectAndManaArray[thisAbility->INT->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->WISEnabled){
+		sum += thisAbility->WIS->effectAndManaArray[thisAbility->WIS->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->CHREnabled){
+		sum += thisAbility->CHR->effectAndManaArray[thisAbility->CHR->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->LUCKEnabled){
+		sum += thisAbility->LUCK->effectAndManaArray[thisAbility->LUCK->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->acEnabled){
+		sum += thisAbility->ac->effectAndManaArray[thisAbility->ac->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->damageModEnabled){
+		sum += thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->mvmtEnabled){
+		sum += thisAbility->mvmt->effectAndManaArray[thisAbility->mvmt->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->hpEnabled){
+		sum += thisAbility->hp->effectAndManaArray[thisAbility->hp->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->totalHPEnabled){
+		sum += thisAbility->totalHP->effectAndManaArray[thisAbility->totalHP->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->totalManaEnabled){
+		sum += thisAbility->totalMana->effectAndManaArray[thisAbility->totalMana->selectedIndex]->manaCost;
+	}
+
+	//DR: ceil( sum(<allDRMagnitudes>)/2 )
+	if(thisAbility->bluntDREnabled){
+		DRSum += thisAbility->bluntDR->effectAndManaArray[thisAbility->bluntDR->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->chopDREnabled){
+		DRSum += thisAbility->chopDR->effectAndManaArray[thisAbility->chopDR->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->pierceDREnabled){
+		DRSum += thisAbility->pierceDR->effectAndManaArray[thisAbility->pierceDR->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->slashDREnabled){
+		DRSum += thisAbility->slashDR->effectAndManaArray[thisAbility->slashDR->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->earthDREnabled){
+		DRSum += thisAbility->earthDR->effectAndManaArray[thisAbility->earthDR->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->fireDREnabled){
+		DRSum += thisAbility->fireDR->effectAndManaArray[thisAbility->fireDR->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->waterDREnabled){
+		DRSum += thisAbility->waterDR->effectAndManaArray[thisAbility->waterDR->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->lightningDREnabled){
+		DRSum += thisAbility->lightningDR->effectAndManaArray[thisAbility->lightningDR->selectedIndex]->effectMagnitude;
+	}
+
+	sum += ceil(DRSum/2);
+
+	duration = 0;
+
+	if(thisAbility->durationEnabled){
+		duration = thisAbility->duration->effectAndManaArray[thisAbility->duration->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->durationModEnabled){
+		duration = thisAbility->durationMod->effectAndManaArray[thisAbility->durationMod->selectedIndex]->manaCost;
+	}
+
+	if(duration > 1){
+		sum  = sum * duration;
+	}
+
+	return sum;
+}
+
 void addEffectManaMaptoMapList(effectAndMana * map, effectAndManaMapList * mapList, char * effectName){
 	if(mapList->size != mapList->MAX_SIZE){
 		mapList->effectAndManaArray[mapList->size] = map;
@@ -94,372 +238,424 @@ effectAndManaMapList * makeEffectManaMapList(char * line, int startingIndex, cha
 	return mapList;
 }
 
-effect * createEffectFromLine(char line[2048]){
+ability * createAbilityFromLine(char line[2048]){
 	char * strtok_save_pointer;
 	int mapSize;
-	effect * newEffect = malloc(sizeof(effect));
+	ability * newAbility = malloc(sizeof(ability));
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
-	newEffect->ID = atoi(value);
+	newAbility->ID = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->type = *value;
+	newAbility->type = *value;
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	strcpy(newEffect->name , value);
+	strcpy(newAbility->name , value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->damageTypeEnabled = atoi(value);
+	newAbility->damageTypeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->damageTypeEnabled){
-		newEffect->damageType = *value;
+	if(newAbility->damageTypeEnabled){
+		newAbility->damageType = *value;
 	}else{
-		newEffect->damageType = NULL;
+		newAbility->damageType = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->rangeEnabled = atoi(value);
+	newAbility->rangeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->rangeEnabled){
+	if(newAbility->rangeEnabled){
 		char *tmpStr = strdup(value);
-		newEffect->range = makeEffectManaMapList(tmpStr, mapSize, newEffect->name);
+		newAbility->range = makeEffectManaMapList(tmpStr, mapSize, newAbility->name);
 		free(tmpStr);
 	}else{
-		newEffect->range = NULL;
+		newAbility->range = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->targetedEnabled = atoi(value);
+	newAbility->targetedEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->targetedEnabled){
-		newEffect->targeted = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->targetedEnabled){
+		newAbility->targeted = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->targeted = NULL;
+		newAbility->targeted = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->diceDamageEnabled = atoi(value);
+	newAbility->diceDamageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->diceDamageEnabled){
-		newEffect->diceDamage = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->diceDamageEnabled){
+		newAbility->diceDamage = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->diceDamage = NULL;
+		newAbility->diceDamage = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->diceDamageDurationEnabled = atoi(value);
+	newAbility->damageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->diceDamageDurationEnabled){
-		newEffect->diceDamageDuration = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->damageEnabled){
+		newAbility->damage = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->diceDamageDuration = NULL;
+		newAbility->damage = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->STREnabled = atoi(value);
+	newAbility->diceDamageDurationEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->STREnabled){
-		newEffect->STR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->diceDamageDurationEnabled){
+		newAbility->diceDamageDuration = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->STR = NULL;
+		newAbility->diceDamageDuration = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->DEXEnabled = atoi(value);
+	newAbility->diceDamageDurationModEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->DEXEnabled){
-		newEffect->DEX = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->diceDamageDurationModEnabled){
+		newAbility->diceDamageDurationMod = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->DEX = NULL;
+		newAbility->diceDamageDurationMod = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->CONEnabled = atoi(value);
+	newAbility->durationEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->CONEnabled){
-		newEffect->CON = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->durationEnabled){
+		newAbility->duration = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->CON = NULL;
+		newAbility->duration = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->WILLEnabled = atoi(value);
+	newAbility->durationModEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->WILLEnabled){
-		newEffect->WILL = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->durationModEnabled){
+		newAbility->durationMod = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->WILL = NULL;
+		newAbility->durationMod = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->INTEnabled = atoi(value);
+	newAbility->STREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->INTEnabled){
-		newEffect->INT = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->STREnabled){
+		newAbility->STR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->INT = NULL;
+		newAbility->STR = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->WISEnabled = atoi(value);
+	newAbility->DEXEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->WISEnabled){
-		newEffect->WIS = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->DEXEnabled){
+		newAbility->DEX = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->WIS = NULL;
+		newAbility->DEX = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->CHREnabled = atoi(value);
+	newAbility->CONEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->CHREnabled){
-		newEffect->CHR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->CONEnabled){
+		newAbility->CON = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->CHR = NULL;
+		newAbility->CON = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->LUCKEnabled = atoi(value);
+	newAbility->WILLEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->LUCKEnabled){
-		newEffect->LUCK = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->WILLEnabled){
+		newAbility->WILL = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->LUCK = NULL;
+		newAbility->WILL = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->acEnabled = atoi(value);
+	newAbility->INTEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->acEnabled){
-		newEffect->ac = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->INTEnabled){
+		newAbility->INT = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->ac = NULL;
+		newAbility->INT = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->damageModEnabled = atoi(value);
+	newAbility->WISEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->damageModEnabled){
-		newEffect->damageMod = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->WISEnabled){
+		newAbility->WIS = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->damageMod = NULL;
+		newAbility->WIS = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->mvmtEnabled = atoi(value);
+	newAbility->CHREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->mvmtEnabled){
-		newEffect->mvmt = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->CHREnabled){
+		newAbility->CHR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->mvmt = NULL;
+		newAbility->CHR = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->hpEnabled = atoi(value);
+	newAbility->LUCKEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->hpEnabled){
-		newEffect->hp = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->LUCKEnabled){
+		newAbility->LUCK = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->hp = NULL;
+		newAbility->LUCK = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->totalHPEnabled = atoi(value);
+	newAbility->acEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->totalHPEnabled){
-		newEffect->totalHP = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->acEnabled){
+		newAbility->ac = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->totalHP = NULL;
+		newAbility->ac = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->totalManaEnabled = atoi(value);
+	newAbility->damageModEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->totalManaEnabled){
-		newEffect->totalMana = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->damageModEnabled){
+		newAbility->damageMod = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->totalMana = NULL;
+		newAbility->damageMod = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->bluntDREnabled = atoi(value);
+	newAbility->mvmtEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->bluntDREnabled){
-		newEffect->bluntDR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->mvmtEnabled){
+		newAbility->mvmt = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->bluntDR = NULL;
+		newAbility->mvmt = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->chopDREnabled = atoi(value);
+	newAbility->hpEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->chopDREnabled){
-		newEffect->chopDR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->hpEnabled){
+		newAbility->hp = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->chopDR = NULL;
+		newAbility->hp = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->pierceDREnabled = atoi(value);
+	newAbility->totalHPEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->pierceDREnabled){
-		newEffect->pierceDR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->totalHPEnabled){
+		newAbility->totalHP = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->pierceDR = NULL;
+		newAbility->totalHP = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->slashDREnabled = atoi(value);
+	newAbility->totalManaEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->slashDREnabled){
-		newEffect->slashDR  = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->totalManaEnabled){
+		newAbility->totalMana = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->slashDR = NULL;
+		newAbility->totalMana = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->earthDREnabled = atoi(value);
+	newAbility->bluntDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->earthDREnabled){
-		newEffect->earthDR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->bluntDREnabled){
+		newAbility->bluntDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->earthDR = NULL;
+		newAbility->bluntDR = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->fireDREnabled = atoi(value);
+	newAbility->chopDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->fireDREnabled){
-		newEffect->fireDR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->chopDREnabled){
+		newAbility->chopDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->fireDR = NULL;
+		newAbility->chopDR = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->waterDREnabled = atoi(value);
+	newAbility->pierceDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->waterDREnabled){
-		newEffect->waterDR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->pierceDREnabled){
+		newAbility->pierceDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->waterDR = NULL;
+		newAbility->pierceDR = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newEffect->lightningDREnabled = atoi(value);
+	newAbility->slashDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newEffect->lightningDREnabled){
-		newEffect->lightningDR = makeEffectManaMapList(value, mapSize, newEffect->name);
+	if(newAbility->slashDREnabled){
+		newAbility->slashDR  = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
-		newEffect->lightningDR = NULL;
+		newAbility->slashDR = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	strcpy(newEffect->description, value);
+	newAbility->earthDREnabled = atoi(value);
 
-	return newEffect;
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->earthDREnabled){
+		newAbility->earthDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+	}else{
+		newAbility->earthDR = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->fireDREnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->fireDREnabled){
+		newAbility->fireDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+	}else{
+		newAbility->fireDR = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->waterDREnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->waterDREnabled){
+		newAbility->waterDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+	}else{
+		newAbility->waterDR = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->lightningDREnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->lightningDREnabled){
+		newAbility->lightningDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+	}else{
+		newAbility->lightningDR = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	strcpy(newAbility->description, value);
+
+	return newAbility;
 }

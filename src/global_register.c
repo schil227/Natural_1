@@ -120,9 +120,9 @@ int addEventToRegistry(event * thisEvent){
 	return 0;
 }
 
-int addEffectToRegistry(effect * thisEffect){
+int addAbilityToRegistry(ability * thisAbility){
 	if(thisGlobalRegister->numEffects < thisGlobalRegister->MAX_EFFECTS){
-		thisGlobalRegister->effectRegistry[thisGlobalRegister->numEffects] = thisEffect;
+		thisGlobalRegister->abilityRegistry[thisGlobalRegister->numEffects] = thisAbility;
 		thisGlobalRegister->numEffects++;
 		return 1;
 	}
@@ -309,8 +309,9 @@ void loadEffectsToRegistry(char* directory, char* effectsFileName){
 
 	while(fgets(line,2048,FP) != NULL){
 		if (line[0] != '#') {
-			effect * newEffect = createEffectFromLine(line);
-			addEffectToRegistry(newEffect);
+			ability * newAbility = createAbilityFromLine(line);
+			newAbility->totalManaCost = calculateManaCost(newAbility);
+			addAbilityToRegistry(newAbility);
 		}
 	}
 
