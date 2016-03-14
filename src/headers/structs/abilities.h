@@ -37,6 +37,8 @@ typedef struct{
 	effectAndManaMapList * range;
 	short int targetedEnabled;
 	effectAndManaMapList * targeted;
+	short int extraAttackEnabled;
+	effectAndManaMapList * extraAttack;
 	short int diceDamageEnabled;
 	effectAndManaMapList * diceDamage;
 	short int damageEnabled;
@@ -45,6 +47,8 @@ typedef struct{
 	effectAndManaMapList * diceDamageDuration;
 	short int diceDamageDurationModEnabled;
 	effectAndManaMapList * diceDamageDurationMod;
+	short int aoeEnabled;
+	effectAndManaMapList * aoe;
 	short int durationEnabled;
 	effectAndManaMapList * duration;
 	short int durationModEnabled;

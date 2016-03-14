@@ -51,6 +51,138 @@ char* strtok_r(
     return ret;
 }
 
+
+effectAndManaMapList * cloneEffectAndManaMapList(effectAndManaMapList * thisMap){
+	if(thisMap == NULL){
+		return NULL;
+	}
+
+	int i;
+	effectAndManaMapList * newMap = malloc(sizeof(thisMap));
+
+	newMap->size  = thisMap->size;
+	newMap->MAX_SIZE = thisMap->MAX_SIZE;
+	newMap->selectedIndex = thisMap->selectedIndex;
+	newMap->defaultStartingIndex = thisMap->defaultStartingIndex;
+
+	for(i = 0; i < thisMap->size; i++){
+		effectAndMana * newEffectAndMana = malloc(sizeof(effectAndMana));
+		newEffectAndMana->effectMagnitude = thisMap->effectAndManaArray[i]->effectMagnitude;
+		newEffectAndMana->manaCost = thisMap->effectAndManaArray[i]->manaCost;
+
+		newMap->effectAndManaArray[i] = newEffectAndMana;
+	}
+
+	return newMap;
+}
+
+ability * cloneAbility(ability * thisAbility){
+	ability * newAbility = malloc(sizeof(ability));
+
+	newAbility->type = thisAbility->type;
+	strcpy(newAbility->name, thisAbility->name);
+	strcpy(newAbility->description, thisAbility->description);
+	newAbility->totalManaCost = thisAbility->totalManaCost;
+
+	newAbility->rangeEnabled = thisAbility->rangeEnabled;
+	newAbility->range = cloneEffectAndManaMapList(thisAbility->range);
+
+	newAbility->targetedEnabled = thisAbility->targetedEnabled;
+	newAbility->targeted = cloneEffectAndManaMapList(thisAbility->targeted);
+
+	newAbility->extraAttackEnabled = thisAbility->extraAttackEnabled;
+	newAbility->extraAttack = cloneEffectAndManaMapList(thisAbility->extraAttack);
+
+	newAbility->diceDamageEnabled = thisAbility->diceDamageEnabled;
+	newAbility->diceDamage = cloneEffectAndManaMapList(thisAbility->diceDamage);
+
+	newAbility->damageEnabled = thisAbility->damageEnabled;
+	newAbility->damage = cloneEffectAndManaMapList(thisAbility->damage);
+
+	newAbility->diceDamageDurationEnabled = thisAbility->diceDamageDurationEnabled;
+	newAbility->diceDamageDuration = cloneEffectAndManaMapList(thisAbility->diceDamageDuration);
+
+	newAbility->diceDamageDurationModEnabled = thisAbility->diceDamageDurationModEnabled;
+	newAbility->diceDamageDurationMod = cloneEffectAndManaMapList(thisAbility->diceDamageDurationMod);
+
+	newAbility->aoeEnabled = thisAbility->aoeEnabled;
+	newAbility->aoe = cloneEffectAndManaMapList(thisAbility->aoe);
+
+	newAbility->durationEnabled = thisAbility->durationEnabled;
+	newAbility->duration = cloneEffectAndManaMapList(thisAbility->duration);
+
+	newAbility->durationModEnabled = thisAbility->durationModEnabled;
+	newAbility->durationMod = cloneEffectAndManaMapList(thisAbility->durationMod);
+
+	newAbility->STREnabled = thisAbility->STREnabled;
+	newAbility->STR = cloneEffectAndManaMapList(thisAbility->STR);
+
+	newAbility->DEXEnabled = thisAbility->DEXEnabled;
+	newAbility->DEX = cloneEffectAndManaMapList(thisAbility->DEX);
+
+	newAbility->CONEnabled = thisAbility->CONEnabled;
+	newAbility->CON = cloneEffectAndManaMapList(thisAbility->CON);
+
+	newAbility->WILLEnabled = thisAbility->WILLEnabled;
+	newAbility->WILL = cloneEffectAndManaMapList(thisAbility->WILL);
+
+	newAbility->INTEnabled = thisAbility->INTEnabled;
+	newAbility->INT = cloneEffectAndManaMapList(thisAbility->INT);
+
+	newAbility->WISEnabled = thisAbility->WISEnabled;
+	newAbility->WIS = cloneEffectAndManaMapList(thisAbility->WIS);
+
+	newAbility->CHREnabled = thisAbility->CHREnabled;
+	newAbility->CHR = cloneEffectAndManaMapList(thisAbility->CHR);
+
+	newAbility->LUCKEnabled = thisAbility->LUCKEnabled;
+	newAbility->LUCK = cloneEffectAndManaMapList(thisAbility->LUCK);
+
+	newAbility->acEnabled = thisAbility->acEnabled;
+	newAbility->ac = cloneEffectAndManaMapList(thisAbility->ac);
+
+	newAbility->damageModEnabled = thisAbility->damageModEnabled;
+	newAbility->damageMod = cloneEffectAndManaMapList(thisAbility->damageMod);
+
+	newAbility->mvmtEnabled = thisAbility->mvmtEnabled;
+	newAbility->mvmt = cloneEffectAndManaMapList(thisAbility->mvmt);
+
+	newAbility->hpEnabled = thisAbility->hpEnabled;
+	newAbility->hp = cloneEffectAndManaMapList(thisAbility->hp);
+
+	newAbility->totalHPEnabled = thisAbility->totalHPEnabled;
+	newAbility->totalHP = cloneEffectAndManaMapList(thisAbility->totalHP);
+
+	newAbility->totalManaEnabled = thisAbility->totalManaEnabled;
+	newAbility->totalMana = cloneEffectAndManaMapList(thisAbility->totalMana);
+
+	newAbility->bluntDREnabled = thisAbility->bluntDREnabled;
+	newAbility->bluntDR = cloneEffectAndManaMapList(thisAbility->bluntDR);
+
+	newAbility->chopDREnabled = thisAbility->chopDREnabled;
+	newAbility->chopDR = cloneEffectAndManaMapList(thisAbility->chopDR);
+
+	newAbility->pierceDREnabled = thisAbility->pierceDREnabled;
+	newAbility->pierceDR = cloneEffectAndManaMapList(thisAbility->pierceDR);
+
+	newAbility->slashDREnabled = thisAbility->slashDREnabled;
+	newAbility->slashDR = cloneEffectAndManaMapList(thisAbility->slashDR);
+
+	newAbility->earthDREnabled = thisAbility->earthDREnabled;
+	newAbility->earthDR = cloneEffectAndManaMapList(thisAbility->earthDR);
+
+	newAbility->fireDREnabled = thisAbility->fireDREnabled;
+	newAbility->fireDR = cloneEffectAndManaMapList(thisAbility->fireDR);
+
+	newAbility->waterDREnabled = thisAbility->waterDREnabled;
+	newAbility->waterDR = cloneEffectAndManaMapList(thisAbility->waterDR);
+
+	newAbility->lightningDREnabled = thisAbility->lightningDREnabled;
+	newAbility->lightningDR = cloneEffectAndManaMapList(thisAbility->lightningDR);
+
+	return newAbility;
+}
+
 int calculateManaCost(ability * thisAbility){
 	int sum = 0;
 	int dam = 0;
@@ -61,8 +193,13 @@ int calculateManaCost(ability * thisAbility){
 		sum += thisAbility->range->effectAndManaArray[thisAbility->range->selectedIndex]->manaCost;
 	}
 
-	if(thisAbility->targetedEnabled){
+	//only counts if diceDamagage enanbled
+	if(thisAbility->targetedEnabled && thisAbility->diceDamageEnabled){
 		sum += thisAbility->targeted->effectAndManaArray[thisAbility->targeted->selectedIndex]->manaCost;
+	}
+
+	if(thisAbility->extraAttack){
+		sum += thisAbility->extraAttack->effectAndManaArray[thisAbility->extraAttack->selectedIndex]->manaCost;
 	}
 
 	if(thisAbility->diceDamageEnabled){
@@ -178,6 +315,7 @@ int calculateManaCost(ability * thisAbility){
 
 	sum += ceil(DRSum/2);
 
+	//#####effects that multiply below#####
 	duration = 0;
 
 	if(thisAbility->durationEnabled){
@@ -190,6 +328,13 @@ int calculateManaCost(ability * thisAbility){
 
 	if(duration > 1){
 		sum  = sum * duration;
+	}
+
+	if(thisAbility->aoeEnabled){
+		int tmp = thisAbility->aoe->effectAndManaArray[thisAbility->aoe->selectedIndex]->manaCost;
+		if(tmp > 1){
+			sum = sum * tmp;
+		}
 	}
 
 	return sum;
@@ -291,6 +436,19 @@ ability * createAbilityFromLine(char line[2048]){
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->extraAttackEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->extraAttackEnabled){
+		newAbility->extraAttack = makeEffectManaMapList(value, mapSize, newAbility->name);
+	}else{
+		newAbility->extraAttack = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->diceDamageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -327,6 +485,19 @@ ability * createAbilityFromLine(char line[2048]){
 		newAbility->diceDamageDuration = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->diceDamageDuration = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->aoeEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->aoeEnabled){
+		newAbility->aoe = makeEffectManaMapList(value, mapSize, newAbility->name);
+	}else{
+		newAbility->aoe = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
