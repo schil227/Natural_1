@@ -108,6 +108,51 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 	return 0;
 }
 
+int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
+	switch(msg){
+	case WM_KEYDOWN:{
+		switch (LOWORD(wParam)) {
+			case 0x1B:{ //esc
+				toggleCreateMode();
+			}
+			case 0x0D: { //enter
+
+
+				break;
+			}
+			case 0x38:
+			case 0x68:{ //'8'
+
+				break;
+			}
+			case 0x32:
+			case 0x62:{ //'2' key
+
+				break;
+			}
+
+		}
+		case WM_TIMER:
+		{
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+			ReleaseDC(hwnd, hdc);
+		}
+			break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	}
+}
+
 int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
 	switch(msg){
 	case WM_KEYDOWN:{

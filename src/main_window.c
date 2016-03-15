@@ -183,6 +183,10 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawDialogBox(hdc, hdcBuffer,prc);
 	}
 
+	if(inAbilityCreateMode()){
+		drawAbilityCreateWindow(hdc, hdcBuffer, prc);
+	}
+
 //	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -205,6 +209,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initThisConsole(2010,0,0,300,200);
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
+		initAbilityCreationInstance(3500,RGB(255, 70, 255), 10, 10);
 		initalizeTheGlobalRegister();
 		initEventHandlers();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");
@@ -324,6 +329,11 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			{
 				cursorMode = 2;
 				initCursorMode = 1;
+			}
+			break;
+		case 0x43:
+			{
+				toggleCreateMode();
 			}
 			break;
 		case 0x57: //w key (wait)
@@ -446,13 +456,11 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-//	if(eventsToProcess()){
-//		processAllEvents(player, npcs, enemies, main_field);
-//	}else
-
 	if(shouldDrawDialogBox()){
 		return dialogLoop(hwnd, msg, wParam, lParam, player, npcs, enemies, main_field);
-	} else if (cursorMode) {
+	} else if(inAbilityCreateMode()){
+		return createAbilityLoop(hwnd, msg, wParam, lParam, player);
+	}else if (cursorMode) {
 		if (initCursorMode) {
 			viewShift->xShiftOld = viewShift->xShift;
 			viewShift->yShiftOld = viewShift->yShift;

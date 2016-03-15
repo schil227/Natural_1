@@ -51,6 +51,39 @@ char* strtok_r(
     return ret;
 }
 
+static abilityCreationInstance * thisAbilityCreationInstance;
+
+void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y){
+	thisAbilityCreationInstance = malloc(sizeof(abilityCreationInstance));
+	thisAbilityCreationInstance->inCreateMode = 0;
+	thisAbilityCreationInstance->abilityInsance = NULL;
+	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);;
+}
+
+void toggleCreateMode(){
+	thisAbilityCreationInstance->inCreateMode = (thisAbilityCreationInstance->inCreateMode + 1) % 2;
+}
+
+int inAbilityCreateMode(){
+	if(thisAbilityCreationInstance != NULL){
+		return thisAbilityCreationInstance->inCreateMode;
+	}else{
+		return 0;
+	}
+}
+
+void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+//	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->imageMask);
+//
+//	BitBlt(hdcBuffer, thisAbilityCreationInstance->creationWindow->x, thisAbilityCreationInstance->creationWindow->y, thisAbilityCreationInstance->creationWindow->width, thisAbilityCreationInstance->creationWindow->height, hdcMem, 0, 0, SRCAND);
+
+	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->image);
+
+	BitBlt(hdcBuffer, thisAbilityCreationInstance->creationWindow->x, thisAbilityCreationInstance->creationWindow->y, thisAbilityCreationInstance->creationWindow->width, thisAbilityCreationInstance->creationWindow->height, hdcMem, 0, 0, SRCCOPY);
+	DeleteDC(hdcMem);
+
+}
 
 effectAndManaMapList * cloneEffectAndManaMapList(effectAndManaMapList * thisMap){
 	if(thisMap == NULL){

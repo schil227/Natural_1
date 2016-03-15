@@ -9,6 +9,7 @@
 #define SRC_HEADERS_STRUCTS_ABILITIES_H_
 
 #include<stdlib.h>
+#include"../character_pub_methods.h"
 
 typedef struct{
 	short int effectMagnitude;
@@ -102,5 +103,11 @@ typedef struct{
 	short int lightningDREnabled;
 	effectAndManaMapList * lightningDR;
 } ability;
+
+typedef struct {
+	int inCreateMode;
+	character * creationWindow;
+	ability * abilityInsance;
+} abilityCreationInstance;
 
 #endif /* SRC_HEADERS_STRUCTS_ABILITIES_H_ */
