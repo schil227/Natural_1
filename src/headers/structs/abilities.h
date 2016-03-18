@@ -110,6 +110,10 @@ typedef struct {
 	int MAX_ABILITY_TEMPLATES;
 	int currentTemplateIndex;
 	character * creationWindow;
+	character * selector;
+	character * leftRightArrow;
+	character * scrollUpArrow;
+	character * scrollDownArrow;
 	ability * abilityTemplates[3];
 
 	ability * abilityInsance;

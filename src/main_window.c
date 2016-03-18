@@ -209,7 +209,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initThisConsole(2010,0,0,300,200);
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
-		initAbilityCreationInstance(3500,RGB(255, 70, 255), 10, 10, mapDirectory, "effects_template.txt");
+		initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
 		initalizeTheGlobalRegister();
 		initEventHandlers();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");

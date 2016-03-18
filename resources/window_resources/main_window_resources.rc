@@ -117,6 +117,8 @@ END
 3023 BITMAP DISCARDABLE "../images/mana_potion.bmp"
 
 3500 BITMAP DISCARDABLE "../images/ability_creation_bg.bmp"
+3501 BITMAP DISCARDABLE "../images/selector.bmp"
+3502 BITMAP DISCARDABLE "../images/left_right_arrows.bmp"
 
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

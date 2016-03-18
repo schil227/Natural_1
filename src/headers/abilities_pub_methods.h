@@ -11,5 +11,7 @@
 
 effectAndManaMapList * cloneEffectAndManaMapList(effectAndManaMapList * thisMap);
 ability * createAbilityFromLine(char line[2048]);
+ability * cloneAbility(ability * thisAbility);
+char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map);
 
 #endif /* SRC_HEADERS_ABILITIES_PUB_METHODS_H_ */

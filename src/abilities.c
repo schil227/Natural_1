@@ -61,10 +61,15 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 3;
 	thisAbilityCreationInstance->numAbilityTemplates = 0;
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
+	thisAbilityCreationInstance->selector = createCharacter(3501, rgb, x, y);
+	thisAbilityCreationInstance->leftRightArrow = createCharacter(3502, rgb, x, y);
+	thisAbilityCreationInstance->scrollUpArrow = createCharacter(3002, rgb, x, y);
+	thisAbilityCreationInstance->scrollDownArrow = createCharacter(3004, rgb, x, y);
+
 
 	loadTemplateAbilities(directory, effectsFileNam);
 
-	thisAbilityCreationInstance->abilityInsance = cloneEffectAndManaMapList(thisAbilityCreationInstance->abilityTemplates[0]) ;
+	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[0]) ;
 }
 
 void toggleCreateMode(){
@@ -83,22 +88,56 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	RECT textRect;
 	textRect.top = thisAbilityCreationInstance->creationWindow->y + 40;
-	textRect.left = thisAbilityCreationInstance->creationWindow->x + 10;
+	textRect.left = thisAbilityCreationInstance->creationWindow->x + 30;
 	textRect.bottom = textRect.top + 40;
-	textRect.right = textRect.left + 100;
+	textRect.right = textRect.left + 120;
 
 	//draw window
 	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->image);
 	BitBlt(hdcBuffer, thisAbilityCreationInstance->creationWindow->x, thisAbilityCreationInstance->creationWindow->y, thisAbilityCreationInstance->creationWindow->width, thisAbilityCreationInstance->creationWindow->height, hdcMem, 0, 0, SRCCOPY);
 
 	char tmpLine[128];
-	sprintf(tmpLine,"Type: %c", thisAbilityCreationInstance->abilityInsance->type);
 
-	DrawText(hdcBuffer, tmpLine, -1, &textRect, DT_SINGLELINE);
+	sprintf(tmpLine,"Type: %s", thisAbilityCreationInstance->abilityInsance->name);
+	DrawText(hdcBuffer, tmpLine, strlen(tmpLine), &textRect, DT_SINGLELINE);
+	tmpLine[0] = '\0';
+
+	moveRECTRight(&textRect, 120);
+	sprintf(tmpLine,"Mana Cost: %i", thisAbilityCreationInstance->abilityInsance->totalManaCost);
+	DrawText(hdcBuffer, tmpLine, strlen(tmpLine), &textRect, DT_SINGLELINE);
+	tmpLine[0] = '\0';
+	moveRECTRight(&textRect, -120);
 
 
+	if(thisAbilityCreationInstance->abilityInsance->rangeEnabled){
+		moveRECTDown(&textRect, 17);
+		char * tmpString = getEffectAndManaString("Range", thisAbilityCreationInstance->abilityInsance->range);
+		DrawText(hdcBuffer, tmpString, strlen(tmpString), &textRect, DT_SINGLELINE);
+
+		free(tmpString);
+	}
 	DeleteDC(hdcMem);
 
+}
+
+char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map){
+	char * toReturn = malloc(sizeof(char) * 32);
+	int effect = map->effectAndManaArray[map->selectedIndex]->effectMagnitude;
+	int mana = map->effectAndManaArray[map->selectedIndex]->manaCost;
+
+	sprintf(toReturn, "%s: %d, cost: %d", propertyName, effect, mana);
+
+	return toReturn;
+}
+
+void moveRECTDown(RECT * thisRect, int distance){
+	thisRect->top += distance;
+	thisRect->bottom = thisRect->bottom + distance;
+}
+
+void moveRECTRight(RECT * thisRect, int distance){
+	thisRect->left += distance;
+	thisRect->right = thisRect->right + distance;
 }
 
 int calculateManaCost(ability * thisAbility){
@@ -259,6 +298,7 @@ int calculateManaCost(ability * thisAbility){
 }
 
 void addEffectManaMaptoMapList(effectAndMana * map, effectAndManaMapList * mapList, char * effectName){
+
 	if(mapList->size != mapList->MAX_SIZE){
 		mapList->effectAndManaArray[mapList->size] = map;
 		mapList->size++;
@@ -270,7 +310,7 @@ void addEffectManaMaptoMapList(effectAndMana * map, effectAndManaMapList * mapLi
 }
 
 effectAndManaMapList * makeEffectManaMapList(char * line, int startingIndex, char * effectName){
-	int i, effect, mana;
+	short int effect, mana;
 	char * number = strtok(line,",");
 	effectAndManaMapList *  mapList = malloc(sizeof(effectAndManaMapList));
 
@@ -295,7 +335,6 @@ effectAndManaMapList * makeEffectManaMapList(char * line, int startingIndex, cha
 		map->manaCost = mana;
 
 		addEffectManaMaptoMapList(map, mapList, effectName);
-
 	}
 
 	return mapList;
@@ -773,14 +812,13 @@ ability * createAbilityFromLine(char line[2048]){
 	return newAbility;
 }
 
-
 effectAndManaMapList * cloneEffectAndManaMapList(effectAndManaMapList * thisMap){
 	if(thisMap == NULL){
 		return NULL;
 	}
 
 	int i;
-	effectAndManaMapList * newMap = malloc(sizeof(thisMap));
+	effectAndManaMapList * newMap = malloc(sizeof(effectAndManaMapList));
 
 	newMap->size  = thisMap->size;
 	newMap->MAX_SIZE = thisMap->MAX_SIZE;
