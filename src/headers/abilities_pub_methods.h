@@ -9,5 +9,7 @@
 #define SRC_HEADERS_ABILITIES_PUB_METHODS_H_
 #include "./structs/abilities.h"
 
+effectAndManaMapList * cloneEffectAndManaMapList(effectAndManaMapList * thisMap);
+ability * createAbilityFromLine(char line[2048]);
 
 #endif /* SRC_HEADERS_ABILITIES_PUB_METHODS_H_ */

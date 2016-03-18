@@ -106,7 +106,12 @@ typedef struct{
 
 typedef struct {
 	int inCreateMode;
+	int numAbilityTemplates;
+	int MAX_ABILITY_TEMPLATES;
+	int currentTemplateIndex;
 	character * creationWindow;
+	ability * abilityTemplates[3];
+
 	ability * abilityInsance;
 } abilityCreationInstance;
 

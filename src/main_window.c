@@ -209,7 +209,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initThisConsole(2010,0,0,300,200);
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
-		initAbilityCreationInstance(3500,RGB(255, 70, 255), 10, 10);
+		initAbilityCreationInstance(3500,RGB(255, 70, 255), 10, 10, mapDirectory, "effects_template.txt");
 		initalizeTheGlobalRegister();
 		initEventHandlers();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");
@@ -219,7 +219,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadIndividualsToRegistry(mapDirectory,"individuals.txt");
 		loadItemsToRegistry(mapDirectory, "items.txt");
 		loadEventsToRegistry(mapDirectory, "events.txt");
-		loadEffectsToRegistry(mapDirectory, "effects_template.txt");
+//		loadEffectsToRegistry(mapDirectory, "effects_template.txt");
 
 		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
