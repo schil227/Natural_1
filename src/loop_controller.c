@@ -122,15 +122,24 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 			}
 			case 0x38:
 			case 0x68:{ //'8'
-
+				selectPreviousEffect();
 				break;
 			}
 			case 0x32:
 			case 0x62:{ //'2' key
-
+				selectNextEffect();
 				break;
 			}
-
+			case 0x36:
+			case 0x66:{ //'8'
+				interpretRightAbilityCreation();
+				break;
+			}
+			case 0x34:
+			case 0x64:{ //'2' key
+				interpretLeftAbilityCreation();
+				break;
+			}
 		}
 		case WM_TIMER:
 		{

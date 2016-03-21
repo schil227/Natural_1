@@ -57,9 +57,16 @@ static abilityCreationInstance * thisAbilityCreationInstance;
 void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* directory, char* effectsFileNam){
 	thisAbilityCreationInstance = malloc(sizeof(abilityCreationInstance));
 	thisAbilityCreationInstance->inCreateMode = 0;
+
 	thisAbilityCreationInstance->currentTemplateIndex = 0;
 	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 3;
 	thisAbilityCreationInstance->numAbilityTemplates = 0;
+
+	thisAbilityCreationInstance->effectCurrentIndex = 0;
+	thisAbilityCreationInstance->effectStartingIndex = 0;
+	thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW = 15;
+	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
+
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
 	thisAbilityCreationInstance->selector = createCharacter(3501, rgb, x, y);
 	thisAbilityCreationInstance->leftRightArrow = createCharacter(3502, rgb, x, y);
@@ -85,12 +92,13 @@ int inAbilityCreateMode(){
 }
 
 void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
+	int effectIndex;
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	RECT textRect;
 	textRect.top = thisAbilityCreationInstance->creationWindow->y + 40;
 	textRect.left = thisAbilityCreationInstance->creationWindow->x + 30;
 	textRect.bottom = textRect.top + 40;
-	textRect.right = textRect.left + 120;
+	textRect.right = textRect.left + 150;
 
 	//draw window
 	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->image);
@@ -108,16 +116,213 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	tmpLine[0] = '\0';
 	moveRECTRight(&textRect, -120);
 
-
-	if(thisAbilityCreationInstance->abilityInsance->rangeEnabled){
-		moveRECTDown(&textRect, 17);
-		char * tmpString = getEffectAndManaString("Range", thisAbilityCreationInstance->abilityInsance->range);
-		DrawText(hdcBuffer, tmpString, strlen(tmpString), &textRect, DT_SINGLELINE);
-
-		free(tmpString);
+	//scroll up arrow
+	if(thisAbilityCreationInstance->effectStartingIndex > 0){
+		drawUnboundCharacterAbsolute(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
+				thisAbilityCreationInstance->creationWindow->y + 57, thisAbilityCreationInstance->scrollUpArrow);
 	}
+
+	//scroll down arrow
+	if(thisAbilityCreationInstance->effectEndingIndex < thisAbilityCreationInstance->abilityInsance->numEnabledEffects){
+		drawUnboundCharacterAbsolute(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
+				thisAbilityCreationInstance->creationWindow->y + 77 + 17 * thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW,
+				thisAbilityCreationInstance->scrollDownArrow);
+	}
+
+	moveRECTDown(&textRect, 20);
+
+	effectIndex = 0;
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->rangeEnabled,
+			 hdc, hdcBuffer, &textRect, "Range", thisAbilityCreationInstance->abilityInsance->range);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->targetedEnabled,
+			 hdc, hdcBuffer, &textRect, "Target", thisAbilityCreationInstance->abilityInsance->targeted);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->extraAttackEnabled,
+			 hdc, hdcBuffer, &textRect, "Extra Attack", thisAbilityCreationInstance->abilityInsance->extraAttack);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageEnabled,
+			 hdc, hdcBuffer, &textRect, "Dice Damage", thisAbilityCreationInstance->abilityInsance->diceDamage);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageEnabled,
+			 hdc, hdcBuffer, &textRect, "damage", thisAbilityCreationInstance->abilityInsance->damage);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageDurationEnabled,
+			 hdc, hdcBuffer, &textRect, "Dice Damage Duration", thisAbilityCreationInstance->abilityInsance->diceDamageDuration);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageDurationModEnabled,
+			 hdc, hdcBuffer, &textRect, "diceDamageDurationMod", thisAbilityCreationInstance->abilityInsance->diceDamageDurationMod);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeEnabled,
+				 hdc, hdcBuffer, &textRect, "aoe", thisAbilityCreationInstance->abilityInsance->aoe);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationEnabled,
+				 hdc, hdcBuffer, &textRect, "duration", thisAbilityCreationInstance->abilityInsance->duration);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationModEnabled,
+				 hdc, hdcBuffer, &textRect, "durationMod", thisAbilityCreationInstance->abilityInsance->durationMod);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->STREnabled,
+				 hdc, hdcBuffer, &textRect, "STR", thisAbilityCreationInstance->abilityInsance->STR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->DEXEnabled,
+				 hdc, hdcBuffer, &textRect, "DEX", thisAbilityCreationInstance->abilityInsance->DEX);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CONEnabled,
+				 hdc, hdcBuffer, &textRect, "CON", thisAbilityCreationInstance->abilityInsance->CON);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WILLEnabled,
+				 hdc, hdcBuffer, &textRect, "WILL", thisAbilityCreationInstance->abilityInsance->WILL);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->INTEnabled,
+				 hdc, hdcBuffer, &textRect, "INT", thisAbilityCreationInstance->abilityInsance->INT);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WISEnabled,
+				 hdc, hdcBuffer, &textRect, "WIS", thisAbilityCreationInstance->abilityInsance->WIS);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CHREnabled,
+				 hdc, hdcBuffer, &textRect, "CHR", thisAbilityCreationInstance->abilityInsance->CHR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->LUCKEnabled,
+				 hdc, hdcBuffer, &textRect, "LUCK", thisAbilityCreationInstance->abilityInsance->LUCK);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->acEnabled,
+				 hdc, hdcBuffer, &textRect, "ac", thisAbilityCreationInstance->abilityInsance->ac);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageModEnabled,
+				 hdc, hdcBuffer, &textRect, "damageMod", thisAbilityCreationInstance->abilityInsance->damageMod);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->mvmtEnabled,
+				 hdc, hdcBuffer, &textRect, "mvmt", thisAbilityCreationInstance->abilityInsance->mvmt);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->hpEnabled,
+				 hdc, hdcBuffer, &textRect, "hp", thisAbilityCreationInstance->abilityInsance->hp);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalHPEnabled,
+				 hdc, hdcBuffer, &textRect, "totalHP", thisAbilityCreationInstance->abilityInsance->totalHP);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalManaEnabled,
+				 hdc, hdcBuffer, &textRect, "totalMana", thisAbilityCreationInstance->abilityInsance->totalMana);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->bluntDREnabled,
+				 hdc, hdcBuffer, &textRect, "bluntDR", thisAbilityCreationInstance->abilityInsance->bluntDR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->chopDREnabled,
+				 hdc, hdcBuffer, &textRect, "chopDR", thisAbilityCreationInstance->abilityInsance->chopDR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->pierceDREnabled,
+				 hdc, hdcBuffer, &textRect, "pierceDR", thisAbilityCreationInstance->abilityInsance->pierceDR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->slashDREnabled,
+				 hdc, hdcBuffer, &textRect, "slashDR", thisAbilityCreationInstance->abilityInsance->slashDR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->earthDREnabled,
+				 hdc, hdcBuffer, &textRect, "earthDR", thisAbilityCreationInstance->abilityInsance->earthDR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->fireDREnabled,
+				 hdc, hdcBuffer, &textRect, "fireDR", thisAbilityCreationInstance->abilityInsance->fireDR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->waterDREnabled,
+				 hdc, hdcBuffer, &textRect, "waterDR", thisAbilityCreationInstance->abilityInsance->waterDR);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
+				 hdc, hdcBuffer, &textRect, "lightningDR", thisAbilityCreationInstance->abilityInsance->lightningDR);
+
 	DeleteDC(hdcMem);
 
+}
+
+void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, char * fieldName, effectAndManaMapList * mapList){
+	if(isEnabled){
+		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex){
+			drawEffectMapList(hdcBuffer, textRect, fieldName, mapList);
+			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
+				thisAbilityCreationInstance->selectedMapList = mapList;
+				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top,thisAbilityCreationInstance->selector, NULL);
+				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left + 150,textRect->top,thisAbilityCreationInstance->leftRightArrow, NULL);
+			}
+
+		}
+		(*effectIndex)++;
+	}
+}
+
+void drawEffectMapList(HDC hdcBuffer, RECT * textRect, char * fieldName, effectAndManaMapList * mapList){
+		moveRECTDown(textRect, 17);
+		char * tmpString = getEffectAndManaString(fieldName, mapList);
+
+		if(mapList->selectedIndex > mapList->defaultStartingIndex){
+			SetTextColor(hdcBuffer, RGB(0, 162, 255));
+		}else if (mapList->selectedIndex < mapList->defaultStartingIndex){
+			SetTextColor(hdcBuffer, RGB(255, 0, 0));
+		}
+
+		DrawText(hdcBuffer, tmpString, strlen(tmpString), textRect, DT_SINGLELINE);
+
+		SetTextColor(hdcBuffer, RGB(255, 200, 0));
+
+		free(tmpString);
+}
+
+void selectNextEffect(){
+	if(thisAbilityCreationInstance->effectCurrentIndex + 1 == thisAbilityCreationInstance->effectEndingIndex &&
+			thisAbilityCreationInstance->effectEndingIndex  < thisAbilityCreationInstance->abilityInsance->numEnabledEffects){
+		shiftEffectListUp();
+	} else if(thisAbilityCreationInstance->effectCurrentIndex + 1 < thisAbilityCreationInstance->effectEndingIndex){
+		thisAbilityCreationInstance->effectCurrentIndex++;
+	}
+}
+
+void selectPreviousEffect(){
+	if(thisAbilityCreationInstance->effectCurrentIndex == thisAbilityCreationInstance->effectStartingIndex &&
+			thisAbilityCreationInstance->effectStartingIndex  > 0){
+		shiftEffectListDown();
+	} else if(thisAbilityCreationInstance->effectCurrentIndex > thisAbilityCreationInstance->effectStartingIndex){
+		thisAbilityCreationInstance->effectCurrentIndex--;
+	}
+}
+
+void shiftEffectListUp(){
+	thisAbilityCreationInstance->effectStartingIndex++;
+	thisAbilityCreationInstance->effectEndingIndex++;
+	thisAbilityCreationInstance->effectCurrentIndex++;
+}
+
+void shiftEffectListDown(){
+	thisAbilityCreationInstance->effectStartingIndex--;
+	thisAbilityCreationInstance->effectEndingIndex--;
+	thisAbilityCreationInstance->effectCurrentIndex--;
+}
+
+void interpretRightAbilityCreation(){
+	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
+		increaseEffect();
+	}
+}
+
+void interpretLeftAbilityCreation(){
+	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
+		decreaseEffect();
+	}
+}
+
+void increaseEffect(){
+	effectAndManaMapList * tmp = thisAbilityCreationInstance->selectedMapList;
+	if(tmp->selectedIndex + 1 < tmp->size){
+		tmp->selectedIndex++;
+	}
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+}
+
+void decreaseEffect(){
+	effectAndManaMapList * tmp = thisAbilityCreationInstance->selectedMapList;
+	if(tmp->selectedIndex > 0){
+		tmp->selectedIndex--;
+	}
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 }
 
 char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map){
@@ -237,7 +442,7 @@ int calculateManaCost(ability * thisAbility){
 		sum += thisAbility->totalMana->effectAndManaArray[thisAbility->totalMana->selectedIndex]->manaCost;
 	}
 
-	//DR: ceil( sum(<allDRMagnitudes>)/2 )
+	//DR: ceil( sum(<allDRMagnitudes>)/2.0 )
 	if(thisAbility->bluntDREnabled){
 		DRSum += thisAbility->bluntDR->effectAndManaArray[thisAbility->bluntDR->selectedIndex]->effectMagnitude;
 	}
@@ -270,7 +475,7 @@ int calculateManaCost(ability * thisAbility){
 		DRSum += thisAbility->lightningDR->effectAndManaArray[thisAbility->lightningDR->selectedIndex]->effectMagnitude;
 	}
 
-	sum += ceil(DRSum/2);
+	sum += ceil(DRSum/2.0);
 
 	//#####effects that multiply below#####
 	duration = 0;
@@ -314,7 +519,7 @@ effectAndManaMapList * makeEffectManaMapList(char * line, int startingIndex, cha
 	char * number = strtok(line,",");
 	effectAndManaMapList *  mapList = malloc(sizeof(effectAndManaMapList));
 
-	mapList->defaultStartingIndex = 0;
+	mapList->defaultStartingIndex = startingIndex;
 	mapList->size = 0;
 	mapList->selectedIndex = startingIndex;
 	mapList->MAX_SIZE = 32;
@@ -366,6 +571,7 @@ ability * createAbilityFromLine(char line[2048]){
 	char * strtok_save_pointer;
 	int mapSize;
 	ability * newAbility = malloc(sizeof(ability));
+	newAbility->numEnabledEffects = 0;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	newAbility->ID = atoi(value);
@@ -381,6 +587,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageTypeEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->damageType = *value;
 	}else{
 		newAbility->damageType = NULL;
@@ -394,6 +601,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->rangeEnabled){
+		newAbility->numEnabledEffects++;
 		char *tmpStr = strdup(value);
 		newAbility->range = makeEffectManaMapList(tmpStr, mapSize, newAbility->name);
 		free(tmpStr);
@@ -409,6 +617,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->targetedEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->targeted = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->targeted = NULL;
@@ -422,6 +631,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->extraAttackEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->extraAttack = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->extraAttack = NULL;
@@ -435,6 +645,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceDamageEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->diceDamage = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->diceDamage = NULL;
@@ -448,6 +659,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->damage = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->damage = NULL;
@@ -461,6 +673,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceDamageDurationEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->diceDamageDuration = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->diceDamageDuration = NULL;
@@ -474,6 +687,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->aoeEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->aoe = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->aoe = NULL;
@@ -487,6 +701,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceDamageDurationModEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->diceDamageDurationMod = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->diceDamageDurationMod = NULL;
@@ -500,6 +715,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->durationEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->duration = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->duration = NULL;
@@ -513,6 +729,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->durationModEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->durationMod = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->durationMod = NULL;
@@ -526,6 +743,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->STREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->STR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->STR = NULL;
@@ -539,6 +757,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->DEXEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->DEX = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->DEX = NULL;
@@ -552,6 +771,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->CONEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->CON = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->CON = NULL;
@@ -565,6 +785,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->WILLEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->WILL = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->WILL = NULL;
@@ -578,6 +799,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->INTEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->INT = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->INT = NULL;
@@ -591,6 +813,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->WISEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->WIS = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->WIS = NULL;
@@ -604,6 +827,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->CHREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->CHR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->CHR = NULL;
@@ -617,6 +841,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->LUCKEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->LUCK = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->LUCK = NULL;
@@ -630,6 +855,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->acEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->ac = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->ac = NULL;
@@ -643,6 +869,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageModEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->damageMod = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->damageMod = NULL;
@@ -656,6 +883,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->mvmtEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->mvmt = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->mvmt = NULL;
@@ -669,6 +897,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->hpEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->hp = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->hp = NULL;
@@ -682,6 +911,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->totalHPEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->totalHP = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->totalHP = NULL;
@@ -695,6 +925,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->totalManaEnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->totalMana = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->totalMana = NULL;
@@ -708,6 +939,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->bluntDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->bluntDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->bluntDR = NULL;
@@ -721,6 +953,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->chopDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->chopDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->chopDR = NULL;
@@ -734,6 +967,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->pierceDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->pierceDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->pierceDR = NULL;
@@ -747,6 +981,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->slashDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->slashDR  = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->slashDR = NULL;
@@ -760,6 +995,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->earthDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->earthDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->earthDR = NULL;
@@ -773,6 +1009,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->fireDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->fireDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->fireDR = NULL;
@@ -786,6 +1023,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->waterDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->waterDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->waterDR = NULL;
@@ -799,6 +1037,7 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->lightningDREnabled){
+		newAbility->numEnabledEffects++;
 		newAbility->lightningDR = makeEffectManaMapList(value, mapSize, newAbility->name);
 	}else{
 		newAbility->lightningDR = NULL;
@@ -843,6 +1082,7 @@ ability * cloneAbility(ability * thisAbility){
 	strcpy(newAbility->name, thisAbility->name);
 	strcpy(newAbility->description, thisAbility->description);
 	newAbility->totalManaCost = thisAbility->totalManaCost;
+	newAbility->numEnabledEffects = thisAbility->numEnabledEffects;
 
 	newAbility->rangeEnabled = thisAbility->rangeEnabled;
 	newAbility->range = cloneEffectAndManaMapList(thisAbility->range);

@@ -31,6 +31,7 @@ typedef struct{
 	char name[32];
 	char description[128];
 	int totalManaCost;
+	int numEnabledEffects;
 
 	short int damageTypeEnabled;
 	char damageType;
@@ -106,9 +107,17 @@ typedef struct{
 
 typedef struct {
 	int inCreateMode;
+
 	int numAbilityTemplates;
 	int MAX_ABILITY_TEMPLATES;
 	int currentTemplateIndex;
+
+	int effectStartingIndex;
+	int effectCurrentIndex;
+	int effectEndingIndex;
+	int MAX_FIELDS_ON_WINDOW;
+	effectAndManaMapList * selectedMapList;
+
 	character * creationWindow;
 	character * selector;
 	character * leftRightArrow;

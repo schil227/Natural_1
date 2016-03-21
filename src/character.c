@@ -116,6 +116,18 @@ void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * this
 	DeleteDC(hdcMem);
 }
 
+void drawUnboundCharacterAbsolute(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, thisCharacter->imageMask);
+
+	BitBlt(hdcBuffer, x, y, thisCharacter->width , thisCharacter->height, hdcMem, 0, 0, SRCAND);
+
+	SelectObject(hdcMem, thisCharacter->image);
+
+	BitBlt(hdcBuffer, x, y, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	DeleteDC(hdcMem);
+}
+
 void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, shiftData * viewShift){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCharacter->imageMask);
