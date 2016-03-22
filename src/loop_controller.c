@@ -137,7 +137,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 			}
 			case 0x34:
 			case 0x64:{ //'2' key
-				interpretLeftAbilityCreation();
+				interpretLeftAbilityCreation(player);
 				break;
 			}
 		}

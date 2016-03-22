@@ -9,7 +9,12 @@
 #define SRC_HEADERS_STRUCTS_ABILITIES_H_
 
 #include<stdlib.h>
-#include"../character_pub_methods.h"
+#include"../individual_pub_methods.h"
+
+typedef enum {RANGE, TARGETED, EXTRA_ATTACK, DICE_DAMAGE, DAMAGE, DICE_DAMAGE_DURATION,
+	DICE_DAMAGE_DURATION_MOD, AOE, DURATION, DURATION_MOD, STR, DEX, CON, WILL, INTEL, WIS, CHR, LUCK,
+	AC, DAMAGE_MOD, MVMT, HP, TOTAL_HP, TOTAL_MANA, BLUNT_DR, CHOP_DR, PIERCE_DR, SLASH_DR, EARTH_DR,
+	FIRE_DR, WATER_DR, LIGHTNING_DR } effect_types;
 
 typedef struct{
 	short int effectMagnitude;
@@ -116,7 +121,8 @@ typedef struct {
 	int effectCurrentIndex;
 	int effectEndingIndex;
 	int MAX_FIELDS_ON_WINDOW;
-	effectAndManaMapList * selectedMapList;
+
+	effect_types selectedType;
 
 	character * creationWindow;
 	character * selector;

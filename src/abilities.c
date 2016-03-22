@@ -134,111 +134,111 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	effectIndex = 0;
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->rangeEnabled,
-			 hdc, hdcBuffer, &textRect, "Range", thisAbilityCreationInstance->abilityInsance->range);
+			 hdc, hdcBuffer, &textRect, RANGE, "Range", thisAbilityCreationInstance->abilityInsance->range);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->targetedEnabled,
-			 hdc, hdcBuffer, &textRect, "Target", thisAbilityCreationInstance->abilityInsance->targeted);
+			 hdc, hdcBuffer, &textRect, TARGETED, "Target", thisAbilityCreationInstance->abilityInsance->targeted);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->extraAttackEnabled,
-			 hdc, hdcBuffer, &textRect, "Extra Attack", thisAbilityCreationInstance->abilityInsance->extraAttack);
+			 hdc, hdcBuffer, &textRect, EXTRA_ATTACK, "Extra Attack", thisAbilityCreationInstance->abilityInsance->extraAttack);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageEnabled,
-			 hdc, hdcBuffer, &textRect, "Dice Damage", thisAbilityCreationInstance->abilityInsance->diceDamage);
+			 hdc, hdcBuffer, &textRect, DICE_DAMAGE, "Dice Damage", thisAbilityCreationInstance->abilityInsance->diceDamage);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageEnabled,
-			 hdc, hdcBuffer, &textRect, "damage", thisAbilityCreationInstance->abilityInsance->damage);
+			 hdc, hdcBuffer, &textRect, DAMAGE, "damage", thisAbilityCreationInstance->abilityInsance->damage);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageDurationEnabled,
-			 hdc, hdcBuffer, &textRect, "Dice Damage Duration", thisAbilityCreationInstance->abilityInsance->diceDamageDuration);
+			 hdc, hdcBuffer, &textRect, DICE_DAMAGE_DURATION, "Dice Damage Duration", thisAbilityCreationInstance->abilityInsance->diceDamageDuration);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageDurationModEnabled,
-			 hdc, hdcBuffer, &textRect, "diceDamageDurationMod", thisAbilityCreationInstance->abilityInsance->diceDamageDurationMod);
+			 hdc, hdcBuffer, &textRect, DICE_DAMAGE_DURATION_MOD, "diceDamageDurationMod", thisAbilityCreationInstance->abilityInsance->diceDamageDurationMod);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeEnabled,
-				 hdc, hdcBuffer, &textRect, "aoe", thisAbilityCreationInstance->abilityInsance->aoe);
+				 hdc, hdcBuffer, &textRect, AOE, "aoe", thisAbilityCreationInstance->abilityInsance->aoe);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationEnabled,
-				 hdc, hdcBuffer, &textRect, "duration", thisAbilityCreationInstance->abilityInsance->duration);
+				 hdc, hdcBuffer, &textRect, DURATION, "duration", thisAbilityCreationInstance->abilityInsance->duration);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationModEnabled,
-				 hdc, hdcBuffer, &textRect, "durationMod", thisAbilityCreationInstance->abilityInsance->durationMod);
+				 hdc, hdcBuffer, &textRect, DURATION_MOD, "durationMod", thisAbilityCreationInstance->abilityInsance->durationMod);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->STREnabled,
-				 hdc, hdcBuffer, &textRect, "STR", thisAbilityCreationInstance->abilityInsance->STR);
+				 hdc, hdcBuffer, &textRect, STR, "STR", thisAbilityCreationInstance->abilityInsance->STR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->DEXEnabled,
-				 hdc, hdcBuffer, &textRect, "DEX", thisAbilityCreationInstance->abilityInsance->DEX);
+				 hdc, hdcBuffer, &textRect, DEX, "DEX", thisAbilityCreationInstance->abilityInsance->DEX);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CONEnabled,
-				 hdc, hdcBuffer, &textRect, "CON", thisAbilityCreationInstance->abilityInsance->CON);
+				 hdc, hdcBuffer, &textRect, CON, "CON", thisAbilityCreationInstance->abilityInsance->CON);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WILLEnabled,
-				 hdc, hdcBuffer, &textRect, "WILL", thisAbilityCreationInstance->abilityInsance->WILL);
+				 hdc, hdcBuffer, &textRect, WILL, "WILL", thisAbilityCreationInstance->abilityInsance->WILL);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->INTEnabled,
-				 hdc, hdcBuffer, &textRect, "INT", thisAbilityCreationInstance->abilityInsance->INT);
+				 hdc, hdcBuffer, &textRect, INTEL, "INT", thisAbilityCreationInstance->abilityInsance->INT);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WISEnabled,
-				 hdc, hdcBuffer, &textRect, "WIS", thisAbilityCreationInstance->abilityInsance->WIS);
+				 hdc, hdcBuffer, &textRect, WIS, "WIS", thisAbilityCreationInstance->abilityInsance->WIS);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CHREnabled,
-				 hdc, hdcBuffer, &textRect, "CHR", thisAbilityCreationInstance->abilityInsance->CHR);
+				 hdc, hdcBuffer, &textRect, CHR, "CHR", thisAbilityCreationInstance->abilityInsance->CHR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->LUCKEnabled,
-				 hdc, hdcBuffer, &textRect, "LUCK", thisAbilityCreationInstance->abilityInsance->LUCK);
+				 hdc, hdcBuffer, &textRect, LUCK, "LUCK", thisAbilityCreationInstance->abilityInsance->LUCK);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->acEnabled,
-				 hdc, hdcBuffer, &textRect, "ac", thisAbilityCreationInstance->abilityInsance->ac);
+				 hdc, hdcBuffer, &textRect, AC, "ac", thisAbilityCreationInstance->abilityInsance->ac);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageModEnabled,
-				 hdc, hdcBuffer, &textRect, "damageMod", thisAbilityCreationInstance->abilityInsance->damageMod);
+				 hdc, hdcBuffer, &textRect, DAMAGE_MOD, "damageMod", thisAbilityCreationInstance->abilityInsance->damageMod);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->mvmtEnabled,
-				 hdc, hdcBuffer, &textRect, "mvmt", thisAbilityCreationInstance->abilityInsance->mvmt);
+				 hdc, hdcBuffer, &textRect, MVMT, "mvmt", thisAbilityCreationInstance->abilityInsance->mvmt);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->hpEnabled,
-				 hdc, hdcBuffer, &textRect, "hp", thisAbilityCreationInstance->abilityInsance->hp);
+				 hdc, hdcBuffer, &textRect, HP, "hp", thisAbilityCreationInstance->abilityInsance->hp);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalHPEnabled,
-				 hdc, hdcBuffer, &textRect, "totalHP", thisAbilityCreationInstance->abilityInsance->totalHP);
+				 hdc, hdcBuffer, &textRect, TOTAL_HP, "totalHP", thisAbilityCreationInstance->abilityInsance->totalHP);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalManaEnabled,
-				 hdc, hdcBuffer, &textRect, "totalMana", thisAbilityCreationInstance->abilityInsance->totalMana);
+				 hdc, hdcBuffer, &textRect, TOTAL_MANA, "totalMana", thisAbilityCreationInstance->abilityInsance->totalMana);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->bluntDREnabled,
-				 hdc, hdcBuffer, &textRect, "bluntDR", thisAbilityCreationInstance->abilityInsance->bluntDR);
+				 hdc, hdcBuffer, &textRect, BLUNT_DR, "bluntDR", thisAbilityCreationInstance->abilityInsance->bluntDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->chopDREnabled,
-				 hdc, hdcBuffer, &textRect, "chopDR", thisAbilityCreationInstance->abilityInsance->chopDR);
+				 hdc, hdcBuffer, &textRect, CHOP_DR, "chopDR", thisAbilityCreationInstance->abilityInsance->chopDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->pierceDREnabled,
-				 hdc, hdcBuffer, &textRect, "pierceDR", thisAbilityCreationInstance->abilityInsance->pierceDR);
+				 hdc, hdcBuffer, &textRect, PIERCE_DR, "pierceDR", thisAbilityCreationInstance->abilityInsance->pierceDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->slashDREnabled,
-				 hdc, hdcBuffer, &textRect, "slashDR", thisAbilityCreationInstance->abilityInsance->slashDR);
+				 hdc, hdcBuffer, &textRect, SLASH_DR, "slashDR", thisAbilityCreationInstance->abilityInsance->slashDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->earthDREnabled,
-				 hdc, hdcBuffer, &textRect, "earthDR", thisAbilityCreationInstance->abilityInsance->earthDR);
+				 hdc, hdcBuffer, &textRect, EARTH_DR, "earthDR", thisAbilityCreationInstance->abilityInsance->earthDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->fireDREnabled,
-				 hdc, hdcBuffer, &textRect, "fireDR", thisAbilityCreationInstance->abilityInsance->fireDR);
+				 hdc, hdcBuffer, &textRect, FIRE_DR, "fireDR", thisAbilityCreationInstance->abilityInsance->fireDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->waterDREnabled,
-				 hdc, hdcBuffer, &textRect, "waterDR", thisAbilityCreationInstance->abilityInsance->waterDR);
+				 hdc, hdcBuffer, &textRect, WATER_DR, "waterDR", thisAbilityCreationInstance->abilityInsance->waterDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
-				 hdc, hdcBuffer, &textRect, "lightningDR", thisAbilityCreationInstance->abilityInsance->lightningDR);
+				 hdc, hdcBuffer, &textRect, LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->lightningDR);
 
 	DeleteDC(hdcMem);
 
 }
 
-void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, char * fieldName, effectAndManaMapList * mapList){
+void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, effect_types type, char * fieldName, effectAndManaMapList * mapList){
 	if(isEnabled){
 		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex){
 			drawEffectMapList(hdcBuffer, textRect, fieldName, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
-				thisAbilityCreationInstance->selectedMapList = mapList;
+				thisAbilityCreationInstance->selectedType = type;
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top,thisAbilityCreationInstance->selector, NULL);
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left + 150,textRect->top,thisAbilityCreationInstance->leftRightArrow, NULL);
 			}
@@ -263,6 +263,16 @@ void drawEffectMapList(HDC hdcBuffer, RECT * textRect, char * fieldName, effectA
 		SetTextColor(hdcBuffer, RGB(255, 200, 0));
 
 		free(tmpString);
+}
+
+char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map){
+	char * toReturn = malloc(sizeof(char) * 32);
+	int effect = map->effectAndManaArray[map->selectedIndex]->effectMagnitude;
+	int mana = map->effectAndManaArray[map->selectedIndex]->manaCost;
+
+	sprintf(toReturn, "%s: %d, cost: %d", propertyName, effect, mana);
+
+	return toReturn;
 }
 
 void selectNextEffect(){
@@ -297,42 +307,138 @@ void shiftEffectListDown(){
 
 void interpretRightAbilityCreation(){
 	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
-		increaseEffect();
+		effectAndManaMapList * tmpMap = getMapListFromEffectType();
+		increaseEffect(tmpMap);
 	}
 }
 
-void interpretLeftAbilityCreation(){
+void interpretLeftAbilityCreation(individual * player){
 	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
-		decreaseEffect();
+		effectAndManaMapList * tmpMap = getMapListFromEffectType();
+		decreaseEffect(tmpMap, player);
 	}
 }
 
-void increaseEffect(){
-	effectAndManaMapList * tmp = thisAbilityCreationInstance->selectedMapList;
-	if(tmp->selectedIndex + 1 < tmp->size){
-		tmp->selectedIndex++;
+effectAndManaMapList * getMapListFromEffectType(){
+	switch(thisAbilityCreationInstance->selectedType){
+	case RANGE:
+		return thisAbilityCreationInstance->abilityInsance->range;
+	case TARGETED:
+		return thisAbilityCreationInstance->abilityInsance->targeted;
+	case EXTRA_ATTACK:
+		return thisAbilityCreationInstance->abilityInsance->extraAttack;
+	case DICE_DAMAGE:
+		return thisAbilityCreationInstance->abilityInsance->diceDamage;
+	case DAMAGE:
+		return thisAbilityCreationInstance->abilityInsance->damage;
+	case DICE_DAMAGE_DURATION:
+		return thisAbilityCreationInstance->abilityInsance->diceDamageDuration;
+	case DICE_DAMAGE_DURATION_MOD:
+		return thisAbilityCreationInstance->abilityInsance->diceDamageDurationMod;
+	case AOE:
+		return thisAbilityCreationInstance->abilityInsance->aoe;
+	case DURATION:
+		return thisAbilityCreationInstance->abilityInsance->duration;
+	case DURATION_MOD:
+		return thisAbilityCreationInstance->abilityInsance->durationMod;
+	case STR:
+		return thisAbilityCreationInstance->abilityInsance->STR;
+	case DEX:
+		return thisAbilityCreationInstance->abilityInsance->DEX;
+	case CON:
+		return thisAbilityCreationInstance->abilityInsance->CON;
+	case WILL:
+		return thisAbilityCreationInstance->abilityInsance->WILL;
+	case INTEL:
+		return thisAbilityCreationInstance->abilityInsance->INT;
+	case WIS:
+		return thisAbilityCreationInstance->abilityInsance->WIS;
+	case CHR:
+		return thisAbilityCreationInstance->abilityInsance->CHR;
+	case LUCK:
+		return thisAbilityCreationInstance->abilityInsance->LUCK;
+	case AC:
+		return thisAbilityCreationInstance->abilityInsance->ac;
+	case DAMAGE_MOD:
+		return thisAbilityCreationInstance->abilityInsance->damageMod;
+	case MVMT:
+		return thisAbilityCreationInstance->abilityInsance->mvmt;
+	case HP:
+		return thisAbilityCreationInstance->abilityInsance->hp;
+	case TOTAL_HP:
+		return thisAbilityCreationInstance->abilityInsance->totalHP;
+	case TOTAL_MANA:
+		return thisAbilityCreationInstance->abilityInsance->totalMana;
+	case BLUNT_DR:
+		return thisAbilityCreationInstance->abilityInsance->bluntDR;
+	case CHOP_DR:
+		return thisAbilityCreationInstance->abilityInsance->chopDR;
+	case PIERCE_DR:
+		return thisAbilityCreationInstance->abilityInsance->pierceDR;
+	case SLASH_DR:
+		return thisAbilityCreationInstance->abilityInsance->slashDR;
+	case EARTH_DR:
+		return thisAbilityCreationInstance->abilityInsance->earthDR;
+	case FIRE_DR:
+		return thisAbilityCreationInstance->abilityInsance->fireDR;
+	case WATER_DR:
+		return thisAbilityCreationInstance->abilityInsance->waterDR;
+	case LIGHTNING_DR:
+		return thisAbilityCreationInstance->abilityInsance->lightningDR;
+	}
+
+	return NULL;
+}
+
+int canDecreaseEffect(effectAndManaMapList * selectedMap, individual * player){
+	switch(thisAbilityCreationInstance->selectedType){
+		case RANGE:
+			if(player->range + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+				return 1;
+			}else{
+				return 0;
+			}
+		break;
+		case MVMT:
+			if(player->mvmt + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+				return 1;
+			}else{
+				return 0;
+			}
+		break;
+		case TOTAL_HP:
+			if(player->totalHP + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+				return 1;
+			}else{
+				return 0;
+			}
+		break;
+		case TOTAL_MANA:
+			if(player->totalMana + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+				return 1;
+			}else{
+				return 0;
+			}
+		break;
+	}
+
+	return 1;
+}
+
+void increaseEffect(effectAndManaMapList * selectedMap){
+	if(selectedMap->selectedIndex + 1 < selectedMap->size){
+		selectedMap->selectedIndex++;
 	}
 
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 }
 
-void decreaseEffect(){
-	effectAndManaMapList * tmp = thisAbilityCreationInstance->selectedMapList;
-	if(tmp->selectedIndex > 0){
-		tmp->selectedIndex--;
+void decreaseEffect(effectAndManaMapList * selectedMap, individual * player){
+	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, player)){
+		selectedMap->selectedIndex--;
 	}
 
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
-}
-
-char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map){
-	char * toReturn = malloc(sizeof(char) * 32);
-	int effect = map->effectAndManaArray[map->selectedIndex]->effectMagnitude;
-	int mana = map->effectAndManaArray[map->selectedIndex]->manaCost;
-
-	sprintf(toReturn, "%s: %d, cost: %d", propertyName, effect, mana);
-
-	return toReturn;
 }
 
 void moveRECTDown(RECT * thisRect, int distance){
@@ -344,6 +450,7 @@ void moveRECTRight(RECT * thisRect, int distance){
 	thisRect->left += distance;
 	thisRect->right = thisRect->right + distance;
 }
+
 
 int calculateManaCost(ability * thisAbility){
 	int sum = 0;
