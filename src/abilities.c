@@ -57,6 +57,7 @@ static abilityCreationInstance * thisAbilityCreationInstance;
 void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* directory, char* effectsFileNam){
 	thisAbilityCreationInstance = malloc(sizeof(abilityCreationInstance));
 	thisAbilityCreationInstance->inCreateMode = 0;
+	thisAbilityCreationInstance->templateIndex = 0;
 
 	thisAbilityCreationInstance->currentTemplateIndex = 0;
 	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 3;
@@ -76,7 +77,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 
 	loadTemplateAbilities(directory, effectsFileNam);
 
-	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[0]) ;
+	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
 }
 
 void toggleCreateMode(){
@@ -89,6 +90,17 @@ int inAbilityCreateMode(){
 	}else{
 		return 0;
 	}
+}
+
+void changeAbilityTemplate(int shift){
+	int newIndex = thisAbilityCreationInstance->templateIndex + shift;
+	newIndex = newIndex < 0 ? thisAbilityCreationInstance->numAbilityTemplates : newIndex % thisAbilityCreationInstance->numAbilityTemplates;
+
+	thisAbilityCreationInstance->templateIndex = newIndex;
+
+	free(thisAbilityCreationInstance->abilityInsance);
+
+	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
 }
 
 void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
@@ -109,6 +121,10 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	sprintf(tmpLine,"Type: %s", thisAbilityCreationInstance->abilityInsance->name);
 	DrawText(hdcBuffer, tmpLine, strlen(tmpLine), &textRect, DT_SINGLELINE);
 	tmpLine[0] = '\0';
+
+	if(thisAbilityCreationInstance->effectCurrentIndex == -1){
+		drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect.left - 25,textRect.top,thisAbilityCreationInstance->selector);
+	}
 
 	moveRECTRight(&textRect, 120);
 	sprintf(tmpLine,"Mana Cost: %i", thisAbilityCreationInstance->abilityInsance->totalManaCost);
@@ -239,8 +255,8 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 			drawEffectMapList(hdcBuffer, textRect, fieldName, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				thisAbilityCreationInstance->selectedType = type;
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top,thisAbilityCreationInstance->selector, NULL);
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left + 150,textRect->top,thisAbilityCreationInstance->leftRightArrow, NULL);
+				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top,thisAbilityCreationInstance->selector);
+				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left + 150,textRect->top,thisAbilityCreationInstance->leftRightArrow);
 			}
 
 		}
@@ -288,7 +304,7 @@ void selectPreviousEffect(){
 	if(thisAbilityCreationInstance->effectCurrentIndex == thisAbilityCreationInstance->effectStartingIndex &&
 			thisAbilityCreationInstance->effectStartingIndex  > 0){
 		shiftEffectListDown();
-	} else if(thisAbilityCreationInstance->effectCurrentIndex > thisAbilityCreationInstance->effectStartingIndex){
+	} else if(thisAbilityCreationInstance->effectCurrentIndex > -1){
 		thisAbilityCreationInstance->effectCurrentIndex--;
 	}
 }
@@ -309,6 +325,8 @@ void interpretRightAbilityCreation(){
 	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
 		effectAndManaMapList * tmpMap = getMapListFromEffectType();
 		increaseEffect(tmpMap);
+	}else if(thisAbilityCreationInstance->effectCurrentIndex == -1){
+		changeAbilityTemplate(1);
 	}
 }
 
@@ -316,6 +334,8 @@ void interpretLeftAbilityCreation(individual * player){
 	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
 		effectAndManaMapList * tmpMap = getMapListFromEffectType();
 		decreaseEffect(tmpMap, player);
+	}else if(thisAbilityCreationInstance->effectCurrentIndex == -1){
+		changeAbilityTemplate(-1);
 	}
 }
 

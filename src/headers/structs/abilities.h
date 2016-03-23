@@ -112,6 +112,7 @@ typedef struct{
 
 typedef struct {
 	int inCreateMode;
+	int templateIndex;
 
 	int numAbilityTemplates;
 	int MAX_ABILITY_TEMPLATES;
