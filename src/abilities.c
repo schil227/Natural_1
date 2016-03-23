@@ -94,7 +94,7 @@ int inAbilityCreateMode(){
 
 void changeAbilityTemplate(int shift){
 	int newIndex = thisAbilityCreationInstance->templateIndex + shift;
-	newIndex = newIndex < 0 ? thisAbilityCreationInstance->numAbilityTemplates : newIndex % thisAbilityCreationInstance->numAbilityTemplates;
+	newIndex = newIndex < 0 ? thisAbilityCreationInstance->numAbilityTemplates : newIndex % (thisAbilityCreationInstance->numAbilityTemplates);
 
 	thisAbilityCreationInstance->templateIndex = newIndex;
 
@@ -686,9 +686,9 @@ void loadTemplateAbilities(char* directory, char* effectsFileName){
 		}
 
 		thisAbilityCreationInstance->abilityTemplates[i] = createAbilityFromLine(line);
-		thisAbilityCreationInstance->numAbilityTemplates = i;
 		i++;
 	}
+	thisAbilityCreationInstance->numAbilityTemplates = i;
 
 	fclose(FP);
 	free(fullFileName);
