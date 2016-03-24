@@ -9,7 +9,7 @@
 #define SRC_HEADERS_STRUCTS_ABILITIES_H_
 
 #include<stdlib.h>
-#include"../individual_pub_methods.h"
+#include"../character_pub_methods.h"
 
 typedef enum {RANGE, TARGETED, EXTRA_ATTACK, DICE_DAMAGE, DAMAGE, DICE_DAMAGE_DURATION,
 	DICE_DAMAGE_DURATION_MOD, AOE, DURATION, DURATION_MOD, STR, DEX, CON, WILL, INTEL, WIS, CHR, LUCK,
@@ -36,6 +36,7 @@ typedef struct{
 	char name[32];
 	char description[128];
 	int totalManaCost;
+	int level;
 	int numEnabledEffects;
 
 	short int damageTypeEnabled;

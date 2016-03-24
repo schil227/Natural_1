@@ -330,10 +330,10 @@ void interpretRightAbilityCreation(){
 	}
 }
 
-void interpretLeftAbilityCreation(individual * player){
+void interpretLeftAbilityCreation(int range, int mvmt, int totalHP, int totalMana){
 	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
 		effectAndManaMapList * tmpMap = getMapListFromEffectType();
-		decreaseEffect(tmpMap, player);
+		decreaseEffect(tmpMap, range, mvmt, totalHP, totalMana);
 	}else if(thisAbilityCreationInstance->effectCurrentIndex == -1){
 		changeAbilityTemplate(-1);
 	}
@@ -410,31 +410,31 @@ effectAndManaMapList * getMapListFromEffectType(){
 	return NULL;
 }
 
-int canDecreaseEffect(effectAndManaMapList * selectedMap, individual * player){
+int canDecreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, int totalHP, int totalMana){
 	switch(thisAbilityCreationInstance->selectedType){
 		case RANGE:
-			if(player->range + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+			if(range + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
 				return 1;
 			}else{
 				return 0;
 			}
 		break;
 		case MVMT:
-			if(player->mvmt + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+			if(mvmt + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
 				return 1;
 			}else{
 				return 0;
 			}
 		break;
 		case TOTAL_HP:
-			if(player->totalHP + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+			if(totalHP + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
 				return 1;
 			}else{
 				return 0;
 			}
 		break;
 		case TOTAL_MANA:
-			if(player->totalMana + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+			if(totalMana + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
 				return 1;
 			}else{
 				return 0;
@@ -453,12 +453,26 @@ void increaseEffect(effectAndManaMapList * selectedMap){
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 }
 
-void decreaseEffect(effectAndManaMapList * selectedMap, individual * player){
-	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, player)){
+void decreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, int totalHP, int totalMana){
+	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, range, mvmt, totalHP, totalMana)){
 		selectedMap->selectedIndex--;
 	}
 
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+}
+
+int canCreateAbility(){
+	if(thisAbilityCreationInstance->abilityInsance->type == 'p' && thisAbilityCreationInstance->abilityInsance->totalManaCost == 0){
+		return 1;
+	}else if((thisAbilityCreationInstance->abilityInsance->type == 'd' || thisAbilityCreationInstance->abilityInsance->type == 't') && thisAbilityCreationInstance->abilityInsance->totalManaCost > 0){
+		return 1;
+	}
+
+	return 0;
+}
+
+ability * getNewAbility(){
+	return thisAbilityCreationInstance->abilityInsance;
 }
 
 void moveRECTDown(RECT * thisRect, int distance){
@@ -473,10 +487,12 @@ void moveRECTRight(RECT * thisRect, int distance){
 
 
 int calculateManaCost(ability * thisAbility){
-	int sum = 0;
+	int sum = -1; //Ability = -1
 	int dam = 0;
 	int duration = 0;
 	int DRSum = 0;
+
+	sum += -1*thisAbility->level;
 
 	if(thisAbility->rangeEnabled){
 		sum += thisAbility->range->effectAndManaArray[thisAbility->range->selectedIndex]->manaCost;
@@ -708,6 +724,9 @@ ability * createAbilityFromLine(char line[2048]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(newAbility->name , value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->level = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->damageTypeEnabled = atoi(value);
@@ -1209,7 +1228,11 @@ ability * cloneAbility(ability * thisAbility){
 	strcpy(newAbility->name, thisAbility->name);
 	strcpy(newAbility->description, thisAbility->description);
 	newAbility->totalManaCost = thisAbility->totalManaCost;
+	newAbility->level = thisAbility->level;
 	newAbility->numEnabledEffects = thisAbility->numEnabledEffects;
+
+	newAbility->damageTypeEnabled = thisAbility->damageTypeEnabled;
+	newAbility->damageType = thisAbility->damageType;
 
 	newAbility->rangeEnabled = thisAbility->rangeEnabled;
 	newAbility->range = cloneEffectAndManaMapList(thisAbility->range);

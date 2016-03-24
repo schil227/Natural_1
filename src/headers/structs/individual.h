@@ -9,6 +9,8 @@
 #define SRC_HEADERS_STRUCTS_INDIVIDUAL_H_
 //#include"../character_pub_methods.h"
 #include"../item_pub_methods.h"
+#include"../abilities_pub_methods.h"
+
 #include<math.h>
 
 typedef struct{
@@ -23,8 +25,15 @@ typedef struct{
 
 typedef struct{
 	int activeItemsTotal;
+	int MAX_ABILITIES;
 	activeItem * activeItemArr[40];
 } activeItemList;
+
+typedef struct{
+	int numAbilities;
+	int MAX_ABILITIES;
+	ability * abilitiesList[64];
+}abilityList;
 
 typedef struct {
 	character* playerCharacter;
@@ -33,6 +42,8 @@ typedef struct {
 
 	inventory * backpack;
 	activeItemList * activeItems;
+
+	abilityList * abilities;
 
 	short int STR;
 	short int DEX;

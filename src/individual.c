@@ -28,6 +28,11 @@ individual *initIndividual(){
 		toReturn->backpack->inventoryArr[i] = NULL;
 		toReturn->activeItems->activeItemArr[i] = NULL;
 	}
+
+	toReturn->abilities = malloc(sizeof(abilityList));
+	toReturn->abilities->numAbilities = 0;
+	toReturn->abilities->MAX_ABILITIES = 64;
+
 	return toReturn;
 }
 
@@ -529,6 +534,15 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 	}
 	return 0;
 
+}
+
+void addAbilityToIndividual(individual * thisIndividual, ability * newAbility){
+	if(thisIndividual->abilities->numAbilities == thisIndividual->abilities->MAX_ABILITIES){
+		cwrite("!! CANNOT ADD MORE ABILITIES !!");
+	}
+
+	thisIndividual->abilities->abilitiesList[thisIndividual->abilities->numAbilities] = newAbility;
+	thisIndividual->abilities->numAbilities++;
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

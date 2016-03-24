@@ -137,7 +137,14 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 			}
 			case 0x34:
 			case 0x64:{ //'2' key
-				interpretLeftAbilityCreation(player);
+				interpretLeftAbilityCreation(player->range, player->mvmt, player->totalHP, player->totalMana);
+				break;
+			}
+			case 0x43:{
+				if(canCreateAbility()){
+					addAbilityToIndividual(player, getNewAbility());
+					changeAbilityTemplate(0);
+				}
 				break;
 			}
 		}
@@ -160,6 +167,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	}
+	return 0;
 }
 
 int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
@@ -210,6 +218,7 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	}
+	return 0;
 }
 
 int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
