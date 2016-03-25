@@ -94,7 +94,7 @@ int inAbilityCreateMode(){
 
 void changeAbilityTemplate(int shift){
 	int newIndex = thisAbilityCreationInstance->templateIndex + shift;
-	newIndex = newIndex < 0 ? thisAbilityCreationInstance->numAbilityTemplates : newIndex % (thisAbilityCreationInstance->numAbilityTemplates);
+	newIndex = newIndex < 0 ? thisAbilityCreationInstance->numAbilityTemplates -1 : newIndex % (thisAbilityCreationInstance->numAbilityTemplates);
 
 	thisAbilityCreationInstance->templateIndex = newIndex;
 
@@ -491,37 +491,25 @@ int calculateManaCost(ability * thisAbility){
 	int dam = 0;
 	int duration = 0;
 	int DRSum = 0;
-
+	int aoeRange = 0;
+	int hasEffect = 0;
+	int dummyInt = 0;
 	sum += -1*thisAbility->level;
 
-	if(thisAbility->rangeEnabled){
-		sum += thisAbility->range->effectAndManaArray[thisAbility->range->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &dummyInt, thisAbility->rangeEnabled, thisAbility->range);
 
 	//only counts if diceDamagage enanbled
-	if(thisAbility->targetedEnabled && thisAbility->diceDamageEnabled){
-		sum += thisAbility->targeted->effectAndManaArray[thisAbility->targeted->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &dummyInt, (thisAbility->targetedEnabled * thisAbility->diceDamageEnabled), thisAbility->targeted);
 
-	if(thisAbility->extraAttack){
-		sum += thisAbility->extraAttack->effectAndManaArray[thisAbility->extraAttack->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->extraAttackEnabled, thisAbility->extraAttack);
 
-	if(thisAbility->diceDamageEnabled){
-		dam += thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&dam, &hasEffect, thisAbility->diceDamageEnabled, thisAbility->diceDamage);
 
-	if(thisAbility->damageEnabled){
-		dam += thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&dam, &hasEffect, thisAbility->damageEnabled, thisAbility->damage);
 
-	if(thisAbility->diceDamageDurationEnabled){
-		duration += thisAbility->diceDamageDuration->effectAndManaArray[thisAbility->diceDamageDuration->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&duration, &dummyInt, thisAbility->diceDamageDurationEnabled, thisAbility->diceDamageDuration);
 
-	if(thisAbility->diceDamageDurationModEnabled){
-		duration += thisAbility->diceDamageDurationMod->effectAndManaArray[thisAbility->diceDamageDurationMod->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&duration, &dummyInt, thisAbility->diceDamageDurationModEnabled, thisAbility->diceDamageDurationMod);
 
 	if(duration > 0){
 	sum += dam*duration;
@@ -529,120 +517,103 @@ int calculateManaCost(ability * thisAbility){
 		sum += dam;
 	}
 
-	if(thisAbility->STREnabled){
-		sum += thisAbility->STR->effectAndManaArray[thisAbility->STR->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->STREnabled, thisAbility->STR);
 
-	if(thisAbility->DEXEnabled){
-		sum += thisAbility->DEX->effectAndManaArray[thisAbility->DEX->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->DEXEnabled, thisAbility->DEX);
 
-	if(thisAbility->CONEnabled){
-		sum += thisAbility->CON->effectAndManaArray[thisAbility->CON->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->CONEnabled, thisAbility->CON);
 
-	if(thisAbility->WILLEnabled){
-		sum += thisAbility->WILL->effectAndManaArray[thisAbility->WILL->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->WILLEnabled, thisAbility->WILL);
 
-	if(thisAbility->INTEnabled){
-		sum += thisAbility->INT->effectAndManaArray[thisAbility->INT->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->INTEnabled, thisAbility->INT);
 
-	if(thisAbility->WISEnabled){
-		sum += thisAbility->WIS->effectAndManaArray[thisAbility->WIS->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->WISEnabled, thisAbility->WIS);
 
-	if(thisAbility->CHREnabled){
-		sum += thisAbility->CHR->effectAndManaArray[thisAbility->CHR->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->CHREnabled, thisAbility->CHR);
 
-	if(thisAbility->LUCKEnabled){
-		sum += thisAbility->LUCK->effectAndManaArray[thisAbility->LUCK->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->LUCKEnabled, thisAbility->LUCK);
 
-	if(thisAbility->acEnabled){
-		sum += thisAbility->ac->effectAndManaArray[thisAbility->ac->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->acEnabled, thisAbility->ac);
 
-	if(thisAbility->damageModEnabled){
-		sum += thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->damageModEnabled, thisAbility->damageMod);
 
-	if(thisAbility->mvmtEnabled){
-		sum += thisAbility->mvmt->effectAndManaArray[thisAbility->mvmt->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->mvmtEnabled, thisAbility->mvmt);
 
-	if(thisAbility->hpEnabled){
-		sum += thisAbility->hp->effectAndManaArray[thisAbility->hp->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->hpEnabled, thisAbility->hp);
 
-	if(thisAbility->totalHPEnabled){
-		sum += thisAbility->totalHP->effectAndManaArray[thisAbility->totalHP->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->totalHPEnabled, thisAbility->totalHP);
 
-	if(thisAbility->totalManaEnabled){
-		sum += thisAbility->totalMana->effectAndManaArray[thisAbility->totalMana->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&sum, &hasEffect, thisAbility->totalManaEnabled, thisAbility->totalMana);
 
 	//DR: ceil( sum(<allDRMagnitudes>)/2.0 )
-	if(thisAbility->bluntDREnabled){
-		DRSum += thisAbility->bluntDR->effectAndManaArray[thisAbility->bluntDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->bluntDREnabled, thisAbility->bluntDR);
 
-	if(thisAbility->chopDREnabled){
-		DRSum += thisAbility->chopDR->effectAndManaArray[thisAbility->chopDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->chopDREnabled, thisAbility->chopDR);
 
-	if(thisAbility->pierceDREnabled){
-		DRSum += thisAbility->pierceDR->effectAndManaArray[thisAbility->pierceDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->pierceDREnabled, thisAbility->pierceDR);
 
-	if(thisAbility->slashDREnabled){
-		DRSum += thisAbility->slashDR->effectAndManaArray[thisAbility->slashDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->slashDREnabled, thisAbility->slashDR);
 
-	if(thisAbility->earthDREnabled){
-		DRSum += thisAbility->earthDR->effectAndManaArray[thisAbility->earthDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->earthDREnabled, thisAbility->earthDR);
 
-	if(thisAbility->fireDREnabled){
-		DRSum += thisAbility->fireDR->effectAndManaArray[thisAbility->fireDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->fireDREnabled, thisAbility->fireDR);
 
-	if(thisAbility->waterDREnabled){
-		DRSum += thisAbility->waterDR->effectAndManaArray[thisAbility->waterDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->waterDREnabled, thisAbility->waterDR);
 
-	if(thisAbility->lightningDREnabled){
-		DRSum += thisAbility->lightningDR->effectAndManaArray[thisAbility->lightningDR->selectedIndex]->effectMagnitude;
-	}
+	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->lightningDREnabled, thisAbility->lightningDR);
 
 	sum += ceil(DRSum/2.0);
+
+	//if a meaningful effect has not be modified, return initial mana cost
+//	if(!hasEffect){
+//		return (-1 - thisAbility->level);
+//	}
 
 	//#####effects that multiply below#####
 	duration = 0;
 
-	if(thisAbility->durationEnabled){
-		duration = thisAbility->duration->effectAndManaArray[thisAbility->duration->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&duration, &dummyInt, thisAbility->durationEnabled, thisAbility->duration);
 
-	if(thisAbility->durationModEnabled){
-		duration = thisAbility->durationMod->effectAndManaArray[thisAbility->durationMod->selectedIndex]->manaCost;
-	}
+	updateElementSummation(&duration, &dummyInt, thisAbility->durationModEnabled, thisAbility->durationMod);
 
 	if(duration > 1){
 		sum  = sum * duration;
 	}
 
-	if(thisAbility->aoeEnabled){
-		int tmp = thisAbility->aoe->effectAndManaArray[thisAbility->aoe->selectedIndex]->manaCost;
-		if(tmp > 1){
-			sum = sum * tmp;
-		}
+	updateElementSummation(&aoeRange, &dummyInt, thisAbility->aoeEnabled, thisAbility->aoe);
+
+	if (aoeRange > 1) {
+		sum = sum * aoeRange;
+	}
+
+	//if no meaningful effect has been made, return initial cost
+	if(thisAbility->type != 'p' && !hasEffect){
+		return -1 - thisAbility->level;
 	}
 
 	return sum;
+}
+
+void updateElementSummation(int * sum, int * hasEffect, int isEnabled, effectAndManaMapList * mapList){
+	if(isEnabled){
+		int value = mapList->effectAndManaArray[mapList->selectedIndex]->manaCost;
+		if(value != 0){
+			*hasEffect = 1;
+		}
+
+		*(sum) += value;
+	}
+}
+
+void updateElementDRSummation(int * sum, int * hasEffect, int isEnabled, effectAndManaMapList * mapList){
+	if(isEnabled){
+		int value = mapList->effectAndManaArray[mapList->selectedIndex]->effectMagnitude;
+		if(value != 0){
+			*hasEffect = 1;
+		}
+
+		*(sum) += value;
+	}
 }
 
 void addEffectManaMaptoMapList(effectAndMana * map, effectAndManaMapList * mapList, char * effectName){
