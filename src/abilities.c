@@ -57,6 +57,7 @@ static abilityCreationInstance * thisAbilityCreationInstance;
 void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* directory, char* effectsFileNam){
 	thisAbilityCreationInstance = malloc(sizeof(abilityCreationInstance));
 	thisAbilityCreationInstance->inCreateMode = 0;
+	thisAbilityCreationInstance->inNameMode = 0;
 	thisAbilityCreationInstance->templateIndex = 0;
 
 	thisAbilityCreationInstance->currentTemplateIndex = 0;
@@ -67,13 +68,18 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->effectStartingIndex = 0;
 	thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW = 15;
 	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
+	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
+
+	thisAbilityCreationInstance->currentCharIndex = 'A';
+	thisAbilityCreationInstance->activeNameIndex = 0;
+	strcpy(thisAbilityCreationInstance->newAbilityName, "");
 
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
+	thisAbilityCreationInstance->nameWindow = createCharacter(3503, rgb, x+30, y+30);
 	thisAbilityCreationInstance->selector = createCharacter(3501, rgb, x, y);
 	thisAbilityCreationInstance->leftRightArrow = createCharacter(3502, rgb, x, y);
 	thisAbilityCreationInstance->scrollUpArrow = createCharacter(3002, rgb, x, y);
 	thisAbilityCreationInstance->scrollDownArrow = createCharacter(3004, rgb, x, y);
-
 
 	loadTemplateAbilities(directory, effectsFileNam);
 
@@ -84,9 +90,21 @@ void toggleCreateMode(){
 	thisAbilityCreationInstance->inCreateMode = (thisAbilityCreationInstance->inCreateMode + 1) % 2;
 }
 
+void toggleNameMode(){
+	thisAbilityCreationInstance->inNameMode = (thisAbilityCreationInstance->inNameMode + 1) % 2;
+}
+
 int inAbilityCreateMode(){
 	if(thisAbilityCreationInstance != NULL){
 		return thisAbilityCreationInstance->inCreateMode;
+	}else{
+		return 0;
+	}
+}
+
+int inAbilityNameMode(){
+	if(thisAbilityCreationInstance != NULL){
+		return thisAbilityCreationInstance->inNameMode;
 	}else{
 		return 0;
 	}
@@ -98,7 +116,9 @@ void changeAbilityTemplate(int shift){
 
 	thisAbilityCreationInstance->templateIndex = newIndex;
 
-	free(thisAbilityCreationInstance->abilityInsance);
+	if(thisAbilityCreationInstance->mode == DEFAULT_ABILITY){
+		free(thisAbilityCreationInstance->abilityInsance);
+	}
 
 	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
 }
@@ -110,15 +130,15 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	textRect.top = thisAbilityCreationInstance->creationWindow->y + 40;
 	textRect.left = thisAbilityCreationInstance->creationWindow->x + 30;
 	textRect.bottom = textRect.top + 40;
-	textRect.right = textRect.left + 150;
+	textRect.right = textRect.left + 213;
 
-	//draw window
+	//draw create window
 	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->image);
 	BitBlt(hdcBuffer, thisAbilityCreationInstance->creationWindow->x, thisAbilityCreationInstance->creationWindow->y, thisAbilityCreationInstance->creationWindow->width, thisAbilityCreationInstance->creationWindow->height, hdcMem, 0, 0, SRCCOPY);
 
 	char tmpLine[128];
 
-	sprintf(tmpLine,"Type: %s", thisAbilityCreationInstance->abilityInsance->name);
+	sprintf(tmpLine,"Type: %s", thisAbilityCreationInstance->abilityInsance->typeName);
 	DrawText(hdcBuffer, tmpLine, strlen(tmpLine), &textRect, DT_SINGLELINE);
 	tmpLine[0] = '\0';
 
@@ -126,11 +146,11 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 		drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect.left - 25,textRect.top,thisAbilityCreationInstance->selector);
 	}
 
-	moveRECTRight(&textRect, 120);
+	moveRECTRight(&textRect, 150);
 	sprintf(tmpLine,"Mana Cost: %i", thisAbilityCreationInstance->abilityInsance->totalManaCost);
 	DrawText(hdcBuffer, tmpLine, strlen(tmpLine), &textRect, DT_SINGLELINE);
 	tmpLine[0] = '\0';
-	moveRECTRight(&textRect, -120);
+	moveRECTRight(&textRect, -150);
 
 	//scroll up arrow
 	if(thisAbilityCreationInstance->effectStartingIndex > 0){
@@ -245,6 +265,15 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
 				 hdc, hdcBuffer, &textRect, LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->lightningDR);
 
+	//draw name window
+	if(thisAbilityCreationInstance->inNameMode){
+		SelectObject(hdcMem, thisAbilityCreationInstance->nameWindow->image);
+		BitBlt(hdcBuffer, thisAbilityCreationInstance->nameWindow->x, thisAbilityCreationInstance->nameWindow->y, thisAbilityCreationInstance->nameWindow->width, thisAbilityCreationInstance->nameWindow->height, hdcMem, 0, 0, SRCCOPY);
+		textRect.top = thisAbilityCreationInstance->nameWindow->y + 30;
+		textRect.left = thisAbilityCreationInstance->nameWindow->x + 20;
+		DrawText(hdcBuffer, thisAbilityCreationInstance->newAbilityName, strlen(thisAbilityCreationInstance->newAbilityName), &textRect, DT_SINGLELINE);
+	}
+
 	DeleteDC(hdcMem);
 
 }
@@ -255,8 +284,8 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 			drawEffectMapList(hdcBuffer, textRect, fieldName, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				thisAbilityCreationInstance->selectedType = type;
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top,thisAbilityCreationInstance->selector);
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left + 150,textRect->top,thisAbilityCreationInstance->leftRightArrow);
+				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
+				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->right + 1,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
 
 		}
@@ -267,10 +296,10 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 void drawEffectMapList(HDC hdcBuffer, RECT * textRect, char * fieldName, effectAndManaMapList * mapList){
 		moveRECTDown(textRect, 17);
 		char * tmpString = getEffectAndManaString(fieldName, mapList);
-
-		if(mapList->selectedIndex > mapList->defaultStartingIndex){
+		int manaCost = mapList->effectAndManaArray[mapList->selectedIndex]->manaCost;
+		if(manaCost > 0){
 			SetTextColor(hdcBuffer, RGB(0, 162, 255));
-		}else if (mapList->selectedIndex < mapList->defaultStartingIndex){
+		}else if (manaCost < 0){
 			SetTextColor(hdcBuffer, RGB(255, 0, 0));
 		}
 
@@ -485,6 +514,61 @@ void moveRECTRight(RECT * thisRect, int distance){
 	thisRect->right = thisRect->right + distance;
 }
 
+void setAbilityName(){
+	strcpy(thisAbilityCreationInstance->abilityInsance->name, thisAbilityCreationInstance->newAbilityName);
+}
+
+int nameNotEmpty(){
+	if(strcmp(thisAbilityCreationInstance->newAbilityName,"")){
+		return 0;
+	}
+	return 1;
+}
+
+void selectLetterUp(){
+	if(thisAbilityCreationInstance->currentCharIndex == '\0'){
+		thisAbilityCreationInstance->currentCharIndex = 'A';
+	}else if(thisAbilityCreationInstance->currentCharIndex == 'A'){
+		thisAbilityCreationInstance->currentCharIndex = 'z';
+	}else{
+		thisAbilityCreationInstance->currentCharIndex--;
+	}
+
+
+	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex] = (char)thisAbilityCreationInstance->currentCharIndex;
+	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex+1] = '\0';
+}
+
+void selectLetterDown(){
+	if(thisAbilityCreationInstance->currentCharIndex == '\0'){
+		thisAbilityCreationInstance->currentCharIndex = 'A';
+ 	}else if (thisAbilityCreationInstance->currentCharIndex == 'z') { //'z'
+		thisAbilityCreationInstance->currentCharIndex = 'A';
+	} else {
+		thisAbilityCreationInstance->currentCharIndex++;
+	}
+
+	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex] = (char)thisAbilityCreationInstance->currentCharIndex;
+	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex+1] = '\0';
+}
+
+void selectNextLetter(){
+	if(thisAbilityCreationInstance->activeNameIndex < 14){
+		thisAbilityCreationInstance->activeNameIndex++;
+	//	if(thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex] == '\0'){
+			thisAbilityCreationInstance->currentCharIndex = '\0';
+	//	}else{
+	//		thisAbilityCreationInstance->currentCharIndex = thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex];
+	//	}
+	}
+}
+
+void selectPreviousLetter(){
+	if(thisAbilityCreationInstance->activeNameIndex > 0){
+		thisAbilityCreationInstance->activeNameIndex--;
+		thisAbilityCreationInstance->currentCharIndex = thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex];
+	}
+}
 
 int calculateManaCost(ability * thisAbility){
 	int sum = -1; //Ability = -1
@@ -512,7 +596,11 @@ int calculateManaCost(ability * thisAbility){
 	updateElementSummation(&duration, &dummyInt, thisAbility->diceDamageDurationModEnabled, thisAbility->diceDamageDurationMod);
 
 	if(duration > 0){
-	sum += dam*duration;
+		if(duration < 0 && dam < 0){
+			sum += dam*duration*-1;
+		}else{
+			sum += dam*duration;
+		}
 	}else{
 		sum += dam;
 	}
@@ -694,7 +782,7 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->type = *value;
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	strcpy(newAbility->name , value);
+	strcpy(newAbility->typeName , value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->level = atoi(value);
@@ -720,7 +808,7 @@ ability * createAbilityFromLine(char line[2048]){
 	if(newAbility->rangeEnabled){
 		newAbility->numEnabledEffects++;
 		char *tmpStr = strdup(value);
-		newAbility->range = makeEffectManaMapList(tmpStr, mapSize, newAbility->name);
+		newAbility->range = makeEffectManaMapList(tmpStr, mapSize, newAbility->typeName);
 		free(tmpStr);
 	}else{
 		newAbility->range = NULL;
@@ -735,7 +823,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->targetedEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->targeted = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->targeted = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->targeted = NULL;
 	}
@@ -749,7 +837,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->extraAttackEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->extraAttack = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->extraAttack = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->extraAttack = NULL;
 	}
@@ -763,7 +851,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceDamageEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->diceDamage = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->diceDamage = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->diceDamage = NULL;
 	}
@@ -777,7 +865,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->damage = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->damage = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->damage = NULL;
 	}
@@ -791,7 +879,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceDamageDurationEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->diceDamageDuration = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->diceDamageDuration = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->diceDamageDuration = NULL;
 	}
@@ -805,7 +893,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->aoeEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->aoe = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->aoe = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->aoe = NULL;
 	}
@@ -819,7 +907,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceDamageDurationModEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->diceDamageDurationMod = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->diceDamageDurationMod = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->diceDamageDurationMod = NULL;
 	}
@@ -833,7 +921,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->durationEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->duration = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->duration = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->duration = NULL;
 	}
@@ -847,7 +935,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->durationModEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->durationMod = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->durationMod = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->durationMod = NULL;
 	}
@@ -861,7 +949,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->STREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->STR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->STR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->STR = NULL;
 	}
@@ -875,7 +963,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->DEXEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->DEX = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->DEX = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->DEX = NULL;
 	}
@@ -889,7 +977,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->CONEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->CON = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->CON = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->CON = NULL;
 	}
@@ -903,7 +991,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->WILLEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->WILL = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->WILL = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->WILL = NULL;
 	}
@@ -917,7 +1005,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->INTEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->INT = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->INT = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->INT = NULL;
 	}
@@ -931,7 +1019,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->WISEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->WIS = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->WIS = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->WIS = NULL;
 	}
@@ -945,7 +1033,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->CHREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->CHR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->CHR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->CHR = NULL;
 	}
@@ -959,7 +1047,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->LUCKEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->LUCK = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->LUCK = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->LUCK = NULL;
 	}
@@ -973,7 +1061,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->acEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->ac = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->ac = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->ac = NULL;
 	}
@@ -987,7 +1075,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageModEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->damageMod = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->damageMod = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->damageMod = NULL;
 	}
@@ -1001,7 +1089,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->mvmtEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->mvmt = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->mvmt = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->mvmt = NULL;
 	}
@@ -1015,7 +1103,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->hpEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->hp = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->hp = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->hp = NULL;
 	}
@@ -1029,7 +1117,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->totalHPEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->totalHP = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->totalHP = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->totalHP = NULL;
 	}
@@ -1043,7 +1131,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->totalManaEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->totalMana = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->totalMana = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->totalMana = NULL;
 	}
@@ -1057,7 +1145,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->bluntDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->bluntDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->bluntDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->bluntDR = NULL;
 	}
@@ -1071,7 +1159,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->chopDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->chopDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->chopDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->chopDR = NULL;
 	}
@@ -1085,7 +1173,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->pierceDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->pierceDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->pierceDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->pierceDR = NULL;
 	}
@@ -1099,7 +1187,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->slashDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->slashDR  = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->slashDR  = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->slashDR = NULL;
 	}
@@ -1113,7 +1201,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->earthDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->earthDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->earthDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->earthDR = NULL;
 	}
@@ -1127,7 +1215,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->fireDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->fireDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->fireDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->fireDR = NULL;
 	}
@@ -1141,7 +1229,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->waterDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->waterDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->waterDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->waterDR = NULL;
 	}
@@ -1155,7 +1243,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->lightningDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->lightningDR = makeEffectManaMapList(value, mapSize, newAbility->name);
+		newAbility->lightningDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->lightningDR = NULL;
 	}
@@ -1197,6 +1285,7 @@ ability * cloneAbility(ability * thisAbility){
 
 	newAbility->type = thisAbility->type;
 	strcpy(newAbility->name, thisAbility->name);
+	strcpy(newAbility->typeName, thisAbility->typeName);
 	strcpy(newAbility->description, thisAbility->description);
 	newAbility->totalManaCost = thisAbility->totalManaCost;
 	newAbility->level = thisAbility->level;

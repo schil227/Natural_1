@@ -16,6 +16,8 @@ typedef enum {RANGE, TARGETED, EXTRA_ATTACK, DICE_DAMAGE, DAMAGE, DICE_DAMAGE_DU
 	AC, DAMAGE_MOD, MVMT, HP, TOTAL_HP, TOTAL_MANA, BLUNT_DR, CHOP_DR, PIERCE_DR, SLASH_DR, EARTH_DR,
 	FIRE_DR, WATER_DR, LIGHTNING_DR } effect_types;
 
+typedef enum {DEFAULT_ABILITY, LEVELUP_ABILITY} creation_modes;
+
 typedef struct{
 	short int effectMagnitude;
 	short int manaCost;
@@ -33,7 +35,8 @@ typedef struct{
 typedef struct{
 	int ID;
 	char type;
-	char name[32];
+	char name[16];
+	char typeName[16];
 	char description[128];
 	int totalManaCost;
 	int level;
@@ -113,6 +116,7 @@ typedef struct{
 
 typedef struct {
 	int inCreateMode;
+	int inNameMode;
 	int templateIndex;
 
 	int numAbilityTemplates;
@@ -124,9 +128,15 @@ typedef struct {
 	int effectEndingIndex;
 	int MAX_FIELDS_ON_WINDOW;
 
+	char currentCharIndex;
+	int activeNameIndex;
+	char newAbilityName[16];
+
+	creation_modes mode;
 	effect_types selectedType;
 
 	character * creationWindow;
+	character * nameWindow;
 	character * selector;
 	character * leftRightArrow;
 	character * scrollUpArrow;

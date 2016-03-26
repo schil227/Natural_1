@@ -108,6 +108,65 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 	return 0;
 }
 
+int nameAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
+	switch(msg){
+	case WM_KEYDOWN:{
+		switch (LOWORD(wParam)) {
+			case 0x1B:{ //esc
+				toggleNameMode();
+			}
+			case 0x0D: { //enter
+				if(nameNotEmpty()){
+					setAbilityName();
+					addAbilityToIndividual(player, getNewAbility());
+					changeAbilityTemplate(0);
+				}
+				break;
+			}
+			case 0x38:
+			case 0x68:{ //'8'
+				selectLetterUp();
+				break;
+			}
+			case 0x32:
+			case 0x62:{ //'2' key
+				selectLetterDown();
+				break;
+			}
+			case 0x36:
+			case 0x66:{ //'6'
+				selectNextLetter();
+				break;
+			}
+			case 0x34:
+			case 0x64:{ //'4' key
+				selectPreviousLetter();
+				break;
+			}
+		}
+		case WM_TIMER:
+		{
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+			ReleaseDC(hwnd, hdc);
+		}
+			break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	}
+	return 0;
+}
+
+
 int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
 	switch(msg){
 	case WM_KEYDOWN:{
@@ -131,17 +190,18 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 				break;
 			}
 			case 0x36:
-			case 0x66:{ //'8'
+			case 0x66:{ //'6'
 				interpretRightAbilityCreation();
 				break;
 			}
 			case 0x34:
-			case 0x64:{ //'2' key
+			case 0x64:{ //'4' key
 				interpretLeftAbilityCreation(player->range, player->mvmt, player->totalHP, player->totalMana);
 				break;
 			}
-			case 0x43:{
+			case 0x43:{ //'c' key
 				if(canCreateAbility()){
+					toggleNameMode();
 					addAbilityToIndividual(player, getNewAbility());
 					changeAbilityTemplate(0);
 				}

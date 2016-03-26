@@ -459,6 +459,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(shouldDrawDialogBox()){
 		return dialogLoop(hwnd, msg, wParam, lParam, player, npcs, enemies, main_field);
 	} else if(inAbilityCreateMode()){
+		if(inAbilityNameMode()){
+			return nameAbilityLoop(hwnd, msg, wParam, lParam, player);
+		}
 		return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 	}else if (cursorMode) {
 		if (initCursorMode) {
