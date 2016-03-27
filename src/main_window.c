@@ -183,8 +183,12 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawDialogBox(hdc, hdcBuffer,prc);
 	}
 
-	if(inAbilityCreateMode()){
+	if (inAbilityCreateMode()){
 		drawAbilityCreateWindow(hdc, hdcBuffer, prc);
+	}
+
+	if(inNameBoxMode()){
+		drawNameBoxInstance(hdc, hdcBuffer, prc);
 	}
 
 //	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
@@ -210,6 +214,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
 		initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
+		initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
 		initalizeTheGlobalRegister();
 		initEventHandlers();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");
@@ -458,9 +463,18 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(shouldDrawDialogBox()){
 		return dialogLoop(hwnd, msg, wParam, lParam, player, npcs, enemies, main_field);
+	}else if(inNameBoxMode()){
+		return nameLoop(hwnd, msg, wParam, lParam, player);
 	} else if(inAbilityCreateMode()){
-		if(inAbilityNameMode()){
-			return nameAbilityLoop(hwnd, msg, wParam, lParam, player);
+
+		if(inAbilityWaitForNameMode()){//Name loop finished, check for name
+			toggleAbilityWaitForNameMode();
+			if(!nameEmpty()){
+				setAbilityName(getNameFromInstance());
+				addAbilityToIndividual(player, getNewAbility());
+				changeAbilityTemplate(0);
+				resetNameBoxInstance();
+			}
 		}
 		return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 	}else if (cursorMode) {

@@ -128,15 +128,12 @@ typedef struct {
 	int effectEndingIndex;
 	int MAX_FIELDS_ON_WINDOW;
 
-	char currentCharIndex;
-	int activeNameIndex;
-	char newAbilityName[16];
+	int waitingForName;
 
 	creation_modes mode;
 	effect_types selectedType;
 
 	character * creationWindow;
-	character * nameWindow;
 	character * selector;
 	character * leftRightArrow;
 	character * scrollUpArrow;

@@ -55,10 +55,13 @@ char* strtok_r(
 static abilityCreationInstance * thisAbilityCreationInstance;
 
 void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* directory, char* effectsFileNam){
+	int i;
+
 	thisAbilityCreationInstance = malloc(sizeof(abilityCreationInstance));
 	thisAbilityCreationInstance->inCreateMode = 0;
-	thisAbilityCreationInstance->inNameMode = 0;
 	thisAbilityCreationInstance->templateIndex = 0;
+
+	thisAbilityCreationInstance->waitingForName = 0;
 
 	thisAbilityCreationInstance->currentTemplateIndex = 0;
 	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 3;
@@ -70,12 +73,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
 	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
 
-	thisAbilityCreationInstance->currentCharIndex = 'A';
-	thisAbilityCreationInstance->activeNameIndex = 0;
-	strcpy(thisAbilityCreationInstance->newAbilityName, "");
-
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
-	thisAbilityCreationInstance->nameWindow = createCharacter(3503, rgb, x+30, y+30);
 	thisAbilityCreationInstance->selector = createCharacter(3501, rgb, x, y);
 	thisAbilityCreationInstance->leftRightArrow = createCharacter(3502, rgb, x, y);
 	thisAbilityCreationInstance->scrollUpArrow = createCharacter(3002, rgb, x, y);
@@ -90,21 +88,9 @@ void toggleCreateMode(){
 	thisAbilityCreationInstance->inCreateMode = (thisAbilityCreationInstance->inCreateMode + 1) % 2;
 }
 
-void toggleNameMode(){
-	thisAbilityCreationInstance->inNameMode = (thisAbilityCreationInstance->inNameMode + 1) % 2;
-}
-
 int inAbilityCreateMode(){
 	if(thisAbilityCreationInstance != NULL){
 		return thisAbilityCreationInstance->inCreateMode;
-	}else{
-		return 0;
-	}
-}
-
-int inAbilityNameMode(){
-	if(thisAbilityCreationInstance != NULL){
-		return thisAbilityCreationInstance->inNameMode;
 	}else{
 		return 0;
 	}
@@ -264,15 +250,6 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
 				 hdc, hdcBuffer, &textRect, LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->lightningDR);
-
-	//draw name window
-	if(thisAbilityCreationInstance->inNameMode){
-		SelectObject(hdcMem, thisAbilityCreationInstance->nameWindow->image);
-		BitBlt(hdcBuffer, thisAbilityCreationInstance->nameWindow->x, thisAbilityCreationInstance->nameWindow->y, thisAbilityCreationInstance->nameWindow->width, thisAbilityCreationInstance->nameWindow->height, hdcMem, 0, 0, SRCCOPY);
-		textRect.top = thisAbilityCreationInstance->nameWindow->y + 30;
-		textRect.left = thisAbilityCreationInstance->nameWindow->x + 20;
-		DrawText(hdcBuffer, thisAbilityCreationInstance->newAbilityName, strlen(thisAbilityCreationInstance->newAbilityName), &textRect, DT_SINGLELINE);
-	}
 
 	DeleteDC(hdcMem);
 
@@ -500,6 +477,14 @@ int canCreateAbility(){
 	return 0;
 }
 
+void toggleAbilityWaitForNameMode(){
+	thisAbilityCreationInstance->waitingForName = (thisAbilityCreationInstance->waitingForName + 1) % 2;
+}
+
+int inAbilityWaitForNameMode(){
+	return thisAbilityCreationInstance->waitingForName;
+}
+
 ability * getNewAbility(){
 	return thisAbilityCreationInstance->abilityInsance;
 }
@@ -514,60 +499,8 @@ void moveRECTRight(RECT * thisRect, int distance){
 	thisRect->right = thisRect->right + distance;
 }
 
-void setAbilityName(){
-	strcpy(thisAbilityCreationInstance->abilityInsance->name, thisAbilityCreationInstance->newAbilityName);
-}
-
-int nameNotEmpty(){
-	if(strcmp(thisAbilityCreationInstance->newAbilityName,"")){
-		return 0;
-	}
-	return 1;
-}
-
-void selectLetterUp(){
-	if(thisAbilityCreationInstance->currentCharIndex == '\0'){
-		thisAbilityCreationInstance->currentCharIndex = 'A';
-	}else if(thisAbilityCreationInstance->currentCharIndex == 'A'){
-		thisAbilityCreationInstance->currentCharIndex = 'z';
-	}else{
-		thisAbilityCreationInstance->currentCharIndex--;
-	}
-
-
-	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex] = (char)thisAbilityCreationInstance->currentCharIndex;
-	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex+1] = '\0';
-}
-
-void selectLetterDown(){
-	if(thisAbilityCreationInstance->currentCharIndex == '\0'){
-		thisAbilityCreationInstance->currentCharIndex = 'A';
- 	}else if (thisAbilityCreationInstance->currentCharIndex == 'z') { //'z'
-		thisAbilityCreationInstance->currentCharIndex = 'A';
-	} else {
-		thisAbilityCreationInstance->currentCharIndex++;
-	}
-
-	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex] = (char)thisAbilityCreationInstance->currentCharIndex;
-	thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex+1] = '\0';
-}
-
-void selectNextLetter(){
-	if(thisAbilityCreationInstance->activeNameIndex < 14){
-		thisAbilityCreationInstance->activeNameIndex++;
-	//	if(thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex] == '\0'){
-			thisAbilityCreationInstance->currentCharIndex = '\0';
-	//	}else{
-	//		thisAbilityCreationInstance->currentCharIndex = thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex];
-	//	}
-	}
-}
-
-void selectPreviousLetter(){
-	if(thisAbilityCreationInstance->activeNameIndex > 0){
-		thisAbilityCreationInstance->activeNameIndex--;
-		thisAbilityCreationInstance->currentCharIndex = thisAbilityCreationInstance->newAbilityName[thisAbilityCreationInstance->activeNameIndex];
-	}
+void setAbilityName(char * newName){
+	strcpy(thisAbilityCreationInstance->abilityInsance->name, newName);
 }
 
 int calculateManaCost(ability * thisAbility){

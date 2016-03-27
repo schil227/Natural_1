@@ -108,18 +108,17 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 	return 0;
 }
 
-int nameAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
+int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
 	switch(msg){
 	case WM_KEYDOWN:{
 		switch (LOWORD(wParam)) {
 			case 0x1B:{ //esc
 				toggleNameMode();
+				resetNameBoxInstance();
 			}
 			case 0x0D: { //enter
-				if(nameNotEmpty()){
-					setAbilityName();
-					addAbilityToIndividual(player, getNewAbility());
-					changeAbilityTemplate(0);
+				if(selectCharacter()){
+
 				}
 				break;
 			}
@@ -135,13 +134,16 @@ int nameAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 			}
 			case 0x36:
 			case 0x66:{ //'6'
-				selectNextLetter();
+				selectLetterRight();
 				break;
 			}
 			case 0x34:
 			case 0x64:{ //'4' key
-				selectPreviousLetter();
+				selectLetterLeft();
 				break;
+			}
+			case 0x45:{ //'e' key
+				toggleNameMode();
 			}
 		}
 		case WM_TIMER:
@@ -170,13 +172,16 @@ int nameAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
 	switch(msg){
 	case WM_KEYDOWN:{
+
 		switch (LOWORD(wParam)) {
 			case 0x1B:{ //esc
 				toggleCreateMode();
 			}
 			case 0x0D: { //enter
-
-
+				if(canCreateAbility()){
+					toggleNameMode();
+					toggleAbilityWaitForNameMode();
+				}
 				break;
 			}
 			case 0x38:
@@ -200,11 +205,11 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 				break;
 			}
 			case 0x43:{ //'c' key
-				if(canCreateAbility()){
-					toggleNameMode();
-					addAbilityToIndividual(player, getNewAbility());
-					changeAbilityTemplate(0);
-				}
+//				if(canCreateAbility()){
+//					toggleNameMode();
+//					addAbilityToIndividual(player, getNewAbility());
+//					changeAbilityTemplate(0);
+//				}
 				break;
 			}
 		}
