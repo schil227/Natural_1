@@ -11,7 +11,7 @@
 #include "../character_pub_methods.h"
 
 typedef struct{
-	char charArr[52];
+	char charArr[65];
 	char name[16];
 
 	int inNameMode;

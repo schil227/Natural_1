@@ -179,16 +179,16 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawThisConsole(hdc,hdcBuffer,prc);
 
-	if(shouldDrawDialogBox()){
-		drawDialogBox(hdc, hdcBuffer,prc);
-	}
-
 	if (inAbilityCreateMode()){
 		drawAbilityCreateWindow(hdc, hdcBuffer, prc);
 	}
 
 	if(inNameBoxMode()){
 		drawNameBoxInstance(hdc, hdcBuffer, prc);
+	}
+
+	if(shouldDrawDialogBox()){
+		drawDialogBox(hdc, hdcBuffer,prc);
 	}
 
 //	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
@@ -474,9 +474,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				addAbilityToIndividual(player, getNewAbility());
 				changeAbilityTemplate(0);
 				resetNameBoxInstance();
+
+				cwrite("Ability created!");
 			}
+		}else{
+			return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 		}
-		return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 	}else if (cursorMode) {
 		if (initCursorMode) {
 			viewShift->xShiftOld = viewShift->xShift;

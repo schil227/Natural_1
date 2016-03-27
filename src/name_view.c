@@ -57,6 +57,13 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 	textSelectRect.bottom = textSelectRect.top + 20;
 	textSelectRect.right = textSelectRect.left + 15;
 
+	if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
+		textSelectRect.top = thisNameBoxInstance->nameBox->y + 120;
+		textSelectRect.left = thisNameBoxInstance->nameBox->x + 210 + 40*thisNameBoxInstance->column;
+		textSelectRect.bottom = textSelectRect.top + 20;
+		textSelectRect.right = textSelectRect.left + 15;
+	}
+
 	RECT textNameRect;
 	textNameRect.top = thisNameBoxInstance->nameBox->y + 10;
 	textNameRect.left = thisNameBoxInstance->nameBox->x + 75;
@@ -67,6 +74,7 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 	BitBlt(hdcBuffer, thisNameBoxInstance->nameBox->x, thisNameBoxInstance->nameBox->y, thisNameBoxInstance->nameBox->width, thisNameBoxInstance->nameBox->height, hdcMem, 0, 0, SRCCOPY);
 
 	//cursor
+
 	DrawText(hdcBuffer, "_", 1, &textSelectRect, DT_SINGLELINE);
 
 	//name
@@ -110,6 +118,15 @@ int nameEmpty(){
 }
 
 int selectCharacter(){
+	if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
+		if(thisNameBoxInstance->column == 0){//<--
+			backspaceName();
+			return 0;
+		}else{//END
+			return 1;
+		}
+	}else{
+
 	thisNameBoxInstance->name[thisNameBoxInstance->currentNameIndex] = getCharFromArr();
 
 	if(thisNameBoxInstance->currentNameIndex < thisNameBoxInstance->MAX_NAME_LENGTH){
@@ -117,35 +134,62 @@ int selectCharacter(){
 	}
 
 	return 0;
+	}
 }
 
 void backspaceName(){
-	thisNameBoxInstance->name[thisNameBoxInstance->currentNameIndex] = '\0';
+
 	if(thisNameBoxInstance->currentNameIndex > 0){
 		thisNameBoxInstance->currentNameIndex--;
+		thisNameBoxInstance->name[thisNameBoxInstance->currentNameIndex] = '\0';
 	}
 }
 
 void selectLetterUp(){
 	if(thisNameBoxInstance->row > 0){
 		thisNameBoxInstance->row--;
+	}else{
+		thisNameBoxInstance->row = thisNameBoxInstance->MAX_ROWS;
 	}
 }
 
 void selectLetterDown(){
 	if(thisNameBoxInstance->row < thisNameBoxInstance->MAX_ROWS){
 		thisNameBoxInstance->row++;
+
+		if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
+			thisNameBoxInstance->column = 0;
+		}
+	}else{
+		thisNameBoxInstance->row = 0;
 	}
 }
 
 void selectLetterLeft(){
 	if(thisNameBoxInstance->column > 0){
 		thisNameBoxInstance->column--;
+	}else{
+		if(thisNameBoxInstance->row != thisNameBoxInstance->MAX_ROWS){
+			thisNameBoxInstance->column = thisNameBoxInstance->MAX_COLUMNS;
+		}else{
+			thisNameBoxInstance->column = 1;
+		}
 	}
 }
 
 void selectLetterRight(){
-	if(thisNameBoxInstance->column < thisNameBoxInstance->MAX_COLUMNS){
+
+	if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
+		if(thisNameBoxInstance->column < 1){
+			thisNameBoxInstance->column++;
+		}else{
+			thisNameBoxInstance->column = 0;
+		}
+	}else if(thisNameBoxInstance->column < thisNameBoxInstance->MAX_COLUMNS){
 		thisNameBoxInstance->column++;
+	}else{
+		thisNameBoxInstance->column = 0;
 	}
+
+
 }

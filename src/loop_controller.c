@@ -118,7 +118,7 @@ int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * pla
 			}
 			case 0x0D: { //enter
 				if(selectCharacter()){
-
+					toggleNameMode();
 				}
 				break;
 			}
