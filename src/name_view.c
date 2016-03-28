@@ -53,13 +53,13 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	RECT textSelectRect;
 	textSelectRect.top = thisNameBoxInstance->nameBox->y + 33 + 16*thisNameBoxInstance->row;
-	textSelectRect.left = thisNameBoxInstance->nameBox->x + 15 + 21*thisNameBoxInstance->column;
+	textSelectRect.left = thisNameBoxInstance->nameBox->x + 12 + 21*thisNameBoxInstance->column;
 	textSelectRect.bottom = textSelectRect.top + 20;
 	textSelectRect.right = textSelectRect.left + 15;
 
 	if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
-		textSelectRect.top = thisNameBoxInstance->nameBox->y + 120;
-		textSelectRect.left = thisNameBoxInstance->nameBox->x + 210 + 40*thisNameBoxInstance->column;
+		textSelectRect.top = thisNameBoxInstance->nameBox->y + 122;
+		textSelectRect.left = thisNameBoxInstance->nameBox->x + 205 + 45*thisNameBoxInstance->column;
 		textSelectRect.bottom = textSelectRect.top + 20;
 		textSelectRect.right = textSelectRect.left + 15;
 	}
@@ -75,7 +75,7 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	//cursor
 
-	DrawText(hdcBuffer, "_", 1, &textSelectRect, DT_SINGLELINE);
+	DrawText(hdcBuffer, "__", 2, &textSelectRect, DT_SINGLELINE);
 
 	//name
 	DrawText(hdcBuffer, thisNameBoxInstance->name, strlen(thisNameBoxInstance->name), &textNameRect, DT_SINGLELINE);
@@ -150,6 +150,7 @@ void selectLetterUp(){
 		thisNameBoxInstance->row--;
 	}else{
 		thisNameBoxInstance->row = thisNameBoxInstance->MAX_ROWS;
+		thisNameBoxInstance->column = 0;
 	}
 }
 
@@ -166,15 +167,18 @@ void selectLetterDown(){
 }
 
 void selectLetterLeft(){
-	if(thisNameBoxInstance->column > 0){
+	if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
+		if(thisNameBoxInstance->column < 1){
+			thisNameBoxInstance->column--;
+		}else{
+			thisNameBoxInstance->column = 0;
+		}
+	}else if(thisNameBoxInstance->column > 0){
 		thisNameBoxInstance->column--;
 	}else{
-		if(thisNameBoxInstance->row != thisNameBoxInstance->MAX_ROWS){
-			thisNameBoxInstance->column = thisNameBoxInstance->MAX_COLUMNS;
-		}else{
-			thisNameBoxInstance->column = 1;
-		}
+		thisNameBoxInstance->column = thisNameBoxInstance->MAX_COLUMNS;
 	}
+
 }
 
 void selectLetterRight(){
