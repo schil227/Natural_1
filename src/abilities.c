@@ -116,7 +116,7 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	textRect.top = thisAbilityCreationInstance->creationWindow->y + 40;
 	textRect.left = thisAbilityCreationInstance->creationWindow->x + 30;
 	textRect.bottom = textRect.top + 40;
-	textRect.right = textRect.left + 213;
+	textRect.right = textRect.left + 240;
 
 	//draw create window
 	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->image);
@@ -212,11 +212,14 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->acEnabled,
 				 hdc, hdcBuffer, &textRect, AC, "ac", thisAbilityCreationInstance->abilityInsance->ac);
 
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->attackEnabled,
+					 hdc, hdcBuffer, &textRect, ATTACK, "attack", thisAbilityCreationInstance->abilityInsance->attack);
+
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageModEnabled,
 				 hdc, hdcBuffer, &textRect, DAMAGE_MOD, "damageMod", thisAbilityCreationInstance->abilityInsance->damageMod);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->mvmtEnabled,
-				 hdc, hdcBuffer, &textRect, MVMT, "mvmt", thisAbilityCreationInstance->abilityInsance->mvmt);
+				 hdc, hdcBuffer, &textRect, MVMT, "movement", thisAbilityCreationInstance->abilityInsance->mvmt);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->hpEnabled,
 				 hdc, hdcBuffer, &textRect, HP, "hp", thisAbilityCreationInstance->abilityInsance->hp);
@@ -262,7 +265,7 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				thisAbilityCreationInstance->selectedType = type;
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->right + 1,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
+				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
 
 		}
@@ -385,6 +388,8 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->LUCK;
 	case AC:
 		return thisAbilityCreationInstance->abilityInsance->ac;
+	case ATTACK:
+		return thisAbilityCreationInstance->abilityInsance->attack;
 	case DAMAGE_MOD:
 		return thisAbilityCreationInstance->abilityInsance->damageMod;
 	case MVMT:
@@ -555,6 +560,8 @@ int calculateManaCost(ability * thisAbility){
 	updateElementSummation(&sum, &hasEffect, thisAbility->LUCKEnabled, thisAbility->LUCK);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->acEnabled, thisAbility->ac);
+
+	updateElementDRSummation(&sum, &hasEffect, thisAbility->attackEnabled, thisAbility->attack);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->damageModEnabled, thisAbility->damageMod);
 
@@ -1000,6 +1007,20 @@ ability * createAbilityFromLine(char line[2048]){
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->attackEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->attackEnabled){
+		newAbility->numEnabledEffects++;
+		newAbility->attack = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+	}else{
+		newAbility->attack = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->damageModEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -1283,6 +1304,9 @@ ability * cloneAbility(ability * thisAbility){
 
 	newAbility->acEnabled = thisAbility->acEnabled;
 	newAbility->ac = cloneEffectAndManaMapList(thisAbility->ac);
+
+	newAbility->attackEnabled = thisAbility->attackEnabled;
+	newAbility->attack = cloneEffectAndManaMapList(thisAbility->attack);
 
 	newAbility->damageModEnabled = thisAbility->damageModEnabled;
 	newAbility->damageMod = cloneEffectAndManaMapList(thisAbility->damageMod);

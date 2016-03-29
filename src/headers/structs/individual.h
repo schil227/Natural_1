@@ -44,7 +44,7 @@ typedef struct {
 	activeItemList * activeItems;
 
 	abilityList * abilities;
-
+	abilityList * activeAbilities;
 	short int STR;
 	short int DEX;
 	short int CON;

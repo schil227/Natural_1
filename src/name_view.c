@@ -147,10 +147,23 @@ void backspaceName(){
 
 void selectLetterUp(){
 	if(thisNameBoxInstance->row > 0){
+
+		if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
+			if(thisNameBoxInstance->column == 0){
+				thisNameBoxInstance->column = 9;
+			}else{
+				thisNameBoxInstance->column = 11;
+			}
+		}
+
 		thisNameBoxInstance->row--;
 	}else{
 		thisNameBoxInstance->row = thisNameBoxInstance->MAX_ROWS;
-		thisNameBoxInstance->column = 0;
+		if(thisNameBoxInstance->column > 10){
+			thisNameBoxInstance->column = 1;
+		}else{
+			thisNameBoxInstance->column = 0;
+		}
 	}
 }
 
@@ -159,10 +172,20 @@ void selectLetterDown(){
 		thisNameBoxInstance->row++;
 
 		if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
-			thisNameBoxInstance->column = 0;
+			if(thisNameBoxInstance->column > 10){
+				thisNameBoxInstance->column = 1;
+			}else{
+				thisNameBoxInstance->column = 0;
+			}
 		}
 	}else{
 		thisNameBoxInstance->row = 0;
+
+		if(thisNameBoxInstance->column == 0){
+			thisNameBoxInstance->column = 9;
+		}else{
+			thisNameBoxInstance->column = 11;
+		}
 	}
 }
 

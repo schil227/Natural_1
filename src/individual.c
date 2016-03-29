@@ -33,6 +33,10 @@ individual *initIndividual(){
 	toReturn->abilities->numAbilities = 0;
 	toReturn->abilities->MAX_ABILITIES = 64;
 
+	toReturn->activeAbilities = malloc(sizeof(abilityList));
+	toReturn->activeAbilities->numAbilities = 0;
+	toReturn->activeAbilities->MAX_ABILITIES = 64;
+
 	return toReturn;
 }
 
@@ -184,7 +188,7 @@ item * getActiveWeapon(inventory * backpack){
 int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int d20 = rand() % 20 + 1;
 	int totalAttack = d20 + getAttributeSum(thisIndividual, "attack");
-	int totalAC = getAttributeSum(targetIndividual,"ac");
+	int totalAC = getAttributeSum(targetIndividual,"ac") + getAttributeSum(thisIndividual, "DEX");
 	int i;
 	item * tmpItem;
 
@@ -577,7 +581,7 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	} else if(strcmp("maxTurns",attribute) == 0 ){ //item only for now
 		return 0;
 	} else if(strcmp("ac",attribute) == 0 ){
-		return thisIndividual->AC + thisIndividual->DEX;
+		return thisIndividual->AC;
 	} else if(strcmp("attack",attribute) == 0 ){
 		return thisIndividual->attack;
 	} else if(strcmp("baseDam",attribute) == 0 ){
@@ -854,6 +858,192 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 		 }
 	}
 	return toReturn;
+}
+
+int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
+	if(strcmp("STR",attribute) == 0 ){
+		if(activeAbility->STREnabled){
+			return activeAbility->STR->effectAndManaArray[activeAbility->STR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("DEX",attribute) == 0){
+		if(activeAbility->DEXEnabled){
+			return activeAbility->DEX->effectAndManaArray[activeAbility->DEX->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("CON",attribute) == 0){
+		if(activeAbility->CONEnabled){
+			return activeAbility->CON->effectAndManaArray[activeAbility->CON->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("WILL",attribute) == 0){
+		if(activeAbility->WILLEnabled){
+			return activeAbility->WILL->effectAndManaArray[activeAbility->WILL->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("INT",attribute) == 0){
+		if(activeAbility->INTEnabled){
+			return activeAbility->INT->effectAndManaArray[activeAbility->INT->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("WIS",attribute) == 0){
+		if(activeAbility->WISEnabled){
+			return activeAbility->WIS->effectAndManaArray[activeAbility->WIS->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("CHR",attribute) == 0){
+		if(activeAbility->CHREnabled){
+			return activeAbility->CHR->effectAndManaArray[activeAbility->CHR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("LUCK",attribute) == 0){
+		if(activeAbility->LUCKEnabled){
+			return activeAbility->LUCK->effectAndManaArray[activeAbility->LUCK->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	}else if(strcmp("totalHealth",attribute) == 0 ){
+		if(activeAbility->totalHPEnabled){
+			return activeAbility->totalHP->effectAndManaArray[activeAbility->totalHP->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("health",attribute) == 0 ){
+		if(activeAbility->hpEnabled){
+			return activeAbility->hp->effectAndManaArray[activeAbility->hp->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("totalMana",attribute) == 0 ){
+		if(activeAbility->totalManaEnabled){
+			return activeAbility->totalMana->effectAndManaArray[activeAbility->totalMana->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("mana",attribute) == 0 ){
+			return 0;
+	} else if(strcmp("ac",attribute) == 0 ){
+		if(activeAbility->acEnabled){
+			return activeAbility->ac->effectAndManaArray[activeAbility->ac->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("attack",attribute) == 0 ){
+		if(activeAbility->attackEnabled){
+			return activeAbility->attack->effectAndManaArray[activeAbility->attack->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("baseDam",attribute) == 0 ){
+		if(activeAbility->damageModEnabled){
+			return activeAbility->damageMod->effectAndManaArray[activeAbility->damageMod->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("maxDam",attribute) == 0 ){
+//		if(activeAbility->XXXXXX){
+//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
+//		}else{
+			return 0;
+//		}
+	} else if(strcmp("minDam",attribute) == 0 ){
+//		if(activeAbility->XXXXXX){
+//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
+//		}else{
+			return 0;
+//		}
+	} else if(strcmp("mvmt",attribute) == 0 ){
+		if(activeAbility->mvmtEnabled){
+			return activeAbility->mvmt->effectAndManaArray[activeAbility->mvmt->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("range",attribute) == 0 ){
+		if(activeAbility->rangeEnabled){
+			return activeAbility->range->effectAndManaArray[activeAbility->range->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("bluntDR",attribute) == 0 ){
+		if(activeAbility->bluntDREnabled){
+			return activeAbility->bluntDR->effectAndManaArray[activeAbility->bluntDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("chopDR",attribute) == 0 ){
+		if(activeAbility->chopDREnabled){
+			return activeAbility->chopDR->effectAndManaArray[activeAbility->chopDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("slashDR",attribute) == 0 ){
+		if(activeAbility->slashDREnabled){
+			return activeAbility->slashDR->effectAndManaArray[activeAbility->slashDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("pierceDR",attribute) == 0 ){
+		if(activeAbility->pierceDREnabled){
+			return activeAbility->pierceDR->effectAndManaArray[activeAbility->pierceDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("earthDR",attribute) == 0 ){
+		if(activeAbility->earthDREnabled){
+			return activeAbility->earthDR->effectAndManaArray[activeAbility->earthDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("fireDR",attribute) == 0 ){
+		if(activeAbility->fireDREnabled){
+			return activeAbility->fireDR->effectAndManaArray[activeAbility->fireDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("waterDR",attribute) == 0 ){
+		if(activeAbility->waterDREnabled){
+			return activeAbility->waterDR->effectAndManaArray[activeAbility->waterDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("lightningDR",attribute) == 0 ){
+		if(activeAbility->lightningDREnabled){
+			return activeAbility->lightningDR->effectAndManaArray[activeAbility->lightningDR->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
+	} else if(strcmp("earthWeakness",attribute) == 0 ){
+//		if(activeAbility->earthDR){
+//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
+//		}else{
+			return 0;
+//		}
+	} else if(strcmp("fireWeakness",attribute) == 0 ){
+//		if(activeAbility->XXXXXX){
+//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
+//		}else{
+			return 0;
+//		}
+	} else if(strcmp("waterWeakness",attribute) == 0 ){
+//		if(activeAbility->XXXXXX){
+//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
+//		}else{
+			return 0;
+//		}
+	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
+//		if(activeAbility->XXXXXX){
+//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
+//		}else{
+			return 0;
+//		}
+	}
 }
 
 int getAttributeSum(individual * thisIndividual, char * attribute){
