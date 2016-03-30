@@ -116,6 +116,11 @@ typedef struct{
 	effectAndManaMapList * lightningDR;
 } ability;
 
+typedef struct{
+	ability * thisAbility;
+	int turnsRemaining;
+} activeAbility;
+
 typedef struct {
 	int inCreateMode;
 	int inNameMode;

@@ -33,7 +33,7 @@ individual *initIndividual(){
 	toReturn->abilities->numAbilities = 0;
 	toReturn->abilities->MAX_ABILITIES = 64;
 
-	toReturn->activeAbilities = malloc(sizeof(abilityList));
+	toReturn->activeAbilities = malloc(sizeof(activeAbilityList));
 	toReturn->activeAbilities->numAbilities = 0;
 	toReturn->activeAbilities->MAX_ABILITIES = 64;
 
@@ -213,20 +213,11 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 int damageIndividual(individual *thisIndividual, individual *targetIndividual, int isCrit){
 	int totalDamage = 0, i, totalDR, maxDamTotal, minDamTotal, baseDam;
 	char attackType = 'b'; //for now, default is blunt (punching)
-	item * weapon = getActiveWeapon(thisIndividual->backpack);
 
 	baseDam = getAttributeSum(thisIndividual,"baseDam"); //doesn't include STR mod
 
-	if(weapon == NULL){
-		maxDamTotal = thisIndividual->maxDam;
-		minDamTotal = thisIndividual->minDam;
-		baseDam += getAttributeSum(thisIndividual,"STR"); //unarmed, just + STR
-	} else {
-		maxDamTotal = weapon->maxDamMod;
-		minDamTotal = weapon->minDamMod;
-		attackType = weapon->weaponDamageType;
-		baseDam += floor((weapon->weaponStrMod)*(getAttributeSum(thisIndividual, "STR"))); //TODO: round to .1 then floor? 3.9 -> 4, 4.5->4
-	}
+	maxDamTotal = calcMaxDam(thisIndividual);
+	minDamTotal = calcMinDam(thisIndividual);
 
 	thisIndividual->hasAttacked = 1;
 
@@ -356,6 +347,24 @@ int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
 		return 1;
 	}else{
 		return 0;
+	}
+}
+
+int calcMinDam(individual * thisIndividual){
+	item * weapon = getActiveWeapon(thisIndividual->backpack);
+	if (weapon == NULL) {
+		return thisIndividual->minDam;
+	} else {
+		return weapon->minDamMod;
+	}
+}
+
+int calcMaxDam(individual * thisIndividual){
+	item * weapon = getActiveWeapon(thisIndividual->backpack);
+	if (weapon == NULL) {
+		return thisIndividual->maxDam;
+	} else {
+		return weapon->maxDamMod;
 	}
 }
 
@@ -541,12 +550,30 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 }
 
 void addAbilityToIndividual(individual * thisIndividual, ability * newAbility){
-	if(thisIndividual->abilities->numAbilities == thisIndividual->abilities->MAX_ABILITIES){
+	if (newAbility->type == 'p') {
+		addActiveAbilityToIndividual(thisIndividual, newAbility, 0);
+	}
+
+	if (thisIndividual->abilities->numAbilities == thisIndividual->abilities->MAX_ABILITIES) {
 		cwrite("!! CANNOT ADD MORE ABILITIES !!");
 	}
 
 	thisIndividual->abilities->abilitiesList[thisIndividual->abilities->numAbilities] = newAbility;
 	thisIndividual->abilities->numAbilities++;
+}
+
+void addActiveAbilityToIndividual(individual * thisIndividual, ability * thisAbility, int duration){
+	if(thisIndividual->activeAbilities->numAbilities == thisIndividual->activeAbilities->MAX_ABILITIES){
+		cwrite("!! CANNOT ADD MORE ACTIVE ABILITIES !!");
+	}
+
+	activeAbility * newActiveAbility = malloc(sizeof(activeAbility));
+
+	newActiveAbility->thisAbility = thisAbility;
+	newActiveAbility->turnsRemaining = duration;
+
+	thisIndividual->activeAbilities->abilitiesList[thisIndividual->activeAbilities->numAbilities] = newActiveAbility;
+	thisIndividual->activeAbilities->numAbilities++;
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
@@ -587,9 +614,11 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	} else if(strcmp("baseDam",attribute) == 0 ){
 		return thisIndividual->baseDam;
 	} else if(strcmp("maxDam",attribute) == 0 ){
-		return thisIndividual->maxDam;
+		cwrite("!! UNSUPPORTED ATTRIBUTE TYPE: maxDam !!");
+		return 0;
 	} else if(strcmp("minDam",attribute) == 0 ){
-		return thisIndividual->minDam;
+		cwrite("!! UNSUPPORTED ATTRIBUTE TYPE: minDam !!");
+		return 0;
 	} else if(strcmp("mvmt",attribute) == 0 ){
 		return thisIndividual->mvmt;
 	} else if(strcmp("range",attribute) == 0 ){
@@ -745,19 +774,11 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 			 toReturn += activeItem->damMod;
 		 }
 	} else if(strcmp("maxDam",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->maxDamMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->maxDamMod;
-		 }
+		cwrite("!! UNSUPPORTED ATTRIBUTE TYPE: maxDam !!");
+		return 0;
 	} else if(strcmp("minDam",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->minDamMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->minDamMod;
-		 }
+		cwrite("!! UNSUPPORTED ATTRIBUTE TYPE: minDam !!");
+		return 0;
 	} else if(strcmp("mvmt",attribute) == 0 ){
 		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->mvmtMod;
@@ -948,17 +969,11 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 			return 0;
 		}
 	} else if(strcmp("maxDam",attribute) == 0 ){
-//		if(activeAbility->XXXXXX){
-//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
-//		}else{
-			return 0;
-//		}
+		cwrite("!! UNSUPPORTED ATTRIBUTE TYPE: maxDam !!");
+		return 0;
 	} else if(strcmp("minDam",attribute) == 0 ){
-//		if(activeAbility->XXXXXX){
-//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
-//		}else{
-			return 0;
-//		}
+		cwrite("!! UNSUPPORTED ATTRIBUTE TYPE: minDam !!");
+		return 0;
 	} else if(strcmp("mvmt",attribute) == 0 ){
 		if(activeAbility->mvmtEnabled){
 			return activeAbility->mvmt->effectAndManaArray[activeAbility->mvmt->selectedIndex]->effectMagnitude;
@@ -1060,17 +1075,21 @@ int getAttributeSum(individual * thisIndividual, char * attribute){
 		}
 		if(thisIndividual->activeItems->activeItemArr[i] != NULL){
 			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i],
-								thisIndividual->activeItems->activeItemArr[i]->thisItem, attribute);
+					thisIndividual->activeItems->activeItemArr[i]->thisItem, attribute);
 			activeItemTotal++;
 		}else{
 			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i],
-								NULL, attribute);
+					NULL, attribute);
 		}
 
 		if(thisIndividual->backpack->inventoryArr[i] != NULL){
 			itemTotal++;
 		}
 
+	}
+
+	for(i = 0; i < thisIndividual->activeAbilities->numAbilities; i++){
+		toReturn += getAttributeFromActiveAbility(thisIndividual->activeAbilities->abilitiesList[i]->thisAbility, attribute);
 	}
 
 	return toReturn;

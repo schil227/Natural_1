@@ -35,6 +35,12 @@ typedef struct{
 	ability * abilitiesList[64];
 }abilityList;
 
+typedef struct{
+	int numAbilities;
+	int MAX_ABILITIES;
+	activeAbility * abilitiesList[64];
+}activeAbilityList;
+
 typedef struct {
 	character* playerCharacter;
 	char name[32];
@@ -44,7 +50,7 @@ typedef struct {
 	activeItemList * activeItems;
 
 	abilityList * abilities;
-	abilityList * activeAbilities;
+	activeAbilityList * activeAbilities;
 	short int STR;
 	short int DEX;
 	short int CON;

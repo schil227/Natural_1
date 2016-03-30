@@ -17,19 +17,19 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	DeleteObject(NewBrush);
 
 	char hpOut[32];
-	sprintf(hpOut, "HP: %d/%d", player->hp, player->totalHP);
+	sprintf(hpOut, "HP: %d/%d", getAttributeSum(player, "health"), getAttributeSum(player, "totalHealth"));
 
 	char manaOut[32];
-	sprintf(manaOut, "Mana: %d/%d", player->mana, player->totalMana);
+	sprintf(manaOut, "Mana: %d/%d", getAttributeSum(player, "mana"), getAttributeSum(player, "totalMana"));
 
 	char actionOut[16];
 	sprintf(actionOut, "Actions:%d",player->remainingActions);
 
 	char damSpread[32];
-	sprintf(damSpread, "Damage Spread:[%d-%d]",player->minDam, player->maxDam);
+	sprintf(damSpread, "Damage Spread:[%d-%d]", calcMinDam(player), calcMaxDam(player));
 
 	char mvmtRng[32];
-	sprintf(mvmtRng, "Movement Range:%d", player->mvmt);
+	sprintf(mvmtRng, "Movement Range:%d", getAttributeSum(player, "mvmt"));
 
 	char goldOut[16];
 	sprintf(goldOut,"Gold: %d", player->gold);
@@ -41,6 +41,7 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 //	HFONT oldfont = (HFONT)SelectObject(hdc, hfont);
 
 	char tmpNum[3];
+	int tmpValue;
 
 	TextOut(hdc, 10, 10, hpOut, strlen(hpOut));
 	TextOut(hdc, 10, 10+textYStep, manaOut, strlen(manaOut));
@@ -48,30 +49,46 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	TextOut(hdc, 10, 10+textYStep*3, damSpread, strlen(damSpread));
 	TextOut(hdc, 10, 10+textYStep*4, mvmtRng, strlen(mvmtRng));
 	TextOut(hdc, 10, 120, "STATS:", strlen("STATS:"));
+
+	tmpValue = getAttributeSum(player, "STR");
 	TextOut(hdc, 17, 120+textYStep, "STR:", 4);
-	sprintf(tmpNum,"%d",player->STR);
-	TextOut(hdc, player->STR >=0? 61 : 57, 120+textYStep, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc, tmpValue >=0? 61 : 57, 120+textYStep, tmpNum, strlen(tmpNum));
+
+	tmpValue = getAttributeSum(player, "DEX");
 	TextOut(hdc, 17, 120+textYStep*2, "DEX:", 4);
-	sprintf(tmpNum,"%d",player->DEX);
-	TextOut(hdc, player->DEX >=0? 61 : 57, 120+textYStep*2, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc, tmpValue >=0? 61 : 57, 120+textYStep*2, tmpNum, strlen(tmpNum));
+
+	tmpValue = getAttributeSum(player, "CON");
 	TextOut(hdc, 17, 120+textYStep*3, "CON:", 4);
-	sprintf(tmpNum,"%d",player->CON);
-	TextOut(hdc, player->CON >=0? 61 : 57, 120+textYStep*3, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc, tmpValue >=0? 61 : 57, 120+textYStep*3, tmpNum, strlen(tmpNum));
+
+	tmpValue = getAttributeSum(player, "INT");
 	TextOut(hdc, 17, 120+textYStep*4, "INT:", 4);
-	sprintf(tmpNum,"%d",player->INT);
-	TextOut(hdc, player->INT >=0? 61 : 57, 120+textYStep*4, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc, tmpValue >=0? 61 : 57, 120+textYStep*4, tmpNum, strlen(tmpNum));
+
+	tmpValue = getAttributeSum(player, "WIS");
 	TextOut(hdc, 17, 120+textYStep*5, "WIS:", 4);
-	sprintf(tmpNum,"%d",player->WIS);
-	TextOut(hdc, player->WIS >=0? 61 : 57, 120+textYStep*5, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc, tmpValue >=0? 61 : 57, 120+textYStep*5, tmpNum, strlen(tmpNum));
+
+	tmpValue = getAttributeSum(player, "WILL");
 	TextOut(hdc, 17, 120+textYStep*6, "WILL:", 5);
-	sprintf(tmpNum,"%d",player->WILL);
-	TextOut(hdc, player->WILL >=0? 61 : 57, 120+textYStep*6, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc,tmpValue >=0? 61 : 57, 120+textYStep*6, tmpNum, strlen(tmpNum));
+
+	tmpValue = getAttributeSum(player, "CHR");
 	TextOut(hdc, 17, 120+textYStep*7, "CHR:", 4);
-	sprintf(tmpNum,"%d",player->CHR);
-	TextOut(hdc, player->CHR >=0? 61 : 57, 120+textYStep*7, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc, tmpValue >=0? 61 : 57, 120+textYStep*7, tmpNum, strlen(tmpNum));
+
+	tmpValue = getAttributeSum(player, "LUCK");
 	TextOut(hdc, 17, 120+textYStep*8, "LUCK:", 5);
-	sprintf(tmpNum,"%d",player->LUCK);
-	TextOut(hdc, player->LUCK >=0? 61 : 57, 120+textYStep*8, tmpNum, strlen(tmpNum));
+	sprintf(tmpNum,"%d",tmpValue);
+	TextOut(hdc, tmpValue >=0? 61 : 57, 120+textYStep*8, tmpNum, strlen(tmpNum));
 
 	TextOut(hdc, 17, 120+textYStep*10, goldOut, strlen(goldOut));
 

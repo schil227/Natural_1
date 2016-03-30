@@ -491,7 +491,7 @@ int inAbilityWaitForNameMode(){
 }
 
 ability * getNewAbility(){
-	return thisAbilityCreationInstance->abilityInsance;
+	return cloneAbility(thisAbilityCreationInstance->abilityInsance);
 }
 
 void moveRECTDown(RECT * thisRect, int distance){
@@ -561,7 +561,7 @@ int calculateManaCost(ability * thisAbility){
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->acEnabled, thisAbility->ac);
 
-	updateElementDRSummation(&sum, &hasEffect, thisAbility->attackEnabled, thisAbility->attack);
+	updateElementSummation(&sum, &hasEffect, thisAbility->attackEnabled, thisAbility->attack);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->damageModEnabled, thisAbility->damageMod);
 

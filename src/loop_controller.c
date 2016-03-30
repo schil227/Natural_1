@@ -115,6 +115,7 @@ int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * pla
 			case 0x1B:{ //esc
 				toggleNameMode();
 				resetNameBoxInstance();
+				break;
 			}
 			case 0x0D: { //enter
 				if(selectCharacter()){
@@ -141,9 +142,6 @@ int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * pla
 			case 0x64:{ //'4' key
 				selectLetterLeft();
 				break;
-			}
-			case 0x45:{ //'e' key
-				toggleNameMode();
 			}
 		}
 		case WM_TIMER:

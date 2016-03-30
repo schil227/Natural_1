@@ -192,7 +192,7 @@ void selectLetterDown(){
 void selectLetterLeft(){
 	if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
 		if(thisNameBoxInstance->column < 1){
-			thisNameBoxInstance->column--;
+			thisNameBoxInstance->column = 1;
 		}else{
 			thisNameBoxInstance->column = 0;
 		}
