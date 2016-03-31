@@ -121,6 +121,8 @@ END
 3501 BITMAP DISCARDABLE "../images/selector.bmp"
 3502 BITMAP DISCARDABLE "../images/left_right_arrows.bmp"
 3503 BITMAP DISCARDABLE "../images/name_entry_box.bmp"
+3504 BITMAP DISCARDABLE "../images/abilities_view.bmp"
+
 
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

@@ -179,6 +179,10 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawThisConsole(hdc,hdcBuffer,prc);
 
+	if(inAbilityViewMode()){
+		drawThisAbilityView(hdc, hdcBuffer, prc);
+	}
+
 	if (inAbilityCreateMode()){
 		drawAbilityCreateWindow(hdc, hdcBuffer, prc);
 	}
@@ -214,6 +218,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
 		initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
+		initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
 		initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
 		initalizeTheGlobalRegister();
 		initEventHandlers();
@@ -323,22 +328,28 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				attemptGetItemFromField(main_field,player);
 			}
 			break;
-		case 0x49://i key (get)
+		case 0x49://i key (inventory)
 			{
 				enableInventoryViewMode(player->backpack);
 //				initInventoryMode = 1;
 //				inventoryMode = 1;
 			}
 			break;
-		case 0x54://t key (get)
+		case 0x54://t key (talk)
 			{
 				cursorMode = 2;
 				initCursorMode = 1;
 			}
 			break;
-		case 0x43:
+		case 0x43://c key (ability create)
 			{
 				toggleCreateMode();
+			}
+			break;
+		case 0x52://r key (ability view)
+			{
+				toggleAbilityViewMode();
+//				refreshAbilityView(player->abilities->numAbilities, player->abilities->abilitiesList);
 			}
 			break;
 		case 0x57: //w key (wait)
@@ -480,6 +491,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}else{
 			return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 		}
+	}else if(inAbilityViewMode()){
+		return abilityViewLoop(hwnd, msg, wParam, lParam, player);
 	}else if (cursorMode) {
 		if (initCursorMode) {
 			viewShift->xShiftOld = viewShift->xShift;

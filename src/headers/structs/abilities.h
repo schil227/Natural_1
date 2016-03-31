@@ -150,4 +150,16 @@ typedef struct {
 	ability * abilityInsance;
 } abilityCreationInstance;
 
+typedef struct{
+	int inAbiltyViewMode;
+	int currentAbilityIndex;
+	int numAbilites;
+	int MAX_ABILITIES;
+
+	ability * abilitiesList[64];
+
+	character * abilityViewWindow;
+	character * selector;
+} abilityView;
+
 #endif /* SRC_HEADERS_STRUCTS_ABILITIES_H_ */

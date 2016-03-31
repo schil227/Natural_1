@@ -53,6 +53,7 @@ char* strtok_r(
 }
 
 static abilityCreationInstance * thisAbilityCreationInstance;
+static abilityView * thisAbilityView;
 
 void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* directory, char* effectsFileNam){
 	int i;
@@ -84,8 +85,32 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
 }
 
+void initThisAbilityView(int imageID, COLORREF rgb, int x, int y){
+	thisAbilityView = malloc(sizeof(abilityView));
+
+	thisAbilityView->inAbiltyViewMode = 0;
+	thisAbilityView->currentAbilityIndex = 0;
+	thisAbilityView->numAbilites = 0;
+	thisAbilityView->MAX_ABILITIES = 64;
+
+	thisAbilityView->abilityViewWindow = createCharacter(imageID, rgb, x, y);
+	thisAbilityView->selector = createCharacter(3501, rgb, x, y);
+}
+
+void toggleAbilityViewMode(){
+	thisAbilityView->inAbiltyViewMode = (thisAbilityView->inAbiltyViewMode + 1) % 2;
+}
+
 void toggleCreateMode(){
 	thisAbilityCreationInstance->inCreateMode = (thisAbilityCreationInstance->inCreateMode + 1) % 2;
+}
+
+int inAbilityViewMode(){
+	if(thisAbilityView != NULL){
+		return thisAbilityView->inAbiltyViewMode;
+	}else{
+		return 0;
+	}
 }
 
 int inAbilityCreateMode(){
@@ -107,6 +132,21 @@ void changeAbilityTemplate(int shift){
 	}
 
 	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
+}
+
+void drawThisAbilityView(HDC hdc, HDC hdcBuffer, RECT * prc){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+
+	RECT textRect;
+	textRect.top = thisAbilityView->abilityViewWindow->y + 20;
+	textRect.left = thisAbilityView->abilityViewWindow->y + 30;
+	textRect.bottom = textRect.top + 40;
+	textRect.right = textRect.left + 240;
+
+	SelectObject(hdcMem, thisAbilityView->abilityViewWindow->image);
+	BitBlt(hdcBuffer, thisAbilityView->abilityViewWindow->x, thisAbilityView->abilityViewWindow->y, thisAbilityView->abilityViewWindow->width, thisAbilityView->abilityViewWindow->height, hdcMem, 0, 0, SRCCOPY);
+
+	DeleteDC(hdcMem);
 }
 
 void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
@@ -156,112 +196,112 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	effectIndex = 0;
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->rangeEnabled,
-			 hdc, hdcBuffer, &textRect, RANGE, "Range", thisAbilityCreationInstance->abilityInsance->range);
+			 hdc, hdcBuffer, &textRect, RANGE, "Range", 0, thisAbilityCreationInstance->abilityInsance->range);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->targetedEnabled,
-			 hdc, hdcBuffer, &textRect, TARGETED, "Target", thisAbilityCreationInstance->abilityInsance->targeted);
+			 hdc, hdcBuffer, &textRect, TARGETED, "Target", 0, thisAbilityCreationInstance->abilityInsance->targeted);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->extraAttackEnabled,
-			 hdc, hdcBuffer, &textRect, EXTRA_ATTACK, "Extra Attack", thisAbilityCreationInstance->abilityInsance->extraAttack);
+			 hdc, hdcBuffer, &textRect, EXTRA_ATTACK, "Extra Attack", 0, thisAbilityCreationInstance->abilityInsance->extraAttack);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageEnabled,
-			 hdc, hdcBuffer, &textRect, DICE_DAMAGE, "Dice Damage", thisAbilityCreationInstance->abilityInsance->diceDamage);
+			 hdc, hdcBuffer, &textRect, DICE_DAMAGE, "Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->diceDamage);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageEnabled,
-			 hdc, hdcBuffer, &textRect, DAMAGE, "damage", thisAbilityCreationInstance->abilityInsance->damage);
+			 hdc, hdcBuffer, &textRect, DAMAGE, "damage", 0, thisAbilityCreationInstance->abilityInsance->damage);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageDurationEnabled,
-			 hdc, hdcBuffer, &textRect, DICE_DAMAGE_DURATION, "Dice Damage Duration", thisAbilityCreationInstance->abilityInsance->diceDamageDuration);
+			 hdc, hdcBuffer, &textRect, DICE_DAMAGE_DURATION, "Dice Damage Duration", 0, thisAbilityCreationInstance->abilityInsance->diceDamageDuration);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageDurationModEnabled,
-			 hdc, hdcBuffer, &textRect, DICE_DAMAGE_DURATION_MOD, "diceDamageDurationMod", thisAbilityCreationInstance->abilityInsance->diceDamageDurationMod);
+			 hdc, hdcBuffer, &textRect, DICE_DAMAGE_DURATION_MOD, "diceDamageDurationMod", 0, thisAbilityCreationInstance->abilityInsance->diceDamageDurationMod);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeEnabled,
-				 hdc, hdcBuffer, &textRect, AOE, "aoe", thisAbilityCreationInstance->abilityInsance->aoe);
+				 hdc, hdcBuffer, &textRect, AOE, "aoe", 0, thisAbilityCreationInstance->abilityInsance->aoe);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationEnabled,
-				 hdc, hdcBuffer, &textRect, DURATION, "duration", thisAbilityCreationInstance->abilityInsance->duration);
+				 hdc, hdcBuffer, &textRect, DURATION, "duration", 0, thisAbilityCreationInstance->abilityInsance->duration);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationModEnabled,
-				 hdc, hdcBuffer, &textRect, DURATION_MOD, "durationMod", thisAbilityCreationInstance->abilityInsance->durationMod);
+				 hdc, hdcBuffer, &textRect, DURATION_MOD, "durationMod", 0, thisAbilityCreationInstance->abilityInsance->durationMod);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->STREnabled,
-				 hdc, hdcBuffer, &textRect, STR, "STR", thisAbilityCreationInstance->abilityInsance->STR);
+				 hdc, hdcBuffer, &textRect, STR, "STR", 0, thisAbilityCreationInstance->abilityInsance->STR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->DEXEnabled,
-				 hdc, hdcBuffer, &textRect, DEX, "DEX", thisAbilityCreationInstance->abilityInsance->DEX);
+				 hdc, hdcBuffer, &textRect, DEX, "DEX", 0, thisAbilityCreationInstance->abilityInsance->DEX);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CONEnabled,
-				 hdc, hdcBuffer, &textRect, CON, "CON", thisAbilityCreationInstance->abilityInsance->CON);
+				 hdc, hdcBuffer, &textRect, CON, "CON", 0, thisAbilityCreationInstance->abilityInsance->CON);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WILLEnabled,
-				 hdc, hdcBuffer, &textRect, WILL, "WILL", thisAbilityCreationInstance->abilityInsance->WILL);
+				 hdc, hdcBuffer, &textRect, WILL, "WILL", 0, thisAbilityCreationInstance->abilityInsance->WILL);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->INTEnabled,
-				 hdc, hdcBuffer, &textRect, INTEL, "INT", thisAbilityCreationInstance->abilityInsance->INT);
+				 hdc, hdcBuffer, &textRect, INTEL, "INT", 0, thisAbilityCreationInstance->abilityInsance->INT);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WISEnabled,
-				 hdc, hdcBuffer, &textRect, WIS, "WIS", thisAbilityCreationInstance->abilityInsance->WIS);
+				 hdc, hdcBuffer, &textRect, WIS, "WIS", 0, thisAbilityCreationInstance->abilityInsance->WIS);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CHREnabled,
-				 hdc, hdcBuffer, &textRect, CHR, "CHR", thisAbilityCreationInstance->abilityInsance->CHR);
+				 hdc, hdcBuffer, &textRect, CHR, "CHR", 0, thisAbilityCreationInstance->abilityInsance->CHR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->LUCKEnabled,
-				 hdc, hdcBuffer, &textRect, LUCK, "LUCK", thisAbilityCreationInstance->abilityInsance->LUCK);
+				 hdc, hdcBuffer, &textRect, LUCK, "LUCK", 0, thisAbilityCreationInstance->abilityInsance->LUCK);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->acEnabled,
-				 hdc, hdcBuffer, &textRect, AC, "ac", thisAbilityCreationInstance->abilityInsance->ac);
+				 hdc, hdcBuffer, &textRect, AC, "ac", 0, thisAbilityCreationInstance->abilityInsance->ac);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->attackEnabled,
-					 hdc, hdcBuffer, &textRect, ATTACK, "attack", thisAbilityCreationInstance->abilityInsance->attack);
+					 hdc, hdcBuffer, &textRect, ATTACK, "attack", 0, thisAbilityCreationInstance->abilityInsance->attack);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageModEnabled,
-				 hdc, hdcBuffer, &textRect, DAMAGE_MOD, "damageMod", thisAbilityCreationInstance->abilityInsance->damageMod);
+				 hdc, hdcBuffer, &textRect, DAMAGE_MOD, "damageMod", 0, thisAbilityCreationInstance->abilityInsance->damageMod);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->mvmtEnabled,
-				 hdc, hdcBuffer, &textRect, MVMT, "movement", thisAbilityCreationInstance->abilityInsance->mvmt);
+				 hdc, hdcBuffer, &textRect, MVMT, "movement", 0, thisAbilityCreationInstance->abilityInsance->mvmt);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->hpEnabled,
-				 hdc, hdcBuffer, &textRect, HP, "hp", thisAbilityCreationInstance->abilityInsance->hp);
+				 hdc, hdcBuffer, &textRect, HP, "hp", 0, thisAbilityCreationInstance->abilityInsance->hp);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalHPEnabled,
-				 hdc, hdcBuffer, &textRect, TOTAL_HP, "totalHP", thisAbilityCreationInstance->abilityInsance->totalHP);
+				 hdc, hdcBuffer, &textRect, TOTAL_HP, "totalHP", 0, thisAbilityCreationInstance->abilityInsance->totalHP);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalManaEnabled,
-				 hdc, hdcBuffer, &textRect, TOTAL_MANA, "totalMana", thisAbilityCreationInstance->abilityInsance->totalMana);
+				 hdc, hdcBuffer, &textRect, TOTAL_MANA, "totalMana", 0, thisAbilityCreationInstance->abilityInsance->totalMana);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->bluntDREnabled,
-				 hdc, hdcBuffer, &textRect, BLUNT_DR, "bluntDR", thisAbilityCreationInstance->abilityInsance->bluntDR);
+				 hdc, hdcBuffer, &textRect, BLUNT_DR, "bluntDR", 1, thisAbilityCreationInstance->abilityInsance->bluntDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->chopDREnabled,
-				 hdc, hdcBuffer, &textRect, CHOP_DR, "chopDR", thisAbilityCreationInstance->abilityInsance->chopDR);
+				 hdc, hdcBuffer, &textRect, CHOP_DR, "chopDR", 1, thisAbilityCreationInstance->abilityInsance->chopDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->pierceDREnabled,
-				 hdc, hdcBuffer, &textRect, PIERCE_DR, "pierceDR", thisAbilityCreationInstance->abilityInsance->pierceDR);
+				 hdc, hdcBuffer, &textRect, PIERCE_DR, "pierceDR", 1, thisAbilityCreationInstance->abilityInsance->pierceDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->slashDREnabled,
-				 hdc, hdcBuffer, &textRect, SLASH_DR, "slashDR", thisAbilityCreationInstance->abilityInsance->slashDR);
+				 hdc, hdcBuffer, &textRect, SLASH_DR, "slashDR", 1, thisAbilityCreationInstance->abilityInsance->slashDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->earthDREnabled,
-				 hdc, hdcBuffer, &textRect, EARTH_DR, "earthDR", thisAbilityCreationInstance->abilityInsance->earthDR);
+				 hdc, hdcBuffer, &textRect, EARTH_DR, "earthDR", 1, thisAbilityCreationInstance->abilityInsance->earthDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->fireDREnabled,
-				 hdc, hdcBuffer, &textRect, FIRE_DR, "fireDR", thisAbilityCreationInstance->abilityInsance->fireDR);
+				 hdc, hdcBuffer, &textRect, FIRE_DR, "fireDR", 1, thisAbilityCreationInstance->abilityInsance->fireDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->waterDREnabled,
-				 hdc, hdcBuffer, &textRect, WATER_DR, "waterDR", thisAbilityCreationInstance->abilityInsance->waterDR);
+				 hdc, hdcBuffer, &textRect, WATER_DR, "waterDR", 1, thisAbilityCreationInstance->abilityInsance->waterDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
-				 hdc, hdcBuffer, &textRect, LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->lightningDR);
+				 hdc, hdcBuffer, &textRect, LIGHTNING_DR, "lightningDR", 1, thisAbilityCreationInstance->abilityInsance->lightningDR);
 
 	DeleteDC(hdcMem);
 
 }
 
-void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, effect_types type, char * fieldName, effectAndManaMapList * mapList){
+void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, effect_types type, char * fieldName, int isDR, effectAndManaMapList * mapList){
 	if(isEnabled){
 		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex){
-			drawEffectMapList(hdcBuffer, textRect, fieldName, mapList);
+			drawEffectMapList(hdcBuffer, textRect, fieldName, isDR, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				thisAbilityCreationInstance->selectedType = type;
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
@@ -273,13 +313,18 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 	}
 }
 
-void drawEffectMapList(HDC hdcBuffer, RECT * textRect, char * fieldName, effectAndManaMapList * mapList){
+void drawEffectMapList(HDC hdcBuffer, RECT * textRect, char * fieldName, int isDR, effectAndManaMapList * mapList){
 		moveRECTDown(textRect, 17);
 		char * tmpString = getEffectAndManaString(fieldName, mapList);
-		int manaCost = mapList->effectAndManaArray[mapList->selectedIndex]->manaCost;
-		if(manaCost > 0){
+		int cost;
+		if(isDR){
+			cost= mapList->effectAndManaArray[mapList->selectedIndex]->effectMagnitude;
+		}else{
+			cost= mapList->effectAndManaArray[mapList->selectedIndex]->manaCost;
+		}
+		if(cost > 0){
 			SetTextColor(hdcBuffer, RGB(0, 162, 255));
-		}else if (manaCost < 0){
+		}else if (cost < 0){
 			SetTextColor(hdcBuffer, RGB(255, 0, 0));
 		}
 
