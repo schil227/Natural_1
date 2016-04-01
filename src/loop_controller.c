@@ -241,6 +241,7 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 		switch (LOWORD(wParam)) {
 			case 0x1B:{ //esc
 				toggleAbilityViewMode();
+				resetAbilityView();
 			}
 			case 0x0D: { //enter
 				break;

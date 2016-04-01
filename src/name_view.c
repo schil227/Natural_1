@@ -127,9 +127,8 @@ int selectCharacter(){
 		}
 	}else{
 
-	thisNameBoxInstance->name[thisNameBoxInstance->currentNameIndex] = getCharFromArr();
-
-	if(thisNameBoxInstance->currentNameIndex < thisNameBoxInstance->MAX_NAME_LENGTH){
+	if(thisNameBoxInstance->currentNameIndex + 1 < thisNameBoxInstance->MAX_NAME_LENGTH){
+		thisNameBoxInstance->name[thisNameBoxInstance->currentNameIndex] = getCharFromArr();
 		thisNameBoxInstance->currentNameIndex++;
 	}
 
