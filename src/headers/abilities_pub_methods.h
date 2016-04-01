@@ -15,5 +15,6 @@ ability * cloneAbility(ability * thisAbility);
 char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map);
 void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, effect_types type, char * fieldName, int isDR, effectAndManaMapList * mapList);
 effectAndManaMapList * getMapListFromEffectType();
+void clearAblitiesView();
 
 #endif /* SRC_HEADERS_ABILITIES_PUB_METHODS_H_ */

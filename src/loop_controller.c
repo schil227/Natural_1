@@ -247,12 +247,12 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 			}
 			case 0x38:
 			case 0x68:{ //'8'
-//				selectPreviousAbility();
+				selectPreviousAbility();
 				break;
 			}
 			case 0x32:
 			case 0x62:{ //'2' key
-//				selectNextAbility();
+				selectNextAbility();
 				break;
 			}
 		}

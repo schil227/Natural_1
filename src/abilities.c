@@ -89,9 +89,13 @@ void initThisAbilityView(int imageID, COLORREF rgb, int x, int y){
 	thisAbilityView = malloc(sizeof(abilityView));
 
 	thisAbilityView->inAbiltyViewMode = 0;
-	thisAbilityView->currentAbilityIndex = 0;
 	thisAbilityView->numAbilites = 0;
 	thisAbilityView->MAX_ABILITIES = 64;
+
+	thisAbilityView->currentAbilityIndex = 0;
+	thisAbilityView->startingAbilityIndex = 0;
+	thisAbilityView->endingAbilityIndex = 0;
+	thisAbilityView->MAX_ABILITIES_ON_WINDOW =3;
 
 	thisAbilityView->abilityViewWindow = createCharacter(imageID, rgb, x, y);
 	thisAbilityView->selector = createCharacter(3501, rgb, x, y);
@@ -121,6 +125,34 @@ int inAbilityCreateMode(){
 	}
 }
 
+void clearAblitiesView(){
+	int i;
+
+	for(i = 0; i < thisAbilityView->numAbilites; i++){
+		thisAbilityView->abilitiesList[i] = NULL;
+	}
+
+	thisAbilityView->numAbilites = 0;
+}
+
+void refreshAbilityView(int numAbilities, ability * abilitiesList[64]){
+	int i;
+
+	clearAblitiesView();
+
+	for(i = 0; i < numAbilities; i++){
+		if(i < thisAbilityView->MAX_ABILITIES){
+			thisAbilityView->abilitiesList[i] = abilitiesList[i];
+			thisAbilityView->numAbilites++;
+		} else {
+			cwrite("!! CANNOT ADD MORE ABILITES TO THE VIEW !!");
+			break;
+		}
+	}
+
+	thisAbilityView->endingAbilityIndex = min(thisAbilityView->numAbilites, thisAbilityView->MAX_ABILITIES_ON_WINDOW);
+}
+
 void changeAbilityTemplate(int shift){
 	int newIndex = thisAbilityCreationInstance->templateIndex + shift;
 	newIndex = newIndex < 0 ? thisAbilityCreationInstance->numAbilityTemplates -1 : newIndex % (thisAbilityCreationInstance->numAbilityTemplates);
@@ -135,16 +167,25 @@ void changeAbilityTemplate(int shift){
 }
 
 void drawThisAbilityView(HDC hdc, HDC hdcBuffer, RECT * prc){
+	int i;
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
 	RECT textRect;
-	textRect.top = thisAbilityView->abilityViewWindow->y + 20;
-	textRect.left = thisAbilityView->abilityViewWindow->y + 30;
+	textRect.top = thisAbilityView->abilityViewWindow->y + 30;
+	textRect.left = thisAbilityView->abilityViewWindow->x + 30;
 	textRect.bottom = textRect.top + 40;
 	textRect.right = textRect.left + 240;
 
 	SelectObject(hdcMem, thisAbilityView->abilityViewWindow->image);
 	BitBlt(hdcBuffer, thisAbilityView->abilityViewWindow->x, thisAbilityView->abilityViewWindow->y, thisAbilityView->abilityViewWindow->width, thisAbilityView->abilityViewWindow->height, hdcMem, 0, 0, SRCCOPY);
+
+	for(i = thisAbilityView->startingAbilityIndex; i < thisAbilityView->endingAbilityIndex; i++){
+		DrawText(hdcBuffer, thisAbilityView->abilitiesList[i]->name, strlen(thisAbilityView->abilitiesList[i]->name), &textRect, DT_SINGLELINE);
+		if(thisAbilityView->currentAbilityIndex == i){
+			drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect.left - 25,textRect.top,thisAbilityView->selector);
+		}
+		moveRECTDown(&textRect, 17);
+	}
 
 	DeleteDC(hdcMem);
 }
@@ -343,6 +384,38 @@ char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map){
 	sprintf(toReturn, "%s: %d, cost: %d", propertyName, effect, mana);
 
 	return toReturn;
+}
+
+
+void selectPreviousAbility(){
+	if(thisAbilityView->currentAbilityIndex == thisAbilityView->startingAbilityIndex &&
+			thisAbilityView->currentAbilityIndex > 0){
+		shiftAbilityListDown();
+	}else if(thisAbilityView->currentAbilityIndex > 0){
+		thisAbilityView->currentAbilityIndex--;
+	}
+
+}
+
+void selectNextAbility(){
+	if(thisAbilityView->currentAbilityIndex + 1 == thisAbilityView->endingAbilityIndex &&
+			thisAbilityView->endingAbilityIndex < thisAbilityView->numAbilites){
+		shiftAbilityListUp();
+	}else if (thisAbilityView->currentAbilityIndex + 1 < thisAbilityView->endingAbilityIndex){
+		thisAbilityView->currentAbilityIndex++;
+	}
+}
+
+void shiftAbilityListUp(){
+	thisAbilityView->startingAbilityIndex++;
+	thisAbilityView->endingAbilityIndex++;
+	thisAbilityView->currentAbilityIndex++;
+}
+
+void shiftAbilityListDown(){
+	thisAbilityView->startingAbilityIndex--;
+	thisAbilityView->endingAbilityIndex--;
+	thisAbilityView->currentAbilityIndex--;
 }
 
 void selectNextEffect(){

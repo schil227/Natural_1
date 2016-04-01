@@ -349,7 +349,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x52://r key (ability view)
 			{
 				toggleAbilityViewMode();
-//				refreshAbilityView(player->abilities->numAbilities, player->abilities->abilitiesList);
+				refreshAbilityView(player->abilities->numAbilities, player->abilities->abilitiesList);
 			}
 			break;
 		case 0x57: //w key (wait)

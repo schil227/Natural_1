@@ -152,9 +152,13 @@ typedef struct {
 
 typedef struct{
 	int inAbiltyViewMode;
-	int currentAbilityIndex;
 	int numAbilites;
 	int MAX_ABILITIES;
+
+	int currentAbilityIndex;
+	int startingAbilityIndex;
+	int endingAbilityIndex;
+	int MAX_ABILITIES_ON_WINDOW;
 
 	ability * abilitiesList[64];
 
