@@ -62,6 +62,26 @@ void moveRECTRight(RECT * thisRect, int distance){
 	thisRect->right = thisRect->right + distance;
 }
 
+int calcAbilityDuration(ability * thisAbility){
+	int duration = 0, durationMod = 0;
+
+	if(thisAbility->durationEnabled){
+		duration = thisAbility->duration->effectAndManaArray[thisAbility->duration->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->durationModEnabled){
+		durationMod = thisAbility->durationMod->effectAndManaArray[thisAbility->durationMod->selectedIndex]->effectMagnitude;
+	}
+
+	if(duration > 0){
+		return (rand() % duration) + 1 + durationMod;
+	}else{
+		return durationMod;
+	}
+
+
+}
+
 int calculateManaCost(ability * thisAbility){
 	int sum = -1; //Ability = -1
 	int dam = 0;

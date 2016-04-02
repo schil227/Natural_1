@@ -300,6 +300,11 @@ int calcCrit(individual * thisIndividual, int maxDamTotal, int minDamTotal, int 
 }
 
 void startTurn(individual * thisIndividual){
+	processActiveItems(thisIndividual);
+	processActiveAbilities(thisIndividual);
+}
+
+void processActiveItems(individual * thisIndividual){
 	int i, itemsPassed = 0;
 	activeItem * tmpActiveItem;
 
@@ -327,6 +332,40 @@ void startTurn(individual * thisIndividual){
 			break;
 		}
 	}
+}
+
+void processActiveAbilities(individual * thisIndividual){
+	int i;
+	activeAbilityList * activeAbilities = thisIndividual->activeAbilities;
+
+	i = 0;
+	while(i < activeAbilities->numAbilities){
+		activeAbility * thisActiveAbility = activeAbilities->abilitiesList[i];
+
+		if(thisActiveAbility->thisAbility->type != 'p'){
+			if(thisActiveAbility->turnsRemaining == 0){
+				useActiveAbility(thisActiveAbility);
+
+			} else {
+				char * tmp[64];
+				sprintf(tmp, "Ability %s has finished.", thisActiveAbility->thisAbility->name);
+				cwrite(tmp);
+
+				activeAbilities->abilitiesList[i] = NULL;
+				//replace current element with last element, decrement elements
+				activeAbilities->abilitiesList[i] = activeAbilities->abilitiesList[activeAbilities->numAbilities-1];
+				activeAbilities->abilitiesList[activeAbilities->numAbilities-1] = NULL;
+				activeAbilities->numAbilities--;
+				i--;
+			}
+		}
+		i++;
+	}
+
+}
+
+void useActiveAbility(activeAbility * thisActiveAbility){
+	thisActiveAbility->turnsRemaining--;
 }
 
 void endTurn(individual *thisIndividual){
@@ -576,6 +615,26 @@ void addActiveAbilityToIndividual(individual * thisIndividual, ability * thisAbi
 
 	thisIndividual->activeAbilities->abilitiesList[thisIndividual->activeAbilities->numAbilities] = newActiveAbility;
 	thisIndividual->activeAbilities->numAbilities++;
+}
+
+void useAbility(individual * thisIndividual, ability * thisAbility){
+	//target cursor mode
+	if(thisAbility->type == 't'){ //targeted
+
+	}else if(thisAbility->type == 'd'){ //duration
+		int duration = calcAbilityDuration(thisAbility);
+		char * tmp[64];
+
+		if(thisIndividual->activeAbilities->numAbilities + 1 < thisIndividual->activeAbilities->MAX_ABILITIES){
+			sprintf(tmp, "Used %s for %d turns.",thisAbility->name, duration);
+			cwrite(tmp);
+
+			addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
+		}else{
+			cwrite("Cannot use another ability");
+		}
+
+	}
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

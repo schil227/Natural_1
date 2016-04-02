@@ -243,7 +243,14 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 				toggleAbilityViewMode();
 				resetAbilityView();
 			}
+			break;
 			case 0x0D: { //enter
+				if(abilityCanBeUsed()){
+					useAbility(player,getAbilityToActivate());
+
+					toggleAbilityViewMode();
+					resetAbilityView();
+				}
 				break;
 			}
 			case 0x38:
