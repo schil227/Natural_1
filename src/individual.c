@@ -310,8 +310,10 @@ void startTurn(individual * thisIndividual){
 			tmpActiveItem->remaningTurns--;
 
 			if(tmpActiveItem->remaningTurns <= 0){
-				//free(tmpActiveItem->thisItem);
-				//free(tmpActiveItem);
+				char * tmp[64];
+				sprintf(tmp, "%s has worn off.", tmpActiveItem->thisItem->name);
+				cwrite(tmp);
+
 				thisIndividual->activeItems->activeItemArr[i] = NULL;
 				thisIndividual->activeItems->activeItemsTotal--;
 			}else{
