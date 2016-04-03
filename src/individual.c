@@ -368,6 +368,17 @@ void useActiveAbility(activeAbility * thisActiveAbility){
 	thisActiveAbility->turnsRemaining--;
 }
 
+void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * initEnemyActionMode){
+
+	thisIndividual->remainingActions = thisIndividual->remainingActions - 1;
+
+	if (thisIndividual->remainingActions <= 0) {
+		endTurn(thisIndividual);
+		*enemyActionMode = 1;
+		*initEnemyActionMode = 1;
+	}
+}
+
 void endTurn(individual *thisIndividual){
 	printf("player turn ended\n");
 	thisIndividual->hasAttacked = 0;
@@ -375,8 +386,10 @@ void endTurn(individual *thisIndividual){
 }
 
 int individualWithinRange(individual * thisIndividual, individual * target){
-	if(abs(thisIndividual->playerCharacter->x - target->playerCharacter->x) <= thisIndividual->range
-	&& abs(thisIndividual->playerCharacter->y - target->playerCharacter->y) <= thisIndividual->range){
+	int range = getAttributeSum(thisIndividual, "range");
+
+	if(abs(thisIndividual->playerCharacter->x - target->playerCharacter->x) <= range
+	&& abs(thisIndividual->playerCharacter->y - target->playerCharacter->y) <= range){
 		return 1;
 	}
 	return 0;

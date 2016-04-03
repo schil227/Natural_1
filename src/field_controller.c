@@ -600,6 +600,12 @@ int attemptToTransit(field ** thisField, individual * player, individualGroup * 
 	return 0;
 }
 
+void tryTalkGroups(individualGroup * enemies, individualGroup * npcs, individual * player, int cursorX, int cursorY){
+	if(!tryTalk(npcs,player,getCursorX(),getCursorY()) && !tryTalk(enemies,player,getCursorX(),getCursorY())){
+		cwrite("There's nobody there.");
+	}
+}
+
 int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursorX, int cursorY){
 	int index;
 	for (index = 0; index < thisGroup->numIndividuals; index++) {

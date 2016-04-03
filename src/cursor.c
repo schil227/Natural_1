@@ -6,46 +6,78 @@
  */
 #include "./headers/cursor_pub_methods.h"
 
-void drawCursor(HDC hdc, HDC hdcBuffer, cursor* thisCursor, shiftData * viewData){
+static cursor * thisCursorInstance;
+
+void initThisCursor(int imageID, COLORREF rgb, int x, int y) {
+	thisCursorInstance = malloc(sizeof(cursor));
+	thisCursorInstance->cursorCharacter = createCharacter(imageID, rgb, x, y);
+
+	thisCursorInstance->inCursorMode = 0;
+}
+
+void drawCursor(HDC hdc, HDC hdcBuffer, shiftData * viewData){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCursor->cursorCharacter->imageMask);
-	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursor->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
-	SelectObject(hdcMem, thisCursor->cursorCharacter->image);
-	BitBlt(hdcBuffer, thisCursor->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursor->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursor->cursorCharacter->width, thisCursor->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->imageMask);
+	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
+	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->image);
+	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
-void destroyCursor(cursor* thisCursor){
-	if(thisCursor->cursorCharacter){
-		free(thisCursor->cursorCharacter);
-	}
-	free(thisCursor);
+void toggleInCursorMode(){
+	thisCursorInstance->inCursorMode = (thisCursorInstance->inCursorMode + 1) % 2;
 }
 
-cursor * initCursor(int imageID, COLORREF rgb, int x, int y) {
-	BITMAP bm;
-	cursor * thisCursor = malloc(sizeof(cursor));
-	thisCursor->cursorCharacter = malloc(sizeof(character));
+int inCursorMode(){
+	if(thisCursorInstance != NULL){
+		return thisCursorInstance->inCursorMode;
+	}else{
+		return 0;
+	}
+}
 
-	thisCursor->cursorCharacter->imageID = imageID;
-	thisCursor->cursorCharacter->image = LoadBitmap(GetModuleHandle(NULL),
-	MAKEINTRESOURCE(imageID));
+void refreshCursor(cursorModes thisMode, int x, int y){
+	thisCursorInstance->thisMode = thisMode;
+	setCursorCoords(x,y);
+}
 
-	if (thisCursor->cursorCharacter->image == NULL) {
+cursorModes getCursorMode(){
+	return thisCursorInstance->thisMode;
+}
+
+int getCursorX(){
+	return thisCursorInstance->cursorCharacter->x;
+}
+
+int getCursorY(){
+	return thisCursorInstance->cursorCharacter->y;
+}
+
+void setCursorCoords(int x, int y){
+	thisCursorInstance->cursorCharacter->x = x;
+	thisCursorInstance->cursorCharacter->y = y;
+}
+
+int moveCursor(field *thisField, int direction, shiftData * viewShift){
+	int newX = thisCursorInstance->cursorCharacter->x + xMoveChange(direction);
+	int newY = thisCursorInstance->cursorCharacter->y + yMoveChange(direction);
+	if(newX >= 0 && newX < thisField->totalX && newY >=0 && newY < thisField->totalY){
+		setCursorCoords(newX, newY);
+		tryUpdateXShift(viewShift, newX);
+		tryUpdateYShift(viewShift, newY);
 		return 1;
+	}else{
+		return 0;
 	}
 
-	thisCursor->cursorCharacter->imageMask = CreateBitmapMask(
-			thisCursor->cursorCharacter->image, rgb);
-
-	GetObjectA(thisCursor->cursorCharacter->image, sizeof(bm), &bm);
-
-	thisCursor->cursorCharacter->width = bm.bmWidth;
-	thisCursor->cursorCharacter->height = bm.bmHeight;
-	thisCursor->cursorCharacter->x = x;
-	thisCursor->cursorCharacter->y = y;
-
-	return thisCursor;
 }
+
+void destroyThisCursor(){
+	if(thisCursorInstance->cursorCharacter){
+		destroyCharacter(thisCursorInstance->cursorCharacter);
+	}
+	free(thisCursorInstance);
+}
+
 
 

@@ -8,7 +8,6 @@
 #ifndef SRC_HEADERS_LOOP_CONTROLLER_PUB_METHODS_H_
 #define SRC_HEADERS_LOOP_CONTROLLER_PUB_METHODS_H_
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor, field * main_field, individual * player, individualGroup  * enemies, individualGroup  * npcs, shiftData * viewShift);
 int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift);
 
 int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,

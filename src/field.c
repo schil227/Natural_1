@@ -215,50 +215,26 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 
 }
 
+int tryAttackEnemies(individualGroup * enemies, individual * player, field * thisField, int x, int y){
+	int i;
 
-//int setIndividualTmpSpace(field *thisField, individual *thisIndividual, int x, int y){
-//
-//	//check if in bounds
-//	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
-//			return 0;
-//	}
-//
-//	if(getSpaceFromField(thisField,x,y)->tmpIndividual == NULL){
-//		space * oldSpace = getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
-//		space * newSpace = getSpaceFromField(thisField, x, y);
-//		newSpace->tmpIndividual = malloc(sizeof(individual*));
-//		oldSpace->tmpIndividual = NULL;
-//		free(oldSpace->tmpIndividual);
-//
-//		newSpace->tmpIndividual = thisIndividual;
-//		thisIndividual->playerCharacter->x = x;
-//		thisIndividual->playerCharacter->y = y;
-//		return 1;
-//	}
-//
-//	//space occoupied
-//	return 0;
-//
-//}
+	for (i = 0; i < enemies->numIndividuals; i++) {
 
-int moveCursor(field *thisField, cursor *thisCursor, int direction, shiftData * viewShift){
-	int newX = thisCursor->cursorCharacter->x + xMoveChange(direction);
-	int newY = thisCursor->cursorCharacter->y + yMoveChange(direction);
-	printf("newX:%d, newY:%d\n",newX, newY);
-	//check if in bounds, and newSpace exists
-	printf("y:%d \n", viewShift->yShift);
-	if(newX >= 0 && newX < thisField->totalX && newY >=0 && newY < thisField->totalY){
-		thisCursor->cursorCharacter->x = newX;
-		thisCursor->cursorCharacter->y = newY;
-		tryUpdateXShift(viewShift, newX);
-		tryUpdateYShift(viewShift, newY);
-		return 1;
-	}else{
-		return 0;
+		individual * tmpEnemy = enemies->individuals[i];
+
+		if (tmpEnemy->playerCharacter->x == x && tmpEnemy->playerCharacter->y == y && individualWithinRange(player, tmpEnemy)) {
+
+			if (attackIndividual(player, tmpEnemy)) {
+				deleteIndividiaulFromGroup(enemies, tmpEnemy);
+				removeIndividualFromField(thisField, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
+			}
+
+			return 1;
+		}
 	}
 
+	return 0;
 }
-
 
 void wanderAround(field * thisField, individual * thisIndividual){
  int direction = rand() % 10+1;

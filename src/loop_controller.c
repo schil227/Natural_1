@@ -7,19 +7,18 @@
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMode, int * postCursorMode, cursor * thisCursor,
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyActionMode, int * initEnemyActionMode,
 		field * main_field, individual * player, individualGroup  * enemies, individualGroup  * npcs, shiftData * viewShift) {
-	int toReturn = 0;
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
 		case 0x34: //left
 		case 0x64:
-		case 0x36:
+		case 0x36: //right
 		case 0x66:
-		case 0x38:
+		case 0x38: //up
 		case 0x68:
-		case 0x32:
+		case 0x32: //down
 		case 0x62:
 		case 0x31: //down left
 		case 0x61:
@@ -33,52 +32,30 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 			int direction;
 			direction = LOWORD(wParam) % 16;
 			printf("cursor y:%d \n", viewShift->yShift);
-			moveCursor(main_field,thisCursor,direction, viewShift);
+			moveCursor(main_field,direction, viewShift);
 			break;
 		}
 		case 0x1B: //escape
-			*cursorMode = 0;
+			toggleInCursorMode();
 			viewShift->xShift = viewShift->xShiftOld;
 			viewShift->yShift = viewShift->yShiftOld;
 			break;
 		case 0x0D: //enter //TODO: when attacking, supply both enemies and NPCs, ensure the character cannot attack themselves
 		{
-			if (*cursorMode == 1) {//attack the individual
-				int cX, cY, index;
-				cX = thisCursor->cursorCharacter->x;
-				cY = thisCursor->cursorCharacter->y;
+			if (getCursorMode() == CURSOR_ATTACK) {//attack the individual
+				if(tryAttackEnemies(enemies, player, main_field, getCursorX(), getCursorY())){
+					toggleInCursorMode();
 
-				for (index = 0; index < enemies->numIndividuals; index++) {
-
-					individual * tmpEnemy = enemies->individuals[index];
-
-					if (tmpEnemy->playerCharacter->x == cX && tmpEnemy->playerCharacter->y == cY && individualWithinRange(player, tmpEnemy)) {
-						printf("attacked!");
-						if (attackIndividual(player, tmpEnemy)) {
-							deleteIndividiaulFromGroup(enemies, tmpEnemy);
-							removeIndividualFromField(main_field, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
-//							destroyIndividual(tmpEnemy);
-						}
-						*cursorMode = 0;
-						*postCursorMode = 1;
-
-						viewShift->xShift = viewShift->xShiftOld;
-						viewShift->yShift = viewShift->yShiftOld;
-						break;
-					}
-
-				}
-			}else if(*cursorMode == 2){ //talk to the individual
-				int cX, cY;
-				cX = thisCursor->cursorCharacter->x;
-				cY = thisCursor->cursorCharacter->y;
-
-				if(!tryTalk(npcs,player,cX,cY) && !tryTalk(enemies,player,cX,cY)){
-					cwrite("There's nobody there.");
+					viewShift->xShift = viewShift->xShiftOld;
+					viewShift->yShift = viewShift->yShiftOld;
+					decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 				}
 
-				*cursorMode = 0;
-				*postCursorMode = 1;
+			}else if(getCursorMode() == CURSOR_TALK){ //talk to the individual
+				tryTalkGroups(enemies, npcs, player, getCursorX(), getCursorY());
+
+				decreaseTurns(player, enemyActionMode, initEnemyActionMode);
+				toggleInCursorMode();
 			}
 
 		}
@@ -98,7 +75,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * cursorMo
 		DestroyWindow(hwnd);
 		break;
 		case WM_DESTROY:
-		destroyCursor(thisCursor);
+		destroyThisCursor();
 		PostQuitMessage(0);
 		break;
 		default:

@@ -10,7 +10,12 @@
 
 #include"../individual_pub_methods.h"
 
+typedef enum {CURSOR_ATTACK, CURSOR_TALK, CURSOR_TARGETED_ABILITY} cursorModes;
+
 typedef struct {
+	int inCursorMode;
+	cursorModes thisMode;
+
 	character* cursorCharacter;
 } cursor;
 

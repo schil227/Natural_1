@@ -28,10 +28,6 @@ int mainWindowHeight = 820;
 HWND g_sidebar = NULL;
 HWND g_toolbar = NULL;
 
-int cursorMode = 0;
-int initCursorMode = 0;
-int postCursorMode = 0;
-
 int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
@@ -49,7 +45,6 @@ individual* player;
 
 individualGroup* enemies;
 individualGroup* npcs;
-cursor* thisCursor;
 field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
 
@@ -156,8 +151,8 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, npcs->individuals[npcs->currentIndividualIndex], viewShift);
 	}
 
-	if (cursorMode) {
-		drawCursor(hdc, hdcBuffer, thisCursor, viewShift);
+	if (inCursorMode()) {
+		drawCursor(hdc, hdcBuffer, viewShift);
 	}
 
 	if (moveMode){
@@ -213,7 +208,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		player = initIndividual();
 		enemies = initGroup();
 		npcs = initGroup();
-		thisCursor = initCursor(2004,RGB(224, 64, 192),0,0);
+		initThisCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
@@ -309,10 +304,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		switch (LOWORD(wParam)) {
 
 		case 0x41: //a key (attack)
-			printf("starting \n");
-			cursorMode = 1;
-			initCursorMode = 1;
-			printf("pressed a\n");
+			toggleInCursorMode();
+			refreshCursor(CURSOR_ATTACK, player->playerCharacter->x, player->playerCharacter->y);
+			viewShift->xShiftOld = viewShift->xShift;
+			viewShift->yShiftOld = viewShift->yShift;
 			break;
 		case 0x53: //s key (move)
 			moveMode = 1;
@@ -337,8 +332,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x54://t key (talk)
 			{
-				cursorMode = 2;
-				initCursorMode = 1;
+				toggleInCursorMode();
+				refreshCursor(CURSOR_TALK, player->playerCharacter->x, player->playerCharacter->y);
+				viewShift->xShiftOld = viewShift->xShift;
+				viewShift->yShiftOld = viewShift->yShift;
 			}
 			break;
 		case 0x43://c key (ability create)
@@ -493,38 +490,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 	}else if(inAbilityViewMode()){
 		return abilityViewLoop(hwnd, msg, wParam, lParam, player);
-	}else if (cursorMode) {
-		if (initCursorMode) {
-			viewShift->xShiftOld = viewShift->xShift;
-			viewShift->yShiftOld = viewShift->yShift;
-
-			printf("playerX:%d\n", player->playerCharacter->x);
-			thisCursor->cursorCharacter->x = player->playerCharacter->x;
-			thisCursor->cursorCharacter->y = player->playerCharacter->y;
-			initCursorMode = 0;
-
-		}
-
-		return cursorLoop(hwnd, msg, wParam, lParam, &cursorMode, &postCursorMode, thisCursor, main_field, player, enemies, npcs, viewShift);
-	} else if(postCursorMode){
-		postCursorMode = 0;
-
-		player->remainingActions = player->remainingActions - 1;
-
-		if (player->remainingActions <= 0) {
-			endTurn(player);
-			enemyActionMode = 1;
-			initEnemyActionMode = 1;
-
-//			int i;
-//			for (i = 0; i < thisEnemies->numEnemies; i++) {
-//				enemyAction((thisEnemies->enemies[i]), main_field, player);
-//			}
-//
-//			startTurn(player);
-		}
-
-
+	}else if (inCursorMode()) {
+		return cursorLoop(hwnd, msg, wParam, lParam, &enemyActionMode, &initEnemyActionMode, main_field, player, enemies, npcs, viewShift);
 	} else if(moveMode){
 
 
@@ -575,18 +542,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			free(thisMoveNodeMeta);
 		}
 
-
-
 		return 0;
 	} else if(inInventoryViewMode()){
-
-//		if(initInventoryMode){
-//			refreshInventory(player->backpack);
-//			initInventoryMode = 0;
-//		}
-
 		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, enemies, viewShift);
-
 	}else if(enemyActionMode){
 		if(enemies->numIndividuals == 0){
 			enemyActionMode = 0;
