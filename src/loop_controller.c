@@ -56,6 +56,12 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 
 				decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 				toggleInCursorMode();
+			}else if (getCursorMode() == CURSOR_TARGETED_ABILITY){
+				//todo: check if ability's in range
+				attackIndividualsInAOERange(player, npcs, enemies, main_field, getCursorX(), getCursorY());
+
+				decreaseTurns(player, enemyActionMode, initEnemyActionMode);
+				toggleInCursorMode();
 			}
 
 		}
@@ -224,6 +230,11 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 			case 0x0D: { //enter
 				if(abilityCanBeUsed()){
 					useAbility(player,getAbilityToActivate());
+
+					if(player->activeAbilities->selectedTargetedAbility->type = 't'){
+						toggleInCursorMode();
+						refreshCursor(CURSOR_TARGETED_ABILITY, player->playerCharacter->x, player->playerCharacter->y);
+					}
 
 					toggleAbilityViewMode();
 					resetAbilityView();

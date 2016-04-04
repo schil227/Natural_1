@@ -24,10 +24,8 @@ typedef struct {
 typedef struct {
 	int numCharacters;
 	bool isPassable;
-//	character items[];
 	character* background;
 	individual* currentIndividual;
-//	individual* tmpIndividual;
 	transitInfo* thisTransitInfo;
 } space;
 

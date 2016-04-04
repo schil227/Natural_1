@@ -236,6 +236,72 @@ int tryAttackEnemies(individualGroup * enemies, individual * player, field * thi
 	return 0;
 }
 
+void tryAttackIndividualsWithAbility(individual * thisIndividual, individualGroup * targets, individualGroup * npcs, individualGroup * enemies, field * thisField){
+	int i;
+
+	for(i = 0; i < targets->numIndividuals; i++){
+		if(attackIndividualWithAbility(thisIndividual, targets->individuals[i])){
+			if(individualInGroup(targets->individuals[i],enemies)){
+				deleteIndividiaulFromGroup(enemies, targets->individuals[i]);
+			}
+			if(individualInGroup(targets->individuals[i],npcs)){
+				deleteIndividiaulFromGroup(npcs, targets->individuals[i]);
+			}
+			removeIndividualFromField(thisField, targets->individuals[i]->playerCharacter->x, targets->individuals[i]->playerCharacter->y);
+		}
+	}
+}
+
+void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
+	int i, aoe = 0, minX, maxX, minY, maxY;
+	ability * tmpAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
+
+	if(tmpAbility->aoeEnabled){
+		aoe = tmpAbility->aoe->effectAndManaArray[tmpAbility->aoe->selectedIndex]->effectMagnitude;
+	}
+
+	minX = x - aoe;
+	maxX = x + aoe;
+	minY = y - aoe;
+	maxY = y + aoe;
+
+	for(i = 0; i < enemies->numIndividuals; i++){
+		individual * tmp = enemies->individuals[i];
+		if(tmp->playerCharacter->x >= minX &&
+			tmp->playerCharacter->x <= maxX &&
+			tmp->playerCharacter->y >= minY &&
+			tmp->playerCharacter->y <= maxY ){
+			if(attackIndividualWithAbility(thisIndividual, tmp)){
+				deleteIndividiaulFromGroup(enemies, tmp);
+				removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+			}
+		}
+	}
+
+	for(i = 0; i < npcs->numIndividuals; i++){
+		individual * tmp = npcs->individuals[i];
+		if(tmp->playerCharacter->x >= minX &&
+			tmp->playerCharacter->x <= maxX &&
+			tmp->playerCharacter->y >= minY &&
+			tmp->playerCharacter->y <= maxY ){
+			if(attackIndividualWithAbility(thisIndividual, tmp)){
+				deleteIndividiaulFromGroup(npcs, tmp);
+				removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+			}
+		}
+	}
+
+	if(thisIndividual->playerCharacter->x >= minX &&
+			thisIndividual->playerCharacter->x <= maxX &&
+			thisIndividual->playerCharacter->y >= minY &&
+			thisIndividual->playerCharacter->y <= maxY ){
+		if(attackIndividualWithAbility(thisIndividual, thisIndividual)){
+			removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+		}
+	}
+
+}
+
 void wanderAround(field * thisField, individual * thisIndividual){
  int direction = rand() % 10+1;
  moveIndividual(thisField, thisIndividual, direction);

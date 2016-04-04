@@ -210,6 +210,81 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	}
 }
 
+int attackIndividualWithAbility(individual * thisIndividual, individual * target){
+	ability * targetAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
+	int i, isTargeted = 0;
+
+	if(targetAbility->targetedEnabled){
+		isTargeted = targetAbility->targeted->effectAndManaArray[targetAbility->targeted->selectedIndex]->effectMagnitude;
+	}
+
+	triggerEventOnAttack(target->ID);
+
+	if(isTargeted){
+		return damageIndividualWithAbility(thisIndividual, target);
+	}else{
+		int statValue = 0, d20;
+
+		statValue = getAttributeSum(target, "WIS");
+		d20 = rand() % 20 + 1;
+
+		char statOut[128];
+		sprintf(statOut, "Saving throw WIS Check: %d + 2*%d = %d", d20, statValue, (d20 + statValue*2));
+		cwrite(statOut);
+
+		if((d20 + statValue*2) < 13){
+			cwrite("Saving throw failed!");
+		return 	damageIndividualWithAbility(thisIndividual, target);
+		}else{
+			sprintf(statOut, "%s's ability failed!", thisIndividual->name);
+			cwrite(statOut);
+			return 0;
+		}
+
+	}
+}
+
+int damageIndividualWithAbility(individual *thisIndividual, individual *targetIndividual){
+	int damage = 0, totalDamage, targetDR;
+	ability * targetAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
+
+	if(targetAbility->diceDamageEnabled){
+		int diceDamage = targetAbility->diceDamage->effectAndManaArray[targetAbility->diceDamage->selectedIndex]->effectMagnitude;
+		if(diceDamage > 0){
+			damage = (rand() % diceDamage) + 1;
+		}
+	}
+
+	if(targetAbility->damageEnabled){
+		damage += targetAbility->damage->effectAndManaArray[targetAbility->damage->selectedIndex]->effectMagnitude;
+	}
+
+	targetDR = calcDR(targetIndividual, targetAbility->damageType);
+
+	totalDamage = damage - targetDR;
+
+	if(totalDamage < 1){
+		totalDamage = 0;
+	}
+
+	if(totalDamage > 0){
+		triggerEventOnHarm(targetIndividual->ID);
+	}
+
+	sendHitDialog(thisIndividual->name, targetIndividual->name, 20, totalDamage);
+	targetIndividual->hp = targetIndividual->hp - totalDamage;
+
+	if(targetIndividual->hp <= 0){ //target is dead
+		sendDeathDialog(targetIndividual->name, thisIndividual->name);
+		triggerEventOnDeath(targetIndividual->ID);
+		removeFromExistance(targetIndividual->ID);
+		return 1;
+	}else{ //non-fatal blow
+		return 0;
+	}
+
+}
+
 int damageIndividual(individual *thisIndividual, individual *targetIndividual, int isCrit){
 	int totalDamage = 0, i, totalDR, maxDamTotal, minDamTotal, baseDam;
 	char attackType = 'b'; //for now, default is blunt (punching)
@@ -279,6 +354,18 @@ int calcDR(individual * targetIndividual, char attackType){
 		break;
 	case 'p':
 		totalDR += getAttributeSum(targetIndividual, "pierceDR");
+		break;
+	case 'e':
+		totalDR += getAttributeSum(targetIndividual, "earthDR");
+		break;
+	case 'f':
+		totalDR += getAttributeSum(targetIndividual, "fireDR");
+		break;
+	case 'w':
+		totalDR += getAttributeSum(targetIndividual, "waterDR");
+		break;
+	case 'l':
+		totalDR += getAttributeSum(targetIndividual, "lightningDR");
 		break;
 	}
 
@@ -633,7 +720,7 @@ void addActiveAbilityToIndividual(individual * thisIndividual, ability * thisAbi
 void useAbility(individual * thisIndividual, ability * thisAbility){
 	//target cursor mode
 	if(thisAbility->type == 't'){ //targeted
-
+		thisIndividual->activeAbilities->selectedTargetedAbility = thisAbility;
 	}else if(thisAbility->type == 'd'){ //duration
 		int duration = calcAbilityDuration(thisAbility);
 		char * tmp[64];
@@ -649,6 +736,8 @@ void useAbility(individual * thisIndividual, ability * thisAbility){
 
 	}
 }
+
+
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	int toReturn = 0;
