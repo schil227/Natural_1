@@ -83,14 +83,14 @@ int calcAbilityDuration(ability * thisAbility){
 }
 
 int calculateManaCost(ability * thisAbility){
-	int sum = -1; //Ability = -1
+	int sum = 0; //Ability = -1
 	int dam = 0;
 	int duration = 0;
 	int DRSum = 0;
 	int aoeRange = 0;
 	int hasEffect = 0;
 	int dummyInt = 0;
-	sum += -1*thisAbility->level;
+
 
 	updateElementSummation(&sum, &dummyInt, thisAbility->rangeEnabled, thisAbility->range);
 
@@ -187,6 +187,10 @@ int calculateManaCost(ability * thisAbility){
 	if (aoeRange > 1) {
 		sum = sum * aoeRange;
 	}
+
+	//Negatives (given)
+	sum += -1*thisAbility->level;
+	sum += -1; //ability
 
 	//if no meaningful effect has been made, return initial cost
 	if(thisAbility->type != 'p' && !hasEffect){

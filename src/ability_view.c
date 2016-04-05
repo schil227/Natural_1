@@ -142,10 +142,6 @@ void shiftAbilityListDown(){
 	thisAbilityView->currentAbilityIndex--;
 }
 
-int abilityCanBeUsed(){
-	return thisAbilityView->abilitiesList[thisAbilityView->currentAbilityIndex]->type != 'p' ? 1 : 0;
-}
-
 ability * getAbilityToActivate(){
 	return thisAbilityView->abilitiesList[thisAbilityView->currentAbilityIndex];
 }

@@ -730,6 +730,7 @@ void useAbility(individual * thisIndividual, ability * thisAbility){
 			cwrite(tmp);
 
 			addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
+			decreaseMana(thisIndividual, thisAbility->totalManaCost);
 		}else{
 			cwrite("Cannot use another ability");
 		}
@@ -737,7 +738,17 @@ void useAbility(individual * thisIndividual, ability * thisAbility){
 	}
 }
 
+void decreaseMana(individual * thisIndividual, int mana){
+	thisIndividual->mana -= mana;
+}
 
+int canUseAbility(individual * thisIndividual, ability * thisAbility){
+	if(thisAbility->type != 'p' && thisIndividual->mana - thisAbility->totalManaCost >= 0){
+		return 1;
+	}else{
+		return 0;
+	}
+}
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	int toReturn = 0;

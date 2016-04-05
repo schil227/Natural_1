@@ -236,6 +236,22 @@ int tryAttackEnemies(individualGroup * enemies, individual * player, field * thi
 	return 0;
 }
 
+int withinAbilityRange(individual * player, int x, int y){
+	int range = 0; //NOT attributeSum, should be relative to the ability
+
+	ability * targetAbility = player->activeAbilities->selectedTargetedAbility;
+
+	if(targetAbility->rangeEnabled){
+		range += targetAbility->range->effectAndManaArray[targetAbility->range->selectedIndex]->effectMagnitude;
+	}
+
+	if(abs(player->playerCharacter->x - x) <= range && abs(player->playerCharacter->y - y) <= range){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
 void tryAttackIndividualsWithAbility(individual * thisIndividual, individualGroup * targets, individualGroup * npcs, individualGroup * enemies, field * thisField){
 	int i;
 
@@ -256,6 +272,8 @@ void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * 
 	int i, aoe = 0, minX, maxX, minY, maxY;
 	ability * tmpAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
 
+	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
+
 	if(tmpAbility->aoeEnabled){
 		aoe = tmpAbility->aoe->effectAndManaArray[tmpAbility->aoe->selectedIndex]->effectMagnitude;
 	}
@@ -274,6 +292,7 @@ void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * 
 			if(attackIndividualWithAbility(thisIndividual, tmp)){
 				deleteIndividiaulFromGroup(enemies, tmp);
 				removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+				i--;
 			}
 		}
 	}
@@ -287,6 +306,7 @@ void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * 
 			if(attackIndividualWithAbility(thisIndividual, tmp)){
 				deleteIndividiaulFromGroup(npcs, tmp);
 				removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+				i--;
 			}
 		}
 	}
