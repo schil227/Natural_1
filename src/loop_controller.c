@@ -36,6 +36,9 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 			break;
 		}
 		case 0x1B: //escape
+			if (getCursorMode() == CURSOR_TARGETED_ABILITY){
+				player->activeAbilities->selectedTargetedAbility = NULL;
+			}
 			toggleInCursorMode();
 			viewShift->xShift = viewShift->xShiftOld;
 			viewShift->yShift = viewShift->yShiftOld;
@@ -57,9 +60,10 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 				decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 				toggleInCursorMode();
 			}else if (getCursorMode() == CURSOR_TARGETED_ABILITY){
-				if(withinAbilityRange(player, getCursorX(), getCursorY())){
+				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
 					attackIndividualsInAOERange(player, npcs, enemies, main_field, getCursorX(), getCursorY());
 
+					player->activeAbilities->selectedTargetedAbility = NULL;
 					decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 					toggleInCursorMode();
 				}
@@ -218,7 +222,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 }
 
 
-int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
+int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, int * enemyActionMode, int * initEnemyActionMode){
 	switch(msg){
 	case WM_KEYDOWN:{
 
@@ -232,9 +236,12 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 				if(canUseAbility(player,getAbilityToActivate())){
 					useAbility(player,getAbilityToActivate());
 
-					if(player->activeAbilities->selectedTargetedAbility->type == 't'){
+					if(player->activeAbilities->selectedTargetedAbility != NULL &&
+							player->activeAbilities->selectedTargetedAbility->type == 't'){
 						toggleInCursorMode();
 						refreshCursor(CURSOR_TARGETED_ABILITY, player->playerCharacter->x, player->playerCharacter->y);
+					}else{
+						decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 					}
 
 					toggleAbilityViewMode();

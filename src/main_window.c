@@ -489,7 +489,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 		}
 	}else if(inAbilityViewMode()){
-		return abilityViewLoop(hwnd, msg, wParam, lParam, player);
+		return abilityViewLoop(hwnd, msg, wParam, lParam, player, &enemyActionMode, &initEnemyActionMode);
 	}else if (inCursorMode()) {
 		return cursorLoop(hwnd, msg, wParam, lParam, &enemyActionMode, &initEnemyActionMode, main_field, player, enemies, npcs, viewShift);
 	} else if(moveMode){

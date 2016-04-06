@@ -13,10 +13,7 @@ individual *initIndividual(){
 	int i;
 
 	individual* toReturn = malloc(sizeof(individual));
-//	toReturn->name = malloc(sizeof(char)*32);
 	toReturn->playerCharacter = malloc(sizeof(character));
-//	toReturn->playerCharacter->image = malloc(sizeof(HBITMAP));
-//	toReturn->playerCharacter->imageMask = malloc(sizeof(HBITMAP));
 
 	toReturn->backpack = malloc(sizeof(inventory));
 	toReturn->backpack->inventorySize = 0;
@@ -36,6 +33,10 @@ individual *initIndividual(){
 	toReturn->activeAbilities = malloc(sizeof(activeAbilityList));
 	toReturn->activeAbilities->numAbilities = 0;
 	toReturn->activeAbilities->MAX_ABILITIES = 64;
+
+	toReturn->activeStatuses = malloc(sizeof(statusList));
+	toReturn->activeStatuses->numStatuses = 0;
+	toReturn->activeStatuses->MAX_STATUSES = 16;
 
 	return toReturn;
 }
@@ -389,6 +390,7 @@ int calcCrit(individual * thisIndividual, int maxDamTotal, int minDamTotal, int 
 void startTurn(individual * thisIndividual){
 	processActiveItems(thisIndividual);
 	processActiveAbilities(thisIndividual);
+	processStatuses(thisIndividual);
 }
 
 void processActiveItems(individual * thisIndividual){
@@ -430,7 +432,7 @@ void processActiveAbilities(individual * thisIndividual){
 		activeAbility * thisActiveAbility = activeAbilities->abilitiesList[i];
 
 		if(thisActiveAbility->thisAbility->type != 'p'){
-			if(thisActiveAbility->turnsRemaining == 0){
+			if(thisActiveAbility->turnsRemaining >= 0){
 				useActiveAbility(thisActiveAbility);
 
 			} else {
@@ -449,6 +451,56 @@ void processActiveAbilities(individual * thisIndividual){
 		i++;
 	}
 
+}
+
+void processStatuses(individual * thisIndividual){
+	int i;
+	for(i = 0; i < thisIndividual->activeStatuses->numStatuses; i++){
+		status * tmpStatus = thisIndividual->activeStatuses->statuses[i];
+		if(tmpStatus->turnsRemaining >= 0){
+			processStatus(thisIndividual, tmpStatus);
+		}else{
+			char * tmp[64];
+			sprintf(tmp, "%s recovered from %s.", thisIndividual->name, lookUpStatusEffectName(tmpStatus->effect));
+			cwrite(tmp);
+
+			thisIndividual->activeStatuses->statuses[i] = NULL;
+			thisIndividual->activeStatuses->statuses[i] = thisIndividual->activeStatuses->statuses[thisIndividual->activeStatuses->numStatuses];
+			thisIndividual->activeStatuses->statuses[thisIndividual->activeStatuses->numStatuses] = NULL;
+			thisIndividual->activeStatuses->numStatuses--;
+
+			free(tmpStatus);
+
+			i--;
+
+		}
+	}
+}
+
+void processStatus(individual * thisIndividual, status * thisStatus){
+	thisStatus->turnsRemaining--;
+
+}
+
+char * lookUpStatusEffectName(statusEffect effect){
+	switch(effect){
+	case(STATUS_POISONED):
+		return "poison";
+	case(STATUS_PARALYZED):
+		return "paralysis";
+	case(STATUS_CONFUSED):
+		return "confusion";
+	case(STATUS_BURNING):
+		return "burning";
+	case(STATUS_BLEEDING):
+		return "bleeding";
+	case(STATUS_BERZERK):
+		return "berzerk";
+	case(STATUS_SILENCED):
+		return "silence";
+	}
+
+	return "!! STATUS NOT FOUND !!";
 }
 
 void useActiveAbility(activeAbility * thisActiveAbility){

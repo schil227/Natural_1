@@ -13,6 +13,8 @@
 
 #include<math.h>
 
+typedef enum{ STATUS_POISONED, STATUS_PARALYZED, STATUS_CONFUSED, STATUS_BURNING, STATUS_BLEEDING, STATUS_BERZERK, STATUS_SILENCED} statusEffect;
+
 typedef struct{
 	int inventorySize;
 	item * inventoryArr[40];
@@ -42,6 +44,19 @@ typedef struct{
 	activeAbility * abilitiesList[64];
 }activeAbilityList;
 
+typedef struct{
+	statusEffect effect;
+	int turnsRemaining;
+	int damage;
+	int diceDamage;
+}status;
+
+typedef struct{
+	int numStatuses;
+	int MAX_STATUSES;
+	status * statuses[16];
+}statusList;
+
 typedef struct {
 	character* playerCharacter;
 	char name[32];
@@ -52,6 +67,8 @@ typedef struct {
 
 	abilityList * abilities;
 	activeAbilityList * activeAbilities;
+	statusList * activeStatuses;
+
 	short int STR;
 	short int DEX;
 	short int CON;

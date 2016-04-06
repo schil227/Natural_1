@@ -236,7 +236,7 @@ int tryAttackEnemies(individualGroup * enemies, individual * player, field * thi
 	return 0;
 }
 
-int withinAbilityRange(individual * player, int x, int y){
+int cursorWithinAbilityRange(individual * player, int x, int y){
 	int range = 0; //NOT attributeSum, should be relative to the ability
 
 	ability * targetAbility = player->activeAbilities->selectedTargetedAbility;
@@ -249,22 +249,6 @@ int withinAbilityRange(individual * player, int x, int y){
 		return 1;
 	}else{
 		return 0;
-	}
-}
-
-void tryAttackIndividualsWithAbility(individual * thisIndividual, individualGroup * targets, individualGroup * npcs, individualGroup * enemies, field * thisField){
-	int i;
-
-	for(i = 0; i < targets->numIndividuals; i++){
-		if(attackIndividualWithAbility(thisIndividual, targets->individuals[i])){
-			if(individualInGroup(targets->individuals[i],enemies)){
-				deleteIndividiaulFromGroup(enemies, targets->individuals[i]);
-			}
-			if(individualInGroup(targets->individuals[i],npcs)){
-				deleteIndividiaulFromGroup(npcs, targets->individuals[i]);
-			}
-			removeIndividualFromField(thisField, targets->individuals[i]->playerCharacter->x, targets->individuals[i]->playerCharacter->y);
-		}
 	}
 }
 
