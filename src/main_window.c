@@ -132,12 +132,32 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}
 
-	for(index = 0; index < npcs->numIndividuals; index++){
-		drawIndividual(hdc, hdcBuffer, npcs->individuals[index], viewShift);
+	for(index = 0; index < npcs->MAX_INDIVIDUALS; index++){
+		int individualsPassed = 0;
+		individual * tmp = npcs->individuals[index];
+
+		if(tmp != NULL){
+			individualsPassed++;
+			drawIndividual(hdc, hdcBuffer, npcs->individuals[index], viewShift);
+
+			if(individualsPassed == npcs->numIndividuals){
+				break;
+			}
+		}
 	}
 
-	for(index = 0; index < enemies->numIndividuals; index++){
-		drawIndividual(hdc, hdcBuffer, enemies->individuals[index], viewShift);
+	for(index = 0; index < enemies->MAX_INDIVIDUALS; index++){
+		int individualsPassed = 0;
+		individual * tmp = enemies->individuals[index];
+
+		if(tmp != NULL){
+			individualsPassed++;
+			drawIndividual(hdc, hdcBuffer, enemies->individuals[index], viewShift);
+
+			if(individualsPassed == enemies->numIndividuals){
+				break;
+			}
+		}
 	}
 
 	//draw animated enemy/npc over others
@@ -548,7 +568,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				initEnemyActionMode = 0;
 
 				if (enemies->currentIndividualIndex == -1) {
-					enemies->currentIndividualIndex = 0;
+					nextAvailableIndividualIndex(enemies);
 				}
 
 				if (enemies->numIndividuals == 0) {
@@ -597,13 +617,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			}
 
+
+
 			animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
 					(enemies->individuals[enemies->currentIndividualIndex]),
 					thisMoveNodeMeta, 5, &enemyActionMode, viewShift, 0);
 
 			if (!enemyActionMode) {
 
-				if (thisMoveNodeMeta->rootMoveNode != NULL) {
+				if (thisMoveNodeMeta != NULL && thisMoveNodeMeta->rootMoveNode != NULL) {
 					freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
 				}
 				free(thisMoveNodeMeta);
@@ -616,13 +638,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		postEnemyActionMode = 0;
 
 		attackIfInRange(enemies->individuals[enemies->currentIndividualIndex],player);
-		enemies->currentIndividualIndex++;
-		if(enemies->currentIndividualIndex < enemies->numIndividuals){
+		nextAvailableIndividualIndex(enemies);
+		if(enemies->currentIndividualIndex > -1){
 			enemyActionMode = 1;
 			initEnemyActionMode = 1;
 		}else{
 			startTurn(player);
-			enemies->currentIndividualIndex = -1;
 		}
 
 	}else {

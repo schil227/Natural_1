@@ -387,6 +387,7 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 	attackIfInRange(enemy,player);
 }
 
+
 void destroyNodeArr(nodeArr * thisNodeArr){
 	int i;
 

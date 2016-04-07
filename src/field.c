@@ -216,20 +216,27 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 }
 
 int tryAttackEnemies(individualGroup * enemies, individual * player, field * thisField, int x, int y){
-	int i;
+	int i, enemiesPassed = 0;
 
-	for (i = 0; i < enemies->numIndividuals; i++) {
+	for (i = 0; i < enemies->MAX_INDIVIDUALS; i++) {
 
 		individual * tmpEnemy = enemies->individuals[i];
 
-		if (tmpEnemy->playerCharacter->x == x && tmpEnemy->playerCharacter->y == y && individualWithinRange(player, tmpEnemy)) {
+		if(tmpEnemy != NULL){
+			enemiesPassed++;
+			if (tmpEnemy->playerCharacter->x == x && tmpEnemy->playerCharacter->y == y && individualWithinRange(player, tmpEnemy)) {
 
-			if (attackIndividual(player, tmpEnemy)) {
-				deleteIndividiaulFromGroup(enemies, tmpEnemy);
-				removeIndividualFromField(thisField, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
+				if (attackIndividual(player, tmpEnemy)) {
+					deleteIndividiaulFromGroup(enemies, tmpEnemy);
+					removeIndividualFromField(thisField, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
+				}
+
+				return 1;
 			}
 
-			return 1;
+			if (enemiesPassed == enemies->numIndividuals){
+				break;
+			}
 		}
 	}
 
@@ -253,7 +260,7 @@ int cursorWithinAbilityRange(individual * player, int x, int y){
 }
 
 void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
-	int i, aoe = 0, minX, maxX, minY, maxY;
+	int aoe = 0,  minX, maxX, minY, maxY;
 	ability * tmpAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
 
 	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
@@ -267,43 +274,45 @@ void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * 
 	minY = y - aoe;
 	maxY = y + aoe;
 
-	for(i = 0; i < enemies->numIndividuals; i++){
-		individual * tmp = enemies->individuals[i];
-		if(tmp->playerCharacter->x >= minX &&
-			tmp->playerCharacter->x <= maxX &&
-			tmp->playerCharacter->y >= minY &&
-			tmp->playerCharacter->y <= maxY ){
-			if(attackIndividualWithAbility(thisIndividual, tmp)){
-				deleteIndividiaulFromGroup(enemies, tmp);
-				removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
-				i--;
-			}
-		}
-	}
 
-	for(i = 0; i < npcs->numIndividuals; i++){
-		individual * tmp = npcs->individuals[i];
-		if(tmp->playerCharacter->x >= minX &&
-			tmp->playerCharacter->x <= maxX &&
-			tmp->playerCharacter->y >= minY &&
-			tmp->playerCharacter->y <= maxY ){
-			if(attackIndividualWithAbility(thisIndividual, tmp)){
-				deleteIndividiaulFromGroup(npcs, tmp);
-				removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
-				i--;
-			}
-		}
-	}
+	checkIndividualGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
+	checkIndividualGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
 
-	if(thisIndividual->playerCharacter->x >= minX &&
-			thisIndividual->playerCharacter->x <= maxX &&
-			thisIndividual->playerCharacter->y >= minY &&
-			thisIndividual->playerCharacter->y <= maxY ){
+	if(thisIndividual->playerCharacter->x >= minX && thisIndividual->playerCharacter->x <= maxX &&
+		thisIndividual->playerCharacter->y >= minY && thisIndividual->playerCharacter->y <= maxY ){
+
 		if(attackIndividualWithAbility(thisIndividual, thisIndividual)){
 			removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
 		}
 	}
 
+}
+
+void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField,int minX, int maxX, int minY, int maxY){
+	int i, individualsPassed = 0;
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		individual * tmp = thisGroup->individuals[i];
+
+		if(tmp != NULL){
+			individualsPassed++;
+
+			if(tmp->playerCharacter->x >= minX &&
+					tmp->playerCharacter->x <= maxX &&
+					tmp->playerCharacter->y >= minY &&
+					tmp->playerCharacter->y <= maxY ){
+				if(attackIndividualWithAbility(thisIndividual, tmp)){
+					deleteIndividiaulFromGroup(thisGroup, tmp);
+					removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+				}
+
+			}
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+		}
+	}
 }
 
 void wanderAround(field * thisField, individual * thisIndividual){
@@ -383,11 +392,8 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 
 	fclose(fp);
 
-
 	loadGroup(enemies, enemyMap, directory);
-	loadGroupItems(enemies, enemyItemMap,directory);
 	loadGroup(npcs, npcMap, directory);
-	loadGroupItems(npcs, npcItemMap,directory);
 	loadDialog(dialog, directory);
 
 	field* thisField = initField(fullMapName);

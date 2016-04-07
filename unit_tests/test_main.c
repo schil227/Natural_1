@@ -95,9 +95,18 @@ int path_and_attack_test() {
 	tmpIndividual = getIndividualFromField( main_test_field,testEnemies->individuals[5]->playerCharacter->x, testEnemies->individuals[5]->playerCharacter->y);
 	assert(!strcmp(tmpIndividual->name, testEnemies->individuals[5]->name));
 
-	int i;
-	for(i = 0; i < testEnemies->numIndividuals; i++){
-		enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+	int i, individualsPassed = 0;
+	for(i = 0; i < testEnemies->MAX_INDIVIDUALS; i++){
+
+		if(testEnemies->individuals[i] != NULL){
+			individualsPassed++;
+			enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+
+			if(individualsPassed == testEnemies->numIndividuals){
+				break;
+			}
+		}
+
 	}
 
 	//skeleton 1&5 too far away, same starting position
@@ -184,11 +193,32 @@ int path_and_attack_test() {
 	moveIndividualSpace(main_test_field,testPlayer,1,1);
 
 	//move the enemies two more times, attack the player
-	for(i = 0; i < testEnemies->numIndividuals; i++){
-		enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+	individualsPassed = 0;
+	for(i = 0; i < testEnemies->MAX_INDIVIDUALS; i++){
+
+		if(testEnemies->individuals[i] != NULL){
+			individualsPassed++;
+			enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+
+			if(individualsPassed == testEnemies->numIndividuals){
+				break;
+			}
+		}
+
 	}
-	for(i = 0; i < testEnemies->numIndividuals; i++){
-		enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+
+	individualsPassed = 0;
+	for(i = 0; i < testEnemies->MAX_INDIVIDUALS; i++){
+
+		if(testEnemies->individuals[i] != NULL){
+			individualsPassed++;
+			enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+
+			if(individualsPassed == testEnemies->numIndividuals){
+				break;
+			}
+		}
+
 	}
 
 	//while skeletons 2, 3, and 4 all moved without being blocked, 5 reacts to the blocked path

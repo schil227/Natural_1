@@ -13,6 +13,7 @@ individualGroup * initGroup(){
 	individualGroup * thisGroup = malloc(sizeof(individualGroup));
 	thisGroup->numIndividuals = 0;
 	thisGroup->currentIndividualIndex = -1;
+	thisGroup->MAX_INDIVIDUALS = 50;
 	for(index = 0; index < 50; index++){
 		thisGroup->individuals[index] = NULL;
 	}
@@ -20,14 +21,37 @@ individualGroup * initGroup(){
 }
 
 int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividual){
-	if(thisGroup->numIndividuals < 50){
-		int index = thisGroup->numIndividuals;
-		thisGroup->individuals[index] = thisIndividual;
-		thisGroup->numIndividuals++;
-		return 1;
+	int i;
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] == NULL){
+			thisGroup->individuals[i] = thisIndividual;
+			thisGroup->numIndividuals++;
+			return 1;
+		}
 	}
 
 	return 0;
+}
+
+void nextAvailableIndividualIndex(individualGroup * thisGroup){
+	int i, startingIndex;
+
+	startingIndex = thisGroup->currentIndividualIndex;
+
+	if(startingIndex < 0){
+		i = 0;
+	}else{
+		i = startingIndex + 1;
+	}
+
+	for(i; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] != NULL){
+			thisGroup->currentIndividualIndex = i;
+			return;
+		}
+	}
+
+	thisGroup->currentIndividualIndex = -1;
 }
 
 void createIndividualFromLine(individual * newIndividual, char * line){
@@ -176,7 +200,7 @@ void loadGroup(individualGroup * group, char * fileName, char* directory){
 
 void clearGroup(individualGroup * thisGroup){
 	int i;
-	for(i = 0; i < thisGroup->numIndividuals; i++){
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		thisGroup->individuals[i] = NULL;
 	}
 	thisGroup->numIndividuals = 0;
@@ -184,185 +208,20 @@ void clearGroup(individualGroup * thisGroup){
 
 void setGroupToField(field * thisField, individualGroup * thisGroup){
 	individual * tmpEnemy;
-	int i;
-	for(i = 0; i < thisGroup->numIndividuals; i++){
+	int i, individualsPassed = 0;
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		tmpEnemy = thisGroup->individuals[i];
-		moveIndividualSpace(thisField,tmpEnemy,tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
-	}
-}
+		if(tmpEnemy != NULL){
+			individualsPassed++;
+			moveIndividualSpace(thisField,tmpEnemy,tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
 
-void loadGroupItems(individualGroup * group, char * itemFile, char* directory){
-	char * fullItemFile = appendStrings(directory, itemFile);
-	fullItemFile[strlen(fullItemFile) - 1] = '\0'; //remove '\n' at end of line
-	FILE * itemFP = fopen(fullItemFile, "r");
-	char line[512];
-	item * newItem;
-
-//	while (fgets(line, 512, itemFP) != NULL) {
-//		if (line[0] != '#') {
-//			createEquipItemFromFile(line, group);
-//		}
-//	}
-	fclose(itemFP);
-	free(fullItemFile);
-}
-/*
-void createEquipItemFromFile(char line[512], individualGroup * group){
-	item * newItem;
-	char name[32], description[256];
-	char type, weaponDamType, armorClass, itemType;
-	int i, itemAdded=0, npcID, imageID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
-	maxDamMod, minDamMod, minTurns,  maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
-	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
-	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
-	float weaponStrMod;
-
-	char * value = strtok(line,";");
-		npcID = atoi(value);
-
-		value = strtok(NULL,";");
-		imageID = atoi(value);
-
-		value = strtok(NULL,";");
-		ID = atoi(value);
-
-		value = strtok(NULL,";");
-		type = value[0];
-
-		value = strtok(NULL,";");
-		weaponDamType = value[0];
-
-		value = strtok(NULL,";");
-		armorClass = value[0];
-
-		value = strtok(NULL,";");
-		itemType = value[0];
-
-		value = strtok(NULL,";");
-		price = atoi(value);
-
-		value = strtok(NULL,";");
-		r = atoi(value);
-		value = strtok(NULL,";");
-		g = atoi(value);
-		value = strtok(NULL,";");
-		b = atoi(value);
-
-		value = strtok(NULL,";");
-		strcpy(name, value);
-		value = strtok(NULL,";");
-		x = atoi(value);
-		value = strtok(NULL,";");
-		y = atoi(value);
-
-		value = strtok(NULL, ";");
-		weaponStrMod = atof(value);
-
-		value = strtok(NULL, ";");
-		strMod = atoi(value);
-		value = strtok(NULL, ";");
-		dexMod = atoi(value);
-		value = strtok(NULL, ";");
-		conMod = atoi(value);
-		value = strtok(NULL, ";");
-		willMod = atoi(value);
-		value = strtok(NULL, ";");
-		intMod = atoi(value);
-		value = strtok(NULL, ";");
-		wisMod = atoi(value);
-		value = strtok(NULL, ";");
-		chrMod= atoi(value);
-		value = strtok(NULL, ";");
-		luckMod = atoi(value);
-
-
-		value = strtok(NULL,";");
-		totalHealthMod = atoi(value);
-		value = strtok(NULL,";");
-		healthMod = atoi(value);
-		value = strtok(NULL,";");
-		totalManaMod = atoi(value);
-		value = strtok(NULL,";");
-		manaMod = atoi(value);
-
-		value = strtok(NULL,";");
-		acMod = atoi(value);
-		value = strtok(NULL,";");
-		attackMod = atoi(value);
-		value = strtok(NULL,";");
-		damMod = atoi(value);
-		value = strtok(NULL,";");
-		maxDamMod = atoi(value);
-		value = strtok(NULL,";");
-		minDamMod = atoi(value);
-
-		value = strtok(NULL,";");
-		minTurns = atoi(value);
-		value = strtok(NULL,";");
-		maxTurns = atoi(value);
-
-		value = strtok(NULL,";");
-		mvmtMod = atoi(value);
-		value = strtok(NULL,";");
-		rangeMod = atoi(value);
-
-		value = strtok(NULL,";");
-		bluntDRMod = atoi(value);
-		value = strtok(NULL,";");
-		chopDRMod = atoi(value);
-		value = strtok(NULL,";");
-		slashDRMod = atoi(value);
-		value = strtok(NULL,";");
-		pierceDRMod = atoi(value);
-
-		value = strtok(NULL,";");
-		earthDRMod = atoi(value);
-		value = strtok(NULL,";");
-		fireDRMod = atoi(value);
-		value = strtok(NULL,";");
-		waterDRMod = atoi(value);
-		value = strtok(NULL,";");
-		lightningDRMod = atoi(value);
-
-		value = strtok(NULL,";");
-		earthWeaknessMod = atoi(value);
-		value = strtok(NULL,";");
-		fireWeaknessMod = atoi(value);
-		value = strtok(NULL,";");
-		waterWeaknessMod = atoi(value);
-		value = strtok(NULL,";");
-		lightiningWeaknessMod = atoi(value);
-
-		value = strtok(NULL,";");
-		isEquipt = atoi(value);
-
-		value = strtok(NULL,";");
-		strcpy(description, value);
-
-		newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description
-//				,weaponStrMod,
-				strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
-				weaponDamType, armorClass, itemType, price,
-				totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
-				mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
-				fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
-				waterWeaknessMod, lightiningWeaknessMod, isEquipt);
-
-	for(i = 0; i < group->numIndividuals; i++){
-		if(group->individuals[i]->ID == npcID){
-			addItemToIndividual(group->individuals[i]->backpack, newItem);
-			itemAdded = 1;
-			break;
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
 		}
-	}
 
-	if(!itemAdded){
-		destroyItem(newItem);
 	}
-
 }
-
-*/
 
 item * createFieldItemFromFile(char line[512]){
 	item * newItem;
@@ -534,10 +393,17 @@ void loadFieldItems(field * thisField, char * itemFile, char* directory){
 }
 
 int individualInGroup(individual * thisIndividual, individualGroup * thisIndividualGroup){
-	int i;
-	for(i = 0; i < thisIndividualGroup->numIndividuals; i++){
-		if(thisIndividualGroup->individuals[i] == thisIndividual){
-			return 1;
+	int i, individualsPassed = 0;
+	for(i = 0; i < thisIndividualGroup->MAX_INDIVIDUALS; i++){
+		if(thisIndividualGroup->individuals[i] != NULL){
+			individualsPassed++;
+			if(thisIndividualGroup->individuals[i] == thisIndividual){
+				return 1;
+			}
+
+			if(individualsPassed == thisIndividualGroup->numIndividuals){
+				break;
+			}
 		}
 	}
 
@@ -545,26 +411,27 @@ int individualInGroup(individual * thisIndividual, individualGroup * thisIndivid
 }
 
 individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual * thisIndividual){
-	int index;
-	int numIndividuals = thisGroup->numIndividuals;
-	for( index = 0; index < numIndividuals; index++){
-		if(thisGroup->individuals[index] == thisIndividual){
-			individual * toReturn = thisGroup->individuals[index];
-			if(index == numIndividuals - 1){ //last index
+	int index, individualsPassed = 0;
+
+	for( index = 0; index < thisGroup->MAX_INDIVIDUALS; index++){
+
+		if(thisGroup->individuals[index] != NULL){
+			individualsPassed++;
+
+			if (thisGroup->individuals[index] == thisIndividual) {
+				individual * toReturn = thisGroup->individuals[index];
 				thisGroup->individuals[index] = NULL;
-			}else{
-				thisGroup->individuals[index] = thisGroup->individuals[numIndividuals-1];
-				thisGroup->individuals[numIndividuals-1] = NULL;
+				thisGroup->numIndividuals--;
+				return toReturn;
 			}
 
-			thisGroup->numIndividuals--;
-			return toReturn;
-
+			if (individualsPassed == thisGroup->numIndividuals) {
+				break;
+			}
 		}
 	}
 
 	return NULL;
-
 }
 
 int attemptToTransit(field ** thisField, individual * player, individualGroup * enemies, individualGroup * npcs, shiftData * viewShift, char * mapDirectory){
@@ -607,17 +474,25 @@ void tryTalkGroups(individualGroup * enemies, individualGroup * npcs, individual
 }
 
 int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursorX, int cursorY){
-	int index;
-	for (index = 0; index < thisGroup->numIndividuals; index++) {
+	int index, individualsPassed = 0;
+	for (index = 0; index < thisGroup->MAX_INDIVIDUALS; index++) {
 
 		individual * tmpIndividual = thisGroup->individuals[index];
 
-		if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
-			if(setCurrentMessageByIndividualID(tmpIndividual->ID)){
-				setSpeakingIndividualID(tmpIndividual->ID);
-				toggleDrawDialogBox();
+		if (tmpIndividual != NULL) {
+			individualsPassed++;
+
+			if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
+				if (setCurrentMessageByIndividualID(tmpIndividual->ID)) {
+					setSpeakingIndividualID(tmpIndividual->ID);
+					toggleDrawDialogBox();
+				}
+				return 1;
 			}
-			return 1;
+
+			if (individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
 		}
 	}
 	return 0;

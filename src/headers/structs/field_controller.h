@@ -11,6 +11,7 @@
 
 typedef struct {
 	size_t size;
+	int MAX_INDIVIDUALS;
 	int numIndividuals;
 	int currentIndividualIndex;
 	individual * individuals[50];
