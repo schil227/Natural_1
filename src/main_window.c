@@ -561,8 +561,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		if(enemies->numIndividuals == 0){
 			enemyActionMode = 0;
 			initEnemyActionMode = 0;
-			startTurn(player);
-			enemies->currentIndividualIndex = -1;
+
+			if(startTurn(player)){
+
+			}
+
 		} else {
 			if (initEnemyActionMode) {
 				initEnemyActionMode = 0;
@@ -578,10 +581,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 
 				int i;
-				individual * tmpIndividual =
-						enemies->individuals[enemies->currentIndividualIndex];
-				nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field,
-						tmpIndividual, player);
+				individual * tmpIndividual = enemies->individuals[enemies->currentIndividualIndex];
+
+				//TODO: uncomment when indiviudals can be disposed properly
+//				if(startTurn(tmpIndividual)){
+//					deleteIndividiaulFromGroup(enemies, tmpIndividual);
+//					removeIndividualFromField(main_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+//				}
+
+				nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field, tmpIndividual, player);
 
 				if (enemyNodeArr->size == 0) {
 					enemyActionMode = 0;
@@ -594,24 +602,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						NULL;
 
 				thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-				moveNode * ptrToCurrentNode[1];
-				ptrToCurrentNode[0] = NULL;
 				thisMoveNodeMeta->sum = 0;
 
-				for (i = 0; i < enemyNodeArr->size; i++) {
-					moveNode * tmpMoveNode = malloc(sizeof(moveNode));
-					tmpMoveNode->hasTraversed = 0;
-					tmpMoveNode->x = enemyNodeArr->nodeArray[i]->x;
-					tmpMoveNode->y = enemyNodeArr->nodeArray[i]->y;
-					tmpMoveNode->nextMoveNode = NULL;
-					if (*ptrToCurrentNode == NULL) {
-						*ptrToCurrentNode = tmpMoveNode;
-						thisMoveNodeMeta->rootMoveNode = tmpMoveNode;
-					} else {
-						(*ptrToCurrentNode)->nextMoveNode = tmpMoveNode;
-						*ptrToCurrentNode = tmpMoveNode;
-					}
-				}
+				populateMoveNodeMeta(thisMoveNodeMeta, enemyNodeArr);
+
 
 				destroyNodeArr(enemyNodeArr);
 
@@ -643,7 +637,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			enemyActionMode = 1;
 			initEnemyActionMode = 1;
 		}else{
-			startTurn(player);
+			if(startTurn(player)){
+
+			}
 		}
 
 	}else {

@@ -387,6 +387,26 @@ void enemyAction( individual * enemy, field * thisField, individual * player){
 	attackIfInRange(enemy,player);
 }
 
+void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr){
+	int i;
+	moveNode * ptrToCurrentNode[1];
+	ptrToCurrentNode[0] = NULL;
+
+	for (i = 0; i < thisNodeArr->size; i++) {
+		moveNode * tmpMoveNode = malloc(sizeof(moveNode));
+		tmpMoveNode->hasTraversed = 0;
+		tmpMoveNode->x = thisNodeArr->nodeArray[i]->x;
+		tmpMoveNode->y = thisNodeArr->nodeArray[i]->y;
+		tmpMoveNode->nextMoveNode = NULL;
+		if (*ptrToCurrentNode == NULL) {
+			*ptrToCurrentNode = tmpMoveNode;
+			thisMoveNodeMeta->rootMoveNode = tmpMoveNode;
+		} else {
+			(*ptrToCurrentNode)->nextMoveNode = tmpMoveNode;
+			*ptrToCurrentNode = tmpMoveNode;
+		}
+	}
+}
 
 void destroyNodeArr(nodeArr * thisNodeArr){
 	int i;

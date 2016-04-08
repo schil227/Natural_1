@@ -275,6 +275,11 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	sendHitDialog(thisIndividual->name, targetIndividual->name, 20, totalDamage);
 	targetIndividual->hp = targetIndividual->hp - totalDamage;
 
+	//Add status here
+	if(targetAbility->diceDamageDurationEnabled || targetAbility->diceDamageDurationModEnabled){
+		addStatusToIndividual(targetIndividual, targetAbility);
+	}
+
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
 		triggerEventOnDeath(targetIndividual->ID);
@@ -283,6 +288,10 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	}else{ //non-fatal blow
 		return 0;
 	}
+
+}
+
+void addStatusToIndividual(individual * thisIndividual, ability * thisAbility){
 
 }
 
@@ -387,13 +396,15 @@ int calcCrit(individual * thisIndividual, int maxDamTotal, int minDamTotal, int 
 	}
 }
 
-void startTurn(individual * thisIndividual){
-	processActiveItems(thisIndividual);
-	processActiveAbilities(thisIndividual);
-	processStatuses(thisIndividual);
+
+int startTurn(individual * thisIndividual){
+	if(processActiveItems(thisIndividual) || processActiveAbilities(thisIndividual) || processStatuses(thisIndividual)){
+		return 1;
+	}
+	return 0;
 }
 
-void processActiveItems(individual * thisIndividual){
+int processActiveItems(individual * thisIndividual){
 	int i, itemsPassed = 0;
 	activeItem * tmpActiveItem;
 
@@ -412,6 +423,12 @@ void processActiveItems(individual * thisIndividual){
 				thisIndividual->activeItems->activeItemsTotal--;
 			}else{
 				consumeItem(thisIndividual,tmpActiveItem->thisItem);
+				if(thisIndividual->hp <= 0){
+					char * tmp[128];
+					sprintf(tmp, "%s has perished from %s!", thisIndividual->name, tmpActiveItem->thisItem->name);
+					cwrite(tmp);
+					return 1;
+				}
 				itemsPassed++;
 			}
 
@@ -421,9 +438,11 @@ void processActiveItems(individual * thisIndividual){
 			break;
 		}
 	}
+
+	return 0;
 }
 
-void processActiveAbilities(individual * thisIndividual){
+int processActiveAbilities(individual * thisIndividual){
 	int i;
 	activeAbilityList * activeAbilities = thisIndividual->activeAbilities;
 
@@ -435,6 +454,12 @@ void processActiveAbilities(individual * thisIndividual){
 			if(thisActiveAbility->turnsRemaining >= 0){
 				useActiveAbility(thisActiveAbility);
 
+				if(thisIndividual->hp <= 0){
+					char * tmp[128];
+					sprintf(tmp, "%s has perished from %s!", thisIndividual->name, thisActiveAbility->thisAbility->name);
+					cwrite(tmp);
+					return 1;
+				}
 			} else {
 				char * tmp[64];
 				sprintf(tmp, "Ability %s has finished.", thisActiveAbility->thisAbility->name);
@@ -451,14 +476,23 @@ void processActiveAbilities(individual * thisIndividual){
 		i++;
 	}
 
+	return 0;
 }
 
-void processStatuses(individual * thisIndividual){
+int processStatuses(individual * thisIndividual){
 	int i;
 	for(i = 0; i < thisIndividual->activeStatuses->numStatuses; i++){
 		status * tmpStatus = thisIndividual->activeStatuses->statuses[i];
 		if(tmpStatus->turnsRemaining >= 0){
 			processStatus(thisIndividual, tmpStatus);
+
+			//check if status killed individual
+			if(thisIndividual->hp >= 0){
+				char * tmp[128];
+				sprintf(tmp, "%s has perished from ailment!", thisIndividual->name);
+				cwrite(tmp);
+				return 1;
+			}
 		}else{
 			char * tmp[64];
 			sprintf(tmp, "%s recovered from %s.", thisIndividual->name, lookUpStatusEffectName(tmpStatus->effect));
@@ -475,11 +509,33 @@ void processStatuses(individual * thisIndividual){
 
 		}
 	}
+
+	return 0;
 }
 
 void processStatus(individual * thisIndividual, status * thisStatus){
 	thisStatus->turnsRemaining--;
 
+	switch(thisStatus->effect){
+		case STATUS_POISONED:{
+			damageIndividualWithStatus();
+		}
+
+	}
+
+}
+
+void damageIndividualWithStatus(individual * thisIndividual, status * thisStatus){
+	int damage;
+
+	int diceDamage = thisStatus->diceDamage;
+	if(diceDamage > 0){
+		damage = (rand() % diceDamage) + 1;
+	}
+
+	damage += thisStatus->damage;
+
+	thisIndividual->hp -= damage;
 }
 
 char * lookUpStatusEffectName(statusEffect effect){
