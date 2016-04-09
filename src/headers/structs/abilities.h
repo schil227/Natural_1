@@ -11,17 +11,32 @@
 #include<stdlib.h>
 #include"../character_pub_methods.h"
 
-typedef enum {RANGE, TARGETED, EXTRA_ATTACK, DICE_DAMAGE, DAMAGE, DICE_DAMAGE_DURATION,
-	DICE_DAMAGE_DURATION_MOD, AOE, DURATION, DURATION_MOD, STR, DEX, CON, WILL, INTEL, WIS, CHR, LUCK,
-	AC, ATTACK, DAMAGE_MOD, MVMT, HP, TOTAL_HP, TOTAL_MANA, BLUNT_DR, CHOP_DR, PIERCE_DR, SLASH_DR, EARTH_DR,
-	FIRE_DR, WATER_DR, LIGHTNING_DR } effect_types;
+typedef enum {ABILITY_DAMAGE_TYPE, ABILITY_RANGE, ABILITY_TARGETED, ABILITY_EXTRA_ATTACK, ABILITY_DICE_DAMAGE, ABILITY_DAMAGE, ABILITY_STATUS, ABILITY_STATUS_DAMAGE, ABILITY_STATUS_DICE_DAMAGE,
+	ABILITY_STATUS_DICE_DURATION, ABILITY_STATUS_DURATION, ABILITY_AOE, ABILITY_DURATION, ABILITY_DURATION_MOD,
+	ABILITY_STR, ABILITY_DEX, ABILITY_CON, ABILITY_WILL, ABILITY_INT, ABILITY_WIS, ABILITY_CHR, ABILITY_LUCK, ABILITY_AC, ABILITY_ATTACK,
+	ABILITY_DAMAGE_MOD, ABILITY_MVMT, ABILITY_DICE_HP, ABILITY_HP, ABILITY_TOTAL_HP, ABILITY_TOTAL_MANA, ABILITY_BLUNT_DR,
+	ABILITY_CHOP_DR, ABILITY_PIERCE_DR, ABILITY_SLASH_DR, ABILITY_EARTH_DR,	ABILITY_FIRE_DR, ABILITY_WATER_DR, ABILITY_LIGHTNING_DR
+} effect_types;
 
 typedef enum {DEFAULT_ABILITY, LEVELUP_ABILITY} creation_modes;
+
+typedef struct{
+	char type[16];
+	int manaCost;
+}typeAndMana;
 
 typedef struct{
 	short int effectMagnitude;
 	short int manaCost;
 } effectAndMana;
+
+typedef struct{
+	int size;
+	int MAX_SIZE;
+	int selectedIndex;
+	int defaultStartingIndex;
+	typeAndMana * typeAndManaArray[16];
+}typeAndManaMapList;
 
 typedef struct{
 	int size;
@@ -43,7 +58,7 @@ typedef struct{
 	int numEnabledEffects;
 
 	short int damageTypeEnabled;
-	char damageType;
+	typeAndManaMapList * damageType;
 	short int rangeEnabled;
 	effectAndManaMapList * range;
 	short int targetedEnabled;
@@ -54,10 +69,18 @@ typedef struct{
 	effectAndManaMapList * diceDamage;
 	short int damageEnabled;
 	effectAndManaMapList * damage;
-	short int diceDamageDurationEnabled;
-	effectAndManaMapList * diceDamageDuration;
-	short int diceDamageDurationModEnabled;
-	effectAndManaMapList * diceDamageDurationMod;
+
+	short int statusEnabled;
+	typeAndManaMapList * status;
+	short int statusDiceDamageEnabled;
+	effectAndManaMapList * statusDiceDamage;
+	short int statusDamageEnabled;
+	effectAndManaMapList * statusDamage;
+	short int diceStatusDurationEnabled;
+	effectAndManaMapList * diceStatusDuration;
+	short int statusDurationEnabled;
+	effectAndManaMapList * statusDuration;
+
 	short int aoeEnabled;
 	effectAndManaMapList * aoe;
 	short int durationEnabled;
@@ -90,6 +113,8 @@ typedef struct{
 	effectAndManaMapList * damageMod;
 	short int mvmtEnabled;
 	effectAndManaMapList * mvmt;
+	short int diceHPEnabled;
+	effectAndManaMapList * diceHP;
 	short int hpEnabled;
 	effectAndManaMapList * hp;
 	short int totalHPEnabled;

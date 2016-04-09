@@ -276,8 +276,12 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	targetIndividual->hp = targetIndividual->hp - totalDamage;
 
 	//Add status here
-	if(targetAbility->diceDamageDurationEnabled || targetAbility->diceDamageDurationModEnabled){
-		addStatusToIndividual(targetIndividual, targetAbility);
+	if(targetAbility->statusEnabled){
+		int sum = 0, dummy = 0;
+		calcStatusCost(&sum, &dummy, targetAbility);
+		if(sum > 0){
+			addStatusToIndividual(targetIndividual, targetAbility);
+		}
 	}
 
 	if(targetIndividual->hp <= 0){ //target is dead

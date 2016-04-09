@@ -147,13 +147,17 @@ ability * getAbilityToActivate(){
 }
 
 void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
+	drawSpecificType(hdcBuffer, thisAbility->damageType, thisAbility->damageTypeEnabled, "damageType", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->range, thisAbility->rangeEnabled, "range", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->targeted, thisAbility->targetedEnabled, "targeted", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->extraAttack, thisAbility->extraAttackEnabled, "extraAttack", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->diceDamage, thisAbility->diceDamageEnabled, "diceDamage", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->damage, thisAbility->damageEnabled, "damage", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->diceDamageDuration, thisAbility->diceDamageDurationEnabled, "diceDamageDuration", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->diceDamageDurationMod, thisAbility->diceDamageDurationModEnabled, "diceDamageDurationMod", effectRect);
+	drawSpecificType(hdcBuffer, thisAbility->status, thisAbility->statusEnabled, "status", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->statusDiceDamage, thisAbility->statusDiceDamageEnabled, "statusDiceDamage", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->statusDamage, thisAbility->statusDamageEnabled, "statusDamage", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->diceStatusDuration, thisAbility->diceStatusDurationEnabled, "diceDamageDuration", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->statusDuration, thisAbility->statusDurationEnabled, "diceDamageDurationMod", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->aoe, thisAbility->aoeEnabled, "aoe", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->duration, thisAbility->durationEnabled, "duration", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->durationMod, thisAbility->durationModEnabled, "durationMod", effectRect);
@@ -169,6 +173,7 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificEffect(hdcBuffer, thisAbility->attack, thisAbility->attackEnabled, "attack", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->damageMod, thisAbility->damageModEnabled, "damageMod", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->mvmt, thisAbility->mvmtEnabled, "mvmt", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->diceHP, thisAbility->diceHPEnabled, "diceHP", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->hp, thisAbility->hpEnabled, "hp", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->totalHP, thisAbility->totalHPEnabled, "totalHP", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->totalMana, thisAbility->totalManaEnabled, "totalMana", effectRect);
@@ -183,7 +188,7 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 
 }
 
-void drawSpecificEffect(HDC hdcBuffer, effectAndManaMapList * mapList, int isEnabled,char * name , RECT * effectRect){
+void drawSpecificEffect(HDC hdcBuffer, effectAndManaMapList * mapList, int isEnabled, char * name , RECT * effectRect){
 	if(isEnabled){
 		int magnitude = mapList->effectAndManaArray[mapList->selectedIndex]->effectMagnitude;
 		int cost = mapList->effectAndManaArray[mapList->selectedIndex]->manaCost;
@@ -198,6 +203,32 @@ void drawSpecificEffect(HDC hdcBuffer, effectAndManaMapList * mapList, int isEna
 			}
 
 			sprintf(outStr, "%s: %d",name, magnitude);
+
+			DrawText(hdcBuffer, outStr, strlen(outStr), effectRect, DT_SINGLELINE);
+
+			SetTextColor(hdcBuffer, RGB(255, 200, 0));
+
+			moveRECTDown(effectRect, 14);
+		}
+	}
+}
+
+void drawSpecificType(HDC hdcBuffer, typeAndManaMapList * mapList, int isEnabled, char * name , RECT * effectRect){
+	if(isEnabled){
+		char * type[16];
+		strcpy(type, mapList->typeAndManaArray[mapList->selectedIndex]->type);
+		int cost = mapList->typeAndManaArray[mapList->selectedIndex]->manaCost;
+		if (strcmp(type,"None") != 0) {
+
+			char * outStr[64];
+
+			if(cost > 0){
+				SetTextColor(hdcBuffer, RGB(0, 162, 255));
+			}else if (cost < 0){
+				SetTextColor(hdcBuffer, RGB(255, 0, 0));
+			}
+
+			sprintf(outStr, "%s: %s",name, type);
 
 			DrawText(hdcBuffer, outStr, strlen(outStr), effectRect, DT_SINGLELINE);
 
