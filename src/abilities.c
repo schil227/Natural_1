@@ -215,6 +215,10 @@ void updateElementDRSummation(int * sum, int * hasEffect, int isEnabled, effectA
 void calcStatusCost(int * sum, int * hasEffect, ability * thisAbility){
 	int damageCost = 1, durationCost = 0;
 
+	if(strcmp(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type, "None") == 0){
+		return;
+	}
+
 	if(strcmp(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type, "Poison") == 0
 			|| strcmp(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type, "Burn") == 0){
 		damageCost = thisAbility->statusDamage->effectAndManaArray[thisAbility->statusDamage->selectedIndex]->manaCost;
@@ -338,17 +342,6 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->damageTypeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->damageTypeEnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->damageType = *value;
-	}else{
-		newAbility->damageType = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->damageTypeEnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -358,6 +351,9 @@ ability * createAbilityFromLine(char line[2048]){
 	}else{
 		newAbility->damageType = NULL;
 	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->rangeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
@@ -483,7 +479,6 @@ ability * createAbilityFromLine(char line[2048]){
 	}else{
 		newAbility->diceStatusDuration = NULL;
 	}
-
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->statusDurationEnabled = atoi(value);
@@ -909,13 +904,13 @@ effectAndManaMapList * cloneEffectAndManaMapList(effectAndManaMapList * thisMap)
 	return newMap;
 }
 
-effectAndManaMapList * cloneTypeAndManaMapList(typeAndManaMapList * thisMap){
+typeAndManaMapList * cloneTypeAndManaMapList(typeAndManaMapList * thisMap){
 	if(thisMap == NULL){
 		return NULL;
 	}
 
 	int i;
-	effectAndManaMapList * newMap = malloc(sizeof(effectAndManaMapList));
+	typeAndManaMapList * newMap = malloc(sizeof(typeAndManaMapList));
 
 	newMap->size  = thisMap->size;
 	newMap->MAX_SIZE = thisMap->MAX_SIZE;
@@ -923,11 +918,11 @@ effectAndManaMapList * cloneTypeAndManaMapList(typeAndManaMapList * thisMap){
 	newMap->defaultStartingIndex = thisMap->defaultStartingIndex;
 
 	for(i = 0; i < thisMap->size; i++){
-		typeAndMana * newTypeAndMana = malloc(sizeof(effectAndMana));
+		typeAndMana * newTypeAndMana = malloc(sizeof(typeAndMana));
 		strcpy(newTypeAndMana->type,thisMap->typeAndManaArray[i]->type);
 		newTypeAndMana->manaCost = thisMap->typeAndManaArray[i]->manaCost;
 
-		newMap->effectAndManaArray[i] = newTypeAndMana;
+		newMap->typeAndManaArray[i] = newTypeAndMana;
 	}
 
 	return newMap;

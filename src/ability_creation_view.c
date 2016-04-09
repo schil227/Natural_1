@@ -176,7 +176,7 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 			 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DICE_DURATION, "Status Dice Duration", 0, thisAbilityCreationInstance->abilityInsance->diceStatusDuration);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDurationEnabled,
-			 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DICE_DURATION, "Status Duration", 0, thisAbilityCreationInstance->abilityInsance->statusDuration);
+			 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DURATION, "Status Duration", 0, thisAbilityCreationInstance->abilityInsance->statusDuration);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_AOE, "aoe", 0, thisAbilityCreationInstance->abilityInsance->aoe);
@@ -224,7 +224,7 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 				 hdc, hdcBuffer, &textRect, ABILITY_MVMT, "movement", 0, thisAbilityCreationInstance->abilityInsance->mvmt);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceHPEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_HP, "diceHP", 0, thisAbilityCreationInstance->abilityInsance->diceHP);
+				 hdc, hdcBuffer, &textRect, ABILITY_DICE_HP, "diceHP", 0, thisAbilityCreationInstance->abilityInsance->diceHP);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->hpEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_HP, "hp", 0, thisAbilityCreationInstance->abilityInsance->hp);
@@ -369,6 +369,15 @@ void shiftEffectListDown(){
 	thisAbilityCreationInstance->effectCurrentIndex--;
 }
 
+typeAndManaMapList * getTypeMapListFromEffectType(){
+	switch(thisAbilityCreationInstance->selectedType){
+	case ABILITY_DAMAGE_TYPE:
+		return thisAbilityCreationInstance->abilityInsance->damageType;
+	case ABILITY_STATUS:
+		return thisAbilityCreationInstance->abilityInsance->status;
+	}
+}
+
 void interpretRightAbilityCreation(){
 	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
 		effectAndManaMapList * tmpMap = getMapListFromEffectType();
@@ -398,15 +407,6 @@ void interpretLeftAbilityCreation(int range, int mvmt, int totalHP, int totalMan
 		}
 	}else if(thisAbilityCreationInstance->effectCurrentIndex == -1){
 		changeAbilityTemplate(-1);
-	}
-}
-
-typeAndManaMapList * getTypeMapListFromEffectType(){
-	switch(thisAbilityCreationInstance->selectedType){
-	case ABILITY_DAMAGE_TYPE:
-		return thisAbilityCreationInstance->abilityInsance->damageType;
-	case ABILITY_STATUS:
-		return thisAbilityCreationInstance->abilityInsance->status;
 	}
 }
 
@@ -537,6 +537,27 @@ void increaseEffect(effectAndManaMapList * selectedMap){
 void decreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, int totalHP, int totalMana){
 	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, range, mvmt, totalHP, totalMana)){
 		selectedMap->selectedIndex--;
+	}
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+}
+
+
+void selectNextType(typeAndManaMapList * thisMapList){
+	if(thisMapList->selectedIndex +1 < thisMapList->size){
+		thisMapList->selectedIndex++;
+	}else{
+		thisMapList->selectedIndex = 0;;
+	}
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+}
+
+void selectPreviousType(typeAndManaMapList * thisMapList){
+	if(thisMapList->selectedIndex > 0){
+		thisMapList->selectedIndex--;
+	}else{
+		thisMapList->selectedIndex = thisMapList->size - 1;
 	}
 
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
