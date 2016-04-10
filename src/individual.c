@@ -33,10 +33,19 @@ individual *initIndividual(){
 	toReturn->activeAbilities = malloc(sizeof(activeAbilityList));
 	toReturn->activeAbilities->numAbilities = 0;
 	toReturn->activeAbilities->MAX_ABILITIES = 64;
+	toReturn->activeAbilities->selectedTargetedAbility = NULL;
+
+	for(i = 0; i < 64; i++){
+		toReturn->activeAbilities->abilitiesList[i] = NULL;
+	}
 
 	toReturn->activeStatuses = malloc(sizeof(statusList));
 	toReturn->activeStatuses->numStatuses = 0;
 	toReturn->activeStatuses->MAX_STATUSES = 16;
+
+	for(i = 0; i < 16; i++){
+		toReturn->activeStatuses->statuses[i] = NULL;
+	}
 
 	return toReturn;
 }
@@ -296,7 +305,42 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 }
 
 void addStatusToIndividual(individual * thisIndividual, ability * thisAbility){
+	int i;
+	status * newStatus = createStatusFromAbility(thisAbility);
 
+	if(thisIndividual->activeStatuses->numStatuses < thisIndividual->activeStatuses->MAX_STATUSES){
+
+		for(i = 0; i < thisIndividual->activeStatuses->MAX_STATUSES; i++){
+			if(thisIndividual->activeStatuses->statuses[i] == NULL){
+				thisIndividual->activeStatuses->statuses[i] = newStatus;
+				thisIndividual->activeStatuses->numStatuses++;
+				break;
+			}
+		}
+
+	}
+
+}
+
+status * createStatusFromAbility(ability * thisAbility){
+	int duration = 0, diceDuration = 0;
+
+	status * thisStatus = malloc(sizeof(status));
+
+	thisStatus->effect = lookUpStatusType(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type);
+
+	thisStatus->diceDamage =  thisAbility->statusDiceDamage->effectAndManaArray[thisAbility->statusDiceDamage->selectedIndex]->effectMagnitude;
+	thisStatus->damage =  thisAbility->statusDamage->effectAndManaArray[thisAbility->statusDamage->selectedIndex]->effectMagnitude;
+	diceDuration =  thisAbility->diceStatusDuration->effectAndManaArray[thisAbility->diceStatusDuration->selectedIndex]->effectMagnitude;
+	duration =  thisAbility->statusDuration->effectAndManaArray[thisAbility->statusDuration->selectedIndex]->effectMagnitude;
+
+	if(diceDuration > 0){
+		thisStatus->turnsRemaining = (rand() % diceDuration) + 1 + duration;
+	}else{
+		thisStatus->turnsRemaining = duration;
+	}
+
+	return thisStatus;
 }
 
 int damageIndividual(individual *thisIndividual, individual *targetIndividual, int isCrit){
@@ -436,81 +480,86 @@ int processActiveItems(individual * thisIndividual){
 				itemsPassed++;
 			}
 
+			if(itemsPassed >= thisIndividual->activeItems->activeItemsTotal){
+				break;
+			}
 		}
 
-		if(itemsPassed >= thisIndividual->activeItems->activeItemsTotal){
-			break;
-		}
+
 	}
 
 	return 0;
 }
 
 int processActiveAbilities(individual * thisIndividual){
-	int i;
+	int i, abilitiesPassed = 0;
 	activeAbilityList * activeAbilities = thisIndividual->activeAbilities;
 
-	i = 0;
-	while(i < activeAbilities->numAbilities){
+	for(i = 0; i < activeAbilities->MAX_ABILITIES; i++){
 		activeAbility * thisActiveAbility = activeAbilities->abilitiesList[i];
+		if (thisActiveAbility != NULL) {
+			abilitiesPassed++;
 
-		if(thisActiveAbility->thisAbility->type != 'p'){
-			if(thisActiveAbility->turnsRemaining >= 0){
-				useActiveAbility(thisActiveAbility);
+			if (thisActiveAbility->thisAbility->type != 'p') {
+				if (thisActiveAbility->turnsRemaining >= 0) {
+					useActiveAbility(thisActiveAbility);
 
-				if(thisIndividual->hp <= 0){
-					char * tmp[128];
-					sprintf(tmp, "%s has perished from %s!", thisIndividual->name, thisActiveAbility->thisAbility->name);
+					if (thisIndividual->hp <= 0) {
+						char * tmp[128];
+						sprintf(tmp, "%s has perished from %s!", thisIndividual->name, thisActiveAbility->thisAbility->name);
+						cwrite(tmp);
+						return 1;
+					}
+				} else {
+					char * tmp[64];
+					sprintf(tmp, "Ability %s has finished.",thisActiveAbility->thisAbility->name);
 					cwrite(tmp);
-					return 1;
-				}
-			} else {
-				char * tmp[64];
-				sprintf(tmp, "Ability %s has finished.", thisActiveAbility->thisAbility->name);
-				cwrite(tmp);
 
-				activeAbilities->abilitiesList[i] = NULL;
-				//replace current element with last element, decrement elements
-				activeAbilities->abilitiesList[i] = activeAbilities->abilitiesList[activeAbilities->numAbilities-1];
-				activeAbilities->abilitiesList[activeAbilities->numAbilities-1] = NULL;
-				activeAbilities->numAbilities--;
-				i--;
+					activeAbilities->abilitiesList[i] = NULL;
+					activeAbilities->numAbilities--;
+				}
 			}
+
+			if (abilitiesPassed >= activeAbilities->numAbilities) {
+				break;
+			}
+
 		}
-		i++;
 	}
 
 	return 0;
 }
 
 int processStatuses(individual * thisIndividual){
-	int i;
-	for(i = 0; i < thisIndividual->activeStatuses->numStatuses; i++){
+	int i, statusesPassed = 0;
+
+	for(i = 0; i < thisIndividual->activeStatuses->MAX_STATUSES; i++){
 		status * tmpStatus = thisIndividual->activeStatuses->statuses[i];
-		if(tmpStatus->turnsRemaining >= 0){
-			processStatus(thisIndividual, tmpStatus);
+		if(tmpStatus != NULL){
+			statusesPassed++;
+			if(tmpStatus->turnsRemaining >= 0){
+				processStatus(thisIndividual, tmpStatus);
 
-			//check if status killed individual
-			if(thisIndividual->hp >= 0){
-				char * tmp[128];
-				sprintf(tmp, "%s has perished from ailment!", thisIndividual->name);
+				if(thisIndividual->hp <= 0){
+					char * tmp[128];
+					sprintf(tmp, "%s has perished from ailment!", thisIndividual->name);
+					cwrite(tmp);
+					return 1;
+				}
+			}else{
+				char * tmp[64];
+				sprintf(tmp, "%s recovered from %s.", thisIndividual->name, lookUpStatusEffectName(tmpStatus->effect));
 				cwrite(tmp);
-				return 1;
+
+				thisIndividual->activeStatuses->statuses[i] = NULL;
+				thisIndividual->activeStatuses->numStatuses--;
+
+				free(tmpStatus);
 			}
-		}else{
-			char * tmp[64];
-			sprintf(tmp, "%s recovered from %s.", thisIndividual->name, lookUpStatusEffectName(tmpStatus->effect));
-			cwrite(tmp);
 
-			thisIndividual->activeStatuses->statuses[i] = NULL;
-			thisIndividual->activeStatuses->statuses[i] = thisIndividual->activeStatuses->statuses[thisIndividual->activeStatuses->numStatuses];
-			thisIndividual->activeStatuses->statuses[thisIndividual->activeStatuses->numStatuses] = NULL;
-			thisIndividual->activeStatuses->numStatuses--;
-
-			free(tmpStatus);
-
-			i--;
-
+			if(statusesPassed >= thisIndividual->activeStatuses->numStatuses){
+				break;
+			}
 		}
 	}
 
@@ -521,12 +570,38 @@ void processStatus(individual * thisIndividual, status * thisStatus){
 	thisStatus->turnsRemaining--;
 
 	switch(thisStatus->effect){
-		case STATUS_POISONED:{
-			damageIndividualWithStatus();
+		case STATUS_POISONED:
+		case STATUS_BURNING:
+		case STATUS_BLEEDING:{
+			damageIndividualWithStatus(thisIndividual, thisStatus);
 		}
+	}
+}
 
+statusEffect lookUpStatusType(char * statusType[16]){
+	if(strcmp(statusType, "None") == 0){
+		return STATUS_NONE;
+	}else if(strcmp(statusType, "Poison") == 0){
+		return STATUS_POISONED;
+	}else if(strcmp(statusType, "Paralysis") == 0){
+		return STATUS_PARALYZED;
+	}else if(strcmp(statusType, "Confusion") == 0){
+		return STATUS_CONFUSED;
+	}else if(strcmp(statusType, "Burn") == 0){
+		return STATUS_BURNING;
+	}else if(strcmp(statusType, "Bleed") == 0){
+		return STATUS_BLEEDING;
+	}else if(strcmp(statusType, "Berzerk") == 0){
+		return STATUS_BERZERK;
+	}else if(strcmp(statusType, "Silence") == 0){
+		return STATUS_SILENCED;
 	}
 
+	char * tmpStr[64];
+	sprintf(tmpStr, "!! STATUS TYPE NOT FOUND: %s", statusType);
+	cwrite(tmpStr);
+
+	return STATUS_NONE;
 }
 
 void damageIndividualWithStatus(individual * thisIndividual, status * thisStatus){
@@ -539,7 +614,43 @@ void damageIndividualWithStatus(individual * thisIndividual, status * thisStatus
 
 	damage += thisStatus->damage;
 
+	if(damage < 0){
+		damage = 0;
+	}
+
 	thisIndividual->hp -= damage;
+
+	char * hitMessage[128];
+	switch(thisStatus->effect){
+		case STATUS_POISONED:{
+			if(damage > 0){
+				sprintf(hitMessage, "%s took %d damage from %s",thisIndividual->name, damage, "poison");
+			}else{
+				sprintf(hitMessage, "%s was unaffected by the %s",thisIndividual->name, "poison");
+			}
+		}
+		break;
+		case STATUS_BURNING:{
+			if(damage > 0){
+				sprintf(hitMessage, "%s took %d damage from %s",thisIndividual->name, damage, "burning");
+			}else{
+				sprintf(hitMessage, "%s was unaffected by the %s",thisIndividual->name, "burning");
+			}
+		}
+		break;
+		case STATUS_BLEEDING:{
+			if(damage > 0){
+				sprintf(hitMessage, "%s took %d damage from %s",thisIndividual->name, damage, "bleeding");
+			}else{
+				sprintf(hitMessage, "%s was unaffected by the %s",thisIndividual->name, "bleeding");
+			}
+		}
+		break;
+
+		strcpy(hitMessage, "!! damageIndividualWithStatus() COULD NOT FIND STATUS !!");
+	}
+
+	cwrite(hitMessage);
 }
 
 char * lookUpStatusEffectName(statusEffect effect){

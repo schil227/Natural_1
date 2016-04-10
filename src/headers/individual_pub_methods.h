@@ -18,6 +18,8 @@ int individualWithinRange(individual * thisIndividual, individual * target);
 int calcDR(individual * targetIndividual, char attackType);
 int addItemToIndividual(inventory * backpack, item * newItem);
 char * lookUpStatusEffectName(statusEffect effect);
+statusEffect lookUpStatusType(char * statusType[16]);
+status * createStatusFromAbility(ability * thisAbility);
 
 int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam, char critType[3],
