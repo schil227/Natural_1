@@ -33,7 +33,7 @@ individual *initIndividual(){
 	toReturn->activeAbilities = malloc(sizeof(activeAbilityList));
 	toReturn->activeAbilities->numAbilities = 0;
 	toReturn->activeAbilities->MAX_ABILITIES = 64;
-	toReturn->activeAbilities->selectedTargetedAbility = NULL;
+	toReturn->activeAbilities->selectedAbility = NULL;
 
 	for(i = 0; i < 64; i++){
 		toReturn->activeAbilities->abilitiesList[i] = NULL;
@@ -221,7 +221,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 }
 
 int attackIndividualWithAbility(individual * thisIndividual, individual * target){
-	ability * targetAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
+	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
 	int i, isTargeted = 0;
 
 	if(targetAbility->targetedEnabled){
@@ -254,9 +254,40 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 	}
 }
 
+int abilityIsHarmful(ability * thisAbility){
+	if(thisAbility->damageEnabled){
+		if(thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->effectMagnitude > 0){
+			return 1;
+		}
+	}
+
+	if(thisAbility->diceDamageEnabled){
+		if(thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->effectMagnitude > 0){
+			return 1;
+		}
+	}
+
+	if(thisAbility->statusEnabled){
+		return statusIsHarmful(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type);
+	}
+
+}
+
+int statusIsHarmful(char * type){
+	statusEffect thisStatusEffect = lookUpStatusType(type);
+
+	switch(thisStatusEffect){
+		case STATUS_NONE:{
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 int damageIndividualWithAbility(individual *thisIndividual, individual *targetIndividual){
 	int damage = 0, totalDamage, targetDR;
-	ability * targetAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
+	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
 
 	if(targetAbility->diceDamageEnabled){
 		int diceDamage = targetAbility->diceDamage->effectAndManaArray[targetAbility->diceDamage->selectedIndex]->effectMagnitude;
@@ -284,7 +315,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	sendHitDialog(thisIndividual->name, targetIndividual->name, 20, totalDamage);
 	targetIndividual->hp = targetIndividual->hp - totalDamage;
 
-	//Add status here
+	//Add status
 	if(targetAbility->statusEnabled){
 		int sum = 0, dummy = 0;
 		calcStatusCost(&sum, &dummy, targetAbility);
@@ -943,21 +974,9 @@ void addActiveAbilityToIndividual(individual * thisIndividual, ability * thisAbi
 void useAbility(individual * thisIndividual, ability * thisAbility){
 	//target cursor mode
 	if(thisAbility->type == 't'){ //targeted
-		thisIndividual->activeAbilities->selectedTargetedAbility = thisAbility;
+		thisIndividual->activeAbilities->selectedAbility = thisAbility;
 	}else if(thisAbility->type == 'd'){ //duration
-		int duration = calcAbilityDuration(thisAbility);
-		char * tmp[64];
-
-		if(thisIndividual->activeAbilities->numAbilities + 1 < thisIndividual->activeAbilities->MAX_ABILITIES){
-			sprintf(tmp, "Used %s for %d turns.",thisAbility->name, duration);
-			cwrite(tmp);
-
-			addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
-			decreaseMana(thisIndividual, thisAbility->totalManaCost);
-		}else{
-			cwrite("Cannot use another ability");
-		}
-
+		thisIndividual->activeAbilities->selectedAbility = thisAbility;
 	}
 }
 
@@ -1459,7 +1478,7 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 }
 
 int getAttributeSum(individual * thisIndividual, char * attribute){
-	int toReturn = 0, i, itemTotal = 0, activeItemTotal = 0;
+	int toReturn = 0, i, itemTotal = 0, activeItemTotal = 0, abilitiesPassed = 0;
 
 	toReturn += getAttributeFromIndividual(thisIndividual, attribute);
 
@@ -1485,8 +1504,15 @@ int getAttributeSum(individual * thisIndividual, char * attribute){
 
 	}
 
-	for(i = 0; i < thisIndividual->activeAbilities->numAbilities; i++){
-		toReturn += getAttributeFromActiveAbility(thisIndividual->activeAbilities->abilitiesList[i]->thisAbility, attribute);
+	for(i = 0; i < thisIndividual->activeAbilities->MAX_ABILITIES; i++){
+		if(thisIndividual->activeAbilities->abilitiesList[i] != NULL){
+			abilitiesPassed++;
+			toReturn += getAttributeFromActiveAbility(thisIndividual->activeAbilities->abilitiesList[i]->thisAbility, attribute);
+
+		if(abilitiesPassed >= thisIndividual->activeAbilities->numAbilities){
+			break;
+		}
+		}
 	}
 
 	return toReturn;

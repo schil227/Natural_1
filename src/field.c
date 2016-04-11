@@ -246,7 +246,7 @@ int tryAttackEnemies(individualGroup * enemies, individual * player, field * thi
 int cursorWithinAbilityRange(individual * player, int x, int y){
 	int range = 0; //NOT attributeSum, should be relative to the ability
 
-	ability * targetAbility = player->activeAbilities->selectedTargetedAbility;
+	ability * targetAbility = player->activeAbilities->selectedAbility;
 
 	if(targetAbility->rangeEnabled){
 		range += targetAbility->range->effectAndManaArray[targetAbility->range->selectedIndex]->effectMagnitude;
@@ -259,9 +259,9 @@ int cursorWithinAbilityRange(individual * player, int x, int y){
 	}
 }
 
-void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
+void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
 	int aoe = 0,  minX, maxX, minY, maxY;
-	ability * tmpAbility = thisIndividual->activeAbilities->selectedTargetedAbility;
+	ability * tmpAbility = thisIndividual->activeAbilities->selectedAbility;
 
 	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
 
@@ -274,15 +274,20 @@ void attackIndividualsInAOERange(individual * thisIndividual, individualGroup * 
 	minY = y - aoe;
 	maxY = y + aoe;
 
-
 	checkIndividualGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
 	checkIndividualGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
 
 	if(thisIndividual->playerCharacter->x >= minX && thisIndividual->playerCharacter->x <= maxX &&
 		thisIndividual->playerCharacter->y >= minY && thisIndividual->playerCharacter->y <= maxY ){
 
-		if(attackIndividualWithAbility(thisIndividual, thisIndividual)){
-			removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+		if(tmpAbility->type == 't'){
+			if(attackIndividualWithAbility(thisIndividual, thisIndividual)){
+				removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+			}
+		}else if (tmpAbility->type == 'd'){
+
+			//add duration ability logic here
+			useDurationAbilityOnIndividual(thisIndividual, tmpAbility);
 		}
 	}
 
@@ -301,10 +306,20 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 					tmp->playerCharacter->x <= maxX &&
 					tmp->playerCharacter->y >= minY &&
 					tmp->playerCharacter->y <= maxY ){
-				if(attackIndividualWithAbility(thisIndividual, tmp)){
-					deleteIndividiaulFromGroup(thisGroup, tmp);
-					removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+				if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
+					if(attackIndividualWithAbility(thisIndividual, tmp)){
+						deleteIndividiaulFromGroup(thisGroup, tmp);
+						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+					}
+				}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
+					if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
+						triggerEventOnAttack(tmp->ID);
+					}
+
+					//add duration ability logic here
+					useDurationAbilityOnIndividual(thisIndividual, thisIndividual->activeAbilities->selectedAbility);
 				}
+
 
 			}
 
@@ -313,6 +328,22 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 			}
 		}
 	}
+}
+
+void useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility){
+	int duration = calcAbilityDuration(thisAbility);
+	char * tmp[64];
+
+	if(thisIndividual->activeAbilities->numAbilities + 1 < thisIndividual->activeAbilities->MAX_ABILITIES){
+		sprintf(tmp, "Used %s for %d turns.",thisAbility->name, duration);
+		cwrite(tmp);
+
+		addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
+
+	}else{
+		cwrite("Cannot use another ability");
+	}
+
 }
 
 void wanderAround(field * thisField, individual * thisIndividual){

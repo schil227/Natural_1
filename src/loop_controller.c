@@ -36,8 +36,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 			break;
 		}
 		case 0x1B: //escape
-			if (getCursorMode() == CURSOR_TARGETED_ABILITY){
-				player->activeAbilities->selectedTargetedAbility = NULL;
+			if (getCursorMode() == CURSOR_ABILITY){
+				player->activeAbilities->selectedAbility = NULL;
 			}
 			toggleInCursorMode();
 			viewShift->xShift = viewShift->xShiftOld;
@@ -59,11 +59,11 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 
 				decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 				toggleInCursorMode();
-			}else if (getCursorMode() == CURSOR_TARGETED_ABILITY){
+			}else if (getCursorMode() == CURSOR_ABILITY){
 				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
-					attackIndividualsInAOERange(player, npcs, enemies, main_field, getCursorX(), getCursorY());
+					useAbilityOnIndividualsInAOERange(player, npcs, enemies, main_field, getCursorX(), getCursorY());
 
-					player->activeAbilities->selectedTargetedAbility = NULL;
+					player->activeAbilities->selectedAbility = NULL;
 					decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 					toggleInCursorMode();
 				}
@@ -236,10 +236,10 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 				if(canUseAbility(player,getAbilityToActivate())){
 					useAbility(player,getAbilityToActivate());
 
-					if(player->activeAbilities->selectedTargetedAbility != NULL &&
-							player->activeAbilities->selectedTargetedAbility->type == 't'){
+					if(player->activeAbilities->selectedAbility != NULL &&
+							(player->activeAbilities->selectedAbility->type == 't' || player->activeAbilities->selectedAbility->type == 'd')){
 						toggleInCursorMode();
-						refreshCursor(CURSOR_TARGETED_ABILITY, player->playerCharacter->x, player->playerCharacter->y);
+						refreshCursor(CURSOR_ABILITY, player->playerCharacter->x, player->playerCharacter->y);
 					}else{
 						decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 					}

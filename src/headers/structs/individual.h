@@ -40,7 +40,7 @@ typedef struct{
 typedef struct{
 	int numAbilities;
 	int MAX_ABILITIES;
-	ability * selectedTargetedAbility;
+	ability * selectedAbility;
 	activeAbility * abilitiesList[64];
 }activeAbilityList;
 
