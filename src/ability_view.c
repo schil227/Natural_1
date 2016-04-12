@@ -156,8 +156,8 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificType(hdcBuffer, thisAbility->status, thisAbility->statusEnabled, "status", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->statusDiceDamage, thisAbility->statusDiceDamageEnabled, "statusDiceDamage", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->statusDamage, thisAbility->statusDamageEnabled, "statusDamage", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->diceStatusDuration, thisAbility->diceStatusDurationEnabled, "diceDamageDuration", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->statusDuration, thisAbility->statusDurationEnabled, "diceDamageDurationMod", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->diceStatusDuration, thisAbility->diceStatusDurationEnabled, "statusDiceDuration", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->statusDuration, thisAbility->statusDurationEnabled, "statusDuration", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->aoe, thisAbility->aoeEnabled, "aoe", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->duration, thisAbility->durationEnabled, "duration", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->durationMod, thisAbility->durationModEnabled, "durationMod", effectRect);

@@ -330,22 +330,6 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 	}
 }
 
-void useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility){
-	int duration = calcAbilityDuration(thisAbility);
-	char * tmp[64];
-
-	if(thisIndividual->activeAbilities->numAbilities + 1 < thisIndividual->activeAbilities->MAX_ABILITIES){
-		sprintf(tmp, "Used %s for %d turns.",thisAbility->name, duration);
-		cwrite(tmp);
-
-		addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
-
-	}else{
-		cwrite("Cannot use another ability");
-	}
-
-}
-
 void wanderAround(field * thisField, individual * thisIndividual){
  int direction = rand() % 10+1;
  moveIndividual(thisField, thisIndividual, direction);

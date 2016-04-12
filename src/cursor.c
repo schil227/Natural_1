@@ -58,6 +58,17 @@ void setCursorCoords(int x, int y){
 	thisCursorInstance->cursorCharacter->y = y;
 }
 
+int canMoveCursor(individual * thisIndividual){
+
+	//If it's a self-duration ability, dont move cursor from player position
+	if(thisCursorInstance->thisMode == CURSOR_ABILITY && thisIndividual->activeAbilities->selectedAbility != NULL
+			&&  thisIndividual->activeAbilities->selectedAbility->type == 'd'){
+		return 0;
+	}
+
+	return 1;
+}
+
 int moveCursor(field *thisField, int direction, shiftData * viewShift){
 	int newX = thisCursorInstance->cursorCharacter->x + xMoveChange(direction);
 	int newY = thisCursorInstance->cursorCharacter->y + yMoveChange(direction);

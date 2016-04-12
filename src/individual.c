@@ -224,11 +224,11 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
 	int i, isTargeted = 0;
 
+	triggerEventOnAttack(target->ID);
+
 	if(targetAbility->targetedEnabled){
 		isTargeted = targetAbility->targeted->effectAndManaArray[targetAbility->targeted->selectedIndex]->effectMagnitude;
 	}
-
-	triggerEventOnAttack(target->ID);
 
 	if(isTargeted){
 		return damageIndividualWithAbility(thisIndividual, target);
@@ -320,8 +320,11 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 		int sum = 0, dummy = 0;
 		calcStatusCost(&sum, &dummy, targetAbility);
 		if(sum > 0){
-			addStatusToIndividual(targetIndividual, targetAbility);
+			status * newStatus = createStatusFromAbility(targetAbility);
+			addStatusToIndividual(targetIndividual, newStatus);
+			processStatus(targetIndividual, newStatus);
 		}
+
 	}
 
 	if(targetIndividual->hp <= 0){ //target is dead
@@ -335,9 +338,35 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 
 }
 
-void addStatusToIndividual(individual * thisIndividual, ability * thisAbility){
+void useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility){
+	int duration = calcAbilityDuration(thisAbility);
+	char * tmp[64];
+
+	if(thisIndividual->activeAbilities->numAbilities + 1 < thisIndividual->activeAbilities->MAX_ABILITIES){
+		sprintf(tmp, "Used %s for %d turns.",thisAbility->name, duration);
+		cwrite(tmp);
+
+		addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
+
+		if(thisAbility->statusEnabled){
+			statusEffect thisEffect = lookUpStatusType( thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type);
+
+			if(thisEffect != STATUS_NONE){
+				status * newStatus = createStatusFromAbility(thisAbility);
+				addStatusToIndividual(thisIndividual, newStatus);
+				processStatus(thisIndividual,newStatus);
+			}
+
+		}
+
+	}else{
+		cwrite("Cannot use another ability");
+	}
+
+}
+
+void addStatusToIndividual(individual * thisIndividual, status * newStatus){
 	int i;
-	status * newStatus = createStatusFromAbility(thisAbility);
 
 	if(thisIndividual->activeStatuses->numStatuses < thisIndividual->activeStatuses->MAX_STATUSES){
 
@@ -532,7 +561,7 @@ int processActiveAbilities(individual * thisIndividual){
 			abilitiesPassed++;
 
 			if (thisActiveAbility->thisAbility->type != 'p') {
-				if (thisActiveAbility->turnsRemaining >= 0) {
+				if (thisActiveAbility->turnsRemaining - 1 >= 0) {
 					useActiveAbility(thisActiveAbility);
 
 					if (thisIndividual->hp <= 0) {
@@ -636,7 +665,7 @@ statusEffect lookUpStatusType(char * statusType[16]){
 }
 
 void damageIndividualWithStatus(individual * thisIndividual, status * thisStatus){
-	int damage;
+	int damage = 0;
 
 	int diceDamage = thisStatus->diceDamage;
 	if(diceDamage > 0){

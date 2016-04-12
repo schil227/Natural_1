@@ -31,8 +31,9 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 		{
 			int direction;
 			direction = LOWORD(wParam) % 16;
-			printf("cursor y:%d \n", viewShift->yShift);
-			moveCursor(main_field,direction, viewShift);
+			if(canMoveCursor(player)){
+				moveCursor(main_field,direction, viewShift);
+			}
 			break;
 		}
 		case 0x1B: //escape
@@ -47,16 +48,18 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 		{
 			if (getCursorMode() == CURSOR_ATTACK) {//attack the individual
 				if(tryAttackEnemies(enemies, player, main_field, getCursorX(), getCursorY())){
-					toggleInCursorMode();
 
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
 					decreaseTurns(player, enemyActionMode, initEnemyActionMode);
+					toggleInCursorMode();
 				}
 
 			}else if(getCursorMode() == CURSOR_TALK){ //talk to the individual
 				tryTalkGroups(enemies, npcs, player, getCursorX(), getCursorY());
 
+				viewShift->xShift = viewShift->xShiftOld;
+				viewShift->yShift = viewShift->yShiftOld;
 				decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 				toggleInCursorMode();
 			}else if (getCursorMode() == CURSOR_ABILITY){
@@ -64,6 +67,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 					useAbilityOnIndividualsInAOERange(player, npcs, enemies, main_field, getCursorX(), getCursorY());
 
 					player->activeAbilities->selectedAbility = NULL;
+					viewShift->xShift = viewShift->xShiftOld;
+					viewShift->yShift = viewShift->yShiftOld;
 					decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 					toggleInCursorMode();
 				}
