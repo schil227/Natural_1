@@ -567,7 +567,6 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 
 			(*tmpMoveNode)->hasTraversed = 1;
 
-//			moveIndividualSpace(thisField,thisIndividual,(*tmpMoveNode)->x, (*tmpMoveNode)->y);
 			thisIndividual->playerCharacter->x = (*tmpMoveNode)->x;
 			thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
 
@@ -579,8 +578,6 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 			if((*tmpMoveNode)->nextMoveNode == NULL){
 				setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
 				*postMoveMode = 0;
-//				freeUpMovePath((moveNode *) rootMoveNode->nextMoveNode);
-//				rootMoveNode->nextMoveNode = NULL;
 			}
 		}
 

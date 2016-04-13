@@ -310,6 +310,7 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 					if(attackIndividualWithAbility(thisIndividual, tmp)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+						removeFromExistance(tmp->ID);
 					}
 				}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 					if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
@@ -317,7 +318,11 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 					}
 
 					//add duration ability logic here
-					useDurationAbilityOnIndividual(thisIndividual, thisIndividual->activeAbilities->selectedAbility);
+					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
+						deleteIndividiaulFromGroup(thisGroup, tmp);
+						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+						removeFromExistance(tmp->ID);
+					}
 				}
 
 

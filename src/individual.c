@@ -338,7 +338,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 
 }
 
-void useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility){
+int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility){
 	int duration = calcAbilityDuration(thisAbility);
 	char * tmp[64];
 
@@ -361,6 +361,12 @@ void useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisA
 
 	}else{
 		cwrite("Cannot use another ability");
+	}
+
+	if(thisIndividual->hp <= 0){
+		return 1;
+	}else{
+		return 0;
 	}
 
 }
@@ -535,6 +541,7 @@ int processActiveItems(individual * thisIndividual){
 					char * tmp[128];
 					sprintf(tmp, "%s has perished from %s!", thisIndividual->name, tmpActiveItem->thisItem->name);
 					cwrite(tmp);
+					removeFromExistance(thisIndividual->ID);
 					return 1;
 				}
 				itemsPassed++;
@@ -544,7 +551,6 @@ int processActiveItems(individual * thisIndividual){
 				break;
 			}
 		}
-
 
 	}
 
@@ -568,6 +574,7 @@ int processActiveAbilities(individual * thisIndividual){
 						char * tmp[128];
 						sprintf(tmp, "%s has perished from %s!", thisIndividual->name, thisActiveAbility->thisAbility->name);
 						cwrite(tmp);
+						removeFromExistance(thisIndividual->ID);
 						return 1;
 					}
 				} else {
@@ -604,6 +611,7 @@ int processStatuses(individual * thisIndividual){
 					char * tmp[128];
 					sprintf(tmp, "%s has perished from ailment!", thisIndividual->name);
 					cwrite(tmp);
+					removeFromExistance(thisIndividual->ID);
 					return 1;
 				}
 			}else{

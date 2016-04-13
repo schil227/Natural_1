@@ -570,36 +570,42 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if (initEnemyActionMode) {
 				initEnemyActionMode = 0;
 
-				if (enemies->currentIndividualIndex == -1) {
-					nextAvailableIndividualIndex(enemies);
-				}
-
 				if (enemies->numIndividuals == 0) {
-					postEnemyActionMode = 1;
+					if(startTurn(player)){
+
+					}
 					enemyActionMode = 0;
 					return 0;
+				}
+
+				//initial currentIndividualIndex check
+				if (enemies->currentIndividualIndex == -1) {
+					nextAvailableIndividualIndex(enemies);
 				}
 
 				int i;
 				individual * tmpIndividual = enemies->individuals[enemies->currentIndividualIndex];
 
 				//TODO: uncomment when indiviudals can be disposed properly
-//				if(startTurn(tmpIndividual)){
-//					deleteIndividiaulFromGroup(enemies, tmpIndividual);
-//					removeIndividualFromField(main_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
-//				}
+				if(startTurn(tmpIndividual)){
+					deleteIndividiaulFromGroup(enemies, tmpIndividual);
+					removeIndividualFromField(main_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+					enemyActionMode = 0;
+					postEnemyActionMode = 1;
+					return 0;
+				}
 
 				nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field, tmpIndividual, player);
 
+				//nowhere to go, nothing to animate
 				if (enemyNodeArr->size == 0) {
 					enemyActionMode = 0;
 					postEnemyActionMode = 1;
 					return 0;
 				}
 
-				getSpaceFromField(main_field, tmpIndividual->playerCharacter->x,
-						tmpIndividual->playerCharacter->y)->currentIndividual =
-						NULL;
+				//Gonna move, remove them from the field and update the moveNodeMeta
+				getSpaceFromField(main_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
 
 				thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
 				thisMoveNodeMeta->sum = 0;
@@ -611,12 +617,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			}
 
-
+			//initialization complete, beginning animation loop (once finished, enemyActionMode is toggled)
 
 			animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
 					(enemies->individuals[enemies->currentIndividualIndex]),
 					thisMoveNodeMeta, 5, &enemyActionMode, viewShift, 0);
 
+			//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
 			if (!enemyActionMode) {
 
 				if (thisMoveNodeMeta != NULL && thisMoveNodeMeta->rootMoveNode != NULL) {
@@ -631,7 +638,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if(postEnemyActionMode){
 		postEnemyActionMode = 0;
 
-		attackIfInRange(enemies->individuals[enemies->currentIndividualIndex],player);
+		//attack playerif currentIndividual didn't die and in range
+		if(enemies->individuals[enemies->currentIndividualIndex] != NULL){
+			attackIfInRange(enemies->individuals[enemies->currentIndividualIndex],player);
+		}
+		//determine if need to go back into enemyActionMode
 		nextAvailableIndividualIndex(enemies);
 		if(enemies->currentIndividualIndex > -1){
 			enemyActionMode = 1;
