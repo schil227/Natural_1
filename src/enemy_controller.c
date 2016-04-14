@@ -408,6 +408,60 @@ void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr
 	}
 }
 
+int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+
+	if (enemies->numIndividuals == 0) {
+		if(startTurn(player)){
+
+		}
+		return 1;
+	}
+
+	//initial currentIndividualIndex check
+	if (enemies->currentIndividualIndex == -1) {
+		nextAvailableIndividualIndex(enemies);
+	}
+
+	int i;
+	individual * tmpIndividual = enemies->individuals[enemies->currentIndividualIndex];
+
+	if(startTurn(tmpIndividual)){
+		deleteIndividiaulFromGroup(enemies, tmpIndividual);
+		removeIndividualFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+		return 1;
+	}
+
+	nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, tmpIndividual, player);
+
+	//nowhere to go, nothing to animate
+	if (enemyNodeArr->size == 0) {
+		return 1;
+	}
+
+	//Gonna move, remove them from the field and update the moveNodeMeta
+	getSpaceFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
+
+
+	/*
+	 * 	HEY
+	 *
+	 * 	MALLOC IS FAILING HERE FOR SUM REASON, DEBUG IT
+	 * */
+	(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
+	(*thisMoveNodeMeta)->sum = 0;
+
+	populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+
+
+	destroyNodeArr(enemyNodeArr);
+
+	return 0;
+}
+
+void enemyAttackAction(individual * enemy, individual * player){
+	attackIfInRange(enemy,player);
+}
+
 void destroyNodeArr(nodeArr * thisNodeArr){
 	int i;
 

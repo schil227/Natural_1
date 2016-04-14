@@ -570,50 +570,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if (initEnemyActionMode) {
 				initEnemyActionMode = 0;
 
-				if (enemies->numIndividuals == 0) {
-					if(startTurn(player)){
-
-					}
-					enemyActionMode = 0;
-					return 0;
-				}
-
-				//initial currentIndividualIndex check
-				if (enemies->currentIndividualIndex == -1) {
-					nextAvailableIndividualIndex(enemies);
-				}
-
-				int i;
-				individual * tmpIndividual = enemies->individuals[enemies->currentIndividualIndex];
-
-				//TODO: uncomment when indiviudals can be disposed properly
-				if(startTurn(tmpIndividual)){
-					deleteIndividiaulFromGroup(enemies, tmpIndividual);
-					removeIndividualFromField(main_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+				//note:the address of the pointer to thisMoveNodeMeta is passed in because it is malloc'd inside the method
+				if(initializeEnemyTurn(enemies, player, main_field, &thisMoveNodeMeta)){
 					enemyActionMode = 0;
 					postEnemyActionMode = 1;
 					return 0;
 				}
-
-				nodeArr * enemyNodeArr = getSpaceClosestToPlayer(main_field, tmpIndividual, player);
-
-				//nowhere to go, nothing to animate
-				if (enemyNodeArr->size == 0) {
-					enemyActionMode = 0;
-					postEnemyActionMode = 1;
-					return 0;
-				}
-
-				//Gonna move, remove them from the field and update the moveNodeMeta
-				getSpaceFromField(main_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
-
-				thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-				thisMoveNodeMeta->sum = 0;
-
-				populateMoveNodeMeta(thisMoveNodeMeta, enemyNodeArr);
-
-
-				destroyNodeArr(enemyNodeArr);
 
 			}
 
@@ -640,7 +602,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		//attack playerif currentIndividual didn't die and in range
 		if(enemies->individuals[enemies->currentIndividualIndex] != NULL){
-			attackIfInRange(enemies->individuals[enemies->currentIndividualIndex],player);
+			enemyAttackAction(enemies->individuals[enemies->currentIndividualIndex],player);
+
 		}
 		//determine if need to go back into enemyActionMode
 		nextAvailableIndividualIndex(enemies);
