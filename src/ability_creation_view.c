@@ -187,6 +187,9 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationModEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_DURATION_MOD, "durationMod", 0, thisAbilityCreationInstance->abilityInsance->durationMod);
 
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->actionsEnabled,
+					 hdc, hdcBuffer, &textRect, ABILITY_ACTIONS, "Actions", 0, thisAbilityCreationInstance->abilityInsance->actions);
+
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->STREnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_STR, "STR", 0, thisAbilityCreationInstance->abilityInsance->STR);
 
@@ -436,6 +439,8 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->duration;
 	case ABILITY_DURATION_MOD:
 		return thisAbilityCreationInstance->abilityInsance->durationMod;
+	case ABILITY_ACTIONS:
+		return thisAbilityCreationInstance->abilityInsance->actions;
 	case ABILITY_STR:
 		return thisAbilityCreationInstance->abilityInsance->STR;
 	case ABILITY_DEX:
@@ -506,18 +511,58 @@ int canDecreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, i
 			}
 		break;
 		case ABILITY_TOTAL_HP:
-			if(totalHP + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+		case ABILITY_CON:{
+			int abilityTotalHP = 0, abilityCON = 0;
+
+			if(thisAbilityCreationInstance->abilityInsance->CONEnabled){
+				abilityCON = thisAbilityCreationInstance->abilityInsance->CON->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->CON->selectedIndex]->effectMagnitude;
+			}
+
+			if(thisAbilityCreationInstance->abilityInsance->totalHPEnabled){
+				abilityTotalHP = thisAbilityCreationInstance->abilityInsance->totalHP->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->totalHP->selectedIndex]->effectMagnitude;
+			}
+
+			if(thisAbilityCreationInstance->selectedType == ABILITY_CON){
+				abilityCON -= 1;
+			}
+
+			if(thisAbilityCreationInstance->selectedType == ABILITY_TOTAL_HP){
+				abilityTotalHP -= 1;
+			}
+
+			if(totalHP + abilityTotalHP + abilityCON * 2 > 0){
 				return 1;
 			}else{
 				return 0;
 			}
+		}
 		break;
 		case ABILITY_TOTAL_MANA:
-			if(totalMana + selectedMap->effectAndManaArray[selectedMap->selectedIndex-1]->effectMagnitude > 0){
+		case ABILITY_WILL:{
+			int abilityTotalMana = 0, abilityWill = 0;
+
+			if(thisAbilityCreationInstance->abilityInsance->WILLEnabled){
+				abilityWill = 2 * thisAbilityCreationInstance->abilityInsance->WILL->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->WILL->selectedIndex]->effectMagnitude;
+			}
+
+			if(thisAbilityCreationInstance->abilityInsance->totalManaEnabled){
+				abilityTotalMana = thisAbilityCreationInstance->abilityInsance->totalMana->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->totalMana->selectedIndex]->effectMagnitude;
+			}
+
+			if(thisAbilityCreationInstance->selectedType == ABILITY_WILL){
+				abilityWill -= 1;
+			}
+
+			if(thisAbilityCreationInstance->selectedType == ABILITY_TOTAL_MANA){
+				abilityTotalMana -= 1;
+			}
+
+			if(totalMana + abilityTotalMana + abilityWill * 2 > 0){
 				return 1;
 			}else{
 				return 0;
 			}
+		}
 		break;
 	}
 

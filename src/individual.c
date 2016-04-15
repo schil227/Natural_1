@@ -125,11 +125,11 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 
 	thisIndividual->jumpTarget = 0;
 
-	thisIndividual->totalHP = baseHP + 2*CON;
-	thisIndividual->hp = thisIndividual->totalHP;
+	thisIndividual->totalHP = baseHP;
+	thisIndividual->hp = thisIndividual->totalHP + CON * 2;
 
-	thisIndividual->totalMana = baseMana + 2*WILL;
-	thisIndividual->mana = thisIndividual->totalMana;
+	thisIndividual->totalMana = baseMana;
+	thisIndividual->mana = thisIndividual->totalMana + WILL * 2;
 
 
 	return 0;
@@ -945,16 +945,20 @@ void activateDurationItem(individual * individual, item * thisItem){
 }
 
 void healIndividual(individual * thisIndividual, int hp){
-	if(thisIndividual->totalHP - thisIndividual->hp < hp){
-		thisIndividual->hp = thisIndividual->totalHP;
+	int totalHP = getAttributeSum(thisIndividual, "totalHealth") + getAttributeSum(thisIndividual, "CON") * 2;
+
+	if(totalHP - thisIndividual->hp < hp){
+		thisIndividual->hp = totalHP;
 	}else{
 		thisIndividual->hp += hp;
 	}
 }
 
 void restoreMana(individual * thisIndividual, int mana){
-	if(thisIndividual->totalMana - thisIndividual->mana < mana){
-		thisIndividual->mana = thisIndividual->totalMana;
+	int totalMana = getAttributeSum(thisIndividual, "totalMana") + getAttributeSum(thisIndividual, "WILL") * 2;
+
+	if(totalMana - thisIndividual->mana < mana){
+		thisIndividual->mana = totalMana;
 	}else{
 		thisIndividual->mana += mana;
 	}
@@ -1434,7 +1438,7 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 			return 0;
 		}
 	} else if(strcmp("range",attribute) == 0 ){
-		if(activeAbility->rangeEnabled){
+		if(activeAbility->rangeEnabled && activeAbility->type == 'p'){ //only applicable to perminant abilities
 			return activeAbility->range->effectAndManaArray[activeAbility->range->selectedIndex]->effectMagnitude;
 		}else{
 			return 0;

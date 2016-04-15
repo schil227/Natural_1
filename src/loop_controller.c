@@ -192,7 +192,9 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 			}
 			case 0x34:
 			case 0x64:{ //'4' key
-				interpretLeftAbilityCreation(player->range, player->mvmt, player->totalHP, player->totalMana);
+				int totalBaseHP = player->totalHP + player->CON * 2;
+				int totalBaseMana = player->totalMana + player->WILL * 2;
+				interpretLeftAbilityCreation(player->range, player->mvmt, totalBaseHP, totalBaseMana);
 				break;
 			}
 			case 0x43:{ //'c' key

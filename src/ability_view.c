@@ -161,6 +161,7 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificEffect(hdcBuffer, thisAbility->aoe, thisAbility->aoeEnabled, "aoe", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->duration, thisAbility->durationEnabled, "duration", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->durationMod, thisAbility->durationModEnabled, "durationMod", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->actions, thisAbility->actionsEnabled, "Actions", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->STR, thisAbility->STREnabled, "STR", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->DEX, thisAbility->DEXEnabled, "DEX", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->CON, thisAbility->CONEnabled, "CON", effectRect);

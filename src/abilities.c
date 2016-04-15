@@ -107,6 +107,8 @@ int calculateManaCost(ability * thisAbility){
 		calcStatusCost(&sum, &hasEffect, thisAbility);
 	}
 
+	updateElementSummation(&sum, &hasEffect, thisAbility->actionsEnabled, thisAbility->actions);
+
 	updateElementSummation(&sum, &hasEffect, thisAbility->STREnabled, thisAbility->STR);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->DEXEnabled, thisAbility->DEX);
@@ -130,6 +132,8 @@ int calculateManaCost(ability * thisAbility){
 	updateElementSummation(&sum, &hasEffect, thisAbility->damageModEnabled, thisAbility->damageMod);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->mvmtEnabled, thisAbility->mvmt);
+
+	updateElementSummation(&sum, &hasEffect, thisAbility->diceHPEnabled, thisAbility->diceHP);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->hpEnabled, thisAbility->hp);
 
@@ -534,6 +538,20 @@ ability * createAbilityFromLine(char line[2048]){
 		newAbility->durationMod = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
 		newAbility->durationMod = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->actionsEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mapSize = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->actionsEnabled){
+		newAbility->numEnabledEffects++;
+		newAbility->actions = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+	}else{
+		newAbility->actions = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -980,6 +998,9 @@ ability * cloneAbility(ability * thisAbility){
 
 	newAbility->durationModEnabled = thisAbility->durationModEnabled;
 	newAbility->durationMod = cloneEffectAndManaMapList(thisAbility->durationMod);
+
+	newAbility->actionsEnabled = thisAbility->actionsEnabled;
+	newAbility->actions = cloneEffectAndManaMapList(thisAbility->actions);
 
 	newAbility->STREnabled = thisAbility->STREnabled;
 	newAbility->STR = cloneEffectAndManaMapList(thisAbility->STR);
