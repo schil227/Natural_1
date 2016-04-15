@@ -125,11 +125,11 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 
 	thisIndividual->jumpTarget = 0;
 
-	thisIndividual->totalHP = baseHP;
-	thisIndividual->hp = thisIndividual->totalHP + CON * 2;
+	thisIndividual->baseHP = baseHP;
+	thisIndividual->hp = baseHP + CON * 2;
 
-	thisIndividual->totalMana = baseMana;
-	thisIndividual->mana = thisIndividual->totalMana + WILL * 2;
+	thisIndividual->baseMana = baseMana;
+	thisIndividual->mana = baseMana + WILL * 2;
 
 
 	return 0;
@@ -945,7 +945,7 @@ void activateDurationItem(individual * individual, item * thisItem){
 }
 
 void healIndividual(individual * thisIndividual, int hp){
-	int totalHP = getAttributeSum(thisIndividual, "totalHealth") + getAttributeSum(thisIndividual, "CON") * 2;
+	int totalHP = getAttributeSum(thisIndividual, "baseHP") + getAttributeSum(thisIndividual, "CON") * 2;
 
 	if(totalHP - thisIndividual->hp < hp){
 		thisIndividual->hp = totalHP;
@@ -955,7 +955,7 @@ void healIndividual(individual * thisIndividual, int hp){
 }
 
 void restoreMana(individual * thisIndividual, int mana){
-	int totalMana = getAttributeSum(thisIndividual, "totalMana") + getAttributeSum(thisIndividual, "WILL") * 2;
+	int totalMana = getAttributeSum(thisIndividual, "baseMana") + getAttributeSum(thisIndividual, "WILL") * 2;
 
 	if(totalMana - thisIndividual->mana < mana){
 		thisIndividual->mana = totalMana;
@@ -1052,12 +1052,12 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 		return thisIndividual->CHR;
 	}else if(strcmp("LUCK",attribute) == 0){
 		return thisIndividual->LUCK;
-	}else if(strcmp("totalHealth",attribute) == 0 ){
-		return thisIndividual->totalHP;
+	}else if(strcmp("baseHP",attribute) == 0 ){
+		return thisIndividual->baseHP;
 	} else if(strcmp("health",attribute) == 0 ){
 		return thisIndividual->hp;
-	} else if(strcmp("totalMana",attribute) == 0 ){
-		return thisIndividual->totalMana;
+	} else if(strcmp("baseMana",attribute) == 0 ){
+		return thisIndividual->baseMana;
 	} else if(strcmp("mana",attribute) == 0 ){
 		return thisIndividual->mana;
 	} else if(strcmp("minTurns",attribute) == 0 ){ //item only for now
@@ -1167,7 +1167,7 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 		 if(activeItem != NULL){
 			 toReturn += activeItem->luckMod;
 		 }
-	}else if(strcmp("totalHealth",attribute) == 0 ){
+	}else if(strcmp("baseHP",attribute) == 0 ){
 		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->totalHealthMod;
 		 }
@@ -1175,13 +1175,8 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 			 toReturn += activeItem->totalHealthMod;
 		 }
 	} else if(strcmp("health",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->healthMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->healthMod;
-		 }
-	} else if(strcmp("totalMana",attribute) == 0 ){
+		return 0;
+	} else if(strcmp("baseMana",attribute) == 0 ){
 		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->totalManaMod;
 		 }
@@ -1189,12 +1184,7 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 			 toReturn += activeItem->totalManaMod;
 		 }
 	} else if(strcmp("mana",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->manaMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->manaMod;
-		 }
+			return 0;
 	} else if(strcmp("minTurns",attribute) == 0 ){
 		 if(thisItem != NULL && thisItem->isEquipt){
 			 toReturn += thisItem->minTurns;
@@ -1387,21 +1377,17 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 		}else{
 			return 0;
 		}
-	}else if(strcmp("totalHealth",attribute) == 0 ){
-		if(activeAbility->totalHPEnabled){
-			return activeAbility->totalHP->effectAndManaArray[activeAbility->totalHP->selectedIndex]->effectMagnitude;
+	}else if(strcmp("baseHP",attribute) == 0 ){
+		if(activeAbility->baseHPEnabled){
+			return activeAbility->baseHP->effectAndManaArray[activeAbility->baseHP->selectedIndex]->effectMagnitude;
 		}else{
 			return 0;
 		}
 	} else if(strcmp("health",attribute) == 0 ){
-		if(activeAbility->hpEnabled){
-			return activeAbility->hp->effectAndManaArray[activeAbility->hp->selectedIndex]->effectMagnitude;
-		}else{
 			return 0;
-		}
-	} else if(strcmp("totalMana",attribute) == 0 ){
-		if(activeAbility->totalManaEnabled){
-			return activeAbility->totalMana->effectAndManaArray[activeAbility->totalMana->selectedIndex]->effectMagnitude;
+	} else if(strcmp("baseMana",attribute) == 0 ){
+		if(activeAbility->baseManaEnabled){
+			return activeAbility->baseMana->effectAndManaArray[activeAbility->baseMana->selectedIndex]->effectMagnitude;
 		}else{
 			return 0;
 		}

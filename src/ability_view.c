@@ -176,8 +176,8 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificEffect(hdcBuffer, thisAbility->mvmt, thisAbility->mvmtEnabled, "mvmt", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->diceHP, thisAbility->diceHPEnabled, "diceHP", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->hp, thisAbility->hpEnabled, "hp", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->totalHP, thisAbility->totalHPEnabled, "totalHP", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->totalMana, thisAbility->totalManaEnabled, "totalMana", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->baseHP, thisAbility->baseHPEnabled, "baseHP", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->baseMana, thisAbility->baseManaEnabled, "baseMana", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->bluntDR, thisAbility->bluntDREnabled, "bluntDR", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->chopDR, thisAbility->chopDREnabled, "chopDR", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->pierceDR, thisAbility->pierceDREnabled, "pierceDR", effectRect);

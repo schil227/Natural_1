@@ -232,11 +232,11 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->hpEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_HP, "hp", 0, thisAbilityCreationInstance->abilityInsance->hp);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalHPEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_TOTAL_HP, "totalHP", 0, thisAbilityCreationInstance->abilityInsance->totalHP);
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->baseHPEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_BASE_HP, "baseHP", 0, thisAbilityCreationInstance->abilityInsance->baseHP);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->totalManaEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_TOTAL_MANA, "totalMana", 0, thisAbilityCreationInstance->abilityInsance->totalMana);
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->baseManaEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_BASE_MANA, "baseMana", 0, thisAbilityCreationInstance->abilityInsance->baseMana);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->bluntDREnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_BLUNT_DR, "bluntDR", 1, thisAbilityCreationInstance->abilityInsance->bluntDR);
@@ -469,10 +469,10 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->hp;
 	case ABILITY_DICE_HP:
 		return thisAbilityCreationInstance->abilityInsance->diceHP;
-	case ABILITY_TOTAL_HP:
-		return thisAbilityCreationInstance->abilityInsance->totalHP;
-	case ABILITY_TOTAL_MANA:
-		return thisAbilityCreationInstance->abilityInsance->totalMana;
+	case ABILITY_BASE_HP:
+		return thisAbilityCreationInstance->abilityInsance->baseHP;
+	case ABILITY_BASE_MANA:
+		return thisAbilityCreationInstance->abilityInsance->baseMana;
 	case ABILITY_BLUNT_DR:
 		return thisAbilityCreationInstance->abilityInsance->bluntDR;
 	case ABILITY_CHOP_DR:
@@ -510,54 +510,54 @@ int canDecreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, i
 				return 0;
 			}
 		break;
-		case ABILITY_TOTAL_HP:
+		case ABILITY_BASE_HP:
 		case ABILITY_CON:{
-			int abilityTotalHP = 0, abilityCON = 0;
+			int abilityBaseHP = 0, abilityCON = 0;
 
 			if(thisAbilityCreationInstance->abilityInsance->CONEnabled){
 				abilityCON = thisAbilityCreationInstance->abilityInsance->CON->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->CON->selectedIndex]->effectMagnitude;
 			}
 
-			if(thisAbilityCreationInstance->abilityInsance->totalHPEnabled){
-				abilityTotalHP = thisAbilityCreationInstance->abilityInsance->totalHP->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->totalHP->selectedIndex]->effectMagnitude;
+			if(thisAbilityCreationInstance->abilityInsance->baseHPEnabled){
+				abilityBaseHP = thisAbilityCreationInstance->abilityInsance->baseHP->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->baseHP->selectedIndex]->effectMagnitude;
 			}
 
 			if(thisAbilityCreationInstance->selectedType == ABILITY_CON){
 				abilityCON -= 1;
 			}
 
-			if(thisAbilityCreationInstance->selectedType == ABILITY_TOTAL_HP){
-				abilityTotalHP -= 1;
+			if(thisAbilityCreationInstance->selectedType == ABILITY_BASE_HP){
+				abilityBaseHP -= 1;
 			}
 
-			if(totalHP + abilityTotalHP + abilityCON * 2 > 0){
+			if(totalHP + abilityBaseHP + abilityCON * 2 > 0){
 				return 1;
 			}else{
 				return 0;
 			}
 		}
 		break;
-		case ABILITY_TOTAL_MANA:
+		case ABILITY_BASE_MANA:
 		case ABILITY_WILL:{
-			int abilityTotalMana = 0, abilityWill = 0;
+			int abilityBaseMana = 0, abilityWill = 0;
 
 			if(thisAbilityCreationInstance->abilityInsance->WILLEnabled){
 				abilityWill = 2 * thisAbilityCreationInstance->abilityInsance->WILL->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->WILL->selectedIndex]->effectMagnitude;
 			}
 
-			if(thisAbilityCreationInstance->abilityInsance->totalManaEnabled){
-				abilityTotalMana = thisAbilityCreationInstance->abilityInsance->totalMana->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->totalMana->selectedIndex]->effectMagnitude;
+			if(thisAbilityCreationInstance->abilityInsance->baseManaEnabled){
+				abilityBaseMana = thisAbilityCreationInstance->abilityInsance->baseMana->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->baseMana->selectedIndex]->effectMagnitude;
 			}
 
 			if(thisAbilityCreationInstance->selectedType == ABILITY_WILL){
 				abilityWill -= 1;
 			}
 
-			if(thisAbilityCreationInstance->selectedType == ABILITY_TOTAL_MANA){
-				abilityTotalMana -= 1;
+			if(thisAbilityCreationInstance->selectedType == ABILITY_BASE_MANA){
+				abilityBaseMana -= 1;
 			}
 
-			if(totalMana + abilityTotalMana + abilityWill * 2 > 0){
+			if(totalMana + abilityBaseMana + abilityWill * 2 > 0){
 				return 1;
 			}else{
 				return 0;

@@ -55,7 +55,7 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 }
 
 void createIndividualFromLine(individual * newIndividual, char * line){
-	int imageID,ID,r,g,b,direction,x,y,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,range,mvmt,
+	int imageID,ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam;
 	char * name = malloc(sizeof(char) * 32);
@@ -102,11 +102,11 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	LUCK = atoi(value);
 
 	value = strtok(NULL,";");
-	totalHP = atoi(value);
+	baseHP = atoi(value);
 	value = strtok(NULL,";");
 	totalActions = atoi(value);
 	value = strtok(NULL,";");
-	totalMana = atoi(value);
+	baseMana = atoi(value);
 
 	value = strtok(NULL,";");
 	ac= atoi(value);
@@ -159,7 +159,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	gold = atoi(value);
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
-	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,totalHP,totalActions,totalMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,
+	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold)){
 		printf("failed making new individual\n");
 	}

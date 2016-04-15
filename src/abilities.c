@@ -137,9 +137,9 @@ int calculateManaCost(ability * thisAbility){
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->hpEnabled, thisAbility->hp);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->totalHPEnabled, thisAbility->totalHP);
+	updateElementSummation(&sum, &hasEffect, thisAbility->baseHPEnabled, thisAbility->baseHP);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->totalManaEnabled, thisAbility->totalMana);
+	updateElementSummation(&sum, &hasEffect, thisAbility->baseManaEnabled, thisAbility->baseMana);
 
 	//DR: ceil( sum(<allDRMagnitudes>)/2.0 )
 	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->bluntDREnabled, thisAbility->bluntDR);
@@ -751,31 +751,31 @@ ability * createAbilityFromLine(char line[2048]){
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->totalHPEnabled = atoi(value);
+	newAbility->baseHPEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->totalHPEnabled){
+	if(newAbility->baseHPEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->totalHP = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->baseHP = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
-		newAbility->totalHP = NULL;
+		newAbility->baseHP = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->totalManaEnabled = atoi(value);
+	newAbility->baseManaEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mapSize = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->totalManaEnabled){
+	if(newAbility->baseManaEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->totalMana = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->baseMana = makeEffectManaMapList(value, mapSize, newAbility->typeName);
 	}else{
-		newAbility->totalMana = NULL;
+		newAbility->baseMana = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -1044,11 +1044,11 @@ ability * cloneAbility(ability * thisAbility){
 	newAbility->hpEnabled = thisAbility->hpEnabled;
 	newAbility->hp = cloneEffectAndManaMapList(thisAbility->hp);
 
-	newAbility->totalHPEnabled = thisAbility->totalHPEnabled;
-	newAbility->totalHP = cloneEffectAndManaMapList(thisAbility->totalHP);
+	newAbility->baseHPEnabled = thisAbility->baseHPEnabled;
+	newAbility->baseHP = cloneEffectAndManaMapList(thisAbility->baseHP);
 
-	newAbility->totalManaEnabled = thisAbility->totalManaEnabled;
-	newAbility->totalMana = cloneEffectAndManaMapList(thisAbility->totalMana);
+	newAbility->baseManaEnabled = thisAbility->baseManaEnabled;
+	newAbility->baseMana = cloneEffectAndManaMapList(thisAbility->baseMana);
 
 	newAbility->bluntDREnabled = thisAbility->bluntDREnabled;
 	newAbility->bluntDR = cloneEffectAndManaMapList(thisAbility->bluntDR);

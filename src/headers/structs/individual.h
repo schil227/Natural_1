@@ -78,10 +78,8 @@ typedef struct {
 	short int CHR;
 	short int LUCK;
 
-	short int totalHP;
 	short int baseHP;
 	short int hp;
-	short int totalMana;
 	short int baseMana;
 	short int mana;
 	short int totalActions;

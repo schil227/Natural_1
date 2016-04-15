@@ -17,10 +17,10 @@ void DrawSideBar(HWND hwnd, HDC hdc, RECT rec, individual * player){
 	DeleteObject(NewBrush);
 
 	char hpOut[32];
-	sprintf(hpOut, "HP: %d/%d", getAttributeSum(player, "health"), (getAttributeSum(player, "totalHealth") + getAttributeSum(player, "CON") * 2));
+	sprintf(hpOut, "HP: %d/%d", player->hp, (getAttributeSum(player, "baseHP") + getAttributeSum(player, "CON") * 2));
 
 	char manaOut[32];
-	sprintf(manaOut, "Mana: %d/%d", getAttributeSum(player, "mana"), (getAttributeSum(player, "totalMana")+ getAttributeSum(player, "WILL") * 2));
+	sprintf(manaOut, "Mana: %d/%d", getAttributeSum(player, "mana"), (getAttributeSum(player, "baseMana")+ getAttributeSum(player, "WILL") * 2));
 
 	char actionOut[16];
 	sprintf(actionOut, "Actions:%d",player->remainingActions);
