@@ -51,7 +51,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
-					decreaseTurns(player, enemyActionMode, initEnemyActionMode);
+					decreaseTurns(player, enemyActionMode, initEnemyActionMode, 1);
 					toggleInCursorMode();
 				}
 
@@ -60,16 +60,22 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 
 				viewShift->xShift = viewShift->xShiftOld;
 				viewShift->yShift = viewShift->yShiftOld;
-				decreaseTurns(player, enemyActionMode, initEnemyActionMode);
+				decreaseTurns(player, enemyActionMode, initEnemyActionMode, 1);
 				toggleInCursorMode();
 			}else if (getCursorMode() == CURSOR_ABILITY){
 				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
+					int numActions = 1;
 					useAbilityOnIndividualsInAOERange(player, npcs, enemies, main_field, getCursorX(), getCursorY());
+
+					if(player->activeAbilities->selectedAbility->actionsEnabled){
+						numActions += player->activeAbilities->selectedAbility->actions->effectAndManaArray[player->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+					}
 
 					player->activeAbilities->selectedAbility = NULL;
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
-					decreaseTurns(player, enemyActionMode, initEnemyActionMode);
+
+					decreaseTurns(player, enemyActionMode, initEnemyActionMode, numActions);
 					toggleInCursorMode();
 				}
 			}
@@ -243,12 +249,9 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 				if(canUseAbility(player,getAbilityToActivate())){
 					useAbility(player,getAbilityToActivate());
 
-					if(player->activeAbilities->selectedAbility != NULL &&
-							(player->activeAbilities->selectedAbility->type == 't' || player->activeAbilities->selectedAbility->type == 'd')){
+					if(player->activeAbilities->selectedAbility != NULL && (player->activeAbilities->selectedAbility->type == 't' || player->activeAbilities->selectedAbility->type == 'd')){
 						toggleInCursorMode();
 						refreshCursor(CURSOR_ABILITY, player->playerCharacter->x, player->playerCharacter->y);
-					}else{
-						decreaseTurns(player, enemyActionMode, initEnemyActionMode);
 					}
 
 					toggleAbilityViewMode();

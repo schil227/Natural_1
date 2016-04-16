@@ -368,22 +368,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			break;
 		case 0x57: //w key (wait)
-			player->remainingActions = player->remainingActions - 1;
-
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-				enemyActionMode = 1;
-				initEnemyActionMode = 1;
-
-//				int i;
-//				for(i = 0; i < thisEnemies->numEnemies; i++){
-//					enemyAction((thisEnemies->enemies[i]), main_field, player);
-////					printField(main_field);
-//				}
-//
-//				startTurn(player);
-			}
-
+			decreaseTurns(player, &enemyActionMode, &initEnemyActionMode, 1);
 
 			break;
 		}
@@ -539,15 +524,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
 
-			player->remainingActions = player->remainingActions - 1;
-
-			if (player->remainingActions <= 0) {
-				endTurn(player);
-
-				enemyActionMode = 1;
-				initEnemyActionMode = 1;
-
-			}
+			decreaseTurns(player, &enemyActionMode, &initEnemyActionMode, 1);
 
 			free(thisMoveNodeMeta->rootMoveNode);
 			destroyCharacter(thisMoveNodeMeta->shadowCharacter);
@@ -613,6 +590,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}else{
 			if(startTurn(player)){
 
+			}
+
+			//If player's out of actions, start enemy turn again
+			if(player->remainingActions < 0){
+				endTurn(player);
+				enemyActionMode = 1;
+				initEnemyActionMode = 1;
 			}
 		}
 

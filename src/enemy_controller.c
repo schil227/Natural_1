@@ -411,9 +411,6 @@ void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr
 int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
 
 	if (enemies->numIndividuals == 0) {
-		if(startTurn(player)){
-
-		}
 		return 1;
 	}
 
@@ -441,12 +438,6 @@ int initializeEnemyTurn(individualGroup * enemies, individual * player, field * 
 	//Gonna move, remove them from the field and update the moveNodeMeta
 	getSpaceFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
 
-
-	/*
-	 * 	HEY
-	 *
-	 * 	MALLOC IS FAILING HERE FOR SUM REASON, DEBUG IT
-	 * */
 	(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
 	(*thisMoveNodeMeta)->sum = 0;
 

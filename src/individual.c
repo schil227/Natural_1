@@ -415,6 +415,8 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 
 	baseDam = getAttributeSum(thisIndividual,"baseDam"); //doesn't include STR mod
 
+	baseDam += calcStrengthDamageMod(thisIndividual);
+
 	maxDamTotal = calcMaxDam(thisIndividual);
 	minDamTotal = calcMinDam(thisIndividual);
 
@@ -746,9 +748,9 @@ void useActiveAbility(activeAbility * thisActiveAbility){
 	thisActiveAbility->turnsRemaining--;
 }
 
-void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * initEnemyActionMode){
+void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * initEnemyActionMode, int numTurns){
 
-	thisIndividual->remainingActions = thisIndividual->remainingActions - 1;
+	thisIndividual->remainingActions -= numTurns;
 
 	if (thisIndividual->remainingActions <= 0) {
 		endTurn(thisIndividual);
@@ -760,7 +762,7 @@ void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * ini
 void endTurn(individual *thisIndividual){
 	printf("player turn ended\n");
 	thisIndividual->hasAttacked = 0;
-	thisIndividual->remainingActions = thisIndividual->totalActions;
+	thisIndividual->remainingActions += thisIndividual->totalActions;
 }
 
 int individualWithinRange(individual * thisIndividual, individual * target){
@@ -780,6 +782,18 @@ int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
 	}else{
 		return 0;
 	}
+}
+
+int calcStrengthDamageMod(individual * thisIndividual){
+	item * weapon = getActiveWeapon(thisIndividual->backpack);
+	int str = getAttributeSum(thisIndividual, "STR");
+
+	if(weapon != NULL){
+		return floor(str * weapon->weaponStrMod);
+	}else{
+		return str;
+	}
+
 }
 
 int calcMinDam(individual * thisIndividual){
