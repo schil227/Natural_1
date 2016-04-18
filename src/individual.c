@@ -255,17 +255,7 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 }
 
 int abilityIsHarmful(ability * thisAbility){
-	if(thisAbility->damageEnabled){
-		if(thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->effectMagnitude > 0){
-			return 1;
-		}
-	}
-
-	if(thisAbility->diceDamageEnabled){
-		if(thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->effectMagnitude > 0){
-			return 1;
-		}
-	}
+	//Note: damage and diceDamage only affect the caster, and are not harmful to others in range.
 
 	if(thisAbility->statusEnabled){
 		return statusIsHarmful(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type);
@@ -284,6 +274,40 @@ int statusIsHarmful(char * type){
 
 	return 1;
 }
+
+int processCasterOnlyAffects(individual * thisIndividual, ability * thisAbility){
+	if (thisAbility->type == 'd') {
+		int damage = 0, totalDamage, targetDR;
+
+		if (thisAbility->diceDamageEnabled) {
+			int diceDamage = thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->effectMagnitude;
+
+			if (diceDamage > 0) {
+				damage = (rand() % diceDamage) + 1;
+			}
+		}
+
+		if (thisAbility->damageEnabled) {
+			damage += thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->effectMagnitude;
+		}
+
+		targetDR = calcDR(thisIndividual, thisAbility->damageType);
+
+		totalDamage = damage - targetDR;
+
+		sendHitDialog(thisIndividual->name, thisIndividual->name, 20,
+				totalDamage);
+		thisIndividual->hp = thisIndividual->hp - totalDamage;
+
+		if (thisIndividual->hp <= 0) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	return 0;
+}
+
 
 int damageIndividualWithAbility(individual *thisIndividual, individual *targetIndividual){
 	int damage = 0, totalDamage, targetDR;
@@ -347,6 +371,7 @@ int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAb
 		cwrite(tmp);
 
 		addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
+		useActiveAbility(thisIndividual, thisAbility);
 
 		if(thisAbility->statusEnabled){
 			statusEffect thisEffect = lookUpStatusType( thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type);
@@ -570,7 +595,8 @@ int processActiveAbilities(individual * thisIndividual){
 
 			if (thisActiveAbility->thisAbility->type != 'p') {
 				if (thisActiveAbility->turnsRemaining - 1 >= 0) {
-					useActiveAbility(thisActiveAbility);
+					thisActiveAbility->turnsRemaining--;
+					useActiveAbility(thisIndividual, thisActiveAbility->thisAbility);
 
 					if (thisIndividual->hp <= 0) {
 						char * tmp[128];
@@ -586,6 +612,8 @@ int processActiveAbilities(individual * thisIndividual){
 
 					activeAbilities->abilitiesList[i] = NULL;
 					activeAbilities->numAbilities--;
+
+					postProcessAbility(thisIndividual, thisActiveAbility);
 				}
 			}
 
@@ -597,6 +625,20 @@ int processActiveAbilities(individual * thisIndividual){
 	}
 
 	return 0;
+}
+
+void postProcessAbility(individual * thisIndividual, ability * endingAbility){
+	int totalHP = getTotalHP(thisIndividual);
+	int totalMana = getTotalMana(thisIndividual);
+
+	if(thisIndividual->hp > totalHP){
+		thisIndividual->hp = totalHP;
+	}
+
+	if(thisIndividual->mana > totalMana){
+		thisIndividual->mana = totalMana;
+	}
+
 }
 
 int processStatuses(individual * thisIndividual){
@@ -744,8 +786,29 @@ char * lookUpStatusEffectName(statusEffect effect){
 	return "!! STATUS NOT FOUND !!";
 }
 
-void useActiveAbility(activeAbility * thisActiveAbility){
-	thisActiveAbility->turnsRemaining--;
+void useActiveAbility(individual * thisIndividual, ability * thisAbility){
+	int amountHealed = 0;
+
+	if(thisAbility->hpEnabled){
+		amountHealed += thisAbility->hp->effectAndManaArray[thisAbility->hp->selectedIndex]->effectMagnitude;
+		healIndividual(thisIndividual, thisAbility->hp->effectAndManaArray[thisAbility->hp->selectedIndex]->effectMagnitude);
+	}
+
+	if(thisAbility->diceHPEnabled){
+		int diceHP = thisAbility->diceHP->effectAndManaArray[thisAbility->diceHP->selectedIndex]->effectMagnitude;
+
+		if(diceHP != 0){
+			int diceHeal = (rand() % diceHP) + 1;
+			amountHealed += diceHeal;
+			healIndividual(thisIndividual, diceHeal);
+		}
+	}
+
+	if(amountHealed > 0){
+		char * tmp[64];
+		sprintf(tmp, "%s healed %d hp from %s", thisIndividual->name, amountHealed, thisAbility->name);
+		cwrite(tmp);
+	}
 }
 
 void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * initEnemyActionMode, int numTurns){
@@ -932,17 +995,11 @@ int addItemToIndividual(inventory * backpack, item * newItem){
 	return 0;
 }
 
-/*
- * this will affect attributes instantaniously for no duration of time,
- * meaning atrributes like chopDR are not checked, because they have no meaningful affect.
- */
 void consumeItem(individual * thisIndividual, item * theItem){
-
 	//note, +/- healthMod
 	if(theItem->healthMod != 0){
 		if(theItem->healthMod > 0){
 			healIndividual(thisIndividual, theItem->healthMod);
-
 		}
 	}
 
@@ -953,13 +1010,8 @@ void consumeItem(individual * thisIndividual, item * theItem){
 	}
 }
 
-
-void activateDurationItem(individual * individual, item * thisItem){
-
-}
-
 void healIndividual(individual * thisIndividual, int hp){
-	int totalHP = getAttributeSum(thisIndividual, "baseHP") + getAttributeSum(thisIndividual, "CON") * 2;
+	int totalHP = getTotalHP(thisIndividual);
 
 	if(totalHP - thisIndividual->hp < hp){
 		thisIndividual->hp = totalHP;
@@ -968,14 +1020,23 @@ void healIndividual(individual * thisIndividual, int hp){
 	}
 }
 
+int getTotalHP(individual * thisIndividual){
+	return getAttributeSum(thisIndividual, "baseHP") + 2 * getAttributeSum(thisIndividual, "CON");
+}
+
 void restoreMana(individual * thisIndividual, int mana){
-	int totalMana = getAttributeSum(thisIndividual, "baseMana") + getAttributeSum(thisIndividual, "WILL") * 2;
+	int totalMana = getTotalMana(thisIndividual);
 
 	if(totalMana - thisIndividual->mana < mana){
 		thisIndividual->mana = totalMana;
 	}else{
 		thisIndividual->mana += mana;
 	}
+}
+
+
+int getTotalMana(individual * thisIndividual){
+	return getAttributeSum(thisIndividual, "baseMana") + 2 * getAttributeSum(thisIndividual, "WILL");
 }
 
 int attemptToBuyItem(item * thisItem, individual * thisIndividual){

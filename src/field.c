@@ -259,11 +259,21 @@ int cursorWithinAbilityRange(individual * player, int x, int y){
 	}
 }
 
-void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
+void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGroup * thisIndividualGroup, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
 	int aoe = 0,  minX, maxX, minY, maxY;
 	ability * tmpAbility = thisIndividual->activeAbilities->selectedAbility;
 
 	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
+
+	if(processCasterOnlyAffects(thisIndividual, tmpAbility)){
+		if(thisIndividualGroup != NULL){
+			deleteIndividiaulFromGroup(thisIndividualGroup, thisIndividual);
+		}
+
+		removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+		triggerEventOnDeath(thisIndividual->ID);
+		removeFromExistance(thisIndividual->ID);
+	}
 
 	if(tmpAbility->aoeEnabled){
 		aoe = tmpAbility->aoe->effectAndManaArray[tmpAbility->aoe->selectedIndex]->effectMagnitude;
@@ -277,21 +287,23 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGr
 	checkIndividualGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
 	checkIndividualGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
 
-	if(thisIndividual->playerCharacter->x >= minX && thisIndividual->playerCharacter->x <= maxX &&
-		thisIndividual->playerCharacter->y >= minY && thisIndividual->playerCharacter->y <= maxY ){
+	if(player->playerCharacter->x >= minX && player->playerCharacter->x <= maxX &&
+		player->playerCharacter->y >= minY && player->playerCharacter->y <= maxY ){
 
 		if(tmpAbility->type == 't'){
-			if(attackIndividualWithAbility(thisIndividual, thisIndividual)){
-				removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+			if(attackIndividualWithAbility(thisIndividual, player)){
+				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
 			}
 		}else if (tmpAbility->type == 'd'){
 
 			//add duration ability logic here
-			useDurationAbilityOnIndividual(thisIndividual, tmpAbility);
+			useDurationAbilityOnIndividual(player, tmpAbility);
 		}
 	}
 
 }
+
+
 
 void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField,int minX, int maxX, int minY, int maxY){
 	int i, individualsPassed = 0;

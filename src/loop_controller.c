@@ -65,7 +65,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 			}else if (getCursorMode() == CURSOR_ABILITY){
 				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
 					int numActions = 1;
-					useAbilityOnIndividualsInAOERange(player, npcs, enemies, main_field, getCursorX(), getCursorY());
+					useAbilityOnIndividualsInAOERange(player, NULL, player, npcs, enemies, main_field, getCursorX(), getCursorY());
 
 					if(player->activeAbilities->selectedAbility->actionsEnabled){
 						numActions += player->activeAbilities->selectedAbility->actions->effectAndManaArray[player->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
