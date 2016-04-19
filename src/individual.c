@@ -291,12 +291,15 @@ int processCasterOnlyAffects(individual * thisIndividual, ability * thisAbility)
 			damage += thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->effectMagnitude;
 		}
 
+		if(damage == 0){
+			return 0;
+		}
+
 		targetDR = calcDR(thisIndividual, thisAbility->damageType);
 
 		totalDamage = damage - targetDR;
 
-		sendHitDialog(thisIndividual->name, thisIndividual->name, 20,
-				totalDamage);
+		sendHitDialog(thisIndividual->name, thisIndividual->name, 20, totalDamage);
 		thisIndividual->hp = thisIndividual->hp - totalDamage;
 
 		if (thisIndividual->hp <= 0) {
@@ -1499,7 +1502,7 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 			return 0;
 		}
 	} else if(strcmp("range",attribute) == 0 ){
-		if(activeAbility->rangeEnabled && activeAbility->type == 'p'){ //only applicable to perminant abilities
+		if(activeAbility->rangeEnabled && (activeAbility->type == 'p' || activeAbility->type == 'd')){ //only applicable to perminant abilities
 			return activeAbility->range->effectAndManaArray[activeAbility->range->selectedIndex]->effectMagnitude;
 		}else{
 			return 0;
@@ -1592,12 +1595,10 @@ int getAttributeSum(individual * thisIndividual, char * attribute){
 			break;
 		}
 		if(thisIndividual->activeItems->activeItemArr[i] != NULL){
-			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i],
-					thisIndividual->activeItems->activeItemArr[i]->thisItem, attribute);
+			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i], thisIndividual->activeItems->activeItemArr[i]->thisItem, attribute);
 			activeItemTotal++;
 		}else{
-			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i],
-					NULL, attribute);
+			toReturn += getAttributeFromItem(thisIndividual->backpack->inventoryArr[i], NULL, attribute);
 		}
 
 		if(thisIndividual->backpack->inventoryArr[i] != NULL){

@@ -92,9 +92,12 @@ int calculateManaCost(ability * thisAbility){
 	int dummyInt = 0;
 
 
-	updateElementSummation(&sum, &dummyInt, thisAbility->rangeEnabled, thisAbility->range);
+	if(thisAbility->type == 't'){
+		updateElementSummation(&sum, &dummyInt, thisAbility->rangeEnabled, thisAbility->range);
+	}else{
+		updateElementSummation(&sum, &hasEffect, thisAbility->rangeEnabled, thisAbility->range);
+	}
 
-	//only counts if diceDamagage enanbled
 	updateElementSummation(&sum, &dummyInt, (thisAbility->targetedEnabled * thisAbility->diceDamageEnabled), thisAbility->targeted);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->extraAttackEnabled, thisAbility->extraAttack);
