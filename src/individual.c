@@ -276,7 +276,7 @@ int statusIsHarmful(char * type){
 }
 
 int processCasterOnlyAffects(individual * thisIndividual, ability * thisAbility){
-	if (thisAbility->type == 'd') {
+	if (thisAbility->type == 'd' || thisAbility->type == 'i') {
 		int damage = 0, totalDamage, targetDR;
 
 		if (thisAbility->diceDamageEnabled) {
@@ -816,6 +816,17 @@ void useActiveAbility(individual * thisIndividual, ability * thisAbility){
 
 void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * initEnemyActionMode, int numTurns){
 
+	if(thisIndividual->activeAbilities->selectedAbility != NULL && thisIndividual->activeAbilities->selectedAbility->type == 'i'){
+
+		if(thisIndividual->activeAbilities->selectedAbility->actionsEnabled){
+			numTurns += thisIndividual->activeAbilities->selectedAbility->actions->effectAndManaArray[thisIndividual->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+		 }
+
+		removeActiveAbility(thisIndividual, thisIndividual->activeAbilities->selectedAbility);
+
+		thisIndividual->activeAbilities->selectedAbility = NULL;
+	}
+
 	thisIndividual->remainingActions -= numTurns;
 
 	if (thisIndividual->remainingActions <= 0) {
@@ -824,6 +835,8 @@ void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * ini
 		*initEnemyActionMode = 1;
 	}
 }
+
+
 
 void endTurn(individual *thisIndividual){
 	printf("player turn ended\n");
@@ -1090,13 +1103,39 @@ void addActiveAbilityToIndividual(individual * thisIndividual, ability * thisAbi
 	thisIndividual->activeAbilities->numAbilities++;
 }
 
-void useAbility(individual * thisIndividual, ability * thisAbility){
-	//target cursor mode
-	if(thisAbility->type == 't'){ //targeted
-		thisIndividual->activeAbilities->selectedAbility = thisAbility;
-	}else if(thisAbility->type == 'd'){ //duration
-		thisIndividual->activeAbilities->selectedAbility = thisAbility;
+void removeActiveAbility(individual * thisIndividual, ability * selectedAbility){
+	int i;
+	for(i = 0; i < thisIndividual->activeAbilities->MAX_ABILITIES; i++){
+		if(thisIndividual->activeAbilities->abilitiesList[i] != NULL && thisIndividual->activeAbilities->abilitiesList[i]->thisAbility == selectedAbility){
+			free(thisIndividual->activeAbilities->abilitiesList[i]);
+			thisIndividual->activeAbilities->abilitiesList[i] = NULL;
+			thisIndividual->activeAbilities->numAbilities--;
+			return;
+		}
 	}
+}
+
+int useAbility(individual * thisIndividual, ability * thisAbility){
+	//target cursor mode
+	if(thisAbility->type == 't' || thisAbility->type == 'd'){ //duration
+		thisIndividual->activeAbilities->selectedAbility = thisAbility;
+	}else if(thisAbility->type == 'i'){
+		thisIndividual->activeAbilities->selectedAbility = thisAbility;
+
+		decreaseMana(thisIndividual, thisAbility->totalManaCost);
+		addActiveAbilityToIndividual(thisIndividual, thisAbility, 0);
+
+		useActiveAbility(thisIndividual, thisAbility);
+
+		if(processCasterOnlyAffects(thisIndividual, thisAbility)){
+			char * tmp[128];
+			sprintf(tmp, "%s perished from %s!", thisIndividual->name, thisAbility->name);
+			cwrite(tmp);
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 void decreaseMana(individual * thisIndividual, int mana){

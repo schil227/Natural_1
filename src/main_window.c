@@ -486,7 +486,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 		}
 	}else if(inAbilityViewMode()){
-		return abilityViewLoop(hwnd, msg, wParam, lParam, player, &enemyActionMode, &initEnemyActionMode);
+		if(abilityViewLoop(hwnd, msg, wParam, lParam, player, &enemyActionMode, &initEnemyActionMode)){
+			removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
+			triggerEventOnDeath(player->ID);
+			removeFromExistance(player->ID);
+		}
+		return 0;
 	}else if (inCursorMode()) {
 		return cursorLoop(hwnd, msg, wParam, lParam, &enemyActionMode, &initEnemyActionMode, main_field, player, enemies, npcs, viewShift);
 	} else if(moveMode){

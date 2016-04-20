@@ -247,7 +247,9 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 			break;
 			case 0x0D: { //enter
 				if(canUseAbility(player,getAbilityToActivate())){
-					useAbility(player,getAbilityToActivate());
+					if(useAbility(player,getAbilityToActivate())){
+						return 1;
+					}
 
 					if(player->activeAbilities->selectedAbility != NULL && (player->activeAbilities->selectedAbility->type == 't' || player->activeAbilities->selectedAbility->type == 'd')){
 						toggleInCursorMode();

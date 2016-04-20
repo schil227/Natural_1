@@ -613,6 +613,8 @@ int canCreateAbility(){
 		return 1;
 	}else if((thisAbilityCreationInstance->abilityInsance->type == 'd' || thisAbilityCreationInstance->abilityInsance->type == 't') && thisAbilityCreationInstance->abilityInsance->totalManaCost > 0){
 		return 1;
+	}else if(thisAbilityCreationInstance->abilityInsance->type == 'i' && thisAbilityCreationInstance->abilityInsance->totalManaCost >= 0){
+		return 1;
 	}
 
 	return 0;
