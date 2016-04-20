@@ -84,7 +84,6 @@ int calcAbilityDuration(ability * thisAbility){
 
 int calculateManaCost(ability * thisAbility){
 	int sum = 0; //Ability = -1
-	int dam = 0;
 	int duration = 0;
 	int DRSum = 0;
 	int aoeRange = 0;

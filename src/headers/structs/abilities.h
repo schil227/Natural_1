@@ -172,7 +172,7 @@ typedef struct {
 	character * leftRightArrow;
 	character * scrollUpArrow;
 	character * scrollDownArrow;
-	ability * abilityTemplates[3];
+	ability * abilityTemplates[4];
 
 	ability * abilityInsance;
 } abilityCreationInstance;

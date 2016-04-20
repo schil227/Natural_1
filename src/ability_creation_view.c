@@ -21,7 +21,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->waitingForName = 0;
 
 	thisAbilityCreationInstance->currentTemplateIndex = 0;
-	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 3;
+	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 4;
 	thisAbilityCreationInstance->numAbilityTemplates = 0;
 
 	thisAbilityCreationInstance->effectCurrentIndex = 0;
