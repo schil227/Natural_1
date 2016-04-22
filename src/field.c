@@ -216,7 +216,9 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 }
 
 int tryAttackEnemies(individualGroup * enemies, individual * player, field * thisField, int x, int y){
-	int i, enemiesPassed = 0;
+	int i, j, enemiesPassed = 0, numTimesToAttack = 1;
+
+	numTimesToAttack += calcExtraTimesToAttack(player);
 
 	for (i = 0; i < enemies->MAX_INDIVIDUALS; i++) {
 
@@ -226,11 +228,17 @@ int tryAttackEnemies(individualGroup * enemies, individual * player, field * thi
 			enemiesPassed++;
 			if (tmpEnemy->playerCharacter->x == x && tmpEnemy->playerCharacter->y == y && individualWithinRange(player, tmpEnemy)) {
 
-				if (attackIndividual(player, tmpEnemy)) {
-					deleteIndividiaulFromGroup(enemies, tmpEnemy);
-					removeIndividualFromField(thisField, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
-				}
+				for(j = 0; j < numTimesToAttack; j++){
 
+					if(tmpEnemy->hp > 0){
+
+						if (attackIndividual(player, tmpEnemy)) {
+							deleteIndividiaulFromGroup(enemies, tmpEnemy);
+							removeIndividualFromField(thisField, tmpEnemy->playerCharacter->x, tmpEnemy->playerCharacter->y);
+						}
+					}
+
+				}
 				return 1;
 			}
 

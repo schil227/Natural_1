@@ -854,6 +854,18 @@ int individualWithinRange(individual * thisIndividual, individual * target){
 	return 0;
 }
 
+int calcExtraTimesToAttack(individual * thisIndividual){
+	if(thisIndividual->activeAbilities->selectedAbility != NULL && thisIndividual->activeAbilities->selectedAbility->type == 'i' ){
+
+		if(thisIndividual->activeAbilities->selectedAbility->extraAttackEnabled){
+			return thisIndividual->activeAbilities->selectedAbility->extraAttack->effectAndManaArray[thisIndividual->activeAbilities->selectedAbility->extraAttack->selectedIndex]->effectMagnitude;
+		}
+
+	}
+
+	return 0;
+}
+
 int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
 	if(individualWithinRange(thisIndividual, targetIndividual)){
 		attackIndividual(thisIndividual, targetIndividual);
