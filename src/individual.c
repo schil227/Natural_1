@@ -1155,7 +1155,7 @@ void decreaseMana(individual * thisIndividual, int mana){
 }
 
 int canUseAbility(individual * thisIndividual, ability * thisAbility){
-	if(thisAbility->type != 'p' && thisIndividual->mana - thisAbility->totalManaCost >= 0){
+	if(thisAbility->type != 'p' && thisIndividual->mana - thisAbility->totalManaCost >= 0 && thisIndividual->activeAbilities->selectedAbility == NULL){
 		return 1;
 	}else{
 		return 0;

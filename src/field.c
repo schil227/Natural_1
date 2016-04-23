@@ -295,7 +295,7 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGr
 	checkIndividualGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
 	checkIndividualGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
 
-	if(player->playerCharacter->x >= minX && player->playerCharacter->x <= maxX &&
+	if(player->hp > 0 && player->playerCharacter->x >= minX && player->playerCharacter->x <= maxX &&
 		player->playerCharacter->y >= minY && player->playerCharacter->y <= maxY ){
 
 		if(tmpAbility->type == 't'){
@@ -303,7 +303,6 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGr
 				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
 			}
 		}else if (tmpAbility->type == 'd'){
-
 			//add duration ability logic here
 			useDurationAbilityOnIndividual(player, tmpAbility);
 		}
@@ -319,7 +318,7 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		individual * tmp = thisGroup->individuals[i];
 
-		if(tmp != NULL){
+		if(tmp != NULL && tmp->hp > 0){
 			individualsPassed++;
 
 			if(tmp->playerCharacter->x >= minX &&
