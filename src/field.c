@@ -273,7 +273,7 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGr
 
 	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
 
-	if(processCasterOnlyAffects(thisIndividual, tmpAbility)){
+	if(processCasterOnlyEffects(thisIndividual, tmpAbility)){
 		if(thisIndividualGroup != NULL){
 			deleteIndividiaulFromGroup(thisIndividualGroup, thisIndividual);
 		}

@@ -84,6 +84,7 @@ int calcAbilityDuration(ability * thisAbility){
 
 int calculateManaCost(ability * thisAbility){
 	int sum = 0; //Ability = -1
+	int diceDam = 0;
 	int duration = 0;
 	int DRSum = 0;
 	int aoeRange = 0;
@@ -101,9 +102,13 @@ int calculateManaCost(ability * thisAbility){
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->extraAttackEnabled, thisAbility->extraAttack);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->diceDamageEnabled, thisAbility->diceDamage);
+	updateElementSummation(&diceDam, &hasEffect, thisAbility->diceDamageEnabled, thisAbility->diceDamage);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->damageEnabled, thisAbility->damage);
+
+	if(thisAbility->diceDamageMultiplierEnabled){
+		sum += diceDam * thisAbility->diceDamageMultiplier->effectAndManaArray[thisAbility->diceDamageMultiplier->selectedIndex]->manaCost;
+	}
 
 	if(thisAbility->statusEnabled){
 		calcStatusCost(&sum, &hasEffect, thisAbility);
@@ -328,7 +333,7 @@ typeAndManaMapList * makeTypeManaMapList(char * line, int startingIndex, char * 
 
 ability * createAbilityFromLine(char line[2048]){
 	char * strtok_save_pointer;
-	int mapSize;
+	int startingIndex;
 	ability * newAbility = malloc(sizeof(ability));
 	newAbility->numEnabledEffects = 0;
 
@@ -348,12 +353,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->damageTypeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageTypeEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->damageType = makeTypeManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->damageType = makeTypeManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->damageType = NULL;
 	}
@@ -362,13 +367,13 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->rangeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->rangeEnabled){
 		newAbility->numEnabledEffects++;
 		char *tmpStr = strdup(value);
-		newAbility->range = makeEffectManaMapList(tmpStr, mapSize, newAbility->typeName);
+		newAbility->range = makeEffectManaMapList(tmpStr, startingIndex, newAbility->typeName);
 		free(tmpStr);
 	}else{
 		newAbility->range = NULL;
@@ -378,12 +383,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->targetedEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->targetedEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->targeted = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->targeted = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->targeted = NULL;
 	}
@@ -392,12 +397,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->extraAttackEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->extraAttackEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->extraAttack = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->extraAttack = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->extraAttack = NULL;
 	}
@@ -406,26 +411,40 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->diceDamageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceDamageEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->diceDamage = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->diceDamage = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->diceDamage = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->diceDamageMultiplierEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	startingIndex = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->diceDamageMultiplierEnabled){
+		newAbility->numEnabledEffects++;
+		newAbility->diceDamageMultiplier = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
+	}else{
+		newAbility->diceDamageMultiplier = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->damageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->damage = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->damage = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->damage = NULL;
 	}
@@ -434,12 +453,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->statusEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->statusEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->status = makeTypeManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->status = makeTypeManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->status = NULL;
 	}
@@ -448,12 +467,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->statusDiceDamageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->statusDiceDamageEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->statusDiceDamage = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->statusDiceDamage = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->statusDiceDamage = NULL;
 	}
@@ -462,12 +481,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->statusDamageEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->statusDamageEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->statusDamage = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->statusDamage = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->statusDamage = NULL;
 	}
@@ -476,12 +495,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->diceStatusDurationEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceStatusDurationEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->diceStatusDuration = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->diceStatusDuration = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->diceStatusDuration = NULL;
 	}
@@ -490,12 +509,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->statusDurationEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->statusDurationEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->statusDuration = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->statusDuration = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->statusDuration = NULL;
 	}
@@ -504,12 +523,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->aoeEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->aoeEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->aoe = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->aoe = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->aoe = NULL;
 	}
@@ -518,12 +537,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->durationEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->durationEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->duration = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->duration = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->duration = NULL;
 	}
@@ -532,12 +551,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->durationModEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->durationModEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->durationMod = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->durationMod = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->durationMod = NULL;
 	}
@@ -546,12 +565,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->actionsEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->actionsEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->actions = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->actions = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->actions = NULL;
 	}
@@ -560,12 +579,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->STREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->STREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->STR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->STR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->STR = NULL;
 	}
@@ -574,12 +593,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->DEXEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->DEXEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->DEX = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->DEX = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->DEX = NULL;
 	}
@@ -588,12 +607,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->CONEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->CONEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->CON = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->CON = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->CON = NULL;
 	}
@@ -602,12 +621,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->WILLEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->WILLEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->WILL = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->WILL = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->WILL = NULL;
 	}
@@ -616,12 +635,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->INTEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->INTEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->INT = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->INT = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->INT = NULL;
 	}
@@ -630,12 +649,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->WISEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->WISEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->WIS = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->WIS = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->WIS = NULL;
 	}
@@ -644,12 +663,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->CHREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->CHREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->CHR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->CHR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->CHR = NULL;
 	}
@@ -658,12 +677,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->LUCKEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->LUCKEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->LUCK = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->LUCK = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->LUCK = NULL;
 	}
@@ -672,12 +691,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->acEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->acEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->ac = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->ac = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->ac = NULL;
 	}
@@ -686,12 +705,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->attackEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->attackEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->attack = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->attack = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->attack = NULL;
 	}
@@ -700,12 +719,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->damageModEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->damageModEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->damageMod = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->damageMod = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->damageMod = NULL;
 	}
@@ -714,12 +733,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->mvmtEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->mvmtEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->mvmt = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->mvmt = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->mvmt = NULL;
 	}
@@ -728,12 +747,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->diceHPEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->diceHPEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->diceHP = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->diceHP = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->diceHP = NULL;
 	}
@@ -742,12 +761,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->hpEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->hpEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->hp = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->hp = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->hp = NULL;
 	}
@@ -756,12 +775,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->baseHPEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->baseHPEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->baseHP = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->baseHP = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->baseHP = NULL;
 	}
@@ -770,12 +789,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->baseManaEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->baseManaEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->baseMana = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->baseMana = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->baseMana = NULL;
 	}
@@ -784,12 +803,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->bluntDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->bluntDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->bluntDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->bluntDR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->bluntDR = NULL;
 	}
@@ -798,12 +817,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->chopDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->chopDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->chopDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->chopDR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->chopDR = NULL;
 	}
@@ -812,12 +831,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->pierceDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->pierceDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->pierceDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->pierceDR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->pierceDR = NULL;
 	}
@@ -826,12 +845,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->slashDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->slashDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->slashDR  = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->slashDR  = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->slashDR = NULL;
 	}
@@ -840,12 +859,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->earthDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->earthDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->earthDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->earthDR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->earthDR = NULL;
 	}
@@ -854,12 +873,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->fireDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->fireDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->fireDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->fireDR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->fireDR = NULL;
 	}
@@ -868,12 +887,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->waterDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->waterDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->waterDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->waterDR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->waterDR = NULL;
 	}
@@ -882,12 +901,12 @@ ability * createAbilityFromLine(char line[2048]){
 	newAbility->lightningDREnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	mapSize = atoi(value);
+	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	if(newAbility->lightningDREnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->lightningDR = makeEffectManaMapList(value, mapSize, newAbility->typeName);
+		newAbility->lightningDR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->lightningDR = NULL;
 	}
@@ -973,6 +992,9 @@ ability * cloneAbility(ability * thisAbility){
 
 	newAbility->diceDamageEnabled = thisAbility->diceDamageEnabled;
 	newAbility->diceDamage = cloneEffectAndManaMapList(thisAbility->diceDamage);
+
+	newAbility->diceDamageMultiplierEnabled = thisAbility->diceDamageMultiplierEnabled;
+	newAbility->diceDamageMultiplier = cloneEffectAndManaMapList(thisAbility->diceDamageMultiplier);
 
 	newAbility->damageEnabled = thisAbility->damageEnabled;
 	newAbility->damage = cloneEffectAndManaMapList(thisAbility->damage);

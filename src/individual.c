@@ -275,15 +275,21 @@ int statusIsHarmful(char * type){
 	return 1;
 }
 
-int processCasterOnlyAffects(individual * thisIndividual, ability * thisAbility){
+int processCasterOnlyEffects(individual * thisIndividual, ability * thisAbility){
 	if (thisAbility->type == 'd' || thisAbility->type == 'i') {
-		int damage = 0, totalDamage, targetDR;
+		int i, damage = 0, numDice = 0, totalDamage, targetDR;
 
-		if (thisAbility->diceDamageEnabled) {
+		if(thisAbility->diceDamageMultiplierEnabled){
+			numDice = thisAbility->diceDamageMultiplier->effectAndManaArray[thisAbility->diceDamageMultiplier->selectedIndex]->effectMagnitude;
+		}
+
+		if(thisAbility->diceDamageEnabled){
 			int diceDamage = thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->effectMagnitude;
 
-			if (diceDamage > 0) {
-				damage = (rand() % diceDamage) + 1;
+			for(i = 0; i < numDice; i++){
+				if(diceDamage > 0){
+					damage += (rand() % diceDamage) + 1;
+				}
 			}
 		}
 
@@ -313,13 +319,20 @@ int processCasterOnlyAffects(individual * thisIndividual, ability * thisAbility)
 
 
 int damageIndividualWithAbility(individual *thisIndividual, individual *targetIndividual){
-	int damage = 0, totalDamage, targetDR;
+	int i, damage = 0, numDice = 0, totalDamage, targetDR;
 	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
+
+	if(targetAbility->diceDamageMultiplierEnabled){
+		numDice = targetAbility->diceDamageMultiplier->effectAndManaArray[targetAbility->diceDamageMultiplier->selectedIndex]->effectMagnitude;
+	}
 
 	if(targetAbility->diceDamageEnabled){
 		int diceDamage = targetAbility->diceDamage->effectAndManaArray[targetAbility->diceDamage->selectedIndex]->effectMagnitude;
-		if(diceDamage > 0){
-			damage = (rand() % diceDamage) + 1;
+
+		for(i = 0; i < numDice; i++){
+			if(diceDamage > 0){
+				damage += (rand() % diceDamage) + 1;
+			}
 		}
 	}
 
@@ -1139,7 +1152,7 @@ int useAbility(individual * thisIndividual, ability * thisAbility){
 
 		useActiveAbility(thisIndividual, thisAbility);
 
-		if(processCasterOnlyAffects(thisIndividual, thisAbility)){
+		if(processCasterOnlyEffects(thisIndividual, thisAbility)){
 			char * tmp[128];
 			sprintf(tmp, "%s perished from %s!", thisIndividual->name, thisAbility->name);
 			cwrite(tmp);

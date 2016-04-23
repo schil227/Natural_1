@@ -160,6 +160,9 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageEnabled,
 			 hdc, hdcBuffer, &textRect, ABILITY_DICE_DAMAGE, "Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->diceDamage);
 
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplierEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_DICE_DAMAGE_MULTIPLIER, "Dice Damage Multiplier", 0, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplier);
+
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageEnabled,
 			 hdc, hdcBuffer, &textRect, ABILITY_DAMAGE, "damage", 0, thisAbilityCreationInstance->abilityInsance->damage);
 
@@ -423,6 +426,8 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->extraAttack;
 	case ABILITY_DICE_DAMAGE:
 		return thisAbilityCreationInstance->abilityInsance->diceDamage;
+	case ABILITY_DICE_DAMAGE_MULTIPLIER:
+		return thisAbilityCreationInstance->abilityInsance->diceDamageMultiplier;
 	case ABILITY_DAMAGE:
 		return thisAbilityCreationInstance->abilityInsance->damage;
 	case ABILITY_STATUS_DICE_DAMAGE:
