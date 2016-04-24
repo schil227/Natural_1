@@ -37,10 +37,14 @@ int path_and_attack_test() {
 	testEnemies = initGroup();
 	testNPCs = initGroup();
 	testShiftData = initShiftData();
+	initThisCursor(2004,RGB(224, 64, 192),0,0);
 	initThisConsole(2010,0,0,300,200);
 	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 	initalizeTheGlobalRegister();
 	initEventHandlers();
+	initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
+	initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
+	initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
 	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
 	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
@@ -298,6 +302,9 @@ int path_and_attack_test() {
 	//process the CHR Check, successful
 	processEvent(getEventFromCurrentMessage(), testPlayer, testNPCs, testEnemies, main_test_field);
 
+	createAbiltyTest(testPlayer);
+
+
 	//break down mock up
 	destroyIndividual(testPlayer);
 	clearGroup(testEnemies);
@@ -308,6 +315,58 @@ int path_and_attack_test() {
 	destroyTheGlobalRegister();
 	destroyEventHandlers();
 	return 0;
+}
+
+void createAbiltyTest(individual * testPlayer){
+	//try create ability, fail (mana = -2)
+	assert(!canCreateAbility());
+
+	//down to STR
+	selectNextEffect();
+
+	//increase STR (+1)
+	setAbilityCreationSelectedType(ABILITY_STR);
+	interpretRightAbilityCreation();
+
+	//try create ability, fail (mana = -1)
+	assert(!canCreateAbility());
+
+	//increase STR (+2)
+	interpretRightAbilityCreation();
+
+	//try create ability, succeed (mana = 0)
+	assert(canCreateAbility());
+
+	//ability name is empty - need to fill out
+	assert(nameEmpty());
+
+	// Give abiltiy name ABCBA
+	selectCharacter();
+	selectLetterRight();
+	selectCharacter();
+	selectLetterRight();
+	selectCharacter();
+	selectLetterLeft();
+	selectCharacter();
+	selectLetterLeft();
+	selectCharacter();
+
+	assert(!nameEmpty());
+
+	setAbilityName(getNameFromInstance());
+	addAbilityToIndividual(testPlayer, getNewAbility());
+	changeAbilityTemplate(0);
+	resetNameBoxInstance();
+
+	//the name's been reset
+	assert(nameEmpty());
+
+	//player now has a perminant ability granting +2 strength
+	assert(testPlayer->activeAbilities->numAbilities == 1);
+	assert(testPlayer->abilities->numAbilities == 1);
+	assert(strcmp(testPlayer->abilities->abilitiesList[0]->name,"ABCBA") == 0);
+	assert(getAttributeSum(testPlayer, "STR") == 3);
+
 }
 
 

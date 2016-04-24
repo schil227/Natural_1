@@ -274,7 +274,7 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex){
 			drawEffectMapList(hdcBuffer, textRect, fieldName, isDR, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
-				thisAbilityCreationInstance->selectedType = type;
+				setAbilityCreationSelectedType(type);
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
@@ -289,7 +289,7 @@ void processTypeMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC 
 		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex){
 			drawTypeMapList(hdcBuffer, textRect, fieldName, isDR, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
-				thisAbilityCreationInstance->selectedType = type;
+				setAbilityCreationSelectedType(type);
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
 				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
@@ -299,6 +299,10 @@ void processTypeMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC 
 	}
 }
 
+
+void setAbilityCreationSelectedType(effect_types type){
+	thisAbilityCreationInstance->selectedType = type;
+}
 
 void drawEffectMapList(HDC hdcBuffer, RECT * textRect, char * fieldName, int isDR, effectAndManaMapList * mapList){
 		moveRECTDown(textRect, 17);

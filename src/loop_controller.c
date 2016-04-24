@@ -203,14 +203,6 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 				interpretLeftAbilityCreation(player->range, player->mvmt, totalHP, totalMana);
 				break;
 			}
-			case 0x43:{ //'c' key
-//				if(canCreateAbility()){
-//					toggleNameMode();
-//					addAbilityToIndividual(player, getNewAbility());
-//					changeAbilityTemplate(0);
-//				}
-				break;
-			}
 		}
 		case WM_TIMER:
 		{
