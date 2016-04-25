@@ -19,9 +19,10 @@
 #include"./headers/dialog_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
-const char  g_szClassNameCons[] = "MyConsoleClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
 const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";//".\\resources\\maps\\";//
+static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";
+
 int mainWindowWidth = 640;
 int mainWindowHeight = 820;
 
@@ -635,7 +636,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	srand(0);
 	int i;
 
-	test_main();
+	//initialize for tests
+	player = initIndividual();
+	enemies = initGroup();
+	npcs = initGroup();
+	viewShift = initShiftData();
+	initThisCursor(2004,RGB(224, 64, 192),0,0);
+	initThisConsole(2010,0,0,300,200);
+	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
+	initalizeTheGlobalRegister();
+	initEventHandlers();
+	initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
+	initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
+	initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
+	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
+	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
+	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
+	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
+
+	if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
+	}
+
+	main_field = loadMap("test_map1.txt", mapTestDirectory, player, enemies, npcs);
+
+	test_main(player, enemies, npcs, main_field, viewShift);
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){

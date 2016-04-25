@@ -18,43 +18,42 @@
 #include"../src/headers/enemy_controller_pub_methods.h"
 #include"../src/headers/dialog_pub_methods.h"
 
-char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";//".\\unit_tests\\testMaps\\";//
+static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";//".\\unit_tests\\testMaps\\";//
 
-individual* testPlayer;
-individualGroup* testEnemies;
-individualGroup* testNPCs;
-field* main_test_field;
-cursor* thisTestCursor;
-shiftData* testShiftData;
+//individual* testPlayer;
+//individualGroup* testEnemies;
+//individualGroup* testNPCs;
+//field* main_test_field;
+//shiftData* testShiftData;
 
-int path_and_attack_test() {
+int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGroup* testNPCs, field* main_test_field, shiftData * testShiftData) {
 	//setup
 
 	BITMAP bm;
 	UINT ret;
 
-	testPlayer = initIndividual();
-	testEnemies = initGroup();
-	testNPCs = initGroup();
-	testShiftData = initShiftData();
-	initThisCursor(2004,RGB(224, 64, 192),0,0);
-	initThisConsole(2010,0,0,300,200);
-	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
-	initalizeTheGlobalRegister();
-	initEventHandlers();
-	initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
-	initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
-	initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
-	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
-	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
-	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
-	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
+//	testPlayer = initIndividual();
+//	testEnemies = initGroup();
+//	testNPCs = initGroup();
+//	testShiftData = initShiftData();
+//	initThisCursor(2004,RGB(224, 64, 192),0,0);
+//	initThisConsole(2010,0,0,300,200);
+//	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
+//	initalizeTheGlobalRegister();
+//	initEventHandlers();
+//	initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
+//	initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
+//	initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
+//	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
+//	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
+//	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
+//	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
 
-	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
-	}
+//	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
+//		}
 
 	int x, y;
-	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, testEnemies, testNPCs);
+//	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, testEnemies, testNPCs);
 	int imageID;
 
 
@@ -302,8 +301,56 @@ int path_and_attack_test() {
 	//process the CHR Check, successful
 	processEvent(getEventFromCurrentMessage(), testPlayer, testNPCs, testEnemies, main_test_field);
 
-	createAbiltyTest(testPlayer);
+	createPermanentAbiltyTest(testPlayer);
+	createSelfDurationAbility(testPlayer);
 
+	/*use self duraiton ability,
+	 * poison testPlayer and npc,
+	 *  -2 AC/-1 attack,
+	 *   npc becomes enemy
+	 */
+
+	//update ability view
+	refreshAbilityView(testPlayer->abilities->numAbilities, testPlayer->abilities->abilitiesList);
+
+	//chose duration ability from view
+	selectNextAbility();
+
+	//verify ability can be used
+	assert(canUseAbility(testPlayer, getAbilityToActivate()));
+
+	//player didn't die by using this ability (impossible, it's not an instant ability), abiltiy is set to selectedAbility
+	assert(!useAbility(testPlayer, getAbilityToActivate()));
+
+	//user is within range of self ability
+	assert(cursorWithinAbilityRange(testPlayer, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y));
+
+	//user's hp before poison affects it
+	assert(testPlayer->hp == 17);
+
+	//use duration ability on everyone within range
+	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
+
+	//since duration ability was harmful, npc is now an enemy
+	assert(!individualInGroup(tmpNPC, testNPCs));
+	assert(individualInGroup(tmpNPC, testEnemies));
+
+	//After spell cast hp check
+	assert(testPlayer->hp == 14);
+
+	//player and the NPC are poisoned
+	assert(testPlayer->activeStatuses->statuses[0]->effect == STATUS_POISONED);
+	assert(tmpNPC->activeStatuses->statuses[0]->effect == STATUS_POISONED);
+
+	//status magnitude
+	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 2);
+	assert(testPlayer->activeStatuses->statuses[0]->damage == 1);
+	assert(testPlayer->activeStatuses->statuses[0]->diceDamage == 4);
+
+	//after new turn, poison has fewer turns, damages individual
+	startTurn(testPlayer);
+	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 1);
+	assert(testPlayer->hp == 11);
 
 	//break down mock up
 	destroyIndividual(testPlayer);
@@ -317,7 +364,7 @@ int path_and_attack_test() {
 	return 0;
 }
 
-void createAbiltyTest(individual * testPlayer){
+void createPermanentAbiltyTest(individual * testPlayer){
 	//try create ability, fail (mana = -2)
 	assert(!canCreateAbility());
 
@@ -367,17 +414,114 @@ void createAbiltyTest(individual * testPlayer){
 	assert(strcmp(testPlayer->abilities->abilitiesList[0]->name,"ABCBA") == 0);
 	assert(getAttributeSum(testPlayer, "STR") == 3);
 
+	//return to abilityType
+	selectPreviousEffect();
+	selectPreviousEffect();
+	selectPreviousEffect();
 }
 
+void createSelfDurationAbility(individual * testPlayer){
+	int i;
 
-int test_main() {
+	//select Self Duration ability
+	interpretRightAbilityCreation();
+
+	//Down to status
+	for(i = 0; i < 6; i++){
+		selectNextEffect();
+	}
+
+	//status: poison
+	setAbilityCreationSelectedType(ABILITY_STATUS);
+	interpretRightAbilityCreation();
+
+	//d4 dice damage
+	setAbilityCreationSelectedType(ABILITY_STATUS_DICE_DAMAGE);
+	interpretRightAbilityCreation();
+
+	//+1 damage
+	setAbilityCreationSelectedType(ABILITY_STATUS_DAMAGE);
+	interpretRightAbilityCreation();
+
+	//d4 dice duration
+	setAbilityCreationSelectedType(ABILITY_STATUS_DICE_DURATION);
+	interpretRightAbilityCreation();
+
+	//+1 duration
+	setAbilityCreationSelectedType(ABILITY_STATUS_DURATION);
+	interpretRightAbilityCreation();
+
+	//+1 AOE
+	setAbilityCreationSelectedType(ABILITY_AOE);
+	interpretRightAbilityCreation();
+
+	//down to AC
+	for(i = 0; i < 12; i++){
+		selectNextEffect();
+	}
+
+	//-2 AC
+	setAbilityCreationSelectedType(ABILITY_AC);
+	interpretLeftAbilityCreation();
+	interpretLeftAbilityCreation();
+
+	//-1 Attack
+	selectNextEffect();
+	setAbilityCreationSelectedType(ABILITY_ATTACK);
+	interpretLeftAbilityCreation();
+
+	//ability is +4 mana, able to create
+	assert(canCreateAbility());
+
+	//ability name is empty - need to fill out
+	assert(nameEmpty());
+
+	// Give abiltiy name Jill
+	selectLetterUp();//at backspace
+	selectLetterUp();//at 9
+	selectCharacter(); //select 9 accidently
+	selectLetterDown();//at backspace
+	selectCharacter(); //delete 9
+	selectLetterDown();//at J
+	selectCharacter(); //J
+	selectLetterLeft();//at I
+	selectLetterDown();//at V
+	selectLetterDown();//at i
+	selectCharacter(); //i
+	selectLetterRight();//at j
+	selectLetterRight();//at k
+	selectLetterRight();//at l
+	selectCharacter();//l
+	selectCharacter();//l
+
+	assert(!nameEmpty());
+
+	setAbilityName(getNameFromInstance());
+	addAbilityToIndividual(testPlayer, getNewAbility());
+	changeAbilityTemplate(0);
+	resetNameBoxInstance();
+
+	//the name's been reset
+	assert(nameEmpty());
+
+	//player now has a duration ability
+	assert(testPlayer->activeAbilities->numAbilities == 1);
+	assert(testPlayer->abilities->numAbilities == 2);
+	assert(strcmp(testPlayer->abilities->abilitiesList[1]->name,"Jill") == 0);
+}
+
+void createTargetedAbility(){
+
+}
+
+int test_main(individual * testPlayer, individualGroup* testEnemies, individualGroup* testNPCs, field* main_test_field, shiftData * testShiftData) {
 //	printf("testing general\n");
 //	test_general_all();
 //	printf("testing character\n");
 //	test_character_all();
 //	mock_field_test();
 
-	path_and_attack_test();
+	mainTest(testPlayer, testEnemies, testNPCs, main_test_field, testShiftData);
 
 	return 0;
 }
