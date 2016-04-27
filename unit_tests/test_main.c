@@ -303,6 +303,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 
 	createPermanentAbiltyTest(testPlayer);
 	createSelfDurationAbility(testPlayer);
+	createTargetedAbility(testPlayer);
 
 	/*use self duraiton ability,
 	 * poison testPlayer and npc,
@@ -331,6 +332,9 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	//use duration ability on everyone within range
 	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
 
+	//clear selectedAbility
+	testPlayer->activeAbilities->selectedAbility = NULL;
+
 	//since duration ability was harmful, npc is now an enemy
 	assert(!individualInGroup(tmpNPC, testNPCs));
 	assert(individualInGroup(tmpNPC, testEnemies));
@@ -351,6 +355,45 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	startTurn(testPlayer);
 	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 1);
 	assert(testPlayer->hp == 11);
+
+	/*
+	 * use targeted ability on enemy
+	 */
+	refreshAbilityView(testPlayer->abilities->numAbilities, testPlayer->abilities->abilitiesList);
+
+	//go to targeted ability from view
+	selectNextAbility();//duration
+	selectNextAbility();//targeted
+
+	//Player doesn't have enough mana!
+	assert(!canUseAbility(testPlayer, getAbilityToActivate()));
+
+	//give the player some mana
+	restoreMana(testPlayer, 10);
+
+	//now the ability can be used
+	assert(canUseAbility(testPlayer, getAbilityToActivate()));
+
+	//player didn't die by using this ability (impossible, it's not an instant ability), abiltiy is set to selectedAbility
+	assert(!useAbility(testPlayer, getAbilityToActivate()));
+
+	//ability is NOT within range of selected enemy (skelly)
+	assert(!cursorWithinAbilityRange(testPlayer, 0, 10));
+
+	//ability is in range of closer enemy
+	assert(cursorWithinAbilityRange(testPlayer, 2, 1));
+
+	//get skelly4, the targeted enemy
+	tmpIndividual = testEnemies->individuals[3];
+
+	//skelly4 is in good health
+	assert(tmpIndividual->hp == 2);
+
+	//use ability on selected space,  harming skelly4
+	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, 2, 1);
+
+	//skelly4 was killed by two high-rolled d8s
+	assert(tmpIndividual->hp == -13);
 
 	//break down mock up
 	destroyIndividual(testPlayer);
@@ -508,9 +551,73 @@ void createSelfDurationAbility(individual * testPlayer){
 	assert(testPlayer->activeAbilities->numAbilities == 1);
 	assert(testPlayer->abilities->numAbilities == 2);
 	assert(strcmp(testPlayer->abilities->abilitiesList[1]->name,"Jill") == 0);
+
+	//return to ability select
+	for(i = 0; i < 19; i++){
+		selectPreviousEffect();
+	}
 }
 
-void createTargetedAbility(){
+void createTargetedAbility(individual * testPlayer){
+	//go to targeted ability
+	interpretRightAbilityCreation();
+
+	//go down to range
+	selectNextEffect();
+	selectNextEffect();
+
+	//range: 3
+	setAbilityCreationSelectedType(ABILITY_RANGE);
+	interpretRightAbilityCreation();
+
+	//go down to dice damage
+	selectNextEffect();
+	selectNextEffect();
+
+	//Dice Damage: d8
+	setAbilityCreationSelectedType(ABILITY_DICE_DAMAGE);
+	interpretRightAbilityCreation();
+	interpretRightAbilityCreation();
+
+	//go down to dice damage multiplier
+	interpretRightAbilityCreation();
+
+	//multiplier: 2d8
+	setAbilityCreationSelectedType(ABILITY_DICE_DAMAGE_MULTIPLIER);
+	interpretRightAbilityCreation();
+
+	//ability is +5 mana, able to create
+	assert(canCreateAbility());
+
+	//ability name is empty - need to fill out
+	assert(nameEmpty());
+
+	//Give ability name: A0
+	selectCharacter(); //A
+	selectLetterDown();//at N
+	selectLetterDown();//at a
+	selectLetterDown();//at n
+	selectLetterDown();//at 0
+	selectCharacter(); //0
+
+
+	assert(!nameEmpty());
+
+	setAbilityName(getNameFromInstance());
+	addAbilityToIndividual(testPlayer, getNewAbility());
+	changeAbilityTemplate(0);
+	resetNameBoxInstance();
+
+	//the name's been reset
+	assert(nameEmpty());
+
+	//player now has a duration ability
+	assert(testPlayer->activeAbilities->numAbilities == 1);
+	assert(testPlayer->abilities->numAbilities == 3);
+	assert(strcmp(testPlayer->abilities->abilitiesList[2]->name,"A0") == 0);
+}
+
+void createInstanceAbility(){
 
 }
 
