@@ -304,6 +304,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	createPermanentAbiltyTest(testPlayer);
 	createSelfDurationAbility(testPlayer);
 	createTargetedAbility(testPlayer);
+	createInstanceAbility(testPlayer);
 
 	/*use self duraiton ability,
 	 * poison testPlayer and npc,
@@ -362,7 +363,6 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	refreshAbilityView(testPlayer->abilities->numAbilities, testPlayer->abilities->abilitiesList);
 
 	//go to targeted ability from view
-	selectNextAbility();//duration
 	selectNextAbility();//targeted
 
 	//Player doesn't have enough mana!
@@ -394,6 +394,51 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 
 	//skelly4 was killed by two high-rolled d8s
 	assert(tmpIndividual->hp == -13);
+
+	/*
+ 	 * use instant ability to strike NPC several times, pay with several turns
+ 	 */
+
+	//point to the instant ability
+	selectNextAbility();
+
+	//clear old selected ability
+	testPlayer->activeAbilities->selectedAbility = NULL;
+
+	//verify the ability can be used
+	assert(canUseAbility(testPlayer, getAbilityToActivate()));
+
+	//verify the number of turns the player has before using the ability
+	assert(testPlayer->remainingActions == 2);
+
+	//verify player health before dice heal
+	assert(testPlayer->hp == 11);
+
+	//assert the player is not killed by the instant action
+	assert(!useAbility(testPlayer, getAbilityToActivate()));
+
+	//player healed from diceHP
+	assert(testPlayer->hp == 12);
+
+	//verify tmpNPC was killed by the multiple attacks
+	assert(tryAttackEnemies(testEnemies, testPlayer, main_test_field, tmpNPC->playerCharacter->x, tmpNPC->playerCharacter->y));
+
+	//tmpNPC hp is less than zero
+	assert(tmpNPC->hp == -4);
+
+	//after decreasing the turns, the ability is no longer selected, player has action debt
+	int dummyEnemyActionMode = 0, dummyInitEnemyActionMode = 0;
+	decreaseTurns(testPlayer, &dummyEnemyActionMode, &dummyInitEnemyActionMode, 1);
+
+	//player loses 4 actions, gets 2 replenished on endTurn() call (net: 0 actions for next turn)
+	assert(testPlayer->remainingActions == 0);
+
+	//the selected instant ability was automatially cleared on decreaseTurns call
+	assert(testPlayer->activeAbilities->selectedAbility == NULL);
+
+	//it is now the enemies turn
+	assert(dummyEnemyActionMode);
+	assert(dummyInitEnemyActionMode);
 
 	//break down mock up
 	destroyIndividual(testPlayer);
@@ -615,9 +660,81 @@ void createTargetedAbility(individual * testPlayer){
 	assert(testPlayer->activeAbilities->numAbilities == 1);
 	assert(testPlayer->abilities->numAbilities == 3);
 	assert(strcmp(testPlayer->abilities->abilitiesList[2]->name,"A0") == 0);
+
+	//go back to ability selection
+	selectPreviousEffect();
+	selectPreviousEffect();
+	selectPreviousEffect();
+	selectPreviousEffect();
+
 }
 
-void createInstanceAbility(){
+void createInstanceAbility(individual * testPlayer){
+	int i;
+
+	//go to instant ability
+	interpretRightAbilityCreation();
+
+	//go down to extraAttack
+	selectNextEffect();
+	selectNextEffect();
+
+	//+2 extraAttacks
+	setAbilityCreationSelectedType(ABILITY_EXTRA_ATTACK);
+	interpretRightAbilityCreation();
+	interpretRightAbilityCreation();
+
+	//go down to actions
+	for(i = 0; i < 9; i++){
+		selectNextEffect();
+	}
+
+	//-3 actions
+	setAbilityCreationSelectedType(ABILITY_ACTIONS);
+	interpretRightAbilityCreation();
+	interpretRightAbilityCreation();
+	interpretRightAbilityCreation();
+
+	//go down to diceHP
+	for(i = 0; i < 4; i++){
+		selectNextEffect();
+	}
+
+	//d4 diceHP
+	setAbilityCreationSelectedType(ABILITY_DICE_HP);
+	interpretRightAbilityCreation();
+
+	//ability is 0 mana, able to create
+	assert(canCreateAbility());
+
+	//ability name is empty - need to fill out
+	assert(nameEmpty());
+
+	//Give ability a classic name: AAA
+	selectCharacter(); //A
+	selectCharacter(); //A
+	selectCharacter(); //A
+
+
+	assert(!nameEmpty());
+
+	setAbilityName(getNameFromInstance());
+	addAbilityToIndividual(testPlayer, getNewAbility());
+	changeAbilityTemplate(0);
+	resetNameBoxInstance();
+
+	//the name's been reset
+	assert(nameEmpty());
+
+	//player now has a duration ability
+	assert(testPlayer->activeAbilities->numAbilities == 1);
+	assert(testPlayer->abilities->numAbilities == 4);
+	assert(strcmp(testPlayer->abilities->abilitiesList[3]->name,"AAA") == 0);
+
+	//go back to ability selection
+	for(i = 0; i < 15; i++){
+		selectPreviousEffect();
+	}
 
 }
 
