@@ -328,9 +328,17 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 						tmp->playerCharacter->y <= maxY ){
 					if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
 						triggerEventOnAttack(tmp->ID);
+
+						if(!individualInGroup(tmp, thisGroup)){
+							individualsPassed--;
+						}
 					}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 						if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
 							triggerEventOnAttack(tmp->ID);
+
+							if(!individualInGroup(tmp, thisGroup)){
+								individualsPassed--;
+							}
 						}
 					}
 				}
@@ -368,6 +376,8 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeFromExistance(tmp->ID);
+
+						individualsPassed--;
 					}
 				}
 

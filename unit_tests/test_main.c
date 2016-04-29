@@ -377,23 +377,27 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	//player didn't die by using this ability (impossible, it's not an instant ability), abiltiy is set to selectedAbility
 	assert(!useAbility(testPlayer, getAbilityToActivate()));
 
-	//ability is NOT within range of selected enemy (skelly)
-	assert(!cursorWithinAbilityRange(testPlayer, 0, 10));
+	//ability is NOT within range beyond the selected enemy (skelly)
+	assert(!cursorWithinAbilityRange(testPlayer, 0, 11));
 
-	//ability is in range of closer enemy
-	assert(cursorWithinAbilityRange(testPlayer, 2, 1));
+	//ability is in range of the enemy
+	assert(cursorWithinAbilityRange(testPlayer, 0, 10));
 
-	//get skelly4, the targeted enemy
-	tmpIndividual = testEnemies->individuals[3];
+	//get skelly, the targeted enemy
+	tmpIndividual = testEnemies->individuals[0];
 
-	//skelly4 is in good health
-	assert(tmpIndividual->hp == 2);
+	//skelly is in good health
+	assert(tmpIndividual->hp == 8);
+
+	//consume some rand() to get a better roll
+	rand();
+	rand();
 
 	//use ability on selected space,  harming skelly4
-	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, 2, 1);
+	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
 
-	//skelly4 was killed by two high-rolled d8s
-	assert(tmpIndividual->hp == -13);
+	//skelly was killed by a 11 damage roll (2d8)
+	assert(tmpIndividual->hp == -3);
 
 	/*
  	 * use instant ability to strike NPC several times, pay with several turns
@@ -412,19 +416,24 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	assert(testPlayer->remainingActions == 2);
 
 	//verify player health before dice heal
-	assert(testPlayer->hp == 11);
+	assert(testPlayer->hp == 12);
 
 	//assert the player is not killed by the instant action
 	assert(!useAbility(testPlayer, getAbilityToActivate()));
 
 	//player healed from diceHP
-	assert(testPlayer->hp == 12);
+	assert(testPlayer->hp == 14);
+
+	//consume more rand() to get better throws
+	rand();
+	rand();
+	rand();
 
 	//verify tmpNPC was killed by the multiple attacks
 	assert(tryAttackEnemies(testEnemies, testPlayer, main_test_field, tmpNPC->playerCharacter->x, tmpNPC->playerCharacter->y));
 
-	//tmpNPC hp is less than zero
-	assert(tmpNPC->hp == -4);
+	//tmpNPC has -5 hp after barrage of attacks
+	assert(tmpNPC->hp == -5);
 
 	//after decreasing the turns, the ability is no longer selected, player has action debt
 	int dummyEnemyActionMode = 0, dummyInitEnemyActionMode = 0;
@@ -611,8 +620,10 @@ void createTargetedAbility(individual * testPlayer){
 	selectNextEffect();
 	selectNextEffect();
 
-	//range: 3
+	//range: 9
 	setAbilityCreationSelectedType(ABILITY_RANGE);
+	interpretRightAbilityCreation();
+	interpretRightAbilityCreation();
 	interpretRightAbilityCreation();
 
 	//go down to dice damage
@@ -625,7 +636,7 @@ void createTargetedAbility(individual * testPlayer){
 	interpretRightAbilityCreation();
 
 	//go down to dice damage multiplier
-	interpretRightAbilityCreation();
+	selectNextEffect();
 
 	//multiplier: 2d8
 	setAbilityCreationSelectedType(ABILITY_DICE_DAMAGE_MULTIPLIER);
@@ -662,6 +673,7 @@ void createTargetedAbility(individual * testPlayer){
 	assert(strcmp(testPlayer->abilities->abilitiesList[2]->name,"A0") == 0);
 
 	//go back to ability selection
+	selectPreviousEffect();
 	selectPreviousEffect();
 	selectPreviousEffect();
 	selectPreviousEffect();
