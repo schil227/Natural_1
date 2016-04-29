@@ -292,8 +292,11 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGr
 	minY = y - aoe;
 	maxY = y + aoe;
 
-	checkIndividualGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
-	checkIndividualGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
+	preprocessIndividalGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
+	preprocessIndividalGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
+
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
 
 	if(player->hp > 0 && player->playerCharacter->x >= minX && player->playerCharacter->x <= maxX &&
 		player->playerCharacter->y >= minY && player->playerCharacter->y <= maxY ){
@@ -310,9 +313,36 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGr
 
 }
 
+void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField,int minX, int maxX, int minY, int maxY){
+	int i, individualsPassed = 0;
 
+		for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+			individual * tmp = thisGroup->individuals[i];
 
-void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField,int minX, int maxX, int minY, int maxY){
+			if(tmp != NULL && tmp->hp > 0){
+				individualsPassed++;
+
+				if(tmp->playerCharacter->x >= minX &&
+						tmp->playerCharacter->x <= maxX &&
+						tmp->playerCharacter->y >= minY &&
+						tmp->playerCharacter->y <= maxY ){
+					if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
+						triggerEventOnAttack(tmp->ID);
+					}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
+						if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
+							triggerEventOnAttack(tmp->ID);
+						}
+					}
+				}
+
+				if(individualsPassed >= thisGroup->numIndividuals){
+					break;
+				}
+			}
+		}
+}
+
+void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField,int minX, int maxX, int minY, int maxY){
 	int i, individualsPassed = 0;
 
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
@@ -332,9 +362,6 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 						removeFromExistance(tmp->ID);
 					}
 				}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
-					if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
-						triggerEventOnAttack(tmp->ID);
-					}
 
 					//add duration ability logic here
 					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
@@ -347,7 +374,7 @@ void checkIndividualGroupsInAOE(individual * thisIndividual, individualGroup * t
 
 			}
 
-			if(individualsPassed == thisGroup->numIndividuals){
+			if(individualsPassed >= thisGroup->numIndividuals){
 				break;
 			}
 		}

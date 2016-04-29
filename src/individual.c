@@ -224,7 +224,8 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
 	int i, isTargeted = 0;
 
-	triggerEventOnAttack(target->ID);
+	//Handled in the preprocessIndividalGroupsInAOE() function
+//	triggerEventOnAttack(target->ID);
 
 	if(targetAbility->targetedEnabled){
 		isTargeted = targetAbility->targeted->effectAndManaArray[targetAbility->targeted->selectedIndex]->effectMagnitude;

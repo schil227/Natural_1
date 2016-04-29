@@ -355,7 +355,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	//after new turn, poison has fewer turns, damages individual
 	startTurn(testPlayer);
 	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 1);
-	assert(testPlayer->hp == 11);
+	assert(testPlayer->hp == 12);
 
 	/*
 	 * use targeted ability on enemy

@@ -391,12 +391,20 @@ typeAndManaMapList * getTypeMapListFromEffectType(){
 void interpretRightAbilityCreation(){
 	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
 		effectAndManaMapList * tmpMap = getMapListFromEffectType();
+
 		if(tmpMap == NULL){
 			typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
-			selectNextType(tmpTypeMap);
+
+			if(tmpTypeMap == NULL){
+				cwrite("!! selectedType NOT FOUND !!");
+			}else{
+				selectNextType(tmpTypeMap);
+			}
+
 		}else{
 			increaseEffect(tmpMap);
 		}
+
 	}else if(thisAbilityCreationInstance->effectCurrentIndex == -1){
 		changeAbilityTemplate(1);
 	}
