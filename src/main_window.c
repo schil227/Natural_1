@@ -6,6 +6,8 @@
  */
 
 #include<stdio.h>
+//#include <AL/al.h>
+//#include <AL/alc.h>
 #include<windows.h>
 #include<stdlib.h>
 #include<time.h>
@@ -49,6 +51,27 @@ field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
 
 shiftData * viewShift;
+
+//typedef struct {
+//	int currentSoundId;
+//	int isPlaying;
+//	int sendInturrupt;
+//	char fileName[512];
+//	ALuint source;
+//} soundContainer;
+//
+//typedef struct {
+//	ALCdevice *device;
+//	ALCcontext *context;
+//
+//	soundContainer * music;
+//	soundContainer * sound1;
+//	soundContainer * sound2;
+//} soundPlayer;
+//
+//#define NUM_BUFFERS 3
+//#define BUFFER_SIZE 4096
+//#define NUM_SOURCES 3
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
@@ -624,12 +647,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 
+	initSoundPlayerInstance();
+
+	testPlaySounds();
 
 	int consoleWindowWidth = 480;
 	int consoleWindowHeight = 175;
 	int sidebarWindowWidth = 175;
 	int sidebarWindowHeight = 655;
-
 
 	//run the tests!
 	//init rand for tests
@@ -697,7 +722,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc2.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_MYICON)); //Icon shown when user presses alt+tab
 	wc2.hCursor = LoadCursorA(NULL, IDC_ARROW); //cursor that will be displayed over win.
 	wc2.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1); //background brush to set color of window
-//	wc2.lpszMenuName = MAKEINTRESOURCE(IDR_MYMENU);
 	; // name of menu resource to use for the windows
 	wc2.lpszClassName = g_szClassNameSideBar; //name to identify class with
 	wc2.hIconSm = (HICON) LoadImage(GetModuleHandle(NULL),
@@ -709,7 +733,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 0;
 	}
 
-	//create the window (handle)
+//	create the window (handle)
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
 	WS_OVERLAPPEDWINDOW,
 	CW_USEDEFAULT,
@@ -717,7 +741,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	NULL, NULL, hInstance,
 	NULL);
 
-	//ALWAYS CHECK THE RETURN VALUES!!!
 	if (hwnd == NULL) {
 		MessageBox(NULL, "Window Creation Failed!", "Error!",
 		MB_ICONEXCLAMATION | MB_OK);
@@ -741,9 +764,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		MB_OK | MB_ICONINFORMATION);
 	}
 
-	//ShowWindow(g_toolbar, SW_HIDE);
 	MoveWindow(hwnd,100,100, mainWindowWidth, mainWindowHeight, TRUE);
 	MoveWindow(g_sidebar,100+mainWindowWidth,100,sidebarWindowWidth, sidebarWindowHeight, TRUE);
+
+
 
 	UpdateWindow(hwnd); //redraw
 	SetActiveWindow(hwnd);
@@ -768,3 +792,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	return Msg.wParam;
 
 }
+
+
