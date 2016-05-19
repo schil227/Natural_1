@@ -11,6 +11,7 @@
 #include"../individual_pub_methods.h"
 #include"../event_pub_methods.h"
 #include"../abilities_pub_methods.h"
+#include"../sound_pub_methods.h"
 #include<stdio.h>
 
 typedef struct {
@@ -21,6 +22,8 @@ typedef struct {
 	item * itemRegistry[5000];
 	event * eventRegistry[1000];
 	ability * abilityRegistry[500];
+	soundMap * soundMapRegistry[300];
+
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
 	int MAX_ITEMS;
@@ -29,6 +32,8 @@ typedef struct {
 	int numEvents;
 	int MAX_EFFECTS;
 	int numEffects;
+	int MAX_SOUNDS;
+	int numSounds;
 } globalRegister;
 
 #endif /* SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_ */

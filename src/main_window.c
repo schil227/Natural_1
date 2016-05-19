@@ -6,8 +6,6 @@
  */
 
 #include<stdio.h>
-//#include <AL/al.h>
-//#include <AL/alc.h>
 #include<windows.h>
 #include<stdlib.h>
 #include<time.h>
@@ -19,6 +17,7 @@
 #include"./headers/console_window_pub_methods.h"
 #include"./headers/console_pub_methods.h"
 #include"./headers/dialog_pub_methods.h"
+#include"./headers/sound_pub_methods.h"
 
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
@@ -266,7 +265,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadIndividualsToRegistry(mapDirectory,"individuals.txt");
 		loadItemsToRegistry(mapDirectory, "items.txt");
 		loadEventsToRegistry(mapDirectory, "events.txt");
-//		loadEffectsToRegistry(mapDirectory, "effects_template.txt");
+		loadSoundsToRegistry(mapDirectory, "sounds.txt");
+
+		setSoundID(1, SOUND_MUSIC);
+		setSoundID(2, SOUND_SOUND1);
+
+		testPlaySounds();
 
 		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
@@ -647,19 +651,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hwnd;
 	MSG Msg;
 
-	initSoundPlayerInstance();
-
-	testPlaySounds();
-
 	int consoleWindowWidth = 480;
 	int consoleWindowHeight = 175;
 	int sidebarWindowWidth = 175;
 	int sidebarWindowHeight = 655;
 
+
+
 	//run the tests!
 	//init rand for tests
 	srand(0);
 	int i;
+
+
 
 	//initialize for tests
 	player = initIndividual();
@@ -722,6 +726,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc2.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_MYICON)); //Icon shown when user presses alt+tab
 	wc2.hCursor = LoadCursorA(NULL, IDC_ARROW); //cursor that will be displayed over win.
 	wc2.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1); //background brush to set color of window
+	wc2.lpszMenuName = MAKEINTRESOURCE(IDR_MYMENU);
 	; // name of menu resource to use for the windows
 	wc2.lpszClassName = g_szClassNameSideBar; //name to identify class with
 	wc2.hIconSm = (HICON) LoadImage(GetModuleHandle(NULL),
@@ -732,6 +737,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		MB_ICONEXCLAMATION | MB_OK);
 		return 0;
 	}
+
+	/*
+	 * The OpenAl initilization code must be placed after the call to open the windows, but still be in the main function (apparently).
+	 * I think this may be due to how device handling works.
+	 */
+	initSoundPlayerInstance();
 
 //	create the window (handle)
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
@@ -766,8 +777,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	MoveWindow(hwnd,100,100, mainWindowWidth, mainWindowHeight, TRUE);
 	MoveWindow(g_sidebar,100+mainWindowWidth,100,sidebarWindowWidth, sidebarWindowHeight, TRUE);
-
-
 
 	UpdateWindow(hwnd); //redraw
 	SetActiveWindow(hwnd);

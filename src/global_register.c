@@ -34,6 +34,9 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_EFFECTS = 500;
 	thisGlobalRegister->numEffects = 0;
+
+	thisGlobalRegister->MAX_SOUNDS = 300;
+	thisGlobalRegister->numSounds = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -79,6 +82,22 @@ event * getEventFromRegistry(int id){
 
 	char * errLog[128];
 	sprintf(errLog, "!!EVENT NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
+char * getSoundPathFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numSounds; i++){
+		if(thisGlobalRegister->soundMapRegistry[i]->ID == id){
+			return thisGlobalRegister->soundMapRegistry[i]->fileName;
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!SOUND NOT FOUND IN REGISTRY - %d!!", id);
 	cwrite(errLog);
 
 	return NULL;
@@ -131,6 +150,20 @@ int addAbilityToRegistry(ability * thisAbility){
 
 	return 0;
 }
+
+int addSoundToRegistry(soundMap * thisSoundMap){
+	if(thisGlobalRegister->numSounds < thisGlobalRegister->MAX_SOUNDS){
+		thisGlobalRegister->soundMapRegistry[thisGlobalRegister->numSounds] = thisSoundMap;
+		thisGlobalRegister->numSounds++;
+		return 1;
+	}
+
+	cwrite("!!MAX SOUNDS IN REGISTRY!!");
+
+	return 0;
+}
+
+/*
 
 int removeIndividualFromRegistryByID(int id){
 	int i;
@@ -216,6 +249,8 @@ int removeEventFromRegistry(int id){
 
 	return 0;
 }
+
+*/
 
 /*
  * TODO: On cutover, make sure destroy individual doesn't destroy items.
@@ -312,6 +347,22 @@ void loadEffectsToRegistry(char* directory, char* effectsFileName){
 			ability * newAbility = createAbilityFromLine(line);
 			newAbility->totalManaCost = calculateManaCost(newAbility);
 			addAbilityToRegistry(newAbility);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void loadSoundsToRegistry(char* directory, char* soundFileName){
+	char * fullFileName = appendStrings(directory, soundFileName);
+	FILE * FP = fopen(fullFileName, "r");
+	char line[160];
+
+	while(fgets(line,160,FP) != NULL){
+		if (line[0] != '#') {
+			soundMap * newSoundMap = createSoundMapFromLine(line);
+			addSoundToRegistry(newSoundMap);
 		}
 	}
 

@@ -76,7 +76,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	}
 
 //player is on field at their coordinates, name check
-	individual * tmpIndividual = malloc(sizeof(tmpIndividual));
+	individual * tmpIndividual;// = malloc(sizeof(tmpIndividual));
 	tmpIndividual = getIndividualFromField( main_test_field,testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
 
 	assert(!strcmp(tmpIndividual->name,	testPlayer->name));

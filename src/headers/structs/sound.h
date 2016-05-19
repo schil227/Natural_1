@@ -18,10 +18,15 @@
 #define NUM_SOURCES 3
 
 typedef struct {
+	int ID;
+	char fileName[128];
+} soundMap;
+
+typedef struct {
 	int currentSoundId;
 	int isPlaying;
 	int sendInturrupt;
-	char fileName[512];
+	char fileName[128];
 	ALuint source;
 } soundContainer;
 
@@ -33,6 +38,8 @@ typedef struct {
 	soundContainer * sound1;
 	soundContainer * sound2;
 } soundPlayer;
+
+typedef enum {SOUND_MUSIC, SOUND_SOUND1, SOUND_SOUND2} soundType;
 
 #endif /* SRC_HEADERS_STRUCTS_SOUND_H_ */
 

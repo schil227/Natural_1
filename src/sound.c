@@ -140,11 +140,38 @@ DWORD WINAPI playSound(soundContainer * thisSoundContainer){
 	return EXIT_SUCCESS;
 }
 
-void testPlaySounds(){
-	strcpy(soundPlayerInstance->sound1->fileName, "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\sounds\\\soundEffects\\smallExplosions2.WAV");
-	strcpy(soundPlayerInstance->music->fileName, "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\sounds\\music\\GoTankGo.WAV");
+void setSoundID(int id, soundType thisSoundType){
+	switch(thisSoundType){
+		case SOUND_MUSIC:
+			soundPlayerInstance->music->currentSoundId = id;
+		break;
+		case SOUND_SOUND1:
+			soundPlayerInstance->sound1->currentSoundId = id;
+		break;
+		case SOUND_SOUND2:
+			soundPlayerInstance->sound2->currentSoundId = id;
+		break;
+	}
+}
 
-	CreateThread( NULL, 0, playSound, soundPlayerInstance->sound1, 0, NULL);
+void testPlaySounds(){
+	strcpy(soundPlayerInstance->music->fileName, getSoundPathFromRegistry(soundPlayerInstance->music->currentSoundId));
+	strcpy(soundPlayerInstance->sound1->fileName, getSoundPathFromRegistry(soundPlayerInstance->sound1->currentSoundId));
 
 	CreateThread( NULL, 0, playSound, soundPlayerInstance->music, 0, NULL);
+
+	CreateThread( NULL, 0, playSound, soundPlayerInstance->sound1, 0, NULL);
+}
+
+soundMap * createSoundMapFromLine(char * line){
+	soundMap * newSoundMap = malloc(sizeof(soundMap));
+
+	char * value = strtok(line,";");
+	newSoundMap->ID = atoi(value);
+
+	value = strtok(NULL,";");
+	strcpy(newSoundMap->fileName,value);
+	newSoundMap->fileName[strlen(newSoundMap->fileName)-1] = '\0';
+
+	return newSoundMap;
 }
