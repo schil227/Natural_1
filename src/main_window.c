@@ -359,9 +359,15 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			moveMode = 1;
 			initMoveMode = 1;
 			break;
-		case 0x45: //e key (enter)
+		case 0x45: //e key (enter area)
 			{
 				attemptToTransit(&main_field, player, enemies, npcs, viewShift, mapDirectory);
+			}
+			break;
+		case 0x46: //f key
+			{
+//				sendMusicInturrupt(2);
+				triggerSoundEffect(2);
 			}
 			break;
 		case 0x47://g key (get)

@@ -22,6 +22,21 @@ void initSoundPlayerInstance(){
 	alGenSources(1, &(soundPlayerInstance->music->source));
 	alGenSources(1, &(soundPlayerInstance->sound1->source));
 	alGenSources(1, &(soundPlayerInstance->sound2->source));
+
+	soundPlayerInstance->music->sendInterrupt = 0;
+	soundPlayerInstance->sound1->sendInterrupt = 0;
+	soundPlayerInstance->sound2->sendInterrupt = 0;
+
+	soundPlayerInstance->music->isPlaying = 0;
+	soundPlayerInstance->sound1->isPlaying = 0;
+	soundPlayerInstance->sound2->isPlaying = 0;
+
+	soundPlayerInstance->music->shouldLoop = 1;
+	soundPlayerInstance->sound1->shouldLoop = 0;
+	soundPlayerInstance->sound2->shouldLoop = 0;
+
+	soundPlayerInstance->onDeckSoundContainer = 1;
+
 }
 
 void destroySoundPlayer(){
@@ -34,6 +49,11 @@ void destroySoundPlayer(){
 
 
 DWORD WINAPI playSound(soundContainer * thisSoundContainer){
+	int playAfterInturrupt = 0;
+
+	do{
+	playAfterInturrupt = 0;
+	thisSoundContainer->isPlaying = 1;
 	FILE *fp = NULL;
 	fp=fopen(thisSoundContainer->fileName,"rb");
 
@@ -112,14 +132,24 @@ DWORD WINAPI playSound(soundContainer * thisSoundContainer){
 		ALuint buffer;
 		ALint val;
 
+		if(thisSoundContainer->sendInterrupt){
+			break;
+		}
+
 		// Check if OpenAL is done with any of the queued buffers
 		alGetSourcei(thisSoundContainer->source, AL_BUFFERS_PROCESSED, &val);
+		if(thisSoundContainer->sendInterrupt){
+			break;
+		}
 		if (val <= 0){
 			continue;
 		}
 
 		// For each processed buffer...
 		while (val--) {
+			if(thisSoundContainer->sendInterrupt){
+				break;
+			}
 			// Read the next chunk of decoded data from the stream
 			ret = fread(buf, 1, BUFFER_SIZE, fp);
 
@@ -134,10 +164,28 @@ DWORD WINAPI playSound(soundContainer * thisSoundContainer){
 				return 1;
 			}
 		}
-	}
 
-	fclose(fp);                                   //Delete the sound data buffer
+		if(thisSoundContainer->sendInterrupt){
+			break;
+		}
+	}
+	if(thisSoundContainer->sendInterrupt){
+		thisSoundContainer->sendInterrupt = 0;
+		thisSoundContainer->isPlaying = 0;
+		strcpy(thisSoundContainer->fileName, getSoundPathFromRegistry(thisSoundContainer->currentSoundId));
+		playAfterInturrupt = 1;
+		fclose(fp);                                   //Delete the sound data buffer
+
+	}
+	}while(thisSoundContainer->shouldLoop || playAfterInturrupt);
+
+	thisSoundContainer->isPlaying = 0;
 	return EXIT_SUCCESS;
+}
+
+void sendMusicInterrupt(int newId){
+	soundPlayerInstance->music->sendInterrupt = 1;
+	soundPlayerInstance->music->currentSoundId = newId;
 }
 
 void setSoundID(int id, soundType thisSoundType){
@@ -151,6 +199,30 @@ void setSoundID(int id, soundType thisSoundType){
 		case SOUND_SOUND2:
 			soundPlayerInstance->sound2->currentSoundId = id;
 		break;
+	}
+}
+
+void triggerSoundEffect(int id){
+	if(!soundPlayerInstance->sound1->isPlaying){
+		soundPlayerInstance->onDeckSoundContainer = 2;
+		soundPlayerInstance->sound1->currentSoundId = id;
+		strcpy(soundPlayerInstance->sound1->fileName, getSoundPathFromRegistry(soundPlayerInstance->sound1->currentSoundId));
+		CreateThread( NULL, 0, playSound, soundPlayerInstance->sound1, 0, NULL);
+	}else if(!soundPlayerInstance->sound2->isPlaying){
+		soundPlayerInstance->onDeckSoundContainer = 1;
+		soundPlayerInstance->sound2->currentSoundId = id;
+		strcpy(soundPlayerInstance->sound2->fileName, getSoundPathFromRegistry(soundPlayerInstance->sound2->currentSoundId));
+		CreateThread( NULL, 0, playSound, soundPlayerInstance->sound2, 0, NULL);
+	} else{ //both are playing, interrupt oldest
+		if(soundPlayerInstance->onDeckSoundContainer == 1){
+			soundPlayerInstance->sound1->currentSoundId = id;
+			soundPlayerInstance->sound1->sendInterrupt = 1;
+			soundPlayerInstance->onDeckSoundContainer = 2;
+		} else if(soundPlayerInstance->onDeckSoundContainer == 2){
+			soundPlayerInstance->sound2->currentSoundId = id;
+			soundPlayerInstance->sound2->sendInterrupt = 1;
+			soundPlayerInstance->onDeckSoundContainer = 1;
+		}
 	}
 }
 

@@ -25,7 +25,8 @@ typedef struct {
 typedef struct {
 	int currentSoundId;
 	int isPlaying;
-	int sendInturrupt;
+	int sendInterrupt;
+	int shouldLoop;
 	char fileName[128];
 	ALuint source;
 } soundContainer;
@@ -33,6 +34,8 @@ typedef struct {
 typedef struct {
 	ALCdevice *device;
 	ALCcontext *context;
+
+	int onDeckSoundContainer;
 
 	soundContainer * music;
 	soundContainer * sound1;
