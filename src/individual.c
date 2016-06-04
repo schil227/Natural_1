@@ -6,7 +6,8 @@
  */
 
 #include"./headers/individual_pub_methods.h"
-
+#define HIT_IMAGE_ID 4000
+#define MISS_IMAGE_ID 4001
 int isRandomized = 0;
 
 individual *initIndividual(){
@@ -204,17 +205,23 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 
 	triggerEventOnAttack(targetIndividual->ID);
 
-	if(d20 == 20){
-		return damageIndividual(thisIndividual, targetIndividual, 1);
+	enableSpecialDrawMode();
+	setDurationInTimerTicks(20);
 
+	if(d20 == 20){
+		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
+		return damageIndividual(thisIndividual, targetIndividual, 1);
 	} else if(d20 == 1){ //THE natural one.
+		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(MISS_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		cwrite("Where'd you learn to fight?\n");
 		return 0;
 	}
 
 	if(totalAttack >= totalAC){ //Tie goes to attacker, of course.
+		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		return damageIndividual(thisIndividual, targetIndividual, 0);
 	}else{ //miss
+		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(MISS_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		sendMissedDialog(thisIndividual->name,targetIndividual->name,d20,totalAC);
 		return 0;
 	}

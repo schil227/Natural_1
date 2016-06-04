@@ -460,6 +460,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	destroyConsoleInstance();
 	destroyTheGlobalRegister();
 	destroyEventHandlers();
+	destroySpecialDrawInstance();
 	return 0;
 }
 

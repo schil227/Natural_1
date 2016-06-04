@@ -37,6 +37,9 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_SOUNDS = 300;
 	thisGlobalRegister->numSounds = 0;
+
+	thisGlobalRegister->MAX_IMAGES = 500;
+	thisGlobalRegister->numImages = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -103,6 +106,22 @@ char * getSoundPathFromRegistry(int id){
 	return NULL;
 }
 
+character * getImageFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numImages; i++){
+		if(thisGlobalRegister->imageRegistry[i]->imageID == id){
+			return thisGlobalRegister->imageRegistry[i];
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!IMAGE NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
 int addIndividualToRegistry(individual * thisIndividual){
 	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
 		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
@@ -159,6 +178,18 @@ int addSoundToRegistry(soundMap * thisSoundMap){
 	}
 
 	cwrite("!!MAX SOUNDS IN REGISTRY!!");
+
+	return 0;
+}
+
+int addImageToRegistry(character * image){
+	if(thisGlobalRegister->numImages< thisGlobalRegister->MAX_IMAGES){
+		thisGlobalRegister->imageRegistry[thisGlobalRegister->numImages] = image;
+		thisGlobalRegister->numImages++;
+		return 1;
+	}
+
+	cwrite("!!MAX IMAGES IN REGISTRY!!");
 
 	return 0;
 }
@@ -267,6 +298,9 @@ void destroyTheGlobalRegister(){
 		destroyItem(thisGlobalRegister->itemRegistry[i]);
 	}
 
+	for(i = 0; i < thisGlobalRegister->numImages; i++){
+		destroyCharacter(thisGlobalRegister->imageRegistry[i]);
+	}
 	free(thisGlobalRegister);
 }
 
@@ -363,6 +397,23 @@ void loadSoundsToRegistry(char* directory, char* soundFileName){
 		if (line[0] != '#') {
 			soundMap * newSoundMap = createSoundMapFromLine(line);
 			addSoundToRegistry(newSoundMap);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void loadImagesToRegistry(char* directory, char* imageFileName){
+	char * fullFileName = appendStrings(directory, imageFileName);
+	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
+	FILE * FP = fopen(fullFileName, "r");
+	char line[128];
+
+	while(fgets(line,128,FP) != NULL){
+		if (line[0] != '#') {
+			character * newCharacter = createCharacterFromLine(line);
+			addImageToRegistry(newCharacter);
 		}
 	}
 

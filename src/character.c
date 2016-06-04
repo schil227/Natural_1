@@ -78,6 +78,30 @@ character * createCharacter(int imageID, COLORREF rgb, int x, int y){
 	return thisCharacter;
 }
 
+character * createCharacterFromLine(char line[128]){
+	int imageId, r, g, b, x, y;
+
+	char * value = strtok(line,";");
+	imageId = atoi(value);
+
+	value = strtok(NULL,";");
+	r = atoi(value);
+
+	value = strtok(NULL,";");
+	g = atoi(value);
+
+	value = strtok(NULL,";");
+	b = atoi(value);
+
+	value = strtok(NULL,";");
+	x = atoi(value);
+
+	value = strtok(NULL,";");
+	y = atoi(value);
+
+	return createCharacter(imageId, RGB(r,g,b), x, y);
+}
+
 void destroyCharacter(character* thisCharacter){
 	if(thisCharacter != NULL){
 		if(thisCharacter->image != NULL){

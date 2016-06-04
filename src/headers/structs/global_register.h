@@ -23,6 +23,7 @@ typedef struct {
 	event * eventRegistry[1000];
 	ability * abilityRegistry[500];
 	soundMap * soundMapRegistry[300];
+	character * imageRegistry[500];
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
@@ -34,6 +35,9 @@ typedef struct {
 	int numEffects;
 	int MAX_SOUNDS;
 	int numSounds;
+	int MAX_IMAGES;
+	int numImages;
+
 } globalRegister;
 
 #endif /* SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_ */

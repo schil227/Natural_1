@@ -37,9 +37,6 @@ int initEnemyActionMode = 0;
 int enemyActionMode = 0;
 int postEnemyActionMode = 0;
 
-//int initInventoryMode = 0;
-//int inventoryMode = 0;
-
 int enemyTurn = 0;
 
 individual* player;
@@ -50,27 +47,6 @@ field* main_field;
 moveNodeMeta * thisMoveNodeMeta;
 
 shiftData * viewShift;
-
-//typedef struct {
-//	int currentSoundId;
-//	int isPlaying;
-//	int sendInturrupt;
-//	char fileName[512];
-//	ALuint source;
-//} soundContainer;
-//
-//typedef struct {
-//	ALCdevice *device;
-//	ALCcontext *context;
-//
-//	soundContainer * music;
-//	soundContainer * sound1;
-//	soundContainer * sound2;
-//} soundPlayer;
-//
-//#define NUM_BUFFERS 3
-//#define BUFFER_SIZE 4096
-//#define NUM_SOURCES 3
 
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
@@ -192,6 +168,10 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, npcs->individuals[npcs->currentIndividualIndex], viewShift);
 	}
 
+	if(isSpecialDrawModeEnabled()){
+		drawSpecial(hdc, hdcBuffer, viewShift);
+	}
+
 	if (inCursorMode()) {
 		drawCursor(hdc, hdcBuffer, viewShift);
 	}
@@ -256,6 +236,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
 		initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
 		initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
+		initSpecialDrawInstance();
 		initalizeTheGlobalRegister();
 		initEventHandlers();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");
@@ -266,6 +247,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadItemsToRegistry(mapDirectory, "items.txt");
 		loadEventsToRegistry(mapDirectory, "events.txt");
 		loadSoundsToRegistry(mapDirectory, "sounds.txt");
+		loadImagesToRegistry(mapDirectory, "images.txt");
 
 		setSoundID(1, SOUND_MUSIC);
 		setSoundID(2, SOUND_SOUND1);
@@ -304,7 +286,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			MB_OK | MB_ICONEXCLAMATION);
 		}
 
-		 viewShift = initShiftData();
+		viewShift = initShiftData();
 
 	}
 		break;
@@ -366,8 +348,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x46: //f key
 			{
-//				sendMusicInturrupt(2);
-				triggerSoundEffect(2);
+				sendMusicInterrupt(1);
+//				triggerSoundEffect(2);
 			}
 			break;
 		case 0x47://g key (get)
@@ -500,7 +482,9 @@ LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if(shouldDrawDialogBox()){
+	if(isSpecialDrawModeEnabled()){
+		return specialDrawLoop(hwnd, msg, wParam, lParam);
+	}else if(shouldDrawDialogBox()){
 		return dialogLoop(hwnd, msg, wParam, lParam, player, npcs, enemies, main_field);
 	}else if(inNameBoxMode()){
 		return nameLoop(hwnd, msg, wParam, lParam, player);
@@ -652,9 +636,11 @@ int triggerEvent(int eventID){
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		LPSTR lpCmdLine, int nCmdShow) {
 
+	HWND hwnd;
+
 	WNDCLASSEX wc;
 	WNDCLASSEX wc2;
-	HWND hwnd;
+
 	MSG Msg;
 
 	int consoleWindowWidth = 480;
@@ -669,8 +655,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	srand(0);
 	int i;
 
-
-
 	//initialize for tests
 	player = initIndividual();
 	enemies = initGroup();
@@ -679,6 +663,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initThisCursor(2004,RGB(224, 64, 192),0,0);
 	initThisConsole(2010,0,0,300,200);
 	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
+	initSpecialDrawInstance();
 	initalizeTheGlobalRegister();
 	initEventHandlers();
 	initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
@@ -688,6 +673,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
 	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
 	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
+	loadImagesToRegistry(mapDirectory, "images.txt");
 
 	if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
 	}

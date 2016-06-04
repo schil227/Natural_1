@@ -107,6 +107,34 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 	return 0;
 }
 
+int specialDrawLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	switch(msg){
+	case WM_TIMER:
+	{
+		RECT rect;
+		HDC hdc = GetDC(hwnd);
+		GetClientRect(hwnd, &rect);
+		drawAll(hdc, &rect);
+		ReleaseDC(hwnd, hdc);
+		incrementSpecialDrawTimerTicks();
+		if(specialDrawDurationMet()){
+			resetSpecialDraw();
+		}
+	}
+		break;
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+	return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+
+	return 0;
+}
+
 int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
 	switch(msg){
 	case WM_KEYDOWN:{
