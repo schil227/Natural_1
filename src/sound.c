@@ -7,6 +7,15 @@
 #include "./headers/sound_pub_methods.h"
 
 static soundPlayer * soundPlayerInstance;
+static int soundEnabled = 0;
+
+void disableSound(){
+	soundEnabled = 0;
+}
+
+void enableSound(){
+	soundEnabled = 1;
+}
 
 void initSoundPlayerInstance(){
 	soundPlayerInstance = malloc(sizeof(soundPlayer));
@@ -56,6 +65,8 @@ DWORD WINAPI playSound(soundContainer * thisSoundContainer){
 	thisSoundContainer->isPlaying = 1;
 	FILE *fp = NULL;
 	fp=fopen(thisSoundContainer->fileName,"rb");
+
+	alGenSources(1, &(thisSoundContainer->source));
 
 	unsigned char * buf;
 	char type[4];
@@ -171,12 +182,15 @@ DWORD WINAPI playSound(soundContainer * thisSoundContainer){
 	}
 	if(thisSoundContainer->sendInterrupt){
 		thisSoundContainer->sendInterrupt = 0;
-		thisSoundContainer->isPlaying = 0;
+//		thisSoundContainer->isPlaying = 0;
 		strcpy(thisSoundContainer->fileName, getSoundPathFromRegistry(thisSoundContainer->currentSoundId));
 		playAfterInturrupt = 1;
 		fclose(fp);                                   //Delete the sound data buffer
 
 	}
+
+	alDeleteSources(1, &thisSoundContainer->source);
+
 	}while(thisSoundContainer->shouldLoop || playAfterInturrupt);
 
 	thisSoundContainer->isPlaying = 0;
@@ -184,6 +198,10 @@ DWORD WINAPI playSound(soundContainer * thisSoundContainer){
 }
 
 void sendMusicInterrupt(int newId){
+	if(!soundEnabled){
+		return;
+	}
+
 	soundPlayerInstance->music->sendInterrupt = 1;
 	soundPlayerInstance->music->currentSoundId = newId;
 }
@@ -203,6 +221,10 @@ void setSoundID(int id, soundType thisSoundType){
 }
 
 void triggerSoundEffect(int id){
+	if(!soundEnabled){
+		return;
+	}
+
 	if(!soundPlayerInstance->sound1->isPlaying){
 		soundPlayerInstance->onDeckSoundContainer = 2;
 		soundPlayerInstance->sound1->currentSoundId = id;
@@ -213,7 +235,8 @@ void triggerSoundEffect(int id){
 		soundPlayerInstance->sound2->currentSoundId = id;
 		strcpy(soundPlayerInstance->sound2->fileName, getSoundPathFromRegistry(soundPlayerInstance->sound2->currentSoundId));
 		CreateThread( NULL, 0, playSound, soundPlayerInstance->sound2, 0, NULL);
-	} else{ //both are playing, interrupt oldest
+	}
+	else{ //both are playing, interrupt oldest
 		if(soundPlayerInstance->onDeckSoundContainer == 1){
 			soundPlayerInstance->sound1->currentSoundId = id;
 			soundPlayerInstance->sound1->sendInterrupt = 1;

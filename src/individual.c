@@ -6,8 +6,16 @@
  */
 
 #include"./headers/individual_pub_methods.h"
-#define HIT_IMAGE_ID 4000
-#define MISS_IMAGE_ID 4001
+
+static int HIT_IMAGE_ID = 4000;
+static int MISS_IMAGE_ID = 4001;
+
+static int SOUND_BLUNT_ID = 4;
+static int SOUND_CHOP_ID = 5;
+static int SOUND_PIERCE_ID = 6;
+static int SOUND_SLASH_ID = 7;
+static int SOUND_SLICE_ID = 8;
+
 int isRandomized = 0;
 
 individual *initIndividual(){
@@ -224,6 +232,31 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(MISS_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		sendMissedDialog(thisIndividual->name,targetIndividual->name,d20,totalAC);
 		return 0;
+	}
+}
+
+void triggerAttackSound(char attackType){
+	switch (attackType) {
+	case 'b':
+		triggerSoundEffect(SOUND_BLUNT_ID);
+		break;
+	case 'c':
+		triggerSoundEffect(SOUND_CHOP_ID);
+		break;
+	case 's':
+		triggerSoundEffect(SOUND_SLASH_ID);
+		break;
+	case 'p':
+		triggerSoundEffect(SOUND_PIERCE_ID);
+		break;
+	case 'e':
+		break;
+	case 'f':
+		break;
+	case 'w':
+		break;
+	case 'l':
+		break;
 	}
 }
 
@@ -462,9 +495,14 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 	int totalDamage = 0, i, totalDR, maxDamTotal, minDamTotal, baseDam;
 	char attackType = 'b'; //for now, default is blunt (punching)
 
+	item * weapon = getActiveWeapon(thisIndividual->backpack);
+	attackType = getIndividualAttackType(thisIndividual, weapon);
+
+	triggerAttackSound(attackType);
+
 	baseDam = getAttributeSum(thisIndividual,"baseDam"); //doesn't include STR mod
 
-	baseDam += calcStrengthDamageMod(thisIndividual);
+	baseDam += calcStrengthDamageMod(thisIndividual, weapon);
 
 	maxDamTotal = calcMaxDam(thisIndividual);
 	minDamTotal = calcMinDam(thisIndividual);
@@ -483,7 +521,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		cwrite("CRITICAL HIT!!!\n");
 		totalDamage = calcCrit(thisIndividual, maxDamTotal, minDamTotal, baseDam);
 	}else{
-		if(maxDamTotal-minDamTotal == 0){ //max/min are the same!
+		if(maxDamTotal == minDamTotal){
 			totalDamage = maxDamTotal;
 		}else{
 			totalDamage = rand() % (maxDamTotal - minDamTotal);
@@ -896,8 +934,15 @@ int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
 	}
 }
 
-int calcStrengthDamageMod(individual * thisIndividual){
-	item * weapon = getActiveWeapon(thisIndividual->backpack);
+char getIndividualAttackType(individual * thisIndividual, item * weapon){
+	if(weapon != NULL){
+		return weapon->weaponDamageType;
+	}else{
+		return 'b'; //TODO: individuals have default attack type (claws, fists, etc);
+	}
+}
+
+int calcStrengthDamageMod(individual * thisIndividual, item * weapon){
 	int str = getAttributeSum(thisIndividual, "STR");
 
 	if(weapon != NULL){

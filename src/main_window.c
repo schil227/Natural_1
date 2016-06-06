@@ -249,6 +249,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadSoundsToRegistry(mapDirectory, "sounds.txt");
 		loadImagesToRegistry(mapDirectory, "images.txt");
 
+		enableSound();
+
 		setSoundID(1, SOUND_MUSIC);
 		setSoundID(2, SOUND_SOUND1);
 
@@ -348,13 +350,19 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x46: //f key
 			{
-				sendMusicInterrupt(1);
-//				triggerSoundEffect(2);
+//				sendMusicInterrupt(1);
+				triggerSoundEffect(2);
 			}
 			break;
 		case 0x47://g key (get)
 			{
 				attemptGetItemFromField(main_field,player);
+			}
+			break;
+		case 0x48: //h key
+			{
+//				sendMusicInterrupt(1);
+				triggerSoundEffect(6);
 			}
 			break;
 		case 0x49://i key (inventory)
@@ -648,8 +656,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	int sidebarWindowWidth = 175;
 	int sidebarWindowHeight = 655;
 
-
-
 	//run the tests!
 	//init rand for tests
 	srand(0);
@@ -673,7 +679,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
 	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
 	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
+	loadSoundsToRegistry(mapDirectory, "sounds.txt");
 	loadImagesToRegistry(mapDirectory, "images.txt");
+	initSoundPlayerInstance();
 
 	if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
 	}
@@ -734,7 +742,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	 * The OpenAl initilization code must be placed after the call to open the windows, but still be in the main function (apparently).
 	 * I think this may be due to how device handling works.
 	 */
-	initSoundPlayerInstance();
 
 //	create the window (handle)
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
@@ -772,6 +779,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	UpdateWindow(hwnd); //redraw
 	SetActiveWindow(hwnd);
+
+
+
 	/*
 	 * GetMessage gets a message from the queue, e.g. when the user moves
 	 * the mouse or types a key, clicks, etc.
