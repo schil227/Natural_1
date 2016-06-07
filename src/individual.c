@@ -250,12 +250,16 @@ void triggerAttackSound(char attackType){
 		triggerSoundEffect(SOUND_PIERCE_ID);
 		break;
 	case 'e':
+		triggerSoundEffect(SOUND_SLASH_ID);
 		break;
 	case 'f':
+		triggerSoundEffect(SOUND_SLASH_ID);
 		break;
 	case 'w':
+		triggerSoundEffect(SOUND_SLASH_ID);
 		break;
 	case 'l':
+		triggerSoundEffect(SOUND_SLASH_ID);
 		break;
 	}
 }
@@ -263,6 +267,9 @@ void triggerAttackSound(char attackType){
 int attackIndividualWithAbility(individual * thisIndividual, individual * target){
 	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
 	int i, isTargeted = 0;
+
+	enableSpecialDrawMode();
+	setDurationInTimerTicks(20);
 
 	//Handled in the preprocessIndividalGroupsInAOE() function
 //	triggerEventOnAttack(target->ID);
@@ -272,6 +279,7 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 	}
 
 	if(isTargeted){
+		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), target->playerCharacter->x, target->playerCharacter->y);
 		return damageIndividualWithAbility(thisIndividual, target);
 	}else{
 		int statValue = 0, d20;
@@ -285,8 +293,10 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 
 		if((d20 + statValue*2) < 13){
 			cwrite("Saving throw failed!");
-		return 	damageIndividualWithAbility(thisIndividual, target);
+			addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), target->playerCharacter->x, target->playerCharacter->y);
+			return 	damageIndividualWithAbility(thisIndividual, target);
 		}else{
+			addCharacterToSpecialDrawWithCoords(getImageFromRegistry(MISS_IMAGE_ID), target->playerCharacter->x, target->playerCharacter->y);
 			sprintf(statOut, "%s's ability failed!", thisIndividual->name);
 			cwrite(statOut);
 			return 0;
@@ -342,7 +352,7 @@ int processCasterOnlyEffects(individual * thisIndividual, ability * thisAbility)
 			return 0;
 		}
 
-		targetDR = calcDR(thisIndividual, thisAbility->damageType);
+		targetDR = calcDR(thisIndividual, thisAbility->damageType->typeAndManaArray[thisAbility->damageType->selectedIndex]->type[0]);
 
 		totalDamage = damage - targetDR;
 
@@ -363,6 +373,8 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	int i, damage = 0, numDice = 0, totalDamage, targetDR;
 	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
 
+	triggerAttackSound(targetAbility->damageType->typeAndManaArray[targetAbility->damageType->selectedIndex]->type[0]);
+
 	if(targetAbility->diceDamageMultiplierEnabled){
 		numDice = targetAbility->diceDamageMultiplier->effectAndManaArray[targetAbility->diceDamageMultiplier->selectedIndex]->effectMagnitude;
 	}
@@ -381,7 +393,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 		damage += targetAbility->damage->effectAndManaArray[targetAbility->damage->selectedIndex]->effectMagnitude;
 	}
 
-	targetDR = calcDR(targetIndividual, targetAbility->damageType);
+	targetDR = calcDR(targetIndividual, targetAbility->damageType->typeAndManaArray[targetAbility->damageType->selectedIndex]->type[0]);
 
 	totalDamage = damage - targetDR;
 
@@ -412,6 +424,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
 		triggerEventOnDeath(targetIndividual->ID);
 		removeFromExistance(targetIndividual->ID);
+		addSpecialIndividual(targetIndividual);
 		return 1;
 	}else{ //non-fatal blow
 		return 0;
@@ -546,6 +559,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
 		triggerEventOnDeath(targetIndividual->ID);
 		removeFromExistance(targetIndividual->ID);
+		addSpecialIndividual(targetIndividual);
 		return 1;
 	}else{ //non-fatal blow
 		return 0;

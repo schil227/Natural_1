@@ -11,8 +11,8 @@ static specialDraw * specialDrawInstance;
 void initSpecialDrawInstance(){
 	specialDrawInstance = malloc(sizeof(specialDraw));
 
-	specialDrawInstance->numCharactersToDraw = 0;
-	specialDrawInstance->MAX_CHARACTERS_TO_DRAW = 50;
+	specialDrawInstance->numImagesToDraw = 0;
+	specialDrawInstance->MAX_IMAGES_TO_DRAW = 50;
 
 	specialDrawInstance->numSpecialIndividuals = 0;
 	specialDrawInstance->MAX_SPECIAL_INDIVIDUALS = 50;
@@ -68,23 +68,14 @@ int addSpecialIndividual(individual * thisIndividual){
 }
 
 int addCharacterToSpecialDrawWithCoords(character * thisCharacter, int x, int y){
-	thisCharacter->x = x;
-	thisCharacter->y = y;
+	if(specialDrawInstance->numImagesToDraw < specialDrawInstance->MAX_IMAGES_TO_DRAW){
+		imageContainer * thisContainer = malloc(sizeof(imageContainer));
+		thisContainer->image = thisCharacter;
+		thisContainer->x = x;
+		thisContainer->y = y;
 
-	if(specialDrawInstance->numCharactersToDraw < specialDrawInstance->MAX_CHARACTERS_TO_DRAW){
-		specialDrawInstance->charactersToDraw[specialDrawInstance->numCharactersToDraw] = thisCharacter;
-		specialDrawInstance->numCharactersToDraw++;
-		return 1;
-	}else{
-		cwrite("!!CANNOT ADD CHARACTER TO SPECIAL DRAW!!");
-		return 0;
-	}
-}
-
-int addCharacterToSpecialDraw(character * thisCharacter){
-	if(specialDrawInstance->numCharactersToDraw < specialDrawInstance->MAX_CHARACTERS_TO_DRAW){
-		specialDrawInstance->charactersToDraw[specialDrawInstance->numCharactersToDraw] = thisCharacter;
-		specialDrawInstance->numCharactersToDraw++;
+		specialDrawInstance->imagesToDraw[specialDrawInstance->numImagesToDraw] = thisContainer;
+		specialDrawInstance->numImagesToDraw++;
 		return 1;
 	}else{
 		cwrite("!!CANNOT ADD CHARACTER TO SPECIAL DRAW!!");
@@ -99,8 +90,8 @@ void drawSpecial(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 		drawIndividual(hdc, hdcBuffer, specialDrawInstance->specialIndividuals[i], viewShift);
 	}
 
-	for(i = 0; i < specialDrawInstance->numCharactersToDraw; i++){
-		drawCharacter(hdc, hdcBuffer, specialDrawInstance->charactersToDraw[i], viewShift);
+	for(i = 0; i < specialDrawInstance->numImagesToDraw; i++){
+		drawUnboundCharacter(hdc, hdcBuffer,specialDrawInstance->imagesToDraw[i]->x, specialDrawInstance->imagesToDraw[i]->y, specialDrawInstance->imagesToDraw[i]->image, viewShift);
 	}
 }
 
@@ -113,11 +104,12 @@ void resetSpecialDraw(){
 
 	specialDrawInstance->numSpecialIndividuals = 0;
 
-	for(i = 0; i < specialDrawInstance->numCharactersToDraw; i++){
-		specialDrawInstance->charactersToDraw[i] = NULL;
+	for(i = 0; i < specialDrawInstance->numImagesToDraw; i++){
+		free(specialDrawInstance->imagesToDraw[i]);
+		specialDrawInstance->imagesToDraw[i] = NULL;
 	}
 
-	specialDrawInstance->numCharactersToDraw = 0;
+	specialDrawInstance->numImagesToDraw = 0;
 
 	specialDrawInstance->currentTimerTicks = 0;
 	specialDrawInstance->durationInTimerTicks = 0;
