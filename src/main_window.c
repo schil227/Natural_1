@@ -574,6 +574,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			}
 
+			//If player's out of actions, start enemy turn again
+			if(player->remainingActions < 0){
+				endTurn(player);
+				enemyActionMode = 1;
+				initEnemyActionMode = 1;
+			}
+
 		} else {
 			if (initEnemyActionMode) {
 				initEnemyActionMode = 0;
@@ -608,8 +615,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if(postEnemyActionMode){
 		postEnemyActionMode = 0;
 
-		//attack playerif currentIndividual didn't die and in range
-		if(enemies->individuals[enemies->currentIndividualIndex] != NULL){
+		//attack player if currentIndividual didn't die and in range and they have actions
+		if(enemies->individuals[enemies->currentIndividualIndex] != NULL && enemies->individuals[enemies->currentIndividualIndex]->remainingActions > 0){
 			enemyAttackAction(enemies->individuals[enemies->currentIndividualIndex],player);
 
 		}

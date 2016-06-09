@@ -762,6 +762,11 @@ void processStatus(individual * thisIndividual, status * thisStatus){
 		case STATUS_BURNING:
 		case STATUS_BLEEDING:{
 			damageIndividualWithStatus(thisIndividual, thisStatus);
+			break;
+		}
+		case STATUS_PARALYZED:{
+			thisIndividual->remainingActions -= thisIndividual->totalActions;
+			break;
 		}
 	}
 }
@@ -908,8 +913,6 @@ void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * ini
 		*initEnemyActionMode = 1;
 	}
 }
-
-
 
 void endTurn(individual *thisIndividual){
 	printf("player turn ended\n");

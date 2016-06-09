@@ -428,6 +428,11 @@ int initializeEnemyTurn(individualGroup * enemies, individual * player, field * 
 		return 1;
 	}
 
+	if(tmpIndividual->remainingActions < 0){
+		endTurn(tmpIndividual);
+		return 0;
+	}
+
 	nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, tmpIndividual, player);
 
 	//nowhere to go, nothing to animate

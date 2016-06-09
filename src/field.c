@@ -368,10 +368,11 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeFromExistance(tmp->ID);
+
+						individualsPassed--;
 					}
 				}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 
-					//add duration ability logic here
 					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
