@@ -351,7 +351,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x46: //f key
 			{
 //				sendMusicInterrupt(1);
-				triggerSoundEffect(2);
+				triggerSoundEffect(9);
 			}
 			break;
 		case 0x47://g key (get)

@@ -320,6 +320,9 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 		switch (LOWORD(wParam)) {
 			case 0x1B: //esc
 			case 0x0D: { //enter
+				if(disableSpeakModeIfEnabled()){
+					break;
+				}
 
 				int eventID = getEventFromCurrentMessage();
 
@@ -345,6 +348,7 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 		}
 		case WM_TIMER:
 		{
+			shouldSpeakTickTrigger();
 			RECT rect;
 			HDC hdc = GetDC(hwnd);
 			GetClientRect(hwnd, &rect);

@@ -42,6 +42,14 @@ typedef struct{
 	int decisionIndex;
 	int decisionIndexRow[10];
 	int speakingIndividualID;
+
+	//For making the character speak
+	int speakMode;
+	int speakDrawLength;
+	int speakDrawSpeedInTicks;
+	int numTicks;
+	int speakSoundID;
+
 	dialogMessage ** dialogMessages;
 	dialogMessage * currentMessage;
 	character * dialogWindow;

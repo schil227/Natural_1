@@ -22,6 +22,12 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->speakingIndividualID = 0;
 	toReturn->individualDialogRegistry[0] = NULL;
 
+	toReturn->speakMode = 1;
+	toReturn->speakDrawLength = 1;
+	toReturn->speakDrawSpeedInTicks = 1;
+	toReturn->numTicks = 0;
+	toReturn->speakSoundID = 8;
+
 	return toReturn;
 }
 
@@ -56,6 +62,17 @@ void clearDialogMessages(){
 	thisDialogInstance->numDialogMessages = 0;
 }
 
+void shouldSpeakTickTrigger(){
+	if(thisDialogInstance->speakMode){
+		thisDialogInstance->numTicks++;
+		if(thisDialogInstance->numTicks > thisDialogInstance->speakDrawSpeedInTicks){
+			thisDialogInstance->numTicks = 0;
+			thisDialogInstance->speakDrawLength++;
+			triggerSoundEffect(thisDialogInstance->speakSoundID);
+		}
+	}
+}
+
 void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	int rowLength;
 
@@ -66,7 +83,18 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 		textBoxRect.right = textBoxRect.left +  thisDialogInstance->dialogWindow->width - 20;
 
 	messageNode drawMessageNode;
-	strcpy(drawMessageNode.message,thisDialogInstance->currentMessage->message);
+	if(thisDialogInstance->speakMode && thisDialogInstance->speakDrawLength == strlen(thisDialogInstance->currentMessage->message)){
+		thisDialogInstance->speakMode = 0;
+		thisDialogInstance->numTicks = 0;
+	}
+
+	if(thisDialogInstance->speakMode){
+		strncpy(drawMessageNode.message,thisDialogInstance->currentMessage->message, thisDialogInstance->speakDrawLength);
+		drawMessageNode.message[thisDialogInstance->speakDrawLength] = '\0';
+	} else{
+		strcpy(drawMessageNode.message,thisDialogInstance->currentMessage->message);
+	}
+
 	drawMessageNode.nextMessageNode = NULL;
 	drawMessageNode.previousMessageNode = NULL;
 
@@ -79,7 +107,7 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	BitBlt(hdcBuffer, thisDialogInstance->dialogWindow->x, thisDialogInstance->dialogWindow->y,
 			thisDialogInstance->dialogWindow->width, thisDialogInstance->dialogWindow->height, hdcMem, 0, 0, SRCCOPY);
 
-	if(thisDialogInstance->currentMessage->numDialogDecision > 0){
+	if(thisDialogInstance->currentMessage->numDialogDecision > 0 && !thisDialogInstance->speakMode){
 		int i, rowToStartOn;
 
 		for(i = 0; i < thisDialogInstance->currentMessage->numDialogDecision; i++){
@@ -134,13 +162,26 @@ void selectDecision(){
 	setCurrentMessage(theDecision->targetMessage);
 }
 
+int disableSpeakModeIfEnabled(){
+	if(thisDialogInstance->speakMode){
+		thisDialogInstance->speakMode = 0;
+		return 1;
+	}
+
+	return 0;
+}
+
 void advanceDialog(){
 	if(thisDialogInstance->currentMessage->nextMessage != NULL || thisDialogInstance->currentMessage->numDialogDecision > 0){
 		if(thisDialogInstance->currentMessage->nextMessage != NULL){
+			thisDialogInstance->speakMode = 1;
+			thisDialogInstance->speakDrawLength = 1;
 			thisDialogInstance->currentMessage = thisDialogInstance->currentMessage->nextMessage;
 		}else{
 			selectDecision();
 			thisDialogInstance->decisionIndex = 0;
+			thisDialogInstance->speakMode = 1;
+			thisDialogInstance->speakDrawLength = 1;
 		}
 
 		if (thisDialogInstance->currentMessage->dialogCheckpoint) {
