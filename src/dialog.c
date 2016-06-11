@@ -111,7 +111,7 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 		int i, rowToStartOn;
 
 		for(i = 0; i < thisDialogInstance->currentMessage->numDialogDecision; i++){
-			rowToStartOn = calcNumIndexes(drawMessageNode.message, rowLength,hdcBuffer, (textBoxRect.right - textBoxRect.right*0.9));
+			rowToStartOn = calcNumIndexes(drawMessageNode.message, rowLength, hdcBuffer, (int)(textBoxRect.right - textBoxRect.right*0.9));
 			thisDialogInstance->decisionIndexRow[i] = rowToStartOn;
 			dialogDecision * tmpDecision = thisDialogInstance->currentMessage->decisions[i];
 			char tmpDecisionStr[70];
@@ -121,11 +121,15 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 			strcat(drawMessageNode.message, tmpDecisionStr);
 		}
 
+		thisDialogInstance->numRows = calcNumIndexes(drawMessageNode.message, rowLength, hdcBuffer, (int)(textBoxRect.right - textBoxRect.right*0.9)) + 1;
+
 		SelectObject(hdcMem, thisDialogInstance->selectArrow->image);
 
-		BitBlt(hdcBuffer, thisDialogInstance->selectArrow->x, thisDialogInstance->selectArrow->y + thisDialogInstance->dialogWindow->height - (15*(thisDialogInstance->numRows -  thisDialogInstance->decisionIndexRow[thisDialogInstance->decisionIndex])),
-				thisDialogInstance->selectArrow->width, thisDialogInstance->selectArrow->height, hdcMem, 0, 0, SRCCOPY);
+		int rowsFromTheTopRowInPixels = (15*(thisDialogInstance->numRows -  thisDialogInstance->decisionIndexRow[thisDialogInstance->decisionIndex]));
 
+		BitBlt(hdcBuffer, thisDialogInstance->selectArrow->x,
+				thisDialogInstance->selectArrow->y + thisDialogInstance->dialogWindow->height - rowsFromTheTopRowInPixels,
+				thisDialogInstance->selectArrow->width, thisDialogInstance->selectArrow->height, hdcMem, 0, 0, SRCCOPY);
 	}
 
 	DeleteDC(hdcMem);
