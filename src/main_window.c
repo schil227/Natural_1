@@ -27,8 +27,6 @@ static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit
 int mainWindowWidth = 640;
 int mainWindowHeight = 820;
 
-HWND g_sidebar = NULL;
-
 int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
@@ -195,6 +193,8 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawThisConsole(hdc,hdcBuffer,prc);
 
+	drawThisSideBar(hdc, hdcBuffer, prc, player);
+
 	if(inAbilityViewMode()){
 		drawThisAbilityView(hdc, hdcBuffer, prc);
 	}
@@ -231,6 +231,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		npcs = initGroup();
 		initThisCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
+		initSidebarInstance(2014,0,0,185,400);
 		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 		initThisInventoryView(3000, 100, 100, 4, player->backpack);
 		initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
@@ -428,67 +429,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
-LRESULT CALLBACK SideBarWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	switch(msg)
-	{
-		case WM_CREATE:
-		{
-			UINT ret2;
-			ret2 = SetTimer(hwnd, ID_TIMER, 50, NULL);
-		}
-		break;
-		case WM_SIZE:
-		{
-			HWND hEdit;
-			RECT rcClient;
-
-			GetClientRect(hwnd, &rcClient);
-
-			hEdit = GetDlgItem(hwnd, IDC_MAIN_EDIT);
-			SetWindowPos(hEdit, NULL, 0, 0, rcClient.right, rcClient.bottom, SWP_NOZORDER);
-		}
-		break;
-		case WM_PAINT:
-		{
-			RECT rec;
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hwnd, &ps); //GetDC(hwnd);
-//
-			GetClientRect(hwnd, &rec);
-
-			DrawSideBar(hwnd,hdc, rec, player);
-//
-//
-			EndPaint(hwnd,&ps);
-			ReleaseDC(hwnd, hdc);
-		}
-		break;
-		case WM_TIMER:
-		{
-//			printf("got the time!\n");
-			RECT rec;
-			HDC hdc = GetDC(hwnd);
-
-			GetClientRect(hwnd, &rec);
-
-			DrawSideBar(hwnd,hdc, rec, player);
-
-
-			ReleaseDC(hwnd, hdc);
-		}
-		break;
-		case WM_CLOSE:
-			DestroyWindow(hwnd);
-		break;
-		case WM_DESTROY:
-			PostQuitMessage(0);
-		break;
-		default:
-			return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
-	return 0;
-}
-
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(isSpecialDrawModeEnabled()){
 		return specialDrawLoop(hwnd, msg, wParam, lParam);
@@ -675,6 +615,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	viewShift = initShiftData();
 	initThisCursor(2004,RGB(224, 64, 192),0,0);
 	initThisConsole(2010,0,0,300,200);
+	initSidebarInstance(2014,0,0,185,400);
 	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
 	initSpecialDrawInstance();
 	initalizeTheGlobalRegister();
@@ -724,32 +665,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 0;
 	}
 
-	wc2.cbSize = sizeof(WNDCLASSEX); //Size of the structure
-	wc2.style = 0; //Class styles (usually zero)
-	wc2.lpfnWndProc = SideBarWndProc; //Pointer to the window procedure for this window class
-	wc2.cbClsExtra = 0; //amount of extra data for this class in memory
-	wc2.cbWndExtra = 0; //amount of extra data per window of this type
-	wc2.hInstance = hInstance; //handle to app instance (input param)
-	wc2.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_MYICON)); //Icon shown when user presses alt+tab
-	wc2.hCursor = LoadCursorA(NULL, IDC_ARROW); //cursor that will be displayed over win.
-	wc2.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1); //background brush to set color of window
-	wc2.lpszMenuName = MAKEINTRESOURCE(IDR_MYMENU);
-	; // name of menu resource to use for the windows
-	wc2.lpszClassName = g_szClassNameSideBar; //name to identify class with
-	wc2.hIconSm = (HICON) LoadImage(GetModuleHandle(NULL),
-	MAKEINTRESOURCE(IDI_MYICON), IMAGE_ICON, 16, 16, 0); //small icon to show in taskbar
-
-	if (!RegisterClassEx(&wc2)) {
-		MessageBox(NULL, "Window Registration Failed!", "Error",
-		MB_ICONEXCLAMATION | MB_OK);
-		return 0;
-	}
-
-	/*
-	 * The OpenAl initilization code must be placed after the call to open the windows, but still be in the main function (apparently).
-	 * I think this may be due to how device handling works.
-	 */
-
 //	create the window (handle)
 	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
 	WS_OVERLAPPEDWINDOW,
@@ -766,23 +681,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	ShowWindow(hwnd, nCmdShow); //display window
 
-	g_sidebar = CreateWindowEx(
-			0,
-			g_szClassNameSideBar,
-			"Status",
-			WS_OVERLAPPED, //WS_OVERLAPPEDWINDOW
-			CW_USEDEFAULT, CW_USEDEFAULT, sidebarWindowWidth, sidebarWindowHeight,
-			hwnd, NULL, hInstance, NULL);
-
-	if (g_sidebar != NULL) {
-		ShowWindow(g_sidebar, SW_SHOW);
-	} else {
-		MessageBox(hwnd, "Could not create g_sidebar", "Warning!",
-		MB_OK | MB_ICONINFORMATION);
-	}
-
 	MoveWindow(hwnd,100,100, mainWindowWidth, mainWindowHeight, TRUE);
-	MoveWindow(g_sidebar,100+mainWindowWidth,100,sidebarWindowWidth, sidebarWindowHeight, TRUE);
 
 	UpdateWindow(hwnd); //redraw
 	SetActiveWindow(hwnd);
