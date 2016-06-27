@@ -231,8 +231,8 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	tmpIndividual = testEnemies->individuals[4];
 	assert(tmpIndividual->playerCharacter->x == 3 && tmpIndividual->playerCharacter->y == 1 );
 
-	//after being attacked 3 times, player health is 15
-	assert(testPlayer->hp == 17);
+	//after being attacked 3 times, player health is 17
+	assert(testPlayer->hp == 16);
 
 	//skeleton0 cannot attack the player, vis versa
 	assert(!individualWithinRange(testEnemies->individuals[0],testPlayer));
@@ -330,7 +330,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	assert(cursorWithinAbilityRange(testPlayer, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y));
 
 	//user's hp before poison affects it
-	assert(testPlayer->hp == 17);
+	assert(testPlayer->hp == 16);
 
 	//use duration ability on everyone within range
 	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
@@ -392,14 +392,15 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	assert(tmpIndividual->hp == 8);
 
 	//consume some rand() to get a better roll
-	rand();
-	rand();
+	for(i = 0; i < 7; i++){
+		rand();
+	}
 
 	//use ability on selected space,  harming skelly4
 	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
 
 	//skelly was killed by a 11 damage roll (2d8)
-	assert(tmpIndividual->hp == -3);
+	assert(tmpIndividual->hp == -5);
 
 	/*
  	 * use instant ability to strike NPC several times, pay with several turns
@@ -424,7 +425,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	assert(!useAbility(testPlayer, getAbilityToActivate()));
 
 	//player healed from diceHP
-	assert(testPlayer->hp == 14);
+	assert(testPlayer->hp == 15);
 
 	//consume more rand() to get better throws
 	rand();
@@ -435,7 +436,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	assert(tryAttackEnemies(testEnemies, testPlayer, main_test_field, tmpNPC->playerCharacter->x, tmpNPC->playerCharacter->y));
 
 	//tmpNPC has -5 hp after barrage of attacks
-	assert(tmpNPC->hp == -5);
+	assert(tmpNPC->hp == -6);
 
 	//after decreasing the turns, the ability is no longer selected, player has action debt
 	int dummyEnemyActionMode = 0, dummyInitEnemyActionMode = 0;

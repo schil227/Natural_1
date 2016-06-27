@@ -8,7 +8,49 @@
 #include<string.h>
 #include"./headers/character_pub_methods.h"
 
+/*
+ * public domain strtok_r() by Charlie Gordon
+ *
+ *   from comp.lang.c  9/14/2007
+ *
+ *      http://groups.google.com/group/comp.lang.c/msg/2ab1ecbb86646684
+ *
+ *     (Declaration that it's public domain):
+ *      http://groups.google.com/group/comp.lang.c/msg/7c7b39328fefab9c
+ */
 
+char* strtok_r(
+    char *str,
+    const char *delim,
+    char **nextp)
+{
+    char *ret;
+
+    if (str == NULL)
+    {
+        str = *nextp;
+    }
+
+    str += strspn(str, delim);
+
+    if (*str == '\0')
+    {
+        return NULL;
+    }
+
+    ret = str;
+
+    str += strcspn(str, delim);
+
+    if (*str)
+    {
+        *str++ = '\0';
+    }
+
+    *nextp = str;
+
+    return ret;
+}
 
 void moveCharacter(character* thisCharacter, int newX, int newY){
 	thisCharacter->x = newX;
@@ -164,6 +206,26 @@ void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, characte
 	DeleteDC(hdcMem);
 }
 
+void updateAnimation(character * thisCharacter){
+	thisCharacter->thisAnimationContainer->clockTickCount++;
+
+	animation * thisAnimationSet = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
+
+	if(thisAnimationSet->durationInTicks[thisAnimationSet->currentFrame] < thisCharacter->thisAnimationContainer->clockTickCount){
+	  if(thisAnimationSet->currentFrame + 1 == thisAnimationSet->numFrames){
+		thisAnimationSet->currentFrame = 0;
+		thisCharacter->thisAnimationContainer->currentAnimation = thisCharacter->thisAnimationContainer->defaultAnimation; // Go back to default animation
+	  }else{
+		thisAnimationSet->currentFrame++;
+	  }
+	  thisCharacter->thisAnimationContainer->clockTickCount = 0;
+	}
+}
+
+int getYImageShift(animationContainer * thisAnimationContainer){
+	return (thisAnimationContainer->animations[thisAnimationContainer->currentAnimation]->currentFrame);
+}
+
 shiftData * initShiftData(){
 	shiftData * newShiftData = malloc(sizeof(shiftData));
 	newShiftData->xShift = 0;
@@ -172,4 +234,82 @@ shiftData * initShiftData(){
 	newShiftData->yShiftOld = 0;
 
 	return newShiftData;
+}
+
+animationContainer * initAnimationContainer(){
+	int i;
+	animationContainer * newContainer = malloc(sizeof(animationContainer));
+
+	newContainer->MAX_ANIMATIONS = 15;
+	newContainer->clockTickCount = 0;
+	newContainer->clockTickDelay = 0;
+	newContainer->currentAnimation = 0;
+	newContainer->defaultAnimation = 0;
+	newContainer->numAnimations = 0;
+	newContainer->animationsEnabled = 0;
+
+	for(i = 0; i < newContainer->MAX_ANIMATIONS; i++){
+		newContainer->animations[i] = NULL;
+	}
+
+	return newContainer;
+}
+
+animation * initAnimation(animationState state){
+	int i;
+	animation * thisAnimation = malloc(sizeof(animation));
+
+	thisAnimation->state = state;
+	thisAnimation->MAX_FRAMES = 20;
+	thisAnimation->numFrames = 0;
+	thisAnimation->totalDuration = 0;
+	thisAnimation->animationX = 0;
+	thisAnimation->currentFrame = 0;
+	thisAnimation->soundFrame = -1;
+	thisAnimation->soundID = -1;
+
+	for(i = 0; i < thisAnimation->MAX_FRAMES; i++){
+		thisAnimation->durationInTicks[i] = 0;
+	}
+
+	return thisAnimation;
+}
+
+void loadAnimationFromLine(animationContainer * thisContainer, animationState state, char * line){
+	animation * thisAnimation = initAnimation(state);
+	int intVal, i;
+
+	char * value = NULL;
+
+	value = strtok(line,",");
+	intVal = atoi(value);
+
+	if(intVal == -1){
+		return;
+	}
+
+	thisAnimation->numFrames = intVal;
+
+	for(i = 0; i < thisAnimation->numFrames; i++){
+		value = strtok(NULL,",");
+		intVal = atoi(value);
+
+		thisAnimation->durationInTicks[i] = intVal;
+		thisAnimation->totalDuration += intVal;
+	}
+
+	value = strtok(NULL,",");
+	intVal = atoi(value);
+
+	if(intVal != -1){
+		thisAnimation->soundFrame = intVal;
+
+		value = strtok(NULL,",");
+		thisAnimation->soundID = atoi(value);
+	}
+
+	thisAnimation->animationX = thisContainer->numAnimations;
+	thisContainer->animations[thisContainer->numAnimations] = thisAnimation;
+
+	thisContainer->numAnimations++;
 }

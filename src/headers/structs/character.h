@@ -10,6 +10,44 @@
 #include<stdlib.h>
 #include<windows.h>
 
+typedef enum {
+	ANIMATION_IDLE = 0,
+	ANIMATION_ATTACK_SLASH = 1,
+	ANIMATION_ATTACK_CHOP = 2,
+	ANIMATION_ATTACK_BLUNT = 3,
+	ANIMATION_ATTACK_PIERCE = 4,
+	ANIMATION_ATTACK_BOW = 5,
+	ANIMATION_HARM = 6,
+	ANIMATION_DEATH = 7,
+	ANIMATION_CAST = 8,
+	ANIMATION_IDLE_EQUIPT = 9,
+	ANIMATION_CONSUME = 10
+} animationState;
+
+typedef struct {
+	animationState state;
+	int animationX;
+	int durationInTicks[20]; // e.g. [10, 15, 2, 1]
+	int totalDuration;
+	int numFrames;
+	int MAX_FRAMES;
+	int currentFrame;
+
+	int soundFrame;
+	int soundID;
+} animation;
+
+typedef struct {
+	animation * animations[15];
+	int numAnimations;
+	int MAX_ANIMATIONS;
+	int currentAnimation;
+	int clockTickCount;
+	int clockTickDelay;
+	int defaultAnimation;
+	int animationsEnabled;
+} animationContainer;
+
 typedef struct {
 	size_t size;
 	int nameLength;
@@ -24,7 +62,7 @@ typedef struct {
 	HBITMAP image;
 	HBITMAP imageMask;
 	COLORREF rgb;
-
+	animationContainer * thisAnimationContainer;
 } character;
 
 typedef struct {

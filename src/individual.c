@@ -63,7 +63,7 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
-		int lightiningWeakness, int dialogID, int gold){
+		int lightiningWeakness, int dialogID, int gold, animationContainer * thisAnimationContainer){
 
 	BITMAP bm;
 
@@ -90,6 +90,8 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->playerCharacter->direction = direction;
 	thisIndividual->playerCharacter->x = x;
 	thisIndividual->playerCharacter->y = y;
+
+	thisIndividual->playerCharacter->thisAnimationContainer = thisAnimationContainer;
 
 	thisIndividual->STR = STR;
 	thisIndividual->DEX = DEX;
@@ -989,14 +991,32 @@ int calcMaxDam(individual * thisIndividual){
 }
 
 void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftData * viewShift){
+		updateAnimation(thisIndividual->playerCharacter);
+
 		HDC hdcMem = CreateCompatibleDC(hdc);
 		SelectObject(hdcMem, thisIndividual->playerCharacter->imageMask);
 
-		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCAND);
+		int shitfX, shiftY;
+		shitfX = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
+		shiftY = thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation*40;
+
+		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+				40,40,
+				hdcMem,
+				shitfX,
+				shiftY,
+				SRCAND);
 
 		SelectObject(hdcMem, thisIndividual->playerCharacter->image);
 
-		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40, thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height, hdcMem, 0, 0, SRCPAINT);
+		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+				40,40,
+				hdcMem,
+				shitfX,
+				shiftY,
+				SRCPAINT);
 		DeleteDC(hdcMem);
 
 }

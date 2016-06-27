@@ -129,33 +129,8 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}
 
-	for(index = 0; index < npcs->MAX_INDIVIDUALS; index++){
-		int individualsPassed = 0;
-		individual * tmp = npcs->individuals[index];
-
-		if(tmp != NULL){
-			individualsPassed++;
-			drawIndividual(hdc, hdcBuffer, npcs->individuals[index], viewShift);
-
-			if(individualsPassed == npcs->numIndividuals){
-				break;
-			}
-		}
-	}
-
-	for(index = 0; index < enemies->MAX_INDIVIDUALS; index++){
-		int individualsPassed = 0;
-		individual * tmp = enemies->individuals[index];
-
-		if(tmp != NULL){
-			individualsPassed++;
-			drawIndividual(hdc, hdcBuffer, enemies->individuals[index], viewShift);
-
-			if(individualsPassed == enemies->numIndividuals){
-				break;
-			}
-		}
-	}
+	drawIndividualGroup(hdc, hdcBuffer, npcs, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, enemies, viewShift);
 
 	//draw animated enemy/npc over others
 	if(enemies->currentIndividualIndex != -1){
@@ -257,7 +232,15 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		testPlaySounds();
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
+		animationContainer * playerAnimationContainer = initAnimationContainer();
+		char line[] = "2,30,30,-1";
+		loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
+		char line2[] = "7,1000,1000,1000,1000,1000,1000,1000,3,7";
+		loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
+		char line3[] = "13,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,-1";
+		loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
+
+		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -282,7 +265,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
-		ret = SetTimer(hwnd, ID_TIMER, 50, NULL); //fires every 50 ms!
+		ret = SetTimer(hwnd, ID_TIMER, 16, NULL); //fires every 16 ms - 60 fps
 
 		if (ret == 0) {
 			MessageBox(hwnd, "Could not SetTimer()!", "Error",
@@ -461,8 +444,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if (inCursorMode()) {
 		return cursorLoop(hwnd, msg, wParam, lParam, &enemyActionMode, &initEnemyActionMode, main_field, player, enemies, npcs, viewShift);
 	} else if(moveMode){
-
-
 		if(initMoveMode){
 			initMoveMode = 0;
 			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
@@ -631,7 +612,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	loadImagesToRegistry(mapDirectory, "images.txt");
 	initSoundPlayerInstance();
 
-	if (defineIndividual(player, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
+	animationContainer * playerAnimationContainer = initAnimationContainer();
+	char line[] = "2,60,60,-1";
+	loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
+	char line2[] = "7,1000,1000,1000,1000,1000,1000,1000,3,7";
+	loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
+	char line3[] = "13,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,-1";
+	loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
+
+	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, enemies, npcs);

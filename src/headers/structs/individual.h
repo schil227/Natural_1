@@ -92,7 +92,7 @@ typedef struct {
 	short int minDam;
 	short int baseDam;
 	short int range;
-	char critType[3];
+	char critType[4];
 	short int mvmt;
 
 	//physical damage resistance

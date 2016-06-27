@@ -59,108 +59,136 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam;
 	char * name = malloc(sizeof(char) * 32);
-	char critType[3];
+	char * strtok_save_pointer;
+	char critType[4];
+	animationContainer * thisAnimationContainer = initAnimationContainer();
 
-	char * value = strtok(line,";");
+	char * value = strtok_r(line,";",&strtok_save_pointer);
 	imageID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	ID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	r = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	g = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	b = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(name, value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	direction = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	x = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	y = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	STR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	DEX = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	CON = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	WILL = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	INT = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	WIS = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	CHR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	LUCK = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	baseHP = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	totalActions = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	baseMana = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	ac= atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	attack= atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	maxDam = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	minDam= atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	baseDam = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(critType,value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	range = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mvmt = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	bluntDR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	chopDR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	slashDR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	pierceDR = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	earthDR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	fireDR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	waterDR = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	lightningDR = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	earthWeakness = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	fireWeakness = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	waterWeakness = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	lightiningWeakness = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	dialogID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	gold = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisAnimationContainer->animationsEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisAnimationContainer->defaultAnimation = atoi(value);
+
+	//load each applicable animation and data
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_IDLE, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_HARM, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_DEATH, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CAST, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_SLASH, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_CHOP, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BLUNT, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_PIERCE, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BOW, value);
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold)){
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, thisAnimationContainer)){
 		printf("failed making new individual\n");
 	}
 
@@ -196,6 +224,24 @@ void loadGroup(individualGroup * group, char * fileName, char* directory){
 
 	fclose(FP);
 	free(fullFileName);
+}
+
+void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, shiftData * viewShift){
+	int index;
+
+	for(index = 0; index < thisGroup->MAX_INDIVIDUALS; index++){
+		int individualsPassed = 0;
+		individual * tmp = thisGroup->individuals[index];
+
+		if(tmp != NULL){
+			individualsPassed++;
+			drawIndividual(hdc, hdcBuffer, thisGroup->individuals[index], viewShift);
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+		}
+	}
 }
 
 void clearGroup(individualGroup * thisGroup){
