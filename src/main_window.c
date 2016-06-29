@@ -235,9 +235,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		animationContainer * playerAnimationContainer = initAnimationContainer();
 		char line[] = "2,30,30,-1";
 		loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
-		char line2[] = "7,1000,1000,1000,1000,1000,1000,1000,3,7";
+		char line2[] = "7,5,5,5,5,5,5,5,3,7";
 		loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
-		char line3[] = "13,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,-1";
+		char line3[] = "13,10,10,10,10,10,10,10,10,10,10,10,10,100,-1";
 		loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
 
 		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer)) {

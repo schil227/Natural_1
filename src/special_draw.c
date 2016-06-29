@@ -48,6 +48,12 @@ void setDurationInTimerTicks(int timerTicks){
 	specialDrawInstance->durationInTimerTicks = timerTicks;
 }
 
+int increaseSpecialDrawDurationIfGreater(int newDelay){
+	if(specialDrawInstance->durationInTimerTicks < newDelay){
+		specialDrawInstance->durationInTimerTicks = newDelay;
+	}
+}
+
 void incrementSpecialDrawTimerTicks(){
 	specialDrawInstance->currentTimerTicks++;
 }

@@ -170,12 +170,6 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	loadAnimationFromLine(thisAnimationContainer, ANIMATION_IDLE, value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_HARM, value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_DEATH, value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CAST, value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
 	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_SLASH, value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_CHOP, value);
@@ -185,6 +179,13 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_PIERCE, value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BOW, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_HARM, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_DEATH, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CAST, value);
+
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,

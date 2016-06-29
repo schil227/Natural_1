@@ -217,6 +217,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 
 	enableSpecialDrawMode();
 	setDurationInTimerTicks(20);
+	setAnimation(thisIndividual->playerCharacter->thisAnimationContainer, ANIMATION_ATTACK_SLASH, 0);
 
 	if(d20 == 20){
 		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
@@ -562,6 +563,10 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		triggerEventOnDeath(targetIndividual->ID);
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
+		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+		setDelayAnimation(targetIndividual->playerCharacter->thisAnimationContainer, ANIMATION_DEATH,delay);
+		int deathDelay = targetIndividual->playerCharacter->thisAnimationContainer->animations[targetIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 		return 1;
 	}else{ //non-fatal blow
 		return 0;
@@ -998,7 +1003,7 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftDat
 
 		int shitfX, shiftY;
 		shitfX = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation*40;
+		shiftY = thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation*41;
 
 		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,

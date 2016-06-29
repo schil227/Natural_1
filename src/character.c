@@ -209,6 +209,17 @@ void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, characte
 void updateAnimation(character * thisCharacter){
 	thisCharacter->thisAnimationContainer->clockTickCount++;
 
+	if(thisCharacter->thisAnimationContainer->clockTickDelay > 0){
+		thisCharacter->thisAnimationContainer->clockTickDelay--;
+		if(thisCharacter->thisAnimationContainer->clockTickDelay == 0){
+			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame = 0;
+			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->nextAnimationAfterDelay]->currentFrame = 0;
+
+			thisCharacter->thisAnimationContainer->currentAnimation = thisCharacter->thisAnimationContainer->nextAnimationAfterDelay;
+			thisCharacter->thisAnimationContainer->clockTickCount = 0;
+		}
+	}
+
 	animation * thisAnimationSet = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
 
 	if(thisAnimationSet->durationInTicks[thisAnimationSet->currentFrame] < thisCharacter->thisAnimationContainer->clockTickCount){
@@ -219,6 +230,36 @@ void updateAnimation(character * thisCharacter){
 		thisAnimationSet->currentFrame++;
 	  }
 	  thisCharacter->thisAnimationContainer->clockTickCount = 0;
+	}
+}
+
+void setDelayAnimation(animationContainer * thisAnimationContainer, animationState state, int delay){
+	int i;
+
+	for(i = 0; i < thisAnimationContainer->numAnimations; i++){
+		if(thisAnimationContainer->animations[i]->state == state){
+			thisAnimationContainer->nextAnimationAfterDelay = i;
+			thisAnimationContainer->clockTickDelay = delay;
+
+			return;
+		}
+	}
+}
+
+void setAnimation(animationContainer * thisAnimationContainer, animationState state, int delay){
+	int i;
+
+	for(i = 0; i < thisAnimationContainer->numAnimations; i++){
+		if(thisAnimationContainer->animations[i]->state == state){
+			thisAnimationContainer->animations[i]->currentFrame = 0;
+			thisAnimationContainer->animations[thisAnimationContainer->currentAnimation]->currentFrame = 0;
+
+			thisAnimationContainer->currentAnimation = i;
+			thisAnimationContainer->clockTickCount = 0;
+			thisAnimationContainer->clockTickDelay = delay;
+
+			return;
+		}
 	}
 }
 
@@ -243,6 +284,7 @@ animationContainer * initAnimationContainer(){
 	newContainer->MAX_ANIMATIONS = 15;
 	newContainer->clockTickCount = 0;
 	newContainer->clockTickDelay = 0;
+	newContainer->nextAnimationAfterDelay = 0;
 	newContainer->currentAnimation = 0;
 	newContainer->defaultAnimation = 0;
 	newContainer->numAnimations = 0;

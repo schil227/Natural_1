@@ -12,15 +12,15 @@
 
 typedef enum {
 	ANIMATION_IDLE = 0,
-	ANIMATION_ATTACK_SLASH = 1,
-	ANIMATION_ATTACK_CHOP = 2,
-	ANIMATION_ATTACK_BLUNT = 3,
-	ANIMATION_ATTACK_PIERCE = 4,
-	ANIMATION_ATTACK_BOW = 5,
-	ANIMATION_HARM = 6,
-	ANIMATION_DEATH = 7,
-	ANIMATION_CAST = 8,
-	ANIMATION_IDLE_EQUIPT = 9,
+	ANIMATION_IDLE_EQUIPT = 1,
+	ANIMATION_ATTACK_SLASH = 2,
+	ANIMATION_ATTACK_CHOP = 3,
+	ANIMATION_ATTACK_BLUNT = 4,
+	ANIMATION_ATTACK_PIERCE = 5,
+	ANIMATION_ATTACK_BOW = 6,
+	ANIMATION_HARM = 7,
+	ANIMATION_DEATH = 8,
+	ANIMATION_CAST = 9,
 	ANIMATION_CONSUME = 10
 } animationState;
 
@@ -44,6 +44,7 @@ typedef struct {
 	int currentAnimation;
 	int clockTickCount;
 	int clockTickDelay;
+	int nextAnimationAfterDelay;
 	int defaultAnimation;
 	int animationsEnabled;
 } animationContainer;
