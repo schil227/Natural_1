@@ -69,6 +69,11 @@ typedef struct {
 	activeAbilityList * activeAbilities;
 	statusList * activeStatuses;
 
+	//for animating
+	character * weaponItem;
+	character * armorItem;
+	character * shieldItem;
+
 	short int STR;
 	short int DEX;
 	short int CON;

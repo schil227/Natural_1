@@ -231,6 +231,7 @@ void updateAnimation(character * thisCharacter){
 	  }
 	  thisCharacter->thisAnimationContainer->clockTickCount = 0;
 	}
+
 }
 
 void setDelayAnimation(animationContainer * thisAnimationContainer, animationState state, int delay){
@@ -246,7 +247,7 @@ void setDelayAnimation(animationContainer * thisAnimationContainer, animationSta
 	}
 }
 
-void setAnimation(animationContainer * thisAnimationContainer, animationState state, int delay){
+void setAnimation(animationContainer * thisAnimationContainer, animationState state){
 	int i;
 
 	for(i = 0; i < thisAnimationContainer->numAnimations; i++){
@@ -256,7 +257,24 @@ void setAnimation(animationContainer * thisAnimationContainer, animationState st
 
 			thisAnimationContainer->currentAnimation = i;
 			thisAnimationContainer->clockTickCount = 0;
-			thisAnimationContainer->clockTickDelay = delay;
+
+			return;
+		}
+	}
+}
+
+void setDefaultAnimation(animationContainer * thisAnimationContainer, animationState state){
+	int i;
+
+	for(i = 0; i < thisAnimationContainer->numAnimations; i++){
+		if(thisAnimationContainer->animations[i]->state == state){
+			thisAnimationContainer->animations[i]->currentFrame = 0;
+			thisAnimationContainer->animations[thisAnimationContainer->currentAnimation]->currentFrame = 0;
+
+			thisAnimationContainer->currentAnimation = i;
+			thisAnimationContainer->clockTickCount = 0;
+
+			thisAnimationContainer->defaultAnimation = i;
 
 			return;
 		}

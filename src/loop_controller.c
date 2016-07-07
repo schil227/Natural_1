@@ -414,7 +414,6 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 						modifyItem(tmpItem, player);
 						refreshInventory(player->backpack);
 					}
-
 				}
 			}
 				break;

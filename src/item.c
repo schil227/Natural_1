@@ -12,15 +12,16 @@ item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, ch
 		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
 		int mvmtMod, int rangeMod, int bluntDRMod, int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod,
 		int fireDRMod, int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
-		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt){
+		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt, animationContainer * thisAnimationContainer){
 
 	item * thisItem = malloc(sizeof(item));
 	thisItem->itemCharacter = createCharacter(imageID,rgb,x,y);
 
-
 	if (thisItem->itemCharacter->image == NULL) {
 		return NULL;
 	}
+
+	thisItem->itemCharacter->thisAnimationContainer = thisAnimationContainer;
 
 	thisItem->npcID = npcID;
 	thisItem->ID = ID;

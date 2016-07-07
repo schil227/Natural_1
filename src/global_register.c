@@ -327,10 +327,10 @@ void loadItemsToRegistry(char* directory, char * itemsFileName){
 	char * fullFileName = appendStrings(directory, itemsFileName);
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
-	char line[512];
+	char line[1024];
 
 
-	while(fgets(line,512,FP) != NULL){
+	while(fgets(line,1024,FP) != NULL){
 		if (line[0] != '#') {
 			item * newItem = createFieldItemFromFile(line);
 
@@ -339,6 +339,15 @@ void loadItemsToRegistry(char* directory, char * itemsFileName){
 
 				if(tmpIndividual != NULL){
 					addItemToIndividual(tmpIndividual->backpack, newItem);
+					if(newItem->isEquipt){
+						if(newItem->type == 'a'){
+							tmpIndividual->armorItem = newItem->itemCharacter;
+						}else if(newItem->type == 's'){
+							tmpIndividual->shieldItem = newItem->itemCharacter;
+						}else if(newItem->type == 'w'){
+							tmpIndividual->weaponItem = newItem->itemCharacter;
+						}
+					}
 				}else{
 					char * errStr[128];
 					sprintf(errStr, "!!FAILED ADDING ITEM TO INDIVIDUAL ID : %d!!\0", newItem->npcID);

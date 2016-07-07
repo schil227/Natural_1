@@ -270,135 +270,167 @@ void setGroupToField(field * thisField, individualGroup * thisGroup){
 	}
 }
 
-item * createFieldItemFromFile(char line[512]){
+item * createFieldItemFromFile(char line[1024]){
 	item * newItem;
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
+	char * strtok_save_pointer;
 	int npcID, imageID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 	double weaponStrMod;
+	animationContainer * thisAnimationContainer = initAnimationContainer();
 
-	char * value = strtok(line,";");
+	char * value = strtok_r(line,";",&strtok_save_pointer);
 	npcID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	imageID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	ID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	type = value[0];
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	weaponDamType = value[0];
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	armorClass = value[0];
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	itemType = value[0];
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	price = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	r = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	g = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	b = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(name, value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	x = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	y = atoi(value);
 
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	weaponStrMod = atof(value);
 
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strMod = atoi(value);
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	dexMod = atoi(value);
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	conMod = atoi(value);
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	willMod = atoi(value);
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	intMod = atoi(value);
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	wisMod = atoi(value);
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	chrMod= atoi(value);
-	value = strtok(NULL, ";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	luckMod = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	totalHealthMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	healthMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	totalManaMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	manaMod = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	acMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	attackMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	damMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	maxDamMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	minDamMod = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	minTurns = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	maxTurns = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	mvmtMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	rangeMod = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	bluntDRMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	chopDRMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	slashDRMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	pierceDRMod = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	earthDRMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	fireDRMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	waterDRMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	lightningDRMod = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	earthWeaknessMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	fireWeaknessMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	waterWeaknessMod = atoi(value);
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	lightiningWeaknessMod = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	isEquipt = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisAnimationContainer->animationsEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisAnimationContainer->defaultAnimation = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_IDLE, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_IDLE_EQUIPT, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_SLASH, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_CHOP, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BLUNT, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_PIERCE, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BOW, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_HARM, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_DEATH, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CAST, value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CONSUME, value);
+
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(description, value);
 
 	newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description,weaponStrMod,
@@ -407,7 +439,7 @@ item * createFieldItemFromFile(char line[512]){
 			totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 			mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
-			waterWeaknessMod, lightiningWeaknessMod, isEquipt);
+			waterWeaknessMod, lightiningWeaknessMod, isEquipt, thisAnimationContainer);
 
 	return newItem;
 }

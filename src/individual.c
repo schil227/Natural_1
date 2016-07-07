@@ -142,6 +142,9 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->baseMana = baseMana;
 	thisIndividual->mana = baseMana + WILL * 2;
 
+	thisIndividual->armorItem = NULL;
+	thisIndividual->weaponItem = NULL;
+	thisIndividual->shieldItem = NULL;
 
 	return 0;
 }
@@ -217,7 +220,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 
 	enableSpecialDrawMode();
 	setDurationInTimerTicks(20);
-	setAnimation(thisIndividual->playerCharacter->thisAnimationContainer, ANIMATION_ATTACK_SLASH, 0);
+	setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_SLASH);
 
 	if(d20 == 20){
 		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
@@ -564,7 +567,8 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
-		setDelayAnimation(targetIndividual->playerCharacter->thisAnimationContainer, ANIMATION_DEATH,delay);
+//		setDelayAnimation(targetIndividual->playerCharacter->thisAnimationContainer, ANIMATION_DEATH,delay);
+		setIndividualDelayAnimation(targetIndividual, ANIMATION_DEATH, delay);
 		int deathDelay = targetIndividual->playerCharacter->thisAnimationContainer->animations[targetIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
 		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 		return 1;
@@ -995,8 +999,82 @@ int calcMaxDam(individual * thisIndividual){
 	}
 }
 
+setIndividualAnimation(individual * thisIndividual, animationState state){
+	setAnimation(thisIndividual->playerCharacter->thisAnimationContainer, state);
+
+	if(thisIndividual->armorItem != NULL){
+		setAnimation(thisIndividual->armorItem->thisAnimationContainer, state);
+	}
+
+	if(thisIndividual->shieldItem != NULL){
+		setAnimation(thisIndividual->shieldItem->thisAnimationContainer, state);
+	}
+
+	if(thisIndividual->weaponItem != NULL){
+		setAnimation(thisIndividual->weaponItem->thisAnimationContainer, state);
+	}
+}
+
+setIndividualDelayAnimation(individual * thisIndividual, animationState state, int delay){
+	setDelayAnimation(thisIndividual->playerCharacter->thisAnimationContainer, state, delay);
+
+	if(thisIndividual->armorItem != NULL){
+		setDelayAnimation(thisIndividual->armorItem->thisAnimationContainer, state);
+	}
+
+	if(thisIndividual->shieldItem != NULL){
+		setDelayAnimation(thisIndividual->shieldItem->thisAnimationContainer, state);
+	}
+
+	if(thisIndividual->weaponItem != NULL){
+		setDelayAnimation(thisIndividual->weaponItem->thisAnimationContainer, state);
+	}
+}
+
+int animationDelayUpdate(character * thisCharacter){
+	if(thisCharacter->thisAnimationContainer->clockTickDelay > 0){
+		thisCharacter->thisAnimationContainer->clockTickDelay--;
+		if(thisCharacter->thisAnimationContainer->clockTickDelay == 0){
+			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame = 0;
+			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->nextAnimationAfterDelay]->currentFrame = 0;
+
+			thisCharacter->thisAnimationContainer->currentAnimation = thisCharacter->thisAnimationContainer->nextAnimationAfterDelay;
+			thisCharacter->thisAnimationContainer->clockTickCount = 0;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int animationFrameTickUpdate(character * thisCharacter){
+	int toReturn = 0;
+	animation * thisAnimationSet = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
+
+	if(thisAnimationSet->durationInTicks[thisAnimationSet->currentFrame] < thisCharacter->thisAnimationContainer->clockTickCount){
+	  if(thisAnimationSet->currentFrame + 1 == thisAnimationSet->numFrames){
+		thisAnimationSet->currentFrame = 0;
+		thisCharacter->thisAnimationContainer->currentAnimation = thisCharacter->thisAnimationContainer->defaultAnimation; // Go back to default animation
+		toReturn = 1;
+	  }else{
+		thisAnimationSet->currentFrame++;
+	  }
+	  thisCharacter->thisAnimationContainer->clockTickCount = 0;
+	}
+
+	return toReturn;
+}
+
 void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftData * viewShift){
-		updateAnimation(thisIndividual->playerCharacter);
+		thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
+
+		if(animationDelayUpdate(thisIndividual->playerCharacter)){
+			updateEquiptItemsToDelayedAnimationState(thisIndividual);
+		}
+
+		if(animationFrameTickUpdate(thisIndividual->playerCharacter)){
+			returnEquiptItemsToIdle(thisIndividual);
+		}
 
 		HDC hdcMem = CreateCompatibleDC(hdc);
 		SelectObject(hdcMem, thisIndividual->playerCharacter->imageMask);
@@ -1024,6 +1102,77 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftDat
 				SRCPAINT);
 		DeleteDC(hdcMem);
 
+		drawEquiptItems(hdc, hdcBuffer, thisIndividual, viewShift);
+}
+
+void returnEquiptItemsToIdle(individual * thisIndividual){
+	if(thisIndividual->armorItem != NULL && thisIndividual->armorItem->thisAnimationContainer->animationsEnabled){
+		thisIndividual->armorItem->thisAnimationContainer->currentAnimation = thisIndividual->armorItem->thisAnimationContainer->defaultAnimation;
+	}
+
+	if(thisIndividual->shieldItem != NULL && thisIndividual->shieldItem->thisAnimationContainer->animationsEnabled){
+		thisIndividual->shieldItem->thisAnimationContainer->currentAnimation = thisIndividual->shieldItem->thisAnimationContainer->defaultAnimation;
+	}
+
+	if(thisIndividual->weaponItem != NULL && thisIndividual->weaponItem->thisAnimationContainer->animationsEnabled){
+		thisIndividual->weaponItem->thisAnimationContainer->currentAnimation = thisIndividual->weaponItem->thisAnimationContainer->defaultAnimation;
+	}
+}
+
+void updateEquiptItemsToDelayedAnimationState(individual * thisIndividual){
+	if(thisIndividual->armorItem != NULL && thisIndividual->armorItem->thisAnimationContainer->animationsEnabled){
+		thisIndividual->armorItem->thisAnimationContainer->currentAnimation = thisIndividual->armorItem->thisAnimationContainer->nextAnimationAfterDelay;
+	}
+
+	if(thisIndividual->shieldItem != NULL && thisIndividual->shieldItem->thisAnimationContainer->animationsEnabled){
+		thisIndividual->shieldItem->thisAnimationContainer->currentAnimation = thisIndividual->shieldItem->thisAnimationContainer->nextAnimationAfterDelay;
+	}
+
+	if(thisIndividual->weaponItem != NULL && thisIndividual->weaponItem->thisAnimationContainer->animationsEnabled){
+		thisIndividual->weaponItem->thisAnimationContainer->currentAnimation = thisIndividual->weaponItem->thisAnimationContainer->nextAnimationAfterDelay;
+	}
+}
+
+void drawEquiptItems(HDC hdc, HDC hdcBuffer, individual* thisIndividual,  shiftData * viewShift){
+	if(thisIndividual->armorItem != NULL && thisIndividual->armorItem->thisAnimationContainer->animationsEnabled){
+		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->armorItem, thisIndividual->playerCharacter->thisAnimationContainer, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, viewShift);
+	}
+
+	if(thisIndividual->shieldItem != NULL && thisIndividual->shieldItem->thisAnimationContainer->animationsEnabled){
+		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->shieldItem, thisIndividual->playerCharacter->thisAnimationContainer, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, viewShift);
+	}
+
+	if(thisIndividual->weaponItem != NULL && thisIndividual->weaponItem->thisAnimationContainer->animationsEnabled){
+		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->weaponItem, thisIndividual->playerCharacter->thisAnimationContainer, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, viewShift);
+	}
+}
+
+void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, animationContainer * baseAnimation, int xCord, int yCord, shiftData * viewShift){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, layer->imageMask);
+
+	int shitfX, shiftY;
+	shitfX = baseAnimation->animations[baseAnimation->currentAnimation]->currentFrame*40;
+	shiftY = layer->thisAnimationContainer->currentAnimation*41;
+
+	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord *40 - (viewShift->yShift)*40,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			40,40,
+			hdcMem,
+			shitfX,
+			shiftY,
+			SRCAND);
+
+	SelectObject(hdcMem, layer->image);
+
+	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord*40 - (viewShift->yShift)*40,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			40,40,
+			hdcMem,
+			shitfX,
+			shiftY,
+			SRCPAINT);
+	DeleteDC(hdcMem);
 }
 
 item * removeItemFromInventory(inventory * backpack, item * thisItem){
@@ -1041,6 +1190,8 @@ item * removeItemFromInventory(inventory * backpack, item * thisItem){
 			return removedItem;
 		}
 	}
+
+	return NULL;
 }
 
 void modifyItem(item * theItem, individual * thisIndividual) {
@@ -1049,16 +1200,42 @@ void modifyItem(item * theItem, individual * thisIndividual) {
 		case 'w': {
 			if(theItem->isEquipt){
 				theItem->isEquipt = 0;
+				thisIndividual->weaponItem = NULL;
 			}else{
-				tryEquipItem(thisIndividual->backpack, theItem);
+				if(tryEquipItem(thisIndividual->backpack, theItem)){
+//					setDefaultAnimation(theItem->itemCharacter->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+					thisIndividual->weaponItem = theItem->itemCharacter;
+					setAnimation(thisIndividual->weaponItem->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+					setDefaultAnimation(thisIndividual->weaponItem->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+				}
 			}
 		}
 		break;
 		case 'a': {
 			if(theItem->isEquipt){
 				theItem->isEquipt = 0;
+				thisIndividual->armorItem = NULL;
 			}else{
-				tryEquipItem(thisIndividual, theItem);
+				if(tryEquipItem(thisIndividual->backpack, theItem)){
+//					setDefaultAnimation(theItem->itemCharacter->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+					thisIndividual->armorItem = theItem->itemCharacter;
+					setAnimation(thisIndividual->armorItem->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+					setDefaultAnimation(thisIndividual->armorItem->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+				}
+			}
+		}
+		break;
+		case 's': {
+			if(theItem->isEquipt){
+				theItem->isEquipt = 0;
+				thisIndividual->shieldItem = NULL;
+			}else{
+				if(tryEquipItem(thisIndividual->backpack, theItem)){
+//					setDefaultAnimation(theItem->itemCharacter->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+					thisIndividual->shieldItem = theItem->itemCharacter;
+					setAnimation(thisIndividual->shieldItem->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+					setDefaultAnimation(thisIndividual->shieldItem->thisAnimationContainer, ANIMATION_IDLE_EQUIPT);
+				}
 			}
 		}
 		break;
@@ -1077,18 +1254,19 @@ void modifyItem(item * theItem, individual * thisIndividual) {
 	}
 }
 
-void tryEquipItem(inventory * backpack, item * thisItem){
+int tryEquipItem(inventory * backpack, item * thisItem){
 	int i;
 	item * tmpItem;
 
 	for(i = 0; i < 40; i++){
 		tmpItem = backpack->inventoryArr[i];
 		if(tmpItem != NULL && tmpItem != thisItem && tmpItem->type == thisItem->type && tmpItem->isEquipt){
-			return;
+			return 0;
 		}
 	}
 
 	thisItem->isEquipt = 1;
+	return 1;
 }
 
 void addItemToActiveItemList(individual * thisIndividual, item * theItem){

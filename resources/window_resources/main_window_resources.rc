@@ -112,10 +112,11 @@ END
 3004 BITMAP DISCARDABLE "../images/scroll_down_arrow.bmp"
 
 //items
-3020 BITMAP DISCARDABLE "../images/dagger.bmp"
+3020 BITMAP DISCARDABLE "../images/sword_1_full.bmp"
 3021 BITMAP DISCARDABLE "../images/herb.bmp"
 3022 BITMAP DISCARDABLE "../images/health_potion.bmp"
 3023 BITMAP DISCARDABLE "../images/mana_potion.bmp"
+3024 BITMAP DISCARDABLE "../images/armor_1_full.bmp"
 
 //Ability
 3500 BITMAP DISCARDABLE "../images/ability_creation_bg.bmp"
