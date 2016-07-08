@@ -206,6 +206,72 @@ void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, characte
 	DeleteDC(hdcMem);
 }
 
+void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, thisCharacter->imageMask);
+
+	int shitfX, shiftY;
+	if(useSecondaryAnimationContainer){
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*40;
+		shiftY = thisCharacter->secondaryAnimationContainer->currentAnimation*41;
+	} else {
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
+		shiftY = thisCharacter->thisAnimationContainer->currentAnimation*41;
+	}
+
+	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			40,40,
+			hdcMem,
+			shitfX,
+			shiftY,
+			SRCAND);
+
+	SelectObject(hdcMem, thisCharacter->image);
+
+	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			40,40,
+			hdcMem,
+			shitfX,
+			shiftY,
+			SRCPAINT);
+	DeleteDC(hdcMem);
+}
+
+void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int xCord, int yCord, int useSecondaryAnimationContainer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, thisCharacter->imageMask);
+
+	int shitfX, shiftY;
+	if(useSecondaryAnimationContainer){
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*40;
+		shiftY = thisCharacter->secondaryAnimationContainer->currentAnimation*41;
+	} else{
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
+		shiftY = thisCharacter->thisAnimationContainer->currentAnimation*41;
+	}
+
+	BitBlt(hdcBuffer, xCord, yCord,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			40,40,
+			hdcMem,
+			shitfX,
+			shiftY,
+			SRCAND);
+
+	SelectObject(hdcMem, thisCharacter->image);
+
+	BitBlt(hdcBuffer,xCord, yCord,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			40,40,
+			hdcMem,
+			shitfX,
+			shiftY,
+			SRCPAINT);
+	DeleteDC(hdcMem);
+}
+
 void updateAnimation(character * thisCharacter){
 	thisCharacter->thisAnimationContainer->clockTickCount++;
 
@@ -310,6 +376,26 @@ animationContainer * initAnimationContainer(){
 
 	for(i = 0; i < newContainer->MAX_ANIMATIONS; i++){
 		newContainer->animations[i] = NULL;
+	}
+
+	return newContainer;
+}
+
+animationContainer * cloneAnimationContainer(animationContainer * baseAnimationContainer){
+	int i;
+	animationContainer * newContainer = malloc(sizeof(animationContainer));
+
+	newContainer->MAX_ANIMATIONS = 15;
+	newContainer->clockTickCount = baseAnimationContainer->clockTickCount;
+	newContainer->clockTickDelay = baseAnimationContainer->clockTickDelay;
+	newContainer->nextAnimationAfterDelay = baseAnimationContainer->nextAnimationAfterDelay;
+	newContainer->currentAnimation = baseAnimationContainer->currentAnimation;
+	newContainer->defaultAnimation = baseAnimationContainer->defaultAnimation;
+	newContainer->numAnimations = baseAnimationContainer->numAnimations;
+	newContainer->animationsEnabled = baseAnimationContainer->animationsEnabled;
+
+	for(i = 0; i < newContainer->MAX_ANIMATIONS; i++){
+		newContainer->animations[i] = baseAnimationContainer->animations[i];
 	}
 
 	return newContainer;

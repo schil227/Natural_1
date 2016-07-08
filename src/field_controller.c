@@ -62,6 +62,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	char * strtok_save_pointer;
 	char critType[4];
 	animationContainer * thisAnimationContainer = initAnimationContainer();
+	animationContainer * secondaryAnimationContainer = NULL;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	imageID = atoi(value);
@@ -186,10 +187,11 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CAST, value);
 
+	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, thisAnimationContainer)){
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
 
@@ -281,6 +283,7 @@ item * createFieldItemFromFile(char line[1024]){
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 	double weaponStrMod;
 	animationContainer * thisAnimationContainer = initAnimationContainer();
+	animationContainer * secondaryAnimationContainer = NULL;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	npcID = atoi(value);
@@ -429,6 +432,7 @@ item * createFieldItemFromFile(char line[1024]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CONSUME, value);
 
+	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(description, value);
@@ -439,7 +443,7 @@ item * createFieldItemFromFile(char line[1024]){
 			totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 			mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
-			waterWeaknessMod, lightiningWeaknessMod, isEquipt, thisAnimationContainer);
+			waterWeaknessMod, lightiningWeaknessMod, isEquipt, thisAnimationContainer, secondaryAnimationContainer);
 
 	return newItem;
 }

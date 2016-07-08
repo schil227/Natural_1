@@ -757,7 +757,7 @@ void drawItemsFromField(HDC hdc, HDC hdcBuffer, fieldInventory * thisFieldInvent
 	for(i = 0; i < 1000; i++){
 
 		if(thisFieldInventory->inventoryArr[i] != NULL){
-			drawCharacter(hdc, hdcBuffer, thisFieldInventory->inventoryArr[i]->itemCharacter, viewShift);
+			drawCharacterAnimation(hdc, hdcBuffer, thisFieldInventory->inventoryArr[i]->itemCharacter, viewShift);
 			numDrawn++;
 		}
 

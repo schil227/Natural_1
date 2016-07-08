@@ -12,7 +12,7 @@ item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, ch
 		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
 		int mvmtMod, int rangeMod, int bluntDRMod, int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod,
 		int fireDRMod, int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
-		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt, animationContainer * thisAnimationContainer){
+		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 
 	item * thisItem = malloc(sizeof(item));
 	thisItem->itemCharacter = createCharacter(imageID,rgb,x,y);
@@ -22,6 +22,7 @@ item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, ch
 	}
 
 	thisItem->itemCharacter->thisAnimationContainer = thisAnimationContainer;
+	thisItem->itemCharacter->secondaryAnimationContainer = secondaryAnimationContainer;
 
 	thisItem->npcID = npcID;
 	thisItem->ID = ID;
@@ -86,6 +87,9 @@ item * cloneItem(item * thisItem){
 	item * newItem = malloc(sizeof(item));
 	newItem->itemCharacter = createCharacter(thisItem->itemCharacter->imageID, thisItem->itemCharacter->rgb,
 								thisItem->itemCharacter->x, thisItem->itemCharacter->y);
+
+	newItem->itemCharacter->thisAnimationContainer = cloneAnimationContainer(thisItem->itemCharacter->thisAnimationContainer);
+	newItem->itemCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisItem->itemCharacter->secondaryAnimationContainer);
 
 	if (thisItem->itemCharacter->image == NULL) {
 			return NULL;

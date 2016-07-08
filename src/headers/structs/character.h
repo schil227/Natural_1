@@ -64,6 +64,7 @@ typedef struct {
 	HBITMAP imageMask;
 	COLORREF rgb;
 	animationContainer * thisAnimationContainer;
+	animationContainer * secondaryAnimationContainer;
 } character;
 
 typedef struct {

@@ -119,19 +119,30 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 			char itemStr[80];
 			buildItemStr(itemStr, thisInventoryView->viewedItems[i]);
 
-			//draw item frame
-			drawUnboundCharacterByPixels(hdc, hdcBuffer,
-				thisInventoryView->inventoryBackground->x+40,
-				thisInventoryView->inventoryBackground->y + 50+50*i,
-				thisInventoryView->itemFrame,
-				viewShift);
+//			drawUnboundAnimationByPixels(hdc, hdcBuffer, thisInventoryView->itemFrame, viewShift,
+//					thisInventoryView->inventoryBackground->x+40, thisInventoryView->inventoryBackground->y + 50+50*i, 0);
 
-			//draw item
 			drawUnboundCharacterByPixels(hdc, hdcBuffer,
-				thisInventoryView->inventoryBackground->x+40,
-				thisInventoryView->inventoryBackground->y + 50+50*i,
-				thisInventoryView->viewedItems[i]->itemCharacter,
-				viewShift);
+					thisInventoryView->inventoryBackground->x + 40,
+					thisInventoryView->inventoryBackground->y + 50 + 50 * i,
+					thisInventoryView->itemFrame, viewShift);
+
+			drawUnboundAnimationByPixels(hdc, hdcBuffer, thisInventoryView->viewedItems[i]->itemCharacter, viewShift,
+					thisInventoryView->inventoryBackground->x+40, thisInventoryView->inventoryBackground->y + 50+50*i, 1);
+
+//			//draw item frame
+//			drawUnboundCharacterByPixels(hdc, hdcBuffer,
+//				thisInventoryView->inventoryBackground->x+40,
+//				thisInventoryView->inventoryBackground->y + 50+50*i,
+//				thisInventoryView->itemFrame,
+//				viewShift);
+//
+//			//draw item
+//			drawUnboundCharacterByPixels(hdc, hdcBuffer,
+//				thisInventoryView->inventoryBackground->x+40,
+//				thisInventoryView->inventoryBackground->y + 50+50*i,
+//				thisInventoryView->viewedItems[i]->itemCharacter,
+//				viewShift);
 
 			//draw item text
 			SetTextColor(hdcBuffer, RGB(255, 200, 0));

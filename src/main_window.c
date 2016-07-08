@@ -233,6 +233,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		testPlaySounds();
 
 		animationContainer * playerAnimationContainer = initAnimationContainer();
+		animationContainer * secondaryAnimationContainer = NULL;
 		char line[] = "2,30,30,-1";
 		loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
 		char line2[] = "7,5,5,5,5,5,5,5,3,7";
@@ -240,7 +241,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		char line3[] = "13,10,10,10,10,10,10,10,10,10,10,10,10,100,-1";
 		loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer)) {
+		secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
+
+		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -613,6 +616,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initSoundPlayerInstance();
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();
+	animationContainer * secondaryAnimationContainer = NULL;
+
 	char line[] = "2,60,60,-1";
 	loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
 	char line2[] = "7,1000,1000,1000,1000,1000,1000,1000,3,7";
@@ -620,7 +625,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	char line3[] = "13,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,-1";
 	loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
 
-	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer)) {
+	secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
+
+	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, enemies, npcs);
