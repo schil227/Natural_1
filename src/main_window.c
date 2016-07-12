@@ -153,12 +153,15 @@ void drawAll(HDC hdc, RECT* prc) {
 		moveNode * tmp = thisMoveNodeMeta->rootMoveNode;
 		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
 		while(tmp->nextMoveNode != NULL){
-
-			drawUnboundCharacter(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, viewShift);
 			tmp = (moveNode*)tmp->nextMoveNode;
+			drawUnboundShadowAnimation(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, viewShift, 0);
+
 		}
 
-		drawUnboundCharacter(hdc, hdcBuffer,tmp->x,tmp->y,tmpCharacter, viewShift);
+		if(tmp->x != player->playerCharacter->x && tmp->y != player->playerCharacter->y){
+			drawUnboundShadowAnimation(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, viewShift, 0);
+		}
+
 
 	}
 
@@ -451,6 +454,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			initMoveMode = 0;
 			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
 								player->playerCharacter->x, player->playerCharacter->y);
+			shadowCharacter->thisAnimationContainer = cloneAnimationContainer(player->playerCharacter->thisAnimationContainer);
+			shadowCharacter->secondaryAnimationContainer = cloneAnimationContainer(player->playerCharacter->secondaryAnimationContainer);
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
 //			thisMoveNodeMeta->shadowCharacter = malloc(sizeof(character));
