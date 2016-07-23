@@ -105,7 +105,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 
 		if(testEnemies->individuals[i] != NULL){
 			individualsPassed++;
-			enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+			testEnemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
 
 			if(individualsPassed == testEnemies->numIndividuals){
 				break;
@@ -203,7 +203,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 
 		if(testEnemies->individuals[i] != NULL){
 			individualsPassed++;
-			enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+			testEnemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
 
 			if(individualsPassed == testEnemies->numIndividuals){
 				break;
@@ -217,7 +217,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 
 		if(testEnemies->individuals[i] != NULL){
 			individualsPassed++;
-			enemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
+			testEnemyAction((testEnemies->individuals[i]), main_test_field, testPlayer);
 
 			if(individualsPassed == testEnemies->numIndividuals){
 				break;

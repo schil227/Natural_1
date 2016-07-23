@@ -347,9 +347,8 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 	return actualPath;
 }
 
-
-//HWND hwnd, MSG msg, WPARAM wParam, LPARAM lParam,
-void enemyAction( individual * enemy, field * thisField, individual * player){
+//Only used in legacy Testing - goes toward the player, attacks if in range.
+void testEnemyAction( individual * enemy, field * thisField, individual * player){
 	printf("starting: %s\n", enemy->name);
 	nodeArr * resultArr = getSpaceClosestToPlayer(thisField, enemy, player);
 	int i;
@@ -408,6 +407,34 @@ void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr
 	}
 }
 
+
+int enemyAction(individual * enemy, individual * player, individualGroup * enemies, individualGroup * npcs, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+	if(individualWithinRange(enemy, player)){
+		attackIndividual(enemy, player);
+		return 0;
+	}else{//move closer to target
+		nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy, player);
+
+		//nowhere to go, nothing to animate
+		if (enemyNodeArr->size == 0) {
+			return 0;
+		}
+
+		//Gonna move, remove them from the field and update the moveNodeMeta
+		getSpaceFromField(thisField, enemy->playerCharacter->x, enemy->playerCharacter->y)->currentIndividual = NULL;
+
+		(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
+		(*thisMoveNodeMeta)->sum = 0;
+
+		populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+
+
+		destroyNodeArr(enemyNodeArr);
+	}
+
+	return 1;
+}
+
 int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
 
 	if (enemies->numIndividuals == 0) {
@@ -429,27 +456,10 @@ int initializeEnemyTurn(individualGroup * enemies, individual * player, field * 
 	}
 
 	if(tmpIndividual->remainingActions < 0){
-		endTurn(tmpIndividual);
 		return 0;
 	}
 
-	nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, tmpIndividual, player);
 
-	//nowhere to go, nothing to animate
-	if (enemyNodeArr->size == 0) {
-		return 1;
-	}
-
-	//Gonna move, remove them from the field and update the moveNodeMeta
-	getSpaceFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y)->currentIndividual = NULL;
-
-	(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
-	(*thisMoveNodeMeta)->sum = 0;
-
-	populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
-
-
-	destroyNodeArr(enemyNodeArr);
 
 	return 0;
 }

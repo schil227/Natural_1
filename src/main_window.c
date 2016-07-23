@@ -33,6 +33,7 @@ int postMoveMode = 0;
 
 int initEnemyActionMode = 0;
 int enemyActionMode = 0;
+int enemyMoveMode = 0;
 int postEnemyActionMode = 0;
 
 int enemyTurn = 0;
@@ -494,6 +495,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return 0;
 	} else if(inInventoryViewMode()){
 		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, enemies, viewShift);
+	}else if(enemyMoveMode){
+		animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
+				(enemies->individuals[enemies->currentIndividualIndex]),
+				thisMoveNodeMeta, 5, &enemyMoveMode, viewShift, 0);
+
+		//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
+		if (!enemyMoveMode) {
+
+			if (thisMoveNodeMeta != NULL
+					&& thisMoveNodeMeta->rootMoveNode != NULL) {
+				freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
+			}
+			free(thisMoveNodeMeta);
+
+			postEnemyActionMode = 1;
+		}
 	}else if(enemyActionMode){
 		if(enemies->numIndividuals == 0){
 			enemyActionMode = 0;
@@ -520,35 +537,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					postEnemyActionMode = 1;
 					return 0;
 				}
-
 			}
+			enemyActionMode = 0;
 
-			//initialization complete, beginning animation loop (once finished, enemyActionMode is toggled)
-
-			animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
-					(enemies->individuals[enemies->currentIndividualIndex]),
-					thisMoveNodeMeta, 5, &enemyActionMode, viewShift, 0);
-
-			//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
-			if (!enemyActionMode) {
-
-				if (thisMoveNodeMeta != NULL && thisMoveNodeMeta->rootMoveNode != NULL) {
-					freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
-				}
-				free(thisMoveNodeMeta);
-
+			//If not moving
+			if(!enemyAction(enemies->individuals[enemies->currentIndividualIndex], player, enemies, npcs, main_field, &thisMoveNodeMeta)){
 				postEnemyActionMode = 1;
+			}else{
+				enemyMoveMode = 1;
 			}
 		}
 
 	}else if(postEnemyActionMode){
 		postEnemyActionMode = 0;
 
-		//attack player if currentIndividual didn't die and in range and they have actions
-		if(enemies->individuals[enemies->currentIndividualIndex] != NULL && enemies->individuals[enemies->currentIndividualIndex]->remainingActions > 0){
-			enemyAttackAction(enemies->individuals[enemies->currentIndividualIndex],player);
+		if(enemies->individuals[enemies->currentIndividualIndex] != NULL ){
+			enemies->individuals[enemies->currentIndividualIndex]->remainingActions--;
 
+			if(enemies->individuals[enemies->currentIndividualIndex]->remainingActions > 0){
+				enemyActionMode = 1;
+				return 1;
+			} else {
+				endTurn(enemies->individuals[enemies->currentIndividualIndex]);
+			}
 		}
+
 		//determine if need to go back into enemyActionMode
 		nextAvailableIndividualIndex(enemies);
 		if(enemies->currentIndividualIndex > -1){
