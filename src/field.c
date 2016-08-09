@@ -267,15 +267,15 @@ int cursorWithinAbilityRange(individual * player, int x, int y){
 	}
 }
 
-void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGroup * thisIndividualGroup, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
+void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGroup * casterIndividualGroup, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
 	int aoe = 0,  minX, maxX, minY, maxY;
 	ability * tmpAbility = thisIndividual->activeAbilities->selectedAbility;
 
 	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
 
 	if(processCasterOnlyEffects(thisIndividual, tmpAbility)){
-		if(thisIndividualGroup != NULL){
-			deleteIndividiaulFromGroup(thisIndividualGroup, thisIndividual);
+		if(casterIndividualGroup != NULL){
+			deleteIndividiaulFromGroup(casterIndividualGroup, thisIndividual);
 		}
 
 		removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
@@ -618,7 +618,7 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 
 			if(theItem->itemCharacter->x == itemX && theItem->itemCharacter->y == itemY){
 				removeItemFromField(thisField->thisFieldInventory, theItem);
-				addItemToIndividual(thisIndividual->backpack, theItem);
+				addItemToInventory(thisIndividual->backpack, theItem);
 				return 1;
 			}
 

@@ -407,8 +407,192 @@ void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr
 	}
 }
 
+int isGreaterThanPercentage(int numerator, int devisor, int percentToBeat){
+	if(devisor == 0){
+		return 1;
+	}else{
+		return ((int)(((numerator*1.0/devisor))*100)) > percentToBeat;
+	}
+}
+
+int isLessThanPercentage(int numerator, int devisor, int percentToBeat){
+	if(devisor == 0){
+		return 1;
+	}else{
+		return ((int)(((numerator*1.0/devisor))*100)) < percentToBeat;
+	}
+}
+
+int isLowOnMana(individual * thisIndividual){
+	int baseMana = getAttributeSum(thisIndividual, "baseMana");
+
+	if(isLessThanPercentage(thisIndividual->mana, baseMana, 35)){
+		int weightedRand = (rand() % 100) + getAttributeSum(thisIndividual, "INT") * 5 + getAttributeSum(thisIndividual, "WIS") * 5;
+
+		if(isGreaterThanPercentage( weightedRand, 100, 50) ){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+item * findManaRestoringItem(inventory * backpack){
+	int i, randIndex;
+	inventory manaItems;
+	item * tmpItem;
+
+	manaItems.inventorySize = 0;
+
+	for(i = 0; i < 40; i++){
+		tmpItem = backpack->inventoryArr[i];
+
+		if(tmpItem != NULL && tmpItem->type == 'i' && tmpItem->manaMod > 0){
+			addItemToInventory(&manaItems, tmpItem);
+		}
+	}
+
+	if(manaItems.inventorySize == 0){
+		return NULL;
+	}else{
+		randIndex = rand() % manaItems.inventorySize;
+		return manaItems.inventoryArr[randIndex];
+	}
+}
+
+int isLowOnHP(individual * thisIndividual){
+	int baseHP = getAttributeSum(thisIndividual, "baseHP");
+
+	if(isLessThanPercentage(thisIndividual->hp, baseHP, 35)){
+		int weightedRand = (rand() % 100) + getAttributeSum(thisIndividual, "CON") * 5 + getAttributeSum(thisIndividual, "WIS") * 5;
+
+		if(isGreaterThanPercentage( weightedRand, 100, 50) ){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+item * getRandomHPRestoringItem(inventory * backpack){
+	int i, currentIndex = 0, randIndex;
+	item * healingItems[40];
+	item * tmpItem;
+
+	for(i = 0; i < 40; i++){
+		tmpItem = backpack->inventoryArr[i];
+
+		if(tmpItem != NULL && tmpItem->type == 'i' && tmpItem->healthMod > 0){
+			healingItems[currentIndex] = tmpItem;
+			currentIndex++;
+		}
+	}
+
+	if(currentIndex == 0){
+		return NULL;
+	}else{
+		randIndex = rand() % currentIndex;
+		return healingItems[randIndex];
+	}
+}
+
+
+ability * getRandomHPRestoringAbility(int availableMana, abilityList * thisAbilityList){
+	int i, numAbilities = 0, randIndex;
+	abilityList healingAbilities;
+	ability * tmpAbility;
+
+	for(i = 0; i < thisAbilityList->numAbilities; i++){
+		tmpAbility = thisAbilityList->abilitiesList[i];
+		if(tmpAbility != NULL && tmpAbility->totalManaCost <= availableMana ){
+			if(tmpAbility->diceHPEnabled && tmpAbility->diceHP->effectAndManaArray[tmpAbility->diceHP->selectedIndex]->effectMagnitude > 0){
+				healingAbilities.abilitiesList[numAbilities] = tmpAbility;
+				numAbilities++;
+			}else if(tmpAbility->hpEnabled && tmpAbility->hp->effectAndManaArray[tmpAbility->hp->selectedIndex]->effectMagnitude > 0){
+				healingAbilities.abilitiesList[numAbilities] = tmpAbility;
+				numAbilities++;
+			}
+		}
+	}
+
+	if(numAbilities == 0){
+		return NULL;
+	}else{
+		randIndex = rand() % numAbilities;
+		return healingAbilities.abilitiesList[randIndex];
+	}
+}
 
 int enemyAction(individual * enemy, individual * player, individualGroup * enemies, individualGroup * npcs, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+	if(isLowOnMana(enemy)){
+		item * manaRestoringItem = findManaRestoringItem(enemy->backpack);
+		if(manaRestoringItem != NULL){
+			if(manaRestoringItem->type == 'd' && enemy->activeItems->activeItemsTotal < 40){
+				consumeItem(enemy, manaRestoringItem);
+				addItemToActiveItemList(enemy, manaRestoringItem);
+				free(removeItemFromInventory(enemy->backpack, manaRestoringItem));
+				return 0;
+			}
+
+			if(manaRestoringItem->type == 'i'){
+				consumeItem(enemy, manaRestoringItem);
+				free(removeItemFromInventory(enemy->backpack, manaRestoringItem));
+				return 0;
+			}
+		}
+	}
+
+	if(isLowOnHP(enemy)){
+		ability * hpRestoringAbility = getRandomHPRestoringAbility(enemy->mana, enemy->abilities);
+		item * hpRestoringItem = getRandomHPRestoringItem(enemy->backpack);
+		int selectedHealingMethod = 0;
+
+		if (hpRestoringItem != NULL && hpRestoringAbility != NULL) {
+			selectedHealingMethod = (rand() % 2) + 1;
+		} else if (hpRestoringItem != NULL) {
+			selectedHealingMethod = 1;
+		} else if (hpRestoringAbility != NULL) {
+			selectedHealingMethod = 2;
+		}
+
+		if (selectedHealingMethod == 1) {
+			if(hpRestoringItem->itemType == 'd' && enemy->activeItems->activeItemsTotal < 40){
+				char msg[128];
+				sprintf(msg, "%s used %s.\n", enemy->name, hpRestoringItem->name);
+				cwrite(msg);
+				consumeItem(enemy, hpRestoringItem);
+				addItemToActiveItemList(enemy, hpRestoringItem);
+				removeItemFromInventory(enemy->backpack, hpRestoringItem);
+				return 0;
+			}
+
+			if(hpRestoringItem->itemType == 'c'){
+				char msg[128];
+				sprintf(msg, "%s used %s.\n", enemy->name, hpRestoringItem->name);
+				cwrite(msg);
+				consumeItem(enemy, hpRestoringItem);
+				free(removeItemFromInventory(enemy->backpack, hpRestoringItem));
+				return 0;
+			}
+
+			if(hpRestoringAbility != NULL){
+				selectedHealingMethod = 2;
+			}
+		}
+
+		if (selectedHealingMethod == 2) {
+			if(hpRestoringAbility->type == 'd' || hpRestoringAbility->type == 't'){
+				enemy->activeAbilities->selectedAbility = hpRestoringAbility;
+				useAbilityOnIndividualsInAOERange(enemy, enemies, player, npcs, enemies, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
+				enemy->activeAbilities->selectedAbility = NULL;
+				return 0;
+			}else if(hpRestoringAbility->type == "i"){
+				useAbility(enemy, hpRestoringAbility);
+				return 0;
+			}
+		}
+	}
+
 	if(individualWithinRange(enemy, player)){
 		attackIndividual(enemy, player);
 		return 0;
@@ -428,11 +612,11 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 
 		populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
 
-
 		destroyNodeArr(enemyNodeArr);
+		return 1;
 	}
 
-	return 1;
+
 }
 
 int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField, moveNodeMeta ** thisMoveNodeMeta){

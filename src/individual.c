@@ -39,6 +39,10 @@ individual *initIndividual(){
 	toReturn->abilities->numAbilities = 0;
 	toReturn->abilities->MAX_ABILITIES = 64;
 
+	for(i = 0; i < toReturn->abilities->MAX_ABILITIES; i++){
+		toReturn->abilities->abilitiesList[i] = NULL;
+	}
+
 	toReturn->activeAbilities = malloc(sizeof(activeAbilityList));
 	toReturn->activeAbilities->numAbilities = 0;
 	toReturn->activeAbilities->MAX_ABILITIES = 64;
@@ -1296,7 +1300,7 @@ void addItemToActiveItemList(individual * thisIndividual, item * theItem){
 
 }
 
-int addItemToIndividual(inventory * backpack, item * newItem){
+int addItemToInventory(inventory * backpack, item * newItem){
 	int i, availableSpot;
 	if(backpack->inventorySize < 40){
 		for(i = 0; i < 40; i++){
@@ -1367,7 +1371,7 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 		}
 
 		addItemToRegistry(newItem);
-		addItemToIndividual(thisIndividual->backpack, newItem);
+		addItemToInventory(thisIndividual->backpack, newItem);
 
 		thisIndividual->gold -= thisItem->price;
 		return 1;

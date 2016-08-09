@@ -16,7 +16,7 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* player, shiftData * view
 int attackIndividual(individual *thisIndividual, individual *targetIndividual);
 int individualWithinRange(individual * thisIndividual, individual * target);
 int calcDR(individual * targetIndividual, char attackType);
-int addItemToIndividual(inventory * backpack, item * newItem);
+int addItemToInventory(inventory * backpack, item * newItem);
 char * lookUpStatusEffectName(statusEffect effect);
 statusEffect lookUpStatusType(char * statusType[16]);
 status * createStatusFromAbility(ability * thisAbility);

@@ -338,7 +338,7 @@ void loadItemsToRegistry(char* directory, char * itemsFileName){
 				individual * tmpIndividual = getIndividualFromRegistry(newItem->npcID);
 
 				if(tmpIndividual != NULL){
-					addItemToIndividual(tmpIndividual->backpack, newItem);
+					addItemToInventory(tmpIndividual->backpack, newItem);
 					if(newItem->isEquipt){
 						if(newItem->type == 'a'){
 							tmpIndividual->armorItem = newItem->itemCharacter;
