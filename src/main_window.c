@@ -247,7 +247,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -381,6 +381,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				toggleAbilityViewMode();
 				refreshAbilityView(player->abilities->numAbilities, player->abilities->abilitiesList);
 			}
+			break;
+		case 0x51: //q key (toggle sneak)
+			player->isSneaking = (player->isSneaking + 1) % 2;
+
 			break;
 		case 0x57: //w key (wait)
 			decreaseTurns(player, &enemyActionMode, &initEnemyActionMode, 1);
@@ -537,6 +541,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					postEnemyActionMode = 1;
 					return 0;
 				}
+
+				if(!enemies->individuals[enemies->currentIndividualIndex]->remainingActions > 0){
+					enemyActionMode = 0;
+					postEnemyActionMode = 1;
+					return 0;
+				}
 			}
 			enemyActionMode = 0;
 
@@ -552,7 +562,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		postEnemyActionMode = 0;
 
 		if(enemies->individuals[enemies->currentIndividualIndex] != NULL ){
-			enemies->individuals[enemies->currentIndividualIndex]->remainingActions--;
 
 			if(enemies->individuals[enemies->currentIndividualIndex]->remainingActions > 0){
 				enemyActionMode = 1;
@@ -645,7 +654,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, enemies, npcs);

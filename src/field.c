@@ -686,6 +686,8 @@ field* initField(char* fieldFileName){
 				newSpace->isPassable = 1;
 			}
 
+			newSpace->canSeeThrough = 1;
+
 			currentChar = line[xIndex+1];
 			if (currentChar == '>') {
 				backgroundCharacter->direction = 3;

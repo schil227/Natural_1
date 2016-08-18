@@ -60,12 +60,15 @@ individual *initIndividual(){
 		toReturn->activeStatuses->statuses[i] = NULL;
 	}
 
+	toReturn->targetedIndividual = NULL;
+	toReturn->targetedDuration = 0;
+
 	return toReturn;
 }
 
 int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
-		int range, int mvmt, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
+		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness, int dialogID, int gold, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 
@@ -119,6 +122,8 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	strcpy(thisIndividual->critType,critType);
 	thisIndividual->range = range;
 	thisIndividual->mvmt = mvmt;
+	thisIndividual->LoS = LoS;
+	thisIndividual->isSneaking = isSneaking;
 
 	thisIndividual->bluntDR = bluntDR;
 	thisIndividual->chopDR = chopDR;
@@ -160,36 +165,7 @@ void destroyIndividual(individual* thisIndividual){
 		destroyCharacter(thisIndividual->playerCharacter);
 	}
 
-//	if(thisIndividual->activeItems != NULL){
-//		itemsPassed = 0;
-//		for(i = 0; i < 40; i++){
-//			if(thisIndividual->activeItems->activeItemArr[i] != NULL){
-////				destroyItem(thisIndividual->activeItems->activeItemArr[i]->thisItem);
-////				free(thisIndividual->activeItems->activeItemArr[i]);
-//				itemsPassed++;
-//			}
-//			if(itemsPassed >= thisIndividual->activeItems->activeItemsTotal){
-//				break;
-//			}
-//
-//		}
-//	}
-
 	free(thisIndividual->activeItems);
-
-//	if(thisIndividual->backpack != NULL){
-//		itemsPassed = 0;
-//		for(i = 0; i < 40; i++){
-//			if(thisIndividual->backpack->inventoryArr[i] != NULL){
-//				destroyItem(thisIndividual->backpack->inventoryArr[i]);
-//				itemsPassed++;
-//			}
-//			if(itemsPassed >= thisIndividual->backpack->inventorySize){
-//				break;
-//			}
-//
-//		}
-//	}
 
 	free(thisIndividual->backpack);
 
@@ -1452,6 +1428,115 @@ int canUseAbility(individual * thisIndividual, ability * thisAbility){
 	}else{
 		return 0;
 	}
+}
+
+cordArr* initCordArr(){
+	cordArr * thisCordArr = malloc(sizeof(cordArr));
+	thisCordArr->numCords = 0;
+	thisCordArr->MAX_CORDS = 50;
+}
+
+void destroyCordArr(cordArr * thisCordArr){
+	int i;
+
+	for(i = 0; i < thisCordArr->numCords; i++){
+		free(thisCordArr->cords);
+	}
+
+	free(thisCordArr);
+}
+
+double calcSlope(int x1, int y1, int x2, int y2){
+	return (double) ((y2 * 0.1) - (y1 * 0.1)) / ((x2 * 0.1) - (x1 * 0.1));
+}
+
+int containsCord(cordArr * thisCordArr, cord * thisCord){
+	int i;
+
+	for(i = 0; i < thisCordArr->numCords; i++){
+		if(thisCordArr->cords[i]->x == thisCord->x && thisCordArr->cords[i]->y == thisCord->y){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int addCordIfUnique(cordArr * thisCordArr, cord * thisCord){
+	if(thisCordArr->numCords < thisCordArr->MAX_CORDS && !containsCord(thisCordArr, thisCord)){
+		thisCordArr->cords[thisCordArr->numCords] = thisCord;
+		thisCordArr->numCords++;
+		return 1;
+	}
+
+	return 0;
+}
+
+cordArr * cordsBetweenTwoIndividuals(individual * thisIndividual, individual * targetIndividual, int maxDistance){
+	int startingX = 0, startingY = 0, endingX, endingY;
+	double slope;
+	int wrtY = 1, startingGreaterThanEnding = 0, foundTargetSpace = 0;
+
+	endingX = targetIndividual->playerCharacter->x - thisIndividual->playerCharacter->x;
+	endingY = targetIndividual->playerCharacter->y - thisIndividual->playerCharacter->y;
+
+	cordArr * thisCordArr = initCordArr();
+
+	if(startingX == endingX && startingY == endingY){
+		return NULL;
+	}else if(startingX == endingX){ // n/0
+		slope = 0;
+		wrtY = 0;
+	}else{
+		slope = calcSlope(startingX, startingY, endingX, endingY);
+
+		if(fabs(slope) > 1){ // calc with respect to
+			slope = calcSlope(startingY, startingX, endingY, endingX);
+			wrtY = 0;
+		}
+	}
+
+	if(wrtY){
+		if(startingX > endingX){
+			startingGreaterThanEnding = 1;
+		}
+	}else{
+		if(startingY > endingY){
+			startingGreaterThanEnding = 1;
+		}
+	}
+
+	double i, step = 0.25;
+
+	if(startingGreaterThanEnding){
+		step = step * -1;
+	}
+
+	for(i = 0; abs(i) < maxDistance; i+= step){
+		cord * nextCord = malloc(sizeof(cord));
+
+		if(wrtY){
+			nextCord->x = i + startingX;
+			nextCord->y = slope*i + startingY;
+		}else{
+			nextCord->y = i + startingX;
+			nextCord->x = slope*i + startingY;
+		}
+
+		if(!addCordIfUnique(thisCordArr, nextCord)){
+			free(nextCord);
+		}else if(nextCord->x == endingX && nextCord->y == endingY){
+			foundTargetSpace = 1;
+			break;
+		}
+	}
+
+	if(!foundTargetSpace){
+		destroyCordArr(thisCordArr);
+		return NULL;
+	}
+
+	return thisCordArr;
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

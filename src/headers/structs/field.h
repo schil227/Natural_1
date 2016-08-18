@@ -23,7 +23,8 @@ typedef struct {
 
 typedef struct {
 	int numCharacters;
-	bool isPassable;
+	int isPassable;
+	int canSeeThrough;
 	character* background;
 	individual* currentIndividual;
 	transitInfo* thisTransitInfo;

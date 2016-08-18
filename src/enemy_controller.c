@@ -523,6 +523,72 @@ ability * getRandomHPRestoringAbility(int availableMana, abilityList * thisAbili
 	}
 }
 
+int isInLineOfSight(individual * thisIndividual, individual * targetIndividual, field * thisField){
+	int i, toReturn = 1;
+	int weightedRand = (rand() % 100);
+
+	if( (targetIndividual->isSneaking  && isGreaterThanPercentage( weightedRand  + getAttributeSum(targetIndividual, "DEX") * 10, 100, 60)) || isGreaterThanPercentage( weightedRand, 100, 90) ){
+		return 0;
+	}
+	cordArr * thisCordArr = cordsBetweenTwoIndividuals(thisIndividual, targetIndividual, thisIndividual->LoS);
+
+	if(thisCordArr == NULL){
+		return 0;
+	}
+
+	for(i = 0; i < thisCordArr->numCords; i++){
+		space * tmpSpace = getSpaceFromField(thisField,thisCordArr->cords[i]->x + thisIndividual->playerCharacter->x, thisCordArr->cords[i]->y + thisIndividual->playerCharacter->y);
+		if( tmpSpace == NULL || !tmpSpace->canSeeThrough ){
+			toReturn = 0;
+			break;
+		}
+	}
+
+	destroyCordArr(thisCordArr);
+
+	return toReturn;
+}
+
+individual * acquireTarget(individual * enemy, individual * player, individualGroup * npcs, field * thisField){
+	if(player->hp > 0 && isInLineOfSight(enemy, player, thisField)){
+		return player;
+	}
+
+	// for each npc, guards, etc.
+
+	return NULL;
+}
+
+int checkForTargets(individual * enemy, individual * player, individualGroup * npcs, field * thisField){
+	if(enemy->targetedIndividual != NULL){
+		if(enemy->targetedIndividual->hp > 0){
+			enemy->targetedIndividual = NULL;
+		}else{
+			enemy->targetedDuration--;
+
+			if(enemy->targetedDuration == 0){
+				int targetResubscription = rand() % 100;
+
+				if(isGreaterThanPercentage(targetResubscription, 100, 50)){
+					enemy->targetedDuration = (rand() % 4) + 6;
+				}else{
+					enemy->targetedIndividual = NULL;
+				}
+			}
+		}
+	}
+
+	if(enemy->targetedIndividual == NULL){
+		enemy->targetedIndividual = acquireTarget(enemy, player, npcs, thisField);
+	}
+
+	if(enemy->targetedIndividual == NULL){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
 int enemyAction(individual * enemy, individual * player, individualGroup * enemies, individualGroup * npcs, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
 	if(isLowOnMana(enemy)){
 		item * manaRestoringItem = findManaRestoringItem(enemy->backpack);
@@ -563,6 +629,8 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 				consumeItem(enemy, hpRestoringItem);
 				addItemToActiveItemList(enemy, hpRestoringItem);
 				removeItemFromInventory(enemy->backpack, hpRestoringItem);
+
+				enemy->remainingActions--;
 				return 0;
 			}
 
@@ -572,6 +640,7 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 				cwrite(msg);
 				consumeItem(enemy, hpRestoringItem);
 				free(removeItemFromInventory(enemy->backpack, hpRestoringItem));
+				enemy->remainingActions--;
 				return 0;
 			}
 
@@ -585,22 +654,37 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 				enemy->activeAbilities->selectedAbility = hpRestoringAbility;
 				useAbilityOnIndividualsInAOERange(enemy, enemies, player, npcs, enemies, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
 				enemy->activeAbilities->selectedAbility = NULL;
+				enemy->remainingActions--;
 				return 0;
 			}else if(hpRestoringAbility->type == "i"){
 				useAbility(enemy, hpRestoringAbility);
+				enemy->remainingActions--;
 				return 0;
 			}
 		}
 	}
 
+	//Do checkForTargets, if null walk about, else go to target.
+	if(!checkForTargets(enemy, player, npcs, thisField)){
+		enemy->remainingActions = 0;
+		if(isGreaterThanPercentage(rand(), 100, 50)){//wander a bit.
+			return 0;
+		}else{//do nothing
+			return 0;
+		}//Add a 'speak' option
+	}
+
+
 	if(individualWithinRange(enemy, player)){
-		attackIndividual(enemy, player);
+		attackIndividual(enemy, enemy->targetedIndividual);
+		enemy->remainingActions--;
 		return 0;
 	}else{//move closer to target
-		nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy, player);
+		nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy, enemy->targetedIndividual);
 
 		//nowhere to go, nothing to animate
 		if (enemyNodeArr->size == 0) {
+			enemy->remainingActions--;//Todo: necessairy?
 			return 0;
 		}
 
@@ -613,6 +697,8 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 		populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
 
 		destroyNodeArr(enemyNodeArr);
+
+		enemy->remainingActions--;
 		return 1;
 	}
 
@@ -663,3 +749,4 @@ void destroyNodeArr(nodeArr * thisNodeArr){
 
 	free(thisNodeArr);
 }
+

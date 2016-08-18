@@ -16,6 +16,17 @@
 typedef enum{ STATUS_NONE, STATUS_POISONED, STATUS_PARALYZED, STATUS_CONFUSED, STATUS_BURNING, STATUS_BLEEDING, STATUS_BERZERK, STATUS_SILENCED} statusEffect;
 
 typedef struct{
+	int x;
+	int y;
+} cord;
+
+typedef struct{
+	cord * cords[50];
+	int numCords;
+	int MAX_CORDS;
+}cordArr;
+
+typedef struct{
 	int inventorySize;
 	item * inventoryArr[40];
 } inventory;
@@ -57,7 +68,7 @@ typedef struct{
 	status * statuses[16];
 }statusList;
 
-typedef struct {
+struct individual{
 	character* playerCharacter;
 	char name[32];
 	int ID;
@@ -99,6 +110,8 @@ typedef struct {
 	short int range;
 	char critType[4];
 	short int mvmt;
+	short int LoS;
+	short int isSneaking;
 
 	//physical damage resistance
 	short int bluntDR;
@@ -123,8 +136,13 @@ typedef struct {
 
 	int jumpTarget;
 
-} individual;
+	int targetedDuration;
+	struct individual * targetedIndividual;
 
+};
+
+struct individual;
+typedef struct individual individual;
 
 
 #endif /* SRC_HEADERS_STRUCTS_INDIVIDUAL_H_ */
