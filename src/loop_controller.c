@@ -369,73 +369,56 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 	return 0;
 }
 
-int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, individualGroup  * thisEnemies, shiftData * viewShift) {
-	int toReturn = 0;
+int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, shiftData * viewShift) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 
-//		if(shouldDrawDialogBox()){
-//			switch (LOWORD(wParam)) {
-//				case 0x1B:
-//				{	//stop drawing dialog box
-//					toggleDrawDialogBox();
-//				}
-//			}
-//		}else{
-			switch (LOWORD(wParam)) {
-			case 0x38:
-			case 0x68: {
-				selectPreviousItemUp();
+		switch (LOWORD(wParam)) {
+		case 0x38:
+		case 0x68: {
+			selectPreviousItemUp();
+		}
+			break;
+		case 0x32:
+		case 0x62: {
+			selectNextItemDown();
+
+		}
+			break;
+			break;
+		case 0x1B: //escape
+			disableInventoryViewMode();
+
+			if (inBuyMode()) {
+				disableInventoryBuyMode();
 			}
-				break;
-			case 0x32:
-			case 0x62: {
-				selectNextItemDown();
 
-			}
-				break;
-				break;
-			case 0x1B: //escape
-				disableInventoryViewMode();
+			break;
+		case 0x0D: //enter
+		{
+			item * tmpItem = getSelectedItem();
 
-				if(inBuyMode()){
-					disableInventoryBuyMode();
-				}
-
-				break;
-			case 0x0D: //enter
-			{
-				item * tmpItem = getSelectedItem();
-
-				if (tmpItem != NULL) {
-					if(inBuyMode()){
-						attemptToBuyItem(tmpItem, player);
-					}else{
-						modifyItem(tmpItem, player);
-						refreshInventory(player->backpack);
-					}
+			if (tmpItem != NULL) {
+				if (inBuyMode()) {
+					attemptToBuyItem(tmpItem, player);
+				} else {
+					modifyItem(tmpItem, player);
+					refreshInventory(player->backpack);
 				}
 			}
-				break;
-			case 0x44: //(d)escription
-			{
-				item * tmpItem = getSelectedItem();
+		}
+			break;
+		case 0x44: //(d)escription
+		{
+			item * tmpItem = getSelectedItem();
 
-				if (tmpItem != NULL) {
-					toggleDrawDialogBox();
-//					char tmpDescription[256];
-//					strcpy(tmpDescription, tmpItem->description);
-//					char * value = strtok(tmpDescription, "\\");
-//					cwrite(value);
-//					value = strtok(NULL, "\\");
-//					cwrite(value);
-
-					setSimpleDialogMessage(tmpItem->description);
-				}
+			if (tmpItem != NULL) {
+				toggleDrawDialogBox();
+				setSimpleDialogMessage(tmpItem->description);
 			}
-				break;
-			}
-//		}
+		}
+			break;
+		}
 		case WM_TIMER:
 		{
 			RECT rect;

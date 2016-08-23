@@ -260,7 +260,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		setCurrentMessage(thisMessage);
 
 		int x, y;
-		main_field = loadMap("map1.txt", mapDirectory, player, enemies, npcs);
+		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 		int imageID;
 
 		for (y = 0; y < main_field->totalY; y++) {
@@ -339,7 +339,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x45: //e key (enter area)
 			{
-				attemptToTransit(&main_field, player, enemies, npcs, viewShift, mapDirectory);
+				attemptToTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory);
 			}
 			break;
 		case 0x46: //f key
@@ -501,7 +501,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		return 0;
 	} else if(inInventoryViewMode()){
-		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, enemies, viewShift);
+		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, viewShift);
 	}else if(enemyMoveMode){
 		animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
 				(enemies->individuals[enemies->currentIndividualIndex]),
@@ -662,9 +662,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
-	main_field = loadMap("test_map1.txt", mapTestDirectory, player, enemies, npcs);
+	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
 
-	test_main(player, enemies, npcs, main_field, viewShift);
+	test_main(player, thisGroupContainer, main_field, viewShift);
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){

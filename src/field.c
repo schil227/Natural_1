@@ -438,7 +438,7 @@ int generateBackground(char backgroundSymbol){
 	}
 }
 
-field * loadMap(char * mapName, char* directory, individual * player, individualGroup* enemies, individualGroup * npcs){
+field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
 
 	char transitMap[80], enemyMap[80], enemyItemMap[80], npcMap[80], npcItemMap[80], fieldItemMap[80], dialog[80];
 	char * fullMapName = appendStrings(directory, mapName);
@@ -469,8 +469,8 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 
 	fclose(fp);
 
-	loadGroup(enemies, GROUP_ENEMIES, enemyMap, directory);
-	loadGroup(npcs, GROUP_NPCS, npcMap, directory);
+	loadGroup(thisGroupContainer->enemies, GROUP_ENEMIES, enemyMap, directory);
+	loadGroup(thisGroupContainer->npcs, GROUP_NPCS, npcMap, directory);
 	loadDialog(dialog, directory);
 
 	field* thisField = initField(fullMapName);
@@ -480,8 +480,8 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 	makeTransitSpaces(transitMap, directory, thisField, player);
 
 	moveIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
-	setGroupToField(thisField, enemies);
-	setGroupToField(thisField, npcs);
+	setGroupToField(thisField, thisGroupContainer->enemies);
+	setGroupToField(thisField, thisGroupContainer->npcs);
 
 	free(fullMapName);
 

@@ -562,7 +562,7 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 	return NULL;
 }
 
-int attemptToTransit(field ** thisField, individual * player, individualGroup * enemies, individualGroup * npcs, shiftData * viewShift, char * mapDirectory){
+int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory){
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
 		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
@@ -572,9 +572,9 @@ int attemptToTransit(field ** thisField, individual * player, individualGroup * 
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
 			destroyField(*thisField, player);
-			clearGroup(enemies);
-			clearGroup(npcs);
-			*thisField = loadMap(mapName, mapDirectory, player, enemies, npcs);
+			clearGroup(thisGroupContainer->enemies);
+			clearGroup(thisGroupContainer->npcs);
+			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
 			viewShift->xShift = 0;
 			viewShift->yShift = 0;
