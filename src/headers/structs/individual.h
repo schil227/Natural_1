@@ -13,7 +13,9 @@
 
 #include<math.h>
 
-typedef enum{ STATUS_NONE, STATUS_POISONED, STATUS_PARALYZED, STATUS_CONFUSED, STATUS_BURNING, STATUS_BLEEDING, STATUS_BERZERK, STATUS_SILENCED} statusEffect;
+typedef enum { STATUS_NONE, STATUS_POISONED, STATUS_PARALYZED, STATUS_CONFUSED, STATUS_BURNING, STATUS_BLEEDING, STATUS_BERZERK, STATUS_SILENCED} statusEffect;
+
+typedef enum { GROUP_ALLIES, GROUP_ENEMIES, GROUP_BEASTS, GROUP_NPCS, GROUP_GUARDS} groupType;
 
 typedef struct{
 	int x;
@@ -136,9 +138,11 @@ struct individual{
 
 	int jumpTarget;
 
+	int faction;
 	int targetedDuration;
 	struct individual * targetedIndividual;
 
+	groupType currentGroupType;
 };
 
 struct individual;

@@ -56,6 +56,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 //	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, testEnemies, testNPCs);
 	int imageID;
 
+	groupContainer * testGroupContainer = initGroupContainer(testEnemies, testNPCs, NULL, NULL, NULL);
 
 	assert(testEnemies->numIndividuals == 6);
 
@@ -301,7 +302,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	individual * tmpNPC = getIndividualFromRegistry(testNPCs->individuals[0]->ID);
 
 	//process the CHR Check, successful
-	processEvent(getEventFromCurrentMessage(), testPlayer, testNPCs, testEnemies, main_test_field);
+	processEvent(getEventFromCurrentMessage(), testPlayer, testGroupContainer, main_test_field);
 
 	createPermanentAbiltyTest(testPlayer);
 	createSelfDurationAbility(testPlayer);
@@ -333,7 +334,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	assert(testPlayer->hp == 16);
 
 	//use duration ability on everyone within range
-	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
+	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
 
 	//clear selectedAbility
 	testPlayer->activeAbilities->selectedAbility = NULL;
@@ -397,7 +398,7 @@ int mainTest(individual* testPlayer, individualGroup* testEnemies, individualGro
 	}
 
 	//use ability on selected space,  harming skelly4
-	useAbilityOnIndividualsInAOERange(testPlayer, NULL, testPlayer, testNPCs, testEnemies, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
 
 	//skelly was killed by a 11 damage roll (2d8)
 	assert(tmpIndividual->hp == -5);

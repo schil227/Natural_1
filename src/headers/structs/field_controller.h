@@ -17,4 +17,12 @@ typedef struct {
 	individual * individuals[50];
 } individualGroup;
 
+typedef struct{
+	individualGroup * enemies;
+	individualGroup * beasts;
+	individualGroup * allies;
+	individualGroup * npcs;
+	individualGroup * guards;
+} groupContainer;
+
 #endif /* SRC_HEADERS_STRUCTS_FIELD_CONTROLLER_H_ */

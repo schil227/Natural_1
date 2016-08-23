@@ -208,22 +208,24 @@ void removeIndividualEventFromMap(individualEvent * thisIndividualEvent, individ
 
 ///// Process Event Functions /////
 
-void becomeNPC(int individualID, individualGroup * npcs, individualGroup * enemies){
+void becomeNPC(int individualID, groupContainer * thisGroupContainer){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
-	if(!individualInGroup(thisIndividual, npcs)){
-		deleteIndividiaulFromGroup(enemies, thisIndividual);
-		addIndividualToGroup(npcs, thisIndividual);
+	if(thisIndividual->currentGroupType != GROUP_NPCS){
+		deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer,thisIndividual), thisIndividual);
+		addIndividualToGroup(thisGroupContainer->npcs, thisIndividual);
+		thisIndividual->currentGroupType = GROUP_NPCS;
 	}
 
 }
 
-void becomeEnemy(int individualID, individualGroup * npcs, individualGroup * enemies){
+void becomeEnemy(int individualID, groupContainer * thisGroupContainer){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
-	if(!individualInGroup(thisIndividual, enemies)){
-		deleteIndividiaulFromGroup(npcs, thisIndividual);
-		addIndividualToGroup(enemies, thisIndividual);
+	if(thisIndividual->currentGroupType != GROUP_ENEMIES){
+		deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer,thisIndividual), thisIndividual);
+		addIndividualToGroup(thisGroupContainer->enemies, thisIndividual);
+		thisIndividual->currentGroupType = GROUP_ENEMIES;
 	}
 
 }
@@ -252,16 +254,16 @@ void statCheck(individual * player, event * thisEvent){
 
 }
 
-void processEvent(int eventID, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
+void processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
 
 	event * thisEvent = getEventFromRegistry(eventID);
 
 	switch(thisEvent->eventType){
 		case 1://become npc
-			becomeNPC(thisEvent->individualID, npcs, enemies);
+			becomeNPC(thisEvent->individualID, thisGroupContainer);
 			break;
 		case 2: // become enemy
-			becomeEnemy(thisEvent->individualID, npcs, enemies);
+			becomeEnemy(thisEvent->individualID, thisGroupContainer);
 			break;
 		case 3: // enable buy mode
 			enterBuyMode(thisEvent->individualID);

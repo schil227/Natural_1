@@ -70,7 +70,7 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
-		int lightiningWeakness, int dialogID, int gold, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
+		int lightiningWeakness, int dialogID, int gold, int faction, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 
 	BITMAP bm;
 
@@ -143,6 +143,7 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->dialogID = dialogID;
 
 	thisIndividual->gold = gold;
+	thisIndividual->faction = faction;
 
 	thisIndividual->jumpTarget = 0;
 
@@ -155,6 +156,8 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->armorItem = NULL;
 	thisIndividual->weaponItem = NULL;
 	thisIndividual->shieldItem = NULL;
+
+	thisIndividual->currentGroupType = 0;
 
 	return 0;
 }

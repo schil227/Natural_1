@@ -549,27 +549,52 @@ int isInLineOfSight(individual * thisIndividual, individual * targetIndividual, 
 	return toReturn;
 }
 
-individual * acquireTarget(individual * enemy, individual * player, individualGroup * npcs, field * thisField){
-	if(player->hp > 0 && isInLineOfSight(enemy, player, thisField)){
+individual * acquireTarget(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField){
+	int i, individualsPassed = 0, playerInLineOfSight = isInLineOfSight(enemy, player, thisField);
+
+	if(player->hp > 0 && playerInLineOfSight && isGreaterThanPercentage(rand() % 100, 100, 50)){
 		return player;
 	}
 
-	// for each npc, guards, etc.
+	// for each npc, guards, enemy-npcs etc.
+	if(thisGroupContainer->enemies->numIndividuals > 0){
+		for(i = 0; i < thisGroupContainer->enemies->MAX_INDIVIDUALS; i++){
+			if(thisGroupContainer->enemies->individuals[i] != NULL){
+				if(thisGroupContainer->enemies->individuals[i]->faction != enemy->faction && isInLineOfSight(enemy, thisGroupContainer->enemies->individuals[i], thisField)){
+					return thisGroupContainer->enemies->individuals[i];
+				}
+				individualsPassed++;
+			}
+
+			if(individualsPassed == thisGroupContainer->enemies->numIndividuals){
+				break;
+			}
+		}
+	}
+
+	if(playerInLineOfSight){
+		return player;
+	}
 
 	return NULL;
 }
 
-int checkForTargets(individual * enemy, individual * player, individualGroup * npcs, field * thisField){
+int checkForTargets(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField){
 	if(enemy->targetedIndividual != NULL){
-		if(enemy->targetedIndividual->hp > 0){
+		if(enemy->targetedIndividual->hp <= 0){
 			enemy->targetedIndividual = NULL;
 		}else{
+			int targetIsInSight = isInLineOfSight(enemy, enemy->targetedIndividual, thisField);
+
+			if(!targetIsInSight){
+				enemy->targetedDuration -= 2;
+			}
 			enemy->targetedDuration--;
 
 			if(enemy->targetedDuration == 0){
 				int targetResubscription = rand() % 100;
 
-				if(isGreaterThanPercentage(targetResubscription, 100, 50)){
+				if(targetIsInSight && isGreaterThanPercentage(targetResubscription, 100, 50)){
 					enemy->targetedDuration = (rand() % 4) + 6;
 				}else{
 					enemy->targetedIndividual = NULL;
@@ -579,7 +604,7 @@ int checkForTargets(individual * enemy, individual * player, individualGroup * n
 	}
 
 	if(enemy->targetedIndividual == NULL){
-		enemy->targetedIndividual = acquireTarget(enemy, player, npcs, thisField);
+		enemy->targetedIndividual = acquireTarget(enemy, player, thisGroupContainer, thisField);
 	}
 
 	if(enemy->targetedIndividual == NULL){
@@ -589,7 +614,7 @@ int checkForTargets(individual * enemy, individual * player, individualGroup * n
 	}
 }
 
-int enemyAction(individual * enemy, individual * player, individualGroup * enemies, individualGroup * npcs, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
 	if(isLowOnMana(enemy)){
 		item * manaRestoringItem = findManaRestoringItem(enemy->backpack);
 		if(manaRestoringItem != NULL){
@@ -652,7 +677,7 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 		if (selectedHealingMethod == 2) {
 			if(hpRestoringAbility->type == 'd' || hpRestoringAbility->type == 't'){
 				enemy->activeAbilities->selectedAbility = hpRestoringAbility;
-				useAbilityOnIndividualsInAOERange(enemy, enemies, player, npcs, enemies, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
+				useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
 				enemy->activeAbilities->selectedAbility = NULL;
 				enemy->remainingActions--;
 				return 0;
@@ -665,7 +690,7 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 	}
 
 	//Do checkForTargets, if null walk about, else go to target.
-	if(!checkForTargets(enemy, player, npcs, thisField)){
+	if(!checkForTargets(enemy, player, thisGroupContainer, thisField)){
 		enemy->remainingActions = 0;
 		if(isGreaterThanPercentage(rand(), 100, 50)){//wander a bit.
 			return 0;
@@ -674,9 +699,11 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 		}//Add a 'speak' option
 	}
 
-
-	if(individualWithinRange(enemy, player)){
-		attackIndividual(enemy, enemy->targetedIndividual);
+	if(individualWithinRange(enemy, enemy->targetedIndividual)){
+		if(attackIndividual(enemy, enemy->targetedIndividual)){
+			deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, enemy->targetedIndividual), enemy->targetedIndividual);
+			removeIndividualFromField(thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
+		}
 		enemy->remainingActions--;
 		return 0;
 	}else{//move closer to target
@@ -684,12 +711,13 @@ int enemyAction(individual * enemy, individual * player, individualGroup * enemi
 
 		//nowhere to go, nothing to animate
 		if (enemyNodeArr->size == 0) {
-			enemy->remainingActions--;//Todo: necessairy?
+			enemy->remainingActions--;
 			return 0;
 		}
 
 		//Gonna move, remove them from the field and update the moveNodeMeta
 		getSpaceFromField(thisField, enemy->playerCharacter->x, enemy->playerCharacter->y)->currentIndividual = NULL;
+//		setIndividualSpace(thisField, enemy,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
 
 		(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
 		(*thisMoveNodeMeta)->sum = 0;

@@ -8,7 +8,7 @@
 #include "./headers/cursor_pub_methods.h"
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyActionMode, int * initEnemyActionMode,
-		field * main_field, individual * player, individualGroup  * enemies, individualGroup  * npcs, shiftData * viewShift) {
+		field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -47,7 +47,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 		case 0x0D: //enter //TODO: when attacking, supply both enemies and NPCs, ensure the character cannot attack themselves
 		{
 			if (getCursorMode() == CURSOR_ATTACK) {//attack the individual
-				if(tryAttackEnemies(enemies, player, main_field, getCursorX(), getCursorY())){
+				if(tryAttackEnemies(thisGroupContainer->enemies, player, main_field, getCursorX(), getCursorY())){
 
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
@@ -56,7 +56,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 				}
 
 			}else if(getCursorMode() == CURSOR_TALK){ //talk to the individual
-				tryTalkGroups(enemies, npcs, player, getCursorX(), getCursorY());
+				tryTalkGroups(thisGroupContainer, player, getCursorX(), getCursorY());
 
 				viewShift->xShift = viewShift->xShiftOld;
 				viewShift->yShift = viewShift->yShiftOld;
@@ -65,7 +65,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 			}else if (getCursorMode() == CURSOR_ABILITY){
 				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
 					int numActions = 1;
-					useAbilityOnIndividualsInAOERange(player, NULL, player, npcs, enemies, main_field, getCursorX(), getCursorY());
+					useAbilityOnIndividualsInAOERange(player, player, thisGroupContainer, main_field, getCursorX(), getCursorY());
 
 					if(player->activeAbilities->selectedAbility->actionsEnabled){
 						numActions += player->activeAbilities->selectedAbility->actions->effectAndManaArray[player->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
@@ -314,7 +314,7 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 	return 0;
 }
 
-int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField){
+int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, groupContainer * thisGroupContainer, field * thisField){
 	switch(msg){
 	case WM_KEYDOWN:{
 		switch (LOWORD(wParam)) {
@@ -327,7 +327,7 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 				int eventID = getEventFromCurrentMessage();
 
 				if(eventID != 0){
-					processEvent(eventID, player, npcs, enemies, thisField);
+					processEvent(eventID, player, thisGroupContainer, thisField);
 				}
 
 				advanceDialog();

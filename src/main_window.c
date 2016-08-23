@@ -40,6 +40,8 @@ int enemyTurn = 0;
 
 individual* player;
 
+static groupContainer * thisGroupContainer;
+
 individualGroup* enemies;
 individualGroup* npcs;
 field* main_field;
@@ -208,6 +210,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		player = initIndividual();
 		enemies = initGroup();
 		npcs = initGroup();
+		thisGroupContainer = initGroupContainer(enemies,npcs, NULL, NULL, NULL);
 		initThisCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
 		initSidebarInstance(2014,0,0,185,400);
@@ -247,7 +250,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -427,7 +430,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(isSpecialDrawModeEnabled()){
 		return specialDrawLoop(hwnd, msg, wParam, lParam);
 	}else if(shouldDrawDialogBox()){
-		return dialogLoop(hwnd, msg, wParam, lParam, player, npcs, enemies, main_field);
+		return dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field);
 	}else if(inNameBoxMode()){
 		return nameLoop(hwnd, msg, wParam, lParam, player);
 	} else if(inAbilityCreateMode()){
@@ -453,7 +456,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 		return 0;
 	}else if (inCursorMode()) {
-		return cursorLoop(hwnd, msg, wParam, lParam, &enemyActionMode, &initEnemyActionMode, main_field, player, enemies, npcs, viewShift);
+		return cursorLoop(hwnd, msg, wParam, lParam, &enemyActionMode, &initEnemyActionMode, main_field, player, thisGroupContainer, viewShift);
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
@@ -551,7 +554,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			enemyActionMode = 0;
 
 			//If not moving
-			if(!enemyAction(enemies->individuals[enemies->currentIndividualIndex], player, enemies, npcs, main_field, &thisMoveNodeMeta)){
+			if(!enemyAction(enemies->individuals[enemies->currentIndividualIndex], player, thisGroupContainer, main_field, &thisMoveNodeMeta)){
 				postEnemyActionMode = 1;
 			}else{
 				enemyMoveMode = 1;
@@ -596,7 +599,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 int triggerEvent(int eventID){
-	processEvent(eventID, player, npcs, enemies, main_field);
+	processEvent(eventID, player, thisGroupContainer, main_field);
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -623,6 +626,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	player = initIndividual();
 	enemies = initGroup();
 	npcs = initGroup();
+	thisGroupContainer = initGroupContainer(enemies,npcs, NULL, NULL, NULL);
+
 	viewShift = initShiftData();
 	initThisCursor(2004,RGB(224, 64, 192),0,0);
 	initThisConsole(2010,0,0,300,200);
@@ -654,7 +659,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, enemies, npcs);

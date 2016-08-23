@@ -267,15 +267,15 @@ int cursorWithinAbilityRange(individual * player, int x, int y){
 	}
 }
 
-void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGroup * casterIndividualGroup, individual * player, individualGroup * npcs, individualGroup * enemies, field * thisField, int x, int y){
+void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int x, int y){
 	int aoe = 0,  minX, maxX, minY, maxY;
 	ability * tmpAbility = thisIndividual->activeAbilities->selectedAbility;
 
 	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
 
 	if(processCasterOnlyEffects(thisIndividual, tmpAbility)){
-		if(casterIndividualGroup != NULL){
-			deleteIndividiaulFromGroup(casterIndividualGroup, thisIndividual);
+		if(getGroupFromIndividual(thisGroupContainer, thisIndividual) != NULL){
+			deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, thisIndividual), thisIndividual);
 		}
 
 		removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
@@ -292,11 +292,11 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individualGr
 	minY = y - aoe;
 	maxY = y + aoe;
 
-	preprocessIndividalGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
-	preprocessIndividalGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, minX, maxX, minY, maxY);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, minX, maxX, minY, maxY);
 
-	useAbilityOnIndividualGroupsInAOE(thisIndividual, enemies, thisField, minX, maxX, minY, maxY);
-	useAbilityOnIndividualGroupsInAOE(thisIndividual, npcs, thisField, minX, maxX, minY, maxY);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, minX, maxX, minY, maxY);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, minX, maxX, minY, maxY);
 
 	if(player->hp > 0 && player->playerCharacter->x >= minX && player->playerCharacter->x <= maxX &&
 		player->playerCharacter->y >= minY && player->playerCharacter->y <= maxY ){
@@ -469,8 +469,8 @@ field * loadMap(char * mapName, char* directory, individual * player, individual
 
 	fclose(fp);
 
-	loadGroup(enemies, enemyMap, directory);
-	loadGroup(npcs, npcMap, directory);
+	loadGroup(enemies, GROUP_ENEMIES, enemyMap, directory);
+	loadGroup(npcs, GROUP_NPCS, npcMap, directory);
 	loadDialog(dialog, directory);
 
 	field* thisField = initField(fullMapName);
@@ -686,7 +686,11 @@ field* initField(char* fieldFileName){
 				newSpace->isPassable = 1;
 			}
 
-			newSpace->canSeeThrough = 1;
+			if(currentChar == 't' || currentChar == 's'){
+				newSpace->canSeeThrough = 0;
+			}else{
+				newSpace->canSeeThrough = 1;
+			}
 
 			currentChar = line[xIndex+1];
 			if (currentChar == '>') {

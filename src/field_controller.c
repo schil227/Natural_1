@@ -57,7 +57,7 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 void createIndividualFromLine(individual * newIndividual, char * line){
 	int imageID,ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,isSneaking,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
-	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam;
+	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
 	char * name = malloc(sizeof(char) * 32);
 	char * strtok_save_pointer;
 	char critType[4];
@@ -166,6 +166,9 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	gold = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	faction = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	thisAnimationContainer->animationsEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -195,7 +198,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, thisAnimationContainer, secondaryAnimationContainer)){
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
 
@@ -204,7 +207,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 
 
-void loadGroup(individualGroup * group, char * fileName, char* directory){
+void loadGroup(individualGroup * group, groupType thisGroupType, char * fileName, char* directory){
 	char * fullFileName = appendStrings(directory, fileName);
 	fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
@@ -216,8 +219,10 @@ void loadGroup(individualGroup * group, char * fileName, char* directory){
 			int id = atoi(value);
 
 			individual * newIndividual = getIndividualFromRegistry(id);
+
 			if(newIndividual != NULL){
 				if (doesExist(newIndividual->ID)) {
+					newIndividual->currentGroupType = thisGroupType;
 					addIndividualToGroup(group, newIndividual);
 				}
 			}else{
@@ -231,6 +236,42 @@ void loadGroup(individualGroup * group, char * fileName, char* directory){
 
 	fclose(FP);
 	free(fullFileName);
+}
+
+groupContainer * initGroupContainer(individualGroup * enemies, individualGroup* npcs, individualGroup* allies, individualGroup* beasts, individualGroup* guards){
+	groupContainer * thisGroupContainer = malloc(sizeof(groupContainer));
+	thisGroupContainer->enemies = enemies;
+	thisGroupContainer->npcs = npcs;
+	thisGroupContainer->allies = allies;
+	thisGroupContainer->beasts = beasts;
+	thisGroupContainer->guards = guards;
+
+	return thisGroupContainer;
+}
+
+individualGroup * getGroupFromIndividual(groupContainer * thisGroupContainer, individual * thisIndividual){
+
+	if(thisIndividual == NULL){
+		cwrite("!! NULL INDIVIDUAL: CANNOT OBTAIN GROUP FROM INDIVIDUAL !!");
+		return NULL;
+	}
+
+	switch(thisIndividual->currentGroupType){
+	case GROUP_ALLIES:
+		return thisGroupContainer->allies;
+	case GROUP_BEASTS:
+		return thisGroupContainer->beasts;
+	case GROUP_ENEMIES:
+		return thisGroupContainer->enemies;
+	case GROUP_GUARDS:
+		return thisGroupContainer->guards;
+	case GROUP_NPCS:
+		return thisGroupContainer->npcs;
+	default:
+		cwrite("!! INDIVIDUAL GROUP TYPE NOT FOUND !! ");
+		return NULL;
+	}
+
 }
 
 void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, shiftData * viewShift){
@@ -554,8 +595,8 @@ int attemptToTransit(field ** thisField, individual * player, individualGroup * 
 	return 0;
 }
 
-void tryTalkGroups(individualGroup * enemies, individualGroup * npcs, individual * player, int cursorX, int cursorY){
-	if(!tryTalk(npcs,player,getCursorX(),getCursorY()) && !tryTalk(enemies,player,getCursorX(),getCursorY())){
+void tryTalkGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){
+	if(!tryTalk(thisGroupContainer->npcs,player,getCursorX(),getCursorY()) && !tryTalk(thisGroupContainer->enemies,player,getCursorX(),getCursorY())){
 		cwrite("There's nobody there.");
 	}
 }
