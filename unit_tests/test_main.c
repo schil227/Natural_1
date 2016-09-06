@@ -10,7 +10,7 @@
 #include<stdio.h>
 #include<string.h>
 #include"../src/headers/general.h"
-#include"./test_headers/test_general.h"
+//#include"./test_headers/test_general.h"
 //#include"./test_headers/test_character.h"
 #include"../src/headers/individual_pub_methods.h"
 #include"../src/headers/field_pub_methods.h"

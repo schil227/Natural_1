@@ -274,6 +274,21 @@ individualGroup * getGroupFromIndividual(groupContainer * thisGroupContainer, in
 
 }
 
+void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shiftData * viewShift){
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->npcs, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->enemies, viewShift);
+	//TODO: add other groups
+
+	//draw animated enemy/npc over others
+	if(thisGroupContainer->enemies->currentIndividualIndex != -1){
+		drawIndividual(hdc, hdcBuffer, thisGroupContainer->enemies->individuals[thisGroupContainer->enemies->currentIndividualIndex], viewShift);
+	}
+
+	if(thisGroupContainer->npcs->currentIndividualIndex != -1){
+		drawIndividual(hdc, hdcBuffer, thisGroupContainer->npcs->individuals[thisGroupContainer->npcs->currentIndividualIndex], viewShift);
+	}
+}
+
 void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, shiftData * viewShift){
 	int index;
 

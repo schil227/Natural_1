@@ -10,7 +10,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
-#include "./test_headers/all_general.h"
+//#include "./test_headers/all_general.h"
 
 void test_general_all(){
 	assert(1==1);

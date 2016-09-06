@@ -40,6 +40,21 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_IMAGES = 500;
 	thisGlobalRegister->numImages = 0;
+
+	thisGlobalRegister->MAX_TEMPLATE_ABILITIES = 4;
+	thisGlobalRegister->numTemplateAbilities = 0;
+
+	thisGlobalRegister->MAX_PERMINENT_ABILITIES= 100;
+	thisGlobalRegister->numPerminentAbilities = 0;
+
+	thisGlobalRegister->MAX_SELF_ABILITIES = 100;
+	thisGlobalRegister->numSelfAbilities = 0;
+
+	thisGlobalRegister->MAX_TARGETED_ABILITIES = 100;
+	thisGlobalRegister->numTargetedAbilities = 0;
+
+	thisGlobalRegister->MAX_INSTANT_ABILITIES = 100;
+	thisGlobalRegister->numInstantAbilities = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -122,6 +137,66 @@ character * getImageFromRegistry(int id){
 	return NULL;
 }
 
+ability * getTemplateAbilityFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numTemplateAbilities; i++){
+		if(thisGlobalRegister->templateAbilities[i]->ID == id){
+			return thisGlobalRegister->templateAbilities[i];
+		}
+	}
+
+	return NULL;
+}
+
+ability * getPerminentAbilityFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numPerminentAbilities; i++){
+		if(thisGlobalRegister->perminentAbilities[i]->ID == id){
+			return thisGlobalRegister->perminentAbilities[i];
+		}
+	}
+
+	return NULL;
+}
+
+ability * getSelfAbilityFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numSelfAbilities; i++){
+		if(thisGlobalRegister->selfAbilities[i]->ID == id){
+			return thisGlobalRegister->selfAbilities[i];
+		}
+	}
+
+	return NULL;
+}
+
+ability * getTargetedAbilityFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numTargetedAbilities; i++){
+		if(thisGlobalRegister->targetedAbilities[i]->ID == id){
+			return thisGlobalRegister->targetedAbilities[i];
+		}
+	}
+
+	return NULL;
+}
+
+ability * getInstantAbilityFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numInstantAbilities; i++){
+		if(thisGlobalRegister->instantAbilities[i]->ID == id){
+			return thisGlobalRegister->instantAbilities[i];
+		}
+	}
+
+	return NULL;
+}
+
 int addIndividualToRegistry(individual * thisIndividual){
 	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
 		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
@@ -158,14 +233,14 @@ int addEventToRegistry(event * thisEvent){
 	return 0;
 }
 
-int addAbilityToRegistry(ability * thisAbility){
-	if(thisGlobalRegister->numEffects < thisGlobalRegister->MAX_EFFECTS){
-		thisGlobalRegister->abilityRegistry[thisGlobalRegister->numEffects] = thisAbility;
-		thisGlobalRegister->numEffects++;
+int addTemplateAbilityToRegistry(ability * thisAbility){
+	if(thisGlobalRegister->numTemplateAbilities < thisGlobalRegister->MAX_TEMPLATE_ABILITIES){
+		thisGlobalRegister->templateAbilities[thisGlobalRegister->numTemplateAbilities] = thisAbility;
+		thisGlobalRegister->numTemplateAbilities++;
 		return 1;
 	}
 
-	cwrite("!!MAX EFFECTS IN REGISTRY!!");
+	cwrite("!!MAX ABILITIES IN REGISTRY!!");
 
 	return 0;
 }
@@ -190,6 +265,54 @@ int addImageToRegistry(character * image){
 	}
 
 	cwrite("!!MAX IMAGES IN REGISTRY!!");
+
+	return 0;
+}
+
+int addPerminentAbilityToRegistry(ability * thisAbility){
+	if(thisGlobalRegister->numPerminentAbilities < thisGlobalRegister->MAX_PERMINENT_ABILITIES){
+		thisGlobalRegister->perminentAbilities[thisGlobalRegister->numPerminentAbilities] = thisAbility;
+		thisGlobalRegister->numPerminentAbilities++;
+		return 1;
+	}
+
+	cwrite("!! MAX PERMINENT ABILITIES IN REGISTRY !!");
+
+	return 0;
+}
+
+int addSelfAbilityToRegistry(ability * thisAbility){
+	if(thisGlobalRegister->numSelfAbilities < thisGlobalRegister->MAX_SELF_ABILITIES){
+		thisGlobalRegister->selfAbilities[thisGlobalRegister->numSelfAbilities] = thisAbility;
+		thisGlobalRegister->numSelfAbilities++;
+		return 1;
+	}
+
+	cwrite("!! MAX SELF ABILITIES IN REGISTRY !!");
+
+	return 0;
+}
+
+int addTargetAbilityToRegistry(ability * thisAbility){
+	if(thisGlobalRegister->numTargetedAbilities < thisGlobalRegister->MAX_TARGETED_ABILITIES){
+		thisGlobalRegister->targetedAbilities[thisGlobalRegister->numTargetedAbilities] = thisAbility;
+		thisGlobalRegister->numTargetedAbilities++;
+		return 1;
+	}
+
+	cwrite("!! MAX TARGETED ABILITIES IN REGISTRY !!");
+
+	return 0;
+}
+
+int addInstantAbilityToRegistry(ability * thisAbility){
+	if(thisGlobalRegister->numInstantAbilities < thisGlobalRegister->MAX_INSTANT_ABILITIES){
+		thisGlobalRegister->instantAbilities[thisGlobalRegister->numInstantAbilities] = thisAbility;
+		thisGlobalRegister->numInstantAbilities++;
+		return 1;
+	}
+
+	cwrite("!! MAX INSTANT ABILITIES IN REGISTRY !!");
 
 	return 0;
 }
@@ -301,6 +424,16 @@ void destroyTheGlobalRegister(){
 	for(i = 0; i < thisGlobalRegister->numImages; i++){
 		destroyCharacter(thisGlobalRegister->imageRegistry[i]);
 	}
+
+//	for(i = 0; i < thisGlobalRegister->numEvents; i++){
+//		free(thisGlobalRegister->eventRegistry[i]);
+//	}
+//
+//	for(i = 0; i < thisGlobalRegister->numSounds; i++){
+//		free(thisGlobalRegister->soundMapRegistry[i]);
+//	}
+
+	//TODO: gotta free up the registry better.
 	free(thisGlobalRegister);
 }
 
@@ -380,23 +513,6 @@ void loadEventsToRegistry(char* directory, char* eventsFileName){
 	free(fullFileName);
 }
 
-void loadEffectsToRegistry(char* directory, char* effectsFileName){
-	char * fullFileName = appendStrings(directory, effectsFileName);
-	FILE * FP = fopen(fullFileName, "r");
-	char line[2048];
-
-	while(fgets(line,2048,FP) != NULL){
-		if (line[0] != '#') {
-			ability * newAbility = createAbilityFromLine(line);
-			newAbility->totalManaCost = calculateManaCost(newAbility);
-			addAbilityToRegistry(newAbility);
-		}
-	}
-
-	fclose(FP);
-	free(fullFileName);
-}
-
 void loadSoundsToRegistry(char* directory, char* soundFileName){
 	char * fullFileName = appendStrings(directory, soundFileName);
 	FILE * FP = fopen(fullFileName, "r");
@@ -423,6 +539,24 @@ void loadImagesToRegistry(char* directory, char* imageFileName){
 		if (line[0] != '#') {
 			character * newCharacter = createCharacterFromLine(line);
 			addImageToRegistry(newCharacter);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+//TODO: load other ability types to the registry
+void loadTargetedAbilitiesToRegistry(char* directory, char* targetedAbilitiesFileName){
+	char * fullFileName = appendStrings(directory, targetedAbilitiesFileName);
+
+	FILE * FP = fopen(fullFileName, "r");
+	char line[128];
+
+	while(fgets(line,128,FP) != NULL){
+		if (line[0] != '#') {
+			ability * newAbility = createTargetedAbilityFromLine(line);
+			addTargetAbilityToRegistry(newAbility);
 		}
 	}
 

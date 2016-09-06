@@ -1058,3 +1058,112 @@ ability * cloneAbility(ability * thisAbility){
 
 	return newAbility;
 }
+
+ability * createTargetedAbilityFromLine(char * line){
+	ability * targetedAbility = cloneAbility(getTemplateAbilityFromRegistry(2));
+	char * value;
+
+	value = strtok(line, ";");
+	targetedAbility->ID = atoi(value);
+
+	value = strtok(NULL, ";");
+	strcpy(targetedAbility->name,value);
+
+	value = strtok(NULL, ";");
+	targetedAbility->damageType->selectedIndex = atoi(value);
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->range->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->range->selectedIndex = targetedAbility->range->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->targeted->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->targeted->selectedIndex = targetedAbility->targeted->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(value != 'd'){
+		targetedAbility->diceDamage->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->diceDamage->selectedIndex = targetedAbility->diceDamage->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->diceDamageMultiplier->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->diceDamageMultiplier->selectedIndex = targetedAbility->diceDamageMultiplier->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->damage->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->damage->selectedIndex = targetedAbility->damage->defaultStartingIndex;
+	}
+
+	//status
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->status->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->status->selectedIndex = targetedAbility->status->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->statusDiceDamage->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->statusDiceDamage->selectedIndex = targetedAbility->statusDiceDamage->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->statusDamage->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->statusDamage->selectedIndex = targetedAbility->statusDamage->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->diceStatusDuration->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->diceStatusDuration->selectedIndex = targetedAbility->diceStatusDuration->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->statusDuration->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->statusDuration->selectedIndex = targetedAbility->statusDuration->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->aoe->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->aoe->selectedIndex = targetedAbility->aoe->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->actions->selectedIndex = atoi(value);
+	}else{
+		targetedAbility->actions->selectedIndex = targetedAbility->actions->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->totalManaCost = atoi(value);
+	}else{
+		targetedAbility->totalManaCost = calculateManaCost(targetedAbility);
+	}
+
+
+	return targetedAbility;
+}

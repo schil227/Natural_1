@@ -132,17 +132,7 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}
 
-	drawIndividualGroup(hdc, hdcBuffer, npcs, viewShift);
-	drawIndividualGroup(hdc, hdcBuffer, enemies, viewShift);
-
-	//draw animated enemy/npc over others
-	if(enemies->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, enemies->individuals[enemies->currentIndividualIndex], viewShift);
-	}
-
-	if(npcs->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, npcs->individuals[npcs->currentIndividualIndex], viewShift);
-	}
+	drawGroups(hdc, hdcBuffer, thisGroupContainer, viewShift);
 
 	if(isSpecialDrawModeEnabled()){
 		drawSpecial(hdc, hdcBuffer, viewShift);
@@ -211,6 +201,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		enemies = initGroup();
 		npcs = initGroup();
 		thisGroupContainer = initGroupContainer(enemies,npcs, NULL, NULL, NULL);
+		initalizeTheGlobalRegister();
 		initThisCursor(2004,RGB(224, 64, 192),0,0);
 		initThisConsole(2010,0,0,300,200);
 		initSidebarInstance(2014,0,0,185,400);
@@ -220,7 +211,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
 		initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
 		initSpecialDrawInstance();
-		initalizeTheGlobalRegister();
 		initEventHandlers();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");
 		appendNewMessageNode("You leave the forest.");
@@ -231,6 +221,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadEventsToRegistry(mapDirectory, "events.txt");
 		loadSoundsToRegistry(mapDirectory, "sounds.txt");
 		loadImagesToRegistry(mapDirectory, "images.txt");
+		loadTargetedAbilitiesToRegistry(mapDirectory, "targeted_abilities.txt");
 
 		enableSound();
 
@@ -645,6 +636,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
 	loadSoundsToRegistry(mapDirectory, "sounds.txt");
 	loadImagesToRegistry(mapDirectory, "images.txt");
+	loadTargetedAbilitiesToRegistry(mapDirectory, "targeted_abilities.txt");
 	initSoundPlayerInstance();
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();

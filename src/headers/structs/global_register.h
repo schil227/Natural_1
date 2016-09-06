@@ -21,22 +21,46 @@ typedef struct {
 	individual * individualRegistry[1000];
 	item * itemRegistry[5000];
 	event * eventRegistry[1000];
-	ability * abilityRegistry[500];
+	ability * templateAbilities[500];
 	soundMap * soundMapRegistry[300];
 	character * imageRegistry[500];
+	ability * perminentAbilities[100];
+	ability * selfAbilities[100];
+	ability * targetedAbilities[100];
+	ability * instantAbilities[100];
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
+
 	int MAX_ITEMS;
 	int numItems;
+
 	int MAX_EVENTS;
 	int numEvents;
+
 	int MAX_EFFECTS;
 	int numEffects;
+
 	int MAX_SOUNDS;
 	int numSounds;
+
 	int MAX_IMAGES;
 	int numImages;
+
+	int MAX_TEMPLATE_ABILITIES;
+	int numTemplateAbilities;
+
+	int numPerminentAbilities;
+	int MAX_PERMINENT_ABILITIES;
+
+	int numSelfAbilities;
+	int MAX_SELF_ABILITIES;
+
+	int numTargetedAbilities;
+	int MAX_TARGETED_ABILITIES;
+
+	int numInstantAbilities;
+	int MAX_INSTANT_ABILITIES;
 
 } globalRegister;
 

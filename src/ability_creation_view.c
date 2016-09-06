@@ -54,13 +54,33 @@ void loadTemplateAbilities(char* directory, char* effectsFileName){
 			break;
 		}
 
-		thisAbilityCreationInstance->abilityTemplates[i] = createAbilityFromLine(line);
+		ability * tmpAbility = createAbilityFromLine(line);
+		addTemplateAbilityToRegistry(tmpAbility);
+		thisAbilityCreationInstance->abilityTemplates[i] = cloneAbility(tmpAbility);
+		thisAbilityCreationInstance->abilityTemplates[i]->ID = tmpAbility->ID;
 		i++;
 	}
+
 	thisAbilityCreationInstance->numAbilityTemplates = i;
 
 	fclose(FP);
 	free(fullFileName);
+}
+
+ability * getTemplateAbility(int ID){
+	switch(ID){
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+			return thisAbilityCreationInstance->abilityTemplates[ID];
+	}
+
+	char errlog[32];
+	sprintf(errlog, "!! ABILITY TEMPLATE ID NOT FOUND: %d !!", ID);
+	cwrite(errlog);
+
+	return NULL;
 }
 
 void toggleCreateMode(){
