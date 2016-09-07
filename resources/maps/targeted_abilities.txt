@@ -1,0 +1,2 @@
+100;fireball;1;1;d;1;d;d;d;d;d;d;d;d;d;1
+101;burn;1;d;d;d;d;d;2;1;1;1;d;d;d;1

@@ -8,8 +8,6 @@
 #include<string.h>
 #include<stdio.h>
 
-
-
 void moveRECTDown(RECT * thisRect, int distance){
 	thisRect->top += distance;
 	thisRect->bottom = thisRect->bottom + distance;
@@ -36,8 +34,6 @@ int calcAbilityDuration(ability * thisAbility){
 	}else{
 		return durationMod;
 	}
-
-
 }
 
 int calculateManaCost(ability * thisAbility){

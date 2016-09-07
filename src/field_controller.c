@@ -63,6 +63,9 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	char critType[4];
 	animationContainer * thisAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;
+	abilityList loadedAbilities;
+	loadedAbilities.MAX_ABILITIES = 64;
+	loadedAbilities.numAbilities = 0;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	imageID = atoi(value);
@@ -168,6 +171,20 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	faction = atoi(value);
 
+	//Load abilities from given type
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAbilitiesToList(&loadedAbilities, value, 0);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAbilitiesToList(&loadedAbilities, value, 1);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAbilitiesToList(&loadedAbilities, value, 2);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	loadAbilitiesToList(&loadedAbilities, value, 3);
+
+	//load animation metadata
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	thisAnimationContainer->animationsEnabled = atoi(value);
 
@@ -198,14 +215,38 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, thisAnimationContainer, secondaryAnimationContainer)){
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
 
 	free(name);
 }
 
+void loadAbilitiesToList(abilityList * abilities, char * line, int abilityTemplateType){
+	int i, intVal;
+	char * value = NULL;
 
+	value = strtok(line, ",");
+	intVal = atoi(value);
+
+	if(intVal == -1){
+		return;
+	}
+
+	for(i = 0; i < intVal; i++){
+		value = strtok(NULL, ",");
+		ability * tmpAbility = getAbilityFromRegistryFromType(atoi(value), abilityTemplateType);
+
+		if(tmpAbility != NULL){
+			if(abilities->numAbilities < abilities->MAX_ABILITIES){
+				abilities->abilitiesList[abilities->numAbilities] = tmpAbility;
+				abilities->numAbilities++;
+			}else{
+				cwrite("!! CANNOT ADD MORE ABILITIES TO INDIVIDUAL !!");
+			}
+		}
+	}
+}
 
 void loadGroup(individualGroup * group, groupType thisGroupType, char * fileName, char* directory){
 	char * fullFileName = appendStrings(directory, fileName);

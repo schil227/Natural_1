@@ -197,6 +197,21 @@ ability * getInstantAbilityFromRegistry(int id){
 	return NULL;
 }
 
+ability * getAbilityFromRegistryFromType(int id, int abilityType){
+	switch(abilityType){
+	case 0:
+		return getPerminentAbilityFromRegistry(id);
+	case 1:
+			return getSelfAbilityFromRegistry(id);
+	case 2:
+			return getTargetedAbilityFromRegistry(id);
+	case 3:
+			return getInstantAbilityFromRegistry(id);
+	}
+
+	return NULL;
+}
+
 int addIndividualToRegistry(individual * thisIndividual){
 	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
 		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
@@ -435,6 +450,19 @@ void destroyTheGlobalRegister(){
 
 	//TODO: gotta free up the registry better.
 	free(thisGlobalRegister);
+}
+
+void loadGlobalRegister(char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
+						char * imagesData, char * targetedAbilitiesData){
+	// Priority loading:
+	//individuals dependant on xAbilities
+	loadTargetedAbilitiesToRegistry(mapDirectory, targetedAbilitiesData);
+
+	loadIndividualsToRegistry(mapDirectory, individualsData);
+	loadItemsToRegistry(mapDirectory, itemsData);
+	loadEventsToRegistry(mapDirectory, eventsData);
+	loadSoundsToRegistry(mapDirectory, soundsData);
+	loadImagesToRegistry(mapDirectory, imagesData);
 }
 
 void loadIndividualsToRegistry(char* directory, char * individualsFileName){
