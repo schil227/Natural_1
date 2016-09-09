@@ -443,6 +443,9 @@ item * findManaRestoringItem(inventory * backpack){
 	item * tmpItem;
 
 	manaItems.inventorySize = 0;
+	for(i = 0; i < 40; i++){
+		manaItems.inventoryArr[i] = NULL;
+	}
 
 	for(i = 0; i < 40; i++){
 		tmpItem = backpack->inventoryArr[i];
@@ -614,7 +617,46 @@ int checkForTargets(individual * enemy, individual * player, groupContainer * th
 	}
 }
 
+int hasOffensiveAbilityInRange(individual * thisIndividual){
+	int i, randIndex, abilityRange, range = 0;
+	abilityList inRangeOffensiveAbilities;
+	inRangeOffensiveAbilities.numAbilities = 0;
+	inRangeOffensiveAbilities.MAX_ABILITIES = 64;
+
+	if(thisIndividual->targetedIndividual == NULL || thisIndividual->abilities->numAbilities == 0){
+		return 0;
+	}
+
+	range = max(abs(thisIndividual->playerCharacter->x - thisIndividual->targetedIndividual->playerCharacter->x) , abs(thisIndividual->playerCharacter->y - thisIndividual->targetedIndividual->playerCharacter->y));
+
+	for(i = 0; i < thisIndividual->abilities->numAbilities; i++){
+		if(!thisIndividual->abilities->abilitiesList[i]->rangeEnabled){
+			continue;
+		}
+
+		abilityRange = thisIndividual->abilities->abilitiesList[i]->range->effectAndManaArray[thisIndividual->abilities->abilitiesList[i]->range->selectedIndex]->effectMagnitude;
+
+		if( thisIndividual->abilities->abilitiesList[i]->totalManaCost <= thisIndividual->mana
+				&& abilityRange >= range
+				&& abilityIsOffensive(thisIndividual->abilities->abilitiesList[i])
+				&& inRangeOffensiveAbilities.numAbilities < inRangeOffensiveAbilities.MAX_ABILITIES){
+			inRangeOffensiveAbilities.abilitiesList[inRangeOffensiveAbilities.numAbilities] = thisIndividual->abilities->abilitiesList[i];
+			inRangeOffensiveAbilities.numAbilities++;
+		}
+	}
+
+	if(inRangeOffensiveAbilities.numAbilities == 0){
+		return 0;
+	}else{
+		randIndex = rand() % inRangeOffensiveAbilities.numAbilities;
+		thisIndividual->activeAbilities->selectedAbility = inRangeOffensiveAbilities.abilitiesList[randIndex];
+		return 1;
+	}
+}
+
 int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+
+	//Restore Mana
 	if(isLowOnMana(enemy)){
 		item * manaRestoringItem = findManaRestoringItem(enemy->backpack);
 		if(manaRestoringItem != NULL){
@@ -633,6 +675,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 		}
 	}
 
+	//Restore HP
 	if(isLowOnHP(enemy)){
 		ability * hpRestoringAbility = getRandomHPRestoringAbility(enemy->mana, enemy->abilities);
 		item * hpRestoringItem = getRandomHPRestoringItem(enemy->backpack);
@@ -699,37 +742,62 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 		}//Add a 'speak' option
 	}
 
-	if(individualWithinRange(enemy, enemy->targetedIndividual)){
-		if(attackIndividual(enemy, enemy->targetedIndividual)){
-			deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, enemy->targetedIndividual), enemy->targetedIndividual);
-			removeIndividualFromField(thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
-		}
-		enemy->remainingActions--;
-		return 0;
-	}else{//move closer to target
-		nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy, enemy->targetedIndividual);
+	//If pre-disposition to attacking (vs. support)
+	if (1) {
+		//has attack ability to use?
+		if (isGreaterThanPercentage(rand() % 100, 100, 50) && hasOffensiveAbilityInRange(enemy)) { //REMOVE CODEBLOCKER
+			int numActions = 1;
 
-		//nowhere to go, nothing to animate
-		if (enemyNodeArr->size == 0) {
-			enemy->remainingActions--;
+			useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
+
+			if(enemy->activeAbilities->selectedAbility->actionsEnabled){
+				numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+			}
+
+			enemy->activeAbilities->selectedAbility = NULL;
+
+			enemy->remainingActions -= numActions;
 			return 0;
 		}
 
-		//Gonna move, remove them from the field and update the moveNodeMeta
-		getSpaceFromField(thisField, enemy->playerCharacter->x, enemy->playerCharacter->y)->currentIndividual = NULL;
-//		setIndividualSpace(thisField, enemy,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
+		//try physically attacking
+		if (individualWithinRange(enemy, enemy->targetedIndividual)) {
+			if (attackIndividual(enemy, enemy->targetedIndividual)) {
+				deleteIndividiaulFromGroup(
+						getGroupFromIndividual(thisGroupContainer,
+								enemy->targetedIndividual),
+						enemy->targetedIndividual);
+				removeIndividualFromField(thisField,
+						enemy->targetedIndividual->playerCharacter->x,
+						enemy->targetedIndividual->playerCharacter->y);
+			}
+			enemy->remainingActions--;
+			return 0;
+		} else { //move closer to target
+			nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy,
+					enemy->targetedIndividual);
 
-		(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
-		(*thisMoveNodeMeta)->sum = 0;
+			//nowhere to go, nothing to animate
+			if (enemyNodeArr->size == 0) {
+				enemy->remainingActions--;
+				return 0;
+			}
 
-		populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+			//Gonna move, remove them from the field and update the moveNodeMeta
+			getSpaceFromField(thisField, enemy->playerCharacter->x,
+					enemy->playerCharacter->y)->currentIndividual = NULL;
 
-		destroyNodeArr(enemyNodeArr);
+			(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
+			(*thisMoveNodeMeta)->sum = 0;
 
-		enemy->remainingActions--;
-		return 1;
+			populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+
+			destroyNodeArr(enemyNodeArr);
+
+			enemy->remainingActions--;
+			return 1;
+		}
 	}
-
 
 }
 

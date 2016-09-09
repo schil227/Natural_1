@@ -179,7 +179,6 @@ void destroyIndividual(individual* thisIndividual){
 	free(thisIndividual->backpack);
 
 	free(thisIndividual);
-
 }
 
 item * getActiveWeapon(inventory * backpack){
@@ -299,6 +298,43 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 		}
 
 	}
+}
+
+int abilityIsOffensive(ability * thisAbility){
+	if(thisAbility->type == 'd' && abilityIsHarmful(thisAbility)){
+		return 1;
+	}
+
+	if (thisAbility->type == 't') {
+		if (thisAbility->diceDamageEnabled
+				&& thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+		if (thisAbility->damageEnabled
+				&& thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+		if(abilityIsHarmful(thisAbility)){
+			return 1;
+		}
+	}
+
+	if(thisAbility->type == 'i'){
+		if (thisAbility->extraAttackEnabled
+				&& thisAbility->extraAttack->effectAndManaArray[thisAbility->extraAttack->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+		if (thisAbility->attackEnabled
+				&& thisAbility->attack->effectAndManaArray[thisAbility->attack->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+		if (thisAbility->damageModEnabled
+				&& thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 int abilityIsHarmful(ability * thisAbility){
