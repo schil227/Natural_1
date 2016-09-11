@@ -68,70 +68,102 @@ int calculateManaCost(ability * thisAbility){
 		calcStatusCost(&sum, &hasEffect, thisAbility);
 	}
 
+	duration = 0;
+
+	updateElementSummation(&duration, &dummyInt, thisAbility->durationEnabled, thisAbility->duration);
+
+	updateElementSummation(&duration, &dummyInt, thisAbility->durationModEnabled, thisAbility->durationMod);
+
 	updateElementSummation(&sum, &hasEffect, thisAbility->actionsEnabled, thisAbility->actions);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->STREnabled, thisAbility->STR);
+	if(!(thisAbility->type == 't' && duration == 0)){
+		updateElementSummation(&sum, &hasEffect, thisAbility->STREnabled, thisAbility->STR);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->DEXEnabled, thisAbility->DEX);
+		updateElementSummation(&sum, &hasEffect, thisAbility->DEXEnabled, thisAbility->DEX);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->CONEnabled, thisAbility->CON);
+		updateElementSummation(&sum, &hasEffect, thisAbility->CONEnabled, thisAbility->CON);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->WILLEnabled, thisAbility->WILL);
+		updateElementSummation(&sum, &hasEffect, thisAbility->WILLEnabled, thisAbility->WILL);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->INTEnabled, thisAbility->INT);
+		updateElementSummation(&sum, &hasEffect, thisAbility->INTEnabled, thisAbility->INT);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->WISEnabled, thisAbility->WIS);
+		updateElementSummation(&sum, &hasEffect, thisAbility->WISEnabled, thisAbility->WIS);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->CHREnabled, thisAbility->CHR);
+		updateElementSummation(&sum, &hasEffect, thisAbility->CHREnabled, thisAbility->CHR);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->LUCKEnabled, thisAbility->LUCK);
+		updateElementSummation(&sum, &hasEffect, thisAbility->LUCKEnabled, thisAbility->LUCK);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->acEnabled, thisAbility->ac);
+		updateElementSummation(&sum, &hasEffect, thisAbility->acEnabled, thisAbility->ac);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->attackEnabled, thisAbility->attack);
+		updateElementSummation(&sum, &hasEffect, thisAbility->attackEnabled, thisAbility->attack);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->damageModEnabled, thisAbility->damageMod);
+		updateElementSummation(&sum, &hasEffect, thisAbility->damageModEnabled, thisAbility->damageMod);
 
-	updateElementSummation(&sum, &hasEffect, thisAbility->mvmtEnabled, thisAbility->mvmt);
+		updateElementSummation(&sum, &hasEffect, thisAbility->mvmtEnabled, thisAbility->mvmt);
+
+		updateElementSummation(&sum, &hasEffect, thisAbility->baseHPEnabled, thisAbility->baseHP);
+
+		updateElementSummation(&sum, &hasEffect, thisAbility->baseManaEnabled, thisAbility->baseMana);
+
+		//DR: ceil( sum(<allDRMagnitudes>)/2.0 )
+		if(thisAbility->type == 't'){
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->bluntDREnabled, thisAbility->bluntDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->chopDREnabled, thisAbility->chopDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->pierceDREnabled, thisAbility->pierceDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->slashDREnabled, thisAbility->slashDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->earthDREnabled, thisAbility->earthDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->fireDREnabled, thisAbility->fireDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->waterDREnabled, thisAbility->waterDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+			updateElementDRSummation(&dummyInt, &hasEffect, thisAbility->lightningDREnabled, thisAbility->lightningDR);
+			DRSum += abs(dummyInt);
+			dummyInt = 0;
+		}else{
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->bluntDREnabled, thisAbility->bluntDR);
+
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->chopDREnabled, thisAbility->chopDR);
+
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->pierceDREnabled, thisAbility->pierceDR);
+
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->slashDREnabled, thisAbility->slashDR);
+
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->earthDREnabled, thisAbility->earthDR);
+
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->fireDREnabled, thisAbility->fireDR);
+
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->waterDREnabled, thisAbility->waterDR);
+
+			updateElementDRSummation(&DRSum, &hasEffect, thisAbility->lightningDREnabled, thisAbility->lightningDR);
+		}
+
+		sum += ceil(DRSum/2.0);
+
+	}
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->diceHPEnabled, thisAbility->diceHP);
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->hpEnabled, thisAbility->hp);
-
-	updateElementSummation(&sum, &hasEffect, thisAbility->baseHPEnabled, thisAbility->baseHP);
-
-	updateElementSummation(&sum, &hasEffect, thisAbility->baseManaEnabled, thisAbility->baseMana);
-
-	//DR: ceil( sum(<allDRMagnitudes>)/2.0 )
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->bluntDREnabled, thisAbility->bluntDR);
-
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->chopDREnabled, thisAbility->chopDR);
-
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->pierceDREnabled, thisAbility->pierceDR);
-
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->slashDREnabled, thisAbility->slashDR);
-
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->earthDREnabled, thisAbility->earthDR);
-
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->fireDREnabled, thisAbility->fireDR);
-
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->waterDREnabled, thisAbility->waterDR);
-
-	updateElementDRSummation(&DRSum, &hasEffect, thisAbility->lightningDREnabled, thisAbility->lightningDR);
-
-	sum += ceil(DRSum/2.0);
 
 	//if a meaningful effect has not be modified, return initial mana cost
 //	if(!hasEffect){
 //		return (-1 - thisAbility->level);
 //	}
 
-	//#####effects that multiply below#####
-	duration = 0;
 
-	updateElementSummation(&duration, &dummyInt, thisAbility->durationEnabled, thisAbility->duration);
-
-	updateElementSummation(&duration, &dummyInt, thisAbility->durationModEnabled, thisAbility->durationMod);
 
 	if(duration > 1){
 		sum  = sum * duration;

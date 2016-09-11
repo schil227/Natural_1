@@ -314,6 +314,117 @@ int abilityIsOffensive(ability * thisAbility){
 				&& thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->effectMagnitude > 0) {
 			return 1;
 		}
+
+		if (thisAbility->STREnabled
+				&& thisAbility->STR->effectAndManaArray[thisAbility->STR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->DEXEnabled
+				&& thisAbility->DEX->effectAndManaArray[thisAbility->DEX->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->CONEnabled
+				&& thisAbility->CON->effectAndManaArray[thisAbility->CON->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->WILLEnabled
+				&& thisAbility->WILL->effectAndManaArray[thisAbility->WILL->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->INTEnabled
+				&& thisAbility->INT->effectAndManaArray[thisAbility->INT->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->WISEnabled
+				&& thisAbility->WIS->effectAndManaArray[thisAbility->WIS->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->CHREnabled
+				&& thisAbility->CHR->effectAndManaArray[thisAbility->CHR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->LUCKEnabled
+				&& thisAbility->LUCK->effectAndManaArray[thisAbility->LUCK->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->acEnabled
+				&& thisAbility->ac->effectAndManaArray[thisAbility->ac->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->attackEnabled
+				&& thisAbility->attack->effectAndManaArray[thisAbility->attack->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->damageModEnabled
+				&& thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->mvmtEnabled
+				&& thisAbility->mvmt->effectAndManaArray[thisAbility->mvmt->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->baseHPEnabled
+				&& thisAbility->baseHP->effectAndManaArray[thisAbility->baseHP->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->baseManaEnabled
+				&& thisAbility->baseMana->effectAndManaArray[thisAbility->baseMana->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->bluntDREnabled
+				&& thisAbility->bluntDR->effectAndManaArray[thisAbility->bluntDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->chopDREnabled
+				&& thisAbility->chopDR->effectAndManaArray[thisAbility->chopDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->pierceDREnabled
+				&& thisAbility->pierceDR->effectAndManaArray[thisAbility->pierceDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->slashDREnabled
+				&& thisAbility->slashDR->effectAndManaArray[thisAbility->slashDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->earthDREnabled
+				&& thisAbility->earthDR->effectAndManaArray[thisAbility->earthDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->fireDREnabled
+				&& thisAbility->fireDR->effectAndManaArray[thisAbility->fireDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->waterDREnabled
+				&& thisAbility->waterDR->effectAndManaArray[thisAbility->waterDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
+		if (thisAbility->lightningDREnabled
+				&& thisAbility->lightningDR->effectAndManaArray[thisAbility->lightningDR->selectedIndex]->effectMagnitude < 0) {
+			return 1;
+		}
+
 		if(abilityIsHarmful(thisAbility)){
 			return 1;
 		}

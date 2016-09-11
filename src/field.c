@@ -304,6 +304,8 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 		if(tmpAbility->type == 't'){
 			if(attackIndividualWithAbility(thisIndividual, player)){
 				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
+			}else{
+				useDurationAbilityOnIndividual(thisIndividual, tmpAbility);
 			}
 		}else if (tmpAbility->type == 'd'){
 			//add duration ability logic here
@@ -326,7 +328,7 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 						tmp->playerCharacter->x <= maxX &&
 						tmp->playerCharacter->y >= minY &&
 						tmp->playerCharacter->y <= maxY ){
-					if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
+					if(thisIndividual->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility)){
 						triggerEventOnAttack(tmp->ID);
 
 						if(!individualInGroup(tmp, thisGroup)){
@@ -364,7 +366,15 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 					tmp->playerCharacter->y >= minY &&
 					tmp->playerCharacter->y <= maxY ){
 				if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
-					if(attackIndividualWithAbility(thisIndividual, tmp)){
+					if(abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, tmp)){
+						deleteIndividiaulFromGroup(thisGroup, tmp);
+						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
+						removeFromExistance(tmp->ID);
+
+						individualsPassed--;
+					}
+
+					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeFromExistance(tmp->ID);

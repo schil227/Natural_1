@@ -262,28 +262,28 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 				 hdc, hdcBuffer, &textRect, ABILITY_BASE_MANA, "baseMana", 0, thisAbilityCreationInstance->abilityInsance->baseMana);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->bluntDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_BLUNT_DR, "bluntDR", 1, thisAbilityCreationInstance->abilityInsance->bluntDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_BLUNT_DR, "bluntDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->bluntDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->chopDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_CHOP_DR, "chopDR", 1, thisAbilityCreationInstance->abilityInsance->chopDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_CHOP_DR, "chopDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->chopDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->pierceDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_PIERCE_DR, "pierceDR", 1, thisAbilityCreationInstance->abilityInsance->pierceDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_PIERCE_DR, "pierceDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->pierceDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->slashDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_SLASH_DR, "slashDR", 1, thisAbilityCreationInstance->abilityInsance->slashDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_SLASH_DR, "slashDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->slashDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->earthDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_EARTH_DR, "earthDR", 1, thisAbilityCreationInstance->abilityInsance->earthDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_EARTH_DR, "earthDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->earthDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->fireDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_FIRE_DR, "fireDR", 1, thisAbilityCreationInstance->abilityInsance->fireDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_FIRE_DR, "fireDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->fireDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->waterDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_WATER_DR, "waterDR", 1, thisAbilityCreationInstance->abilityInsance->waterDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_WATER_DR, "waterDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->waterDR);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_LIGHTNING_DR, "lightningDR", 1, thisAbilityCreationInstance->abilityInsance->lightningDR);
+				 hdc, hdcBuffer, &textRect, ABILITY_LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->lightningDR);
 
 	DeleteDC(hdcMem);
 
@@ -328,9 +328,12 @@ void drawEffectMapList(HDC hdcBuffer, RECT * textRect, char * fieldName, int isD
 		moveRECTDown(textRect, 17);
 		char * tmpString = getEffectAndManaString(fieldName, mapList);
 		int cost;
-		if(isDR){
+		if(isDR == 1){
 			cost= mapList->effectAndManaArray[mapList->selectedIndex]->effectMagnitude;
-		}else{
+		}else if(isDR == 2){
+			cost= abs(mapList->effectAndManaArray[mapList->selectedIndex]->effectMagnitude);
+		}
+		else{
 			cost= mapList->effectAndManaArray[mapList->selectedIndex]->manaCost;
 		}
 		if(cost > 0){
