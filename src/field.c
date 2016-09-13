@@ -366,15 +366,8 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 					tmp->playerCharacter->y >= minY &&
 					tmp->playerCharacter->y <= maxY ){
 				if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
-					if(abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, tmp)){
-						deleteIndividiaulFromGroup(thisGroup, tmp);
-						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
-						removeFromExistance(tmp->ID);
-
-						individualsPassed--;
-					}
-
-					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
+					if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, tmp))
+							|| useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeFromExistance(tmp->ID);
@@ -391,7 +384,6 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 						individualsPassed--;
 					}
 				}
-
 
 			}
 

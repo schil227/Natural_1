@@ -648,7 +648,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
 
-	test_main(player, thisGroupContainer, main_field, viewShift);
+//	test_main(player, thisGroupContainer, main_field, viewShift);
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){

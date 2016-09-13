@@ -280,11 +280,11 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 
 nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
 	int i;
-	int nodeIndex = max(min(nodePath->size, getAttributeSum(thisIndividaul,"mvmt"))-1, 0);
+	int nodeIndex = max(min(nodePath->size, getAttributeSum(thisIndividaul,"mvmt")), 0);
 
 
 	if(nodeIndex > 0){ //going somewhere
-		node * endNode = nodePath->nodeArray[nodeIndex];
+		node * endNode = nodePath->nodeArray[nodeIndex-1];
 		node * allNodes[300];
 		node * activeNodes[300];
 		int i;
