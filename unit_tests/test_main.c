@@ -349,13 +349,13 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(tmpNPC->activeStatuses->statuses[0]->effect == STATUS_POISONED);
 
 	//status magnitude
-	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 2);
+	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 1);
 	assert(testPlayer->activeStatuses->statuses[0]->damage == 1);
 	assert(testPlayer->activeStatuses->statuses[0]->diceDamage == 4);
 
 	//after new turn, poison has fewer turns, damages individual
 	startTurn(testPlayer);
-	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 1);
+	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 0);
 	assert(testPlayer->hp == 12);
 
 	/*

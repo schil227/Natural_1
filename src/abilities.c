@@ -1087,6 +1087,342 @@ ability * cloneAbility(ability * thisAbility){
 	return newAbility;
 }
 
+ability * createPermenantAbilityFromLine(char * line){
+	ability * permenantAbility = cloneAbility(getTemplateAbilityFromRegistry(0));
+	char * value;
+
+	value = strtok(line, ";");
+	permenantAbility->ID = atoi(value);
+
+	value = strtok(NULL, ";");
+	strcpy(permenantAbility->name,value);
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		permenantAbility->range->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->STR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->DEX->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->CON->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->WILL->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->INT->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->WIS->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->CHR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->LUCK->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->ac->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->attack->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->damageMod->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->mvmt->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->baseHP->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->baseMana->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->bluntDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->chopDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->pierceDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->slashDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->earthDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->fireDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->waterDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->lightningDR->selectedIndex = atoi(value);
+	}
+
+	permenantAbility->totalManaCost = 0;
+
+	return permenantAbility;
+}
+
+ability * createDurationAbilityFromLine(char * line){
+	ability * durationAbility = cloneAbility(getTemplateAbilityFromRegistry(1));
+	char * value;
+
+	value = strtok(line,";");
+	durationAbility->ID = atoi(value);
+
+	value = strtok(NULL, ";");
+	strcpy(durationAbility->name,value);
+
+	value = strtok(NULL, ";");
+	durationAbility->damageType->selectedIndex = atoi(value);
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		durationAbility->range->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->diceDamage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->diceDamageMultiplier->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->damage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->status->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->statusDiceDamage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->statusDamage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->diceStatusDuration->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->statusDuration->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->aoe->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->duration->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->durationMod->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->actions->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->STR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->DEX->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->CON->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->WILL->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->INT->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->WIS->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->CHR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->LUCK->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->ac->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->attack->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->damageMod->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->mvmt->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->diceHP->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->hp->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->baseHP->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->baseMana->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->bluntDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->chopDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->pierceDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->slashDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->earthDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->fireDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->waterDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->lightningDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->totalManaCost = atoi(value);
+	}
+
+	return durationAbility;
+}
+
 ability * createTargetedAbilityFromLine(char * line){
 	ability * targetedAbility = cloneAbility(getTemplateAbilityFromRegistry(2));
 	char * value;
@@ -1103,95 +1439,281 @@ ability * createTargetedAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->range->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->range->selectedIndex = targetedAbility->range->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->targeted->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->targeted->selectedIndex = targetedAbility->targeted->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
-	if(value != 'd'){
+	if(*value != 'd'){
 		targetedAbility->diceDamage->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->diceDamage->selectedIndex = targetedAbility->diceDamage->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->diceDamageMultiplier->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->diceDamageMultiplier->selectedIndex = targetedAbility->diceDamageMultiplier->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->damage->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->damage->selectedIndex = targetedAbility->damage->defaultStartingIndex;
 	}
 
-	//status
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->status->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->status->selectedIndex = targetedAbility->status->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->statusDiceDamage->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->statusDiceDamage->selectedIndex = targetedAbility->statusDiceDamage->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->statusDamage->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->statusDamage->selectedIndex = targetedAbility->statusDamage->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->diceStatusDuration->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->diceStatusDuration->selectedIndex = targetedAbility->diceStatusDuration->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->statusDuration->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->statusDuration->selectedIndex = targetedAbility->statusDuration->defaultStartingIndex;
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->aoe->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->aoe->selectedIndex = targetedAbility->aoe->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->duration->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->durationMod->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->actions->selectedIndex = atoi(value);
-	}else{
-		targetedAbility->actions->selectedIndex = targetedAbility->actions->defaultStartingIndex;
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->STR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->DEX->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->CON->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->WILL->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->INT->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->WIS->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->CHR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->LUCK->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->ac->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->attack->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->damageMod->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->mvmt->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->diceHP->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->hp->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->baseHP->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->baseMana->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->bluntDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->chopDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->pierceDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->slashDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->earthDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->fireDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->waterDR->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->lightningDR->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->totalManaCost = atoi(value);
-	}else{
-		targetedAbility->totalManaCost = calculateManaCost(targetedAbility);
 	}
 
-
 	return targetedAbility;
+}
+
+ability * createInstantAbilityFromLine(char * line) {
+	ability * instantAbility = cloneAbility(getTemplateAbilityFromRegistry(3));
+	char * value;
+
+	value = strtok(line, ";");
+	instantAbility->ID = atoi(value);
+
+	value = strtok(NULL, ";");
+	strcpy(instantAbility->name, value);
+
+	value = strtok(NULL, ";");
+	instantAbility->damageType->selectedIndex = atoi(value);
+
+	value = strtok(NULL, ";");
+	instantAbility->damageType->selectedIndex = atoi(value);
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->diceDamage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->diceDamageMultiplier->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->damage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->status->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->statusDiceDamage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->statusDamage->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->diceStatusDuration->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->statusDuration->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->actions->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		instantAbility->attack->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		instantAbility->damageMod->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		instantAbility->mvmt->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		instantAbility->totalManaCost = atoi(value);
+	}
+
+	return instantAbility;
 }

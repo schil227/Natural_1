@@ -62,6 +62,14 @@ individual *initIndividual(){
 
 	toReturn->targetedIndividual = NULL;
 	toReturn->targetedDuration = 0;
+	toReturn->allyIndividual = NULL;
+
+	toReturn->thisBehavior = malloc(sizeof(behavior));
+	toReturn->thisBehavior->isOffensive = 0;
+	toReturn->thisBehavior->hasAbilityAffinity = 0;
+	toReturn->thisBehavior->istactical = 0;
+	toReturn->thisBehavior->isCowardly = 0;
+	toReturn->thisBehavior->turnsRemaining = 0;
 
 	return toReturn;
 }
@@ -70,7 +78,8 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
-		int lightiningWeakness, int dialogID, int gold, int faction, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
+		int lightiningWeakness, int dialogID, int gold, int faction, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
+		abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 	int i;
 	BITMAP bm;
 
@@ -159,6 +168,11 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 
 	thisIndividual->currentGroupType = 0;
 
+	thisIndividual->thisBehavior->offensiveness = offensiveness;
+	thisIndividual->thisBehavior->abilityAffinity = abilityAffinity;
+	thisIndividual->thisBehavior->tacticalness = tacticalness;
+	thisIndividual->thisBehavior->cowardness = cowardness;
+
 	if(loadedAbilities != NULL){
 		for(i = 0; i < loadedAbilities->numAbilities; i++){
 			addAbilityToIndividual(thisIndividual, loadedAbilities->abilitiesList[i]);
@@ -177,6 +191,8 @@ void destroyIndividual(individual* thisIndividual){
 	free(thisIndividual->activeItems);
 
 	free(thisIndividual->backpack);
+
+	free(thisIndividual->thisBehavior);
 
 	free(thisIndividual);
 }
@@ -551,17 +567,17 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	sendHitDialog(thisIndividual->name, targetIndividual->name, 20, totalDamage);
 	targetIndividual->hp = targetIndividual->hp - totalDamage;
 
-	//Add status
-	if(targetAbility->statusEnabled){
-		int sum = 0, dummy = 0;
-		calcStatusCost(&sum, &dummy, targetAbility);
-		if(sum > 0){
-			status * newStatus = createStatusFromAbility(targetAbility);
-			addStatusToIndividual(targetIndividual, newStatus);
-			processStatus(targetIndividual, newStatus);
-		}
-
-	}
+	//Add status - or dont, let useDurationAbilityOnIndividual take care of that
+//	if(targetAbility->statusEnabled){
+//		int sum = 0, dummy = 0;
+//		calcStatusCost(&sum, &dummy, targetAbility);
+//		if(sum > 0){
+//			status * newStatus = createStatusFromAbility(targetAbility);
+//			addStatusToIndividual(targetIndividual, newStatus);
+//			processStatus(targetIndividual, newStatus);
+//		}
+//
+//	}
 
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
@@ -593,6 +609,7 @@ int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAb
 				status * newStatus = createStatusFromAbility(thisAbility);
 				addStatusToIndividual(thisIndividual, newStatus);
 				processStatus(thisIndividual,newStatus);
+				newStatus->turnsRemaining--;
 			}
 
 		}
@@ -1626,6 +1643,218 @@ int addCordIfUnique(cordArr * thisCordArr, cord * thisCord){
 	}
 
 	return 0;
+}
+
+/*Taking into account that the Y access grows as it goes down (essentially flipping the access)
+ * The abs() call is necessary because when calculating the slope the Y values are negated
+ * (this allows the slope to be computed in the bottom-right quadrant of the Cartesian system)
+ */
+int isAboveOnField(int baseY, int aboveY){
+	return abs(baseY) < abs(aboveY);
+}
+
+int getRetreatDirection(int thisX, int thisY, int targetX, int targetY){
+	double slope;
+
+	targetY = targetY*-1;
+	thisY = thisY*-1;
+
+	if(thisX == targetX && thisY == targetY){
+			return 0;
+	}else if(thisX == targetX){ // n/0; target is either above or below thisIndividual
+		if(isAboveOnField(thisY, targetY)){ // target is above thisIndividual
+			return 8;
+		}else {
+			return 2;
+		}
+	}else{
+		slope = calcSlope(thisX, thisY, targetX, targetY);
+
+		if(slope > 2.0 || slope < -2.0){
+			if(isAboveOnField(thisY, targetY)){
+				return 8;
+			}else {
+				return 2;
+			}
+		}
+
+		if(slope > 0.5){
+			if(isAboveOnField(thisY, targetY)){
+				return 9;
+			}else {
+				return 1;
+			}
+		}
+
+		if(slope > -0.5){
+			if(thisX < targetX){
+				return 4;
+			}else {
+				return 6;
+			}
+		}
+
+		if(slope > -2){
+			if(isAboveOnField(thisY, targetY)){
+				return 7;
+			}else {
+				return 3;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int * getOrderedRetreatDirections(int rootDirection){
+	int * directionArray;
+
+	if(rootDirection == 0){
+		return NULL;
+	}
+
+	directionArray = malloc(5*sizeof(int));
+
+	directionArray[0] = rootDirection;
+
+	switch (rootDirection){
+		case 1:
+			if(rand()%2 == 0){
+				directionArray[1] = 2;
+				directionArray[2] = 4;
+			}else{
+				directionArray[1] = 4;
+				directionArray[2] = 2;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 3;
+				directionArray[4] = 7;
+			}else{
+				directionArray[3] = 7;
+				directionArray[4] = 3;
+			}
+
+			return directionArray;
+		case 2:
+			if(rand()%2 == 0){
+				directionArray[1] = 1;
+				directionArray[2] = 3;
+			}else{
+				directionArray[1] = 3;
+				directionArray[2] = 1;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 4;
+				directionArray[4] = 6;
+			}else{
+				directionArray[3] = 6;
+				directionArray[4] = 4;
+			}
+
+			return directionArray;
+		case 3:
+			if(rand()%2 == 0){
+				directionArray[1] = 2;
+				directionArray[2] = 6;
+			}else{
+				directionArray[1] = 6;
+				directionArray[2] = 2;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 1;
+				directionArray[4] = 9;
+			}else{
+				directionArray[3] = 9;
+				directionArray[4] = 1;
+			}
+
+			return directionArray;
+		case 4:
+			if(rand()%2 == 0){
+				directionArray[1] = 1;
+				directionArray[2] = 7;
+			}else{
+				directionArray[1] = 7;
+				directionArray[2] = 1;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 2;
+				directionArray[4] = 8;
+			}else{
+				directionArray[3] = 8;
+				directionArray[4] = 2;
+			}
+
+			return directionArray;
+		case 6:
+			if(rand()%2 == 0){
+				directionArray[1] = 3;
+				directionArray[2] = 9;
+			}else{
+				directionArray[1] = 9;
+				directionArray[2] = 3;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 2;
+				directionArray[4] = 8;
+			}else{
+				directionArray[3] = 8;
+				directionArray[4] = 2;
+			}
+
+			return directionArray;
+		case 7:
+			if(rand()%2 == 0){
+				directionArray[1] = 4;
+				directionArray[2] = 8;
+			}else{
+				directionArray[1] = 8;
+				directionArray[2] = 4;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 1;
+				directionArray[4] = 9;
+			}else{
+				directionArray[3] = 9;
+				directionArray[4] = 1;
+			}
+
+			return directionArray;
+		case 8:
+			if(rand()%2 == 0){
+				directionArray[1] = 7;
+				directionArray[2] = 9;
+			}else{
+				directionArray[1] = 9;
+				directionArray[2] = 7;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 4;
+				directionArray[4] = 6;
+			}else{
+				directionArray[3] = 6;
+				directionArray[4] = 4;
+			}
+
+			return directionArray;
+		case 9:
+			if(rand()%2 == 0){
+				directionArray[1] = 6;
+				directionArray[2] = 8;
+			}else{
+				directionArray[1] = 8;
+				directionArray[2] = 6;
+			}
+			if(rand()%2 == 0){
+				directionArray[3] = 3;
+				directionArray[4] = 7;
+			}else{
+				directionArray[3] = 7;
+				directionArray[4] = 3;
+			}
+
+			return directionArray;
+	}
 }
 
 cordArr * cordsBetweenTwoIndividuals(individual * thisIndividual, individual * targetIndividual, int maxDistance){

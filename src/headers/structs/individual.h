@@ -70,6 +70,20 @@ typedef struct{
 	status * statuses[16];
 }statusList;
 
+typedef struct{
+	int offensiveness;
+	int abilityAffinity;
+	int tacticalness;
+	int cowardness;
+
+	int isOffensive;
+	int hasAbilityAffinity;
+	int istactical;
+	int isCowardly;
+
+	int turnsRemaining;
+}behavior;
+
 struct individual{
 	character* playerCharacter;
 	char name[32];
@@ -140,7 +154,9 @@ struct individual{
 
 	int faction;
 	int targetedDuration;
+	behavior * thisBehavior;
 	struct individual * targetedIndividual;
+	struct individual * allyIndividual;
 
 	groupType currentGroupType;
 };

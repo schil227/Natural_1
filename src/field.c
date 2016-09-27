@@ -302,14 +302,15 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 		player->playerCharacter->y >= minY && player->playerCharacter->y <= maxY ){
 
 		if(tmpAbility->type == 't'){
-			if(attackIndividualWithAbility(thisIndividual, player)){
+			if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, player))
+					|| useDurationAbilityOnIndividual(player, thisIndividual->activeAbilities->selectedAbility)){
 				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
-			}else{
-				useDurationAbilityOnIndividual(thisIndividual, tmpAbility);
 			}
 		}else if (tmpAbility->type == 'd'){
 			//add duration ability logic here
-			useDurationAbilityOnIndividual(player, tmpAbility);
+			if(useDurationAbilityOnIndividual(player, tmpAbility)){
+				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
+			}
 		}
 	}
 

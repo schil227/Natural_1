@@ -58,6 +58,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	int imageID,ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,isSneaking,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
+	int offensiveness, abilityAffinity, tacticalness, cowardness;
 	char * name = malloc(sizeof(char) * 32);
 	char * strtok_save_pointer;
 	char critType[4];
@@ -171,6 +172,18 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	faction = atoi(value);
 
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	offensiveness = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	abilityAffinity = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	tacticalness = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	cowardness = atoi(value);
+
 	//Load abilities from given type
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	loadAbilitiesToList(&loadedAbilities, value, 0);
@@ -215,7 +228,8 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, offensiveness, abilityAffinity, tacticalness, cowardness,
+			&loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
 

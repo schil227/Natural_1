@@ -338,6 +338,15 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 	return nullNode;
 }
 
+nodeArr * getSpaceClosestToSpace(field * thisField, individual * thisIndividual, int x, int y){
+	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, x, y);
+
+	nodeArr * actualPath = processPath(thisField, resultArr, thisIndividual);
+	destroyNodeArr(resultArr);
+
+	return actualPath;
+}
+
 nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
 	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 
@@ -654,6 +663,188 @@ int hasOffensiveAbilityInRange(individual * thisIndividual){
 	}
 }
 
+int abilityInRangeOfIndividual(ability * thisAbility, individual * thisIndividual, individual * targetIndividual){
+	int maxDistance;
+
+	if(!thisAbility->rangeEnabled){
+		return 0;
+	}
+
+	maxDistance = max(abs(thisIndividual->playerCharacter->x - targetIndividual->playerCharacter->x), abs(thisIndividual->playerCharacter->y - targetIndividual->playerCharacter->y));
+
+	if(maxDistance <= thisAbility->range->effectAndManaArray[thisAbility->range->selectedIndex]->effectMagnitude){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+void rerollBehavior(individual * thisIndividual){
+	if(isGreaterThanPercentage(thisIndividual->thisBehavior->offensiveness, 100, rand() % 100)){
+		thisIndividual->thisBehavior->isOffensive = 1;
+	}else{
+		thisIndividual->thisBehavior->isOffensive = 0;
+	}
+
+	if(isGreaterThanPercentage(thisIndividual->thisBehavior->abilityAffinity, 100, rand() % 100)){
+		thisIndividual->thisBehavior->hasAbilityAffinity = 1;
+	}else{
+		thisIndividual->thisBehavior->hasAbilityAffinity = 0;
+	}
+
+	if(isGreaterThanPercentage(thisIndividual->thisBehavior->tacticalness, 100, rand() % 100)){
+		thisIndividual->thisBehavior->istactical = 1;
+	}else{
+		thisIndividual->thisBehavior->istactical = 0;
+	}
+
+	if(isGreaterThanPercentage(thisIndividual->thisBehavior->cowardness, 100, rand() % 50)){ //TODO: make 100 instead of 50
+		thisIndividual->thisBehavior->isCowardly = 1;
+	}else{
+		thisIndividual->thisBehavior->isCowardly = 0;
+	}
+
+	thisIndividual->thisBehavior->turnsRemaining = (rand() % 6) + 2;
+}
+
+int isAlly(individual * thisIndividual, individual * possibleAlly, groupContainer * thisGroupContainer){
+	int i, individualsPassed = 0;
+
+	if(thisIndividual->faction != possibleAlly->faction){
+		return 0;
+	}
+
+	individualGroup * thisGroup =  getGroupFromIndividual(thisGroupContainer, thisIndividual);
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] != NULL){
+			individualsPassed++;
+		}
+
+		if(thisGroup->individuals[i] == possibleAlly){
+			return 1;
+		}
+
+		if(individualsPassed == thisGroup->numIndividuals){
+			break;
+		}
+	}
+
+	return 0;
+}
+
+int cordArrContainsCoordinates(cordArr * thisCordArr, int x, int y){
+	int i;
+
+	for(i = 0; i < thisCordArr->numCords; i++){
+		if(thisCordArr->cords[i]->x == x && thisCordArr->cords[i]->y == y){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+cord * findRetreatSpace(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField, int x, int y){
+	int i,j,hasChanged=0;
+	cord * retreatSpot = malloc(sizeof(cord));
+	retreatSpot->x = thisIndividual->playerCharacter->x;
+	retreatSpot->y = thisIndividual->playerCharacter->y;
+
+	cordArr * oldSpaces = malloc(sizeof(cordArr));
+	oldSpaces->numCords = 0;
+
+	for(i = 0; i < getAttributeSum(thisIndividual, "mvmt"); i++){
+		int * direcitonArray = getOrderedRetreatDirections(getRetreatDirection(retreatSpot->x, retreatSpot->y,x,y));
+
+		if(direcitonArray == NULL){
+			break;
+		}
+
+		for(j = 0; j < 5; j++){
+			int newX = retreatSpot->x + xMoveChange(direcitonArray[j]);
+			int newY = retreatSpot->y + yMoveChange(direcitonArray[j]);
+
+			if(cordArrContainsCoordinates(oldSpaces, newX, newY)){
+				continue;
+			}
+
+			cord * newCord = malloc(sizeof(cord));
+			newCord->x = newX;
+			newCord->y = newY;
+
+			addCordIfUnique(oldSpaces, newCord);
+
+			space * nextSpace = getSpaceFromField(thisField, newX, newY);
+
+			if(nextSpace != NULL && nextSpace->isPassable && (nextSpace->currentIndividual == NULL || isAlly(thisIndividual, nextSpace->currentIndividual, thisGroupContainer)) ){
+				retreatSpot->x = newX;
+				retreatSpot->y = newY;
+
+				hasChanged = 1;
+				break;
+			}
+		}
+
+		free(direcitonArray);
+
+		if(!hasChanged){ //cannot move further
+			destroyCordArr(oldSpaces);
+			return retreatSpot;
+		}
+
+		hasChanged = 0;
+	}
+
+	destroyCordArr(oldSpaces);
+	return retreatSpot;
+}
+
+int retreatFromTarget(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
+
+	cord * targetSpace = findRetreatSpace(thisIndividual, thisGroupContainer, thisField, thisIndividual->targetedIndividual->playerCharacter->x, thisIndividual->targetedIndividual->playerCharacter->y);
+	nodeArr * enemyNodeArr = getSpaceClosestToSpace(thisField, thisIndividual, targetSpace->x, targetSpace->y);
+
+	//nowhere to go, nothing to animate
+	if (enemyNodeArr->size == 0) {
+		thisIndividual->activeAbilities->selectedAbility = NULL;
+		return 0;
+	}
+
+	//Gonna move, remove them from the field and update the moveNodeMeta
+	getSpaceFromField(thisField, thisIndividual->playerCharacter->x,
+			thisIndividual->playerCharacter->y)->currentIndividual = NULL;
+
+	(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
+	(*thisMoveNodeMeta)->sum = 0;
+
+	populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+
+	destroyNodeArr(enemyNodeArr);
+
+	thisIndividual->remainingActions--;
+	return 1;
+}
+
+int noEnemiesInRange(individual * enemy, groupContainer * thisGroupContainer, field * thisField, int range){
+	int i, j, startingX, startingY;
+
+	startingX = max(enemy->playerCharacter->x - range, 0);
+	startingY = max(enemy->playerCharacter->y - range, 0);
+
+	for(i = startingX; i < startingX + (range*2 + 1); i++){
+		for(j = startingY; j < startingY + (range*2 + 1); j++){
+			space * tmpSpace = getSpaceFromField(thisField, i, j);
+
+			if(tmpSpace != NULL && tmpSpace->currentIndividual != NULL && !isAlly(enemy, tmpSpace->currentIndividual, thisGroupContainer) ){
+				return 0;
+			}
+		}
+	}
+
+	return 1;
+}
+
 int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
 
 	//Restore Mana
@@ -742,10 +933,112 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 		}//Add a 'speak' option
 	}
 
+	//On Deck Ability
+	if(enemy->activeAbilities->selectedAbility != NULL){
+		if(enemy->mana >= enemy->activeAbilities->selectedAbility->totalManaCost){
+			if(abilityIsOffensive(enemy->activeAbilities->selectedAbility)){
+				if(enemy->targetedIndividual != NULL){
+					if(abilityInRangeOfIndividual(enemy->activeAbilities->selectedAbility, enemy, enemy->targetedIndividual)){
+						useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
+					}else{
+						nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy,
+								enemy->targetedIndividual);
+
+						//nowhere to go, nothing to animate
+						if (enemyNodeArr->size == 0) {
+							enemy->activeAbilities->selectedAbility = NULL;
+						}
+
+						//Gonna move, remove them from the field and update the moveNodeMeta
+						getSpaceFromField(thisField, enemy->playerCharacter->x,
+								enemy->playerCharacter->y)->currentIndividual = NULL;
+
+						(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
+						(*thisMoveNodeMeta)->sum = 0;
+
+						populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+
+						destroyNodeArr(enemyNodeArr);
+
+						enemy->remainingActions--;
+						return 1;
+					}
+				}else{
+					enemy->activeAbilities->selectedAbility = NULL;
+				}
+			}else{//is buff ability
+				if(enemy->allyIndividual != NULL){
+					if(abilityInRangeOfIndividual(enemy->activeAbilities->selectedAbility, enemy, enemy->allyIndividual)){
+						useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
+					}else{
+						nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy,
+								enemy->allyIndividual);
+
+						//nowhere to go, nothing to animate
+						if (enemyNodeArr->size == 0) {
+							enemy->activeAbilities->selectedAbility = NULL;
+						}
+
+						//Gonna move, remove them from the field and update the moveNodeMeta
+						getSpaceFromField(thisField, enemy->playerCharacter->x,
+								enemy->playerCharacter->y)->currentIndividual = NULL;
+
+						(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
+						(*thisMoveNodeMeta)->sum = 0;
+
+						populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+
+						destroyNodeArr(enemyNodeArr);
+
+						enemy->remainingActions--;
+						return 1;
+					}
+				}else{
+					enemy->activeAbilities->selectedAbility = NULL;
+				}
+			}
+		}else{
+			enemy->activeAbilities->selectedAbility = NULL;
+		}
+	}
+
+	if(enemy->thisBehavior->turnsRemaining == 0){
+		rerollBehavior(enemy);
+	}else{
+		enemy->thisBehavior->turnsRemaining--;
+	}
+
+	if(enemy->thisBehavior->isCowardly){
+		if(noEnemiesInRange(enemy, thisGroupContainer, thisField, 4)){
+			char fleeText[128];
+
+			if(isGreaterThanPercentage((rand() %100) + getAttributeSum(enemy, "DEX")*10 + getAttributeSum(enemy, "WIS")*5 ,100, 50)){
+				sprintf(fleeText, "%s fled the fight!", enemy->name);
+				cwrite(fleeText);
+
+				deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, enemy), enemy);
+				removeIndividualFromField(thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
+				enemy->remainingActions--;
+				return 0;
+			}else{
+				sprintf(fleeText, "%s tried to flee, but couldn't escape!", enemy->name);
+				cwrite(fleeText);
+
+				enemy->remainingActions--;
+				return 0;
+			}
+		} else {
+			int isMoving = retreatFromTarget(enemy, thisGroupContainer, thisField, thisMoveNodeMeta);
+
+			enemy->remainingActions--;
+			return isMoving;
+		}
+	}
+
 	//If pre-disposition to attacking (vs. support)
 	if (1) {
 		//has attack ability to use?
-		if (isGreaterThanPercentage(rand() % 100, 100, 50) && hasOffensiveAbilityInRange(enemy)) { //REMOVE CODEBLOCKER
+		if (isGreaterThanPercentage(rand() % 100, 100, 50) && hasOffensiveAbilityInRange(enemy)) {
 			int numActions = 1;
 
 			useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
@@ -763,10 +1056,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 		//try physically attacking
 		if (individualWithinRange(enemy, enemy->targetedIndividual)) {
 			if (attackIndividual(enemy, enemy->targetedIndividual)) {
-				deleteIndividiaulFromGroup(
-						getGroupFromIndividual(thisGroupContainer,
-								enemy->targetedIndividual),
-						enemy->targetedIndividual);
+				deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, enemy->targetedIndividual), enemy->targetedIndividual);
 				removeIndividualFromField(thisField,
 						enemy->targetedIndividual->playerCharacter->x,
 						enemy->targetedIndividual->playerCharacter->y);
