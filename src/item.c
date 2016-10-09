@@ -135,3 +135,40 @@ item * cloneItem(item * thisItem){
 
 	return newItem;
 }
+
+int itemIsBuffing(item * thisItem){
+	if(thisItem->weaponStrMod > 0 ||
+		thisItem->strMod > 0 ||
+		thisItem->dexMod > 0 ||
+		thisItem->conMod > 0 ||
+		thisItem->willMod > 0 ||
+		thisItem->intMod > 0 ||
+		thisItem->wisMod > 0 ||
+		thisItem->chrMod > 0 ||
+		thisItem->luckMod > 0 ||
+		thisItem->totalHealthMod > 0 ||
+		thisItem->totalManaMod > 0 ||
+		thisItem->acMod > 0 ||
+		thisItem->attackMod > 0 ||
+		thisItem->damMod > 0 ||
+		thisItem->maxDamMod > 0 ||
+		thisItem->minDamMod > 0 ||
+		thisItem->mvmtMod > 0 ||
+		thisItem->rangeMod > 0 ||
+		thisItem->bluntDRMod > 0 ||
+		thisItem->chopDRMod > 0 ||
+		thisItem->slashDRMod > 0 ||
+		thisItem->pierceDRMod > 0 ||
+		thisItem->earthDRMod > 0 ||
+		thisItem->fireDRMod > 0 ||
+		thisItem->waterDRMod > 0 ||
+		thisItem->lightningDRMod > 0 ||
+		thisItem->earthWeaknessMod > 0 ||
+		thisItem->fireWeaknessMod > 0 ||
+		thisItem->waterWeaknessMod > 0 ||
+		thisItem->lightiningWeaknessMod > 0 ){
+		return 1;
+	}
+
+	return 0;
+}

@@ -23,7 +23,7 @@ typedef struct{
 } cord;
 
 typedef struct{
-	cord * cords[50];
+	cord * cords[300];
 	int numCords;
 	int MAX_CORDS;
 }cordArr;
@@ -78,7 +78,7 @@ typedef struct{
 
 	int isOffensive;
 	int hasAbilityAffinity;
-	int istactical;
+	int isTactical;
 	int isCowardly;
 
 	int turnsRemaining;

@@ -67,7 +67,7 @@ individual *initIndividual(){
 	toReturn->thisBehavior = malloc(sizeof(behavior));
 	toReturn->thisBehavior->isOffensive = 0;
 	toReturn->thisBehavior->hasAbilityAffinity = 0;
-	toReturn->thisBehavior->istactical = 0;
+	toReturn->thisBehavior->isTactical = 0;
 	toReturn->thisBehavior->isCowardly = 0;
 	toReturn->thisBehavior->turnsRemaining = 0;
 
@@ -316,6 +316,161 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 	}
 }
 
+void channelMana(individual * thisIndividual){
+	int i;
+	int manaRestore = 1;
+	char logStr[128];
+	sprintf(logStr, "%s is channeling:", thisIndividual->name);
+	cwrite(logStr);
+
+	for(i = 0; i < max(getAttributeSum(thisIndividual, "WILL") + 1,1); i++){
+		manaRestore = max(manaRestore, (rand() % 4) + 1);
+	}
+
+	manaRestore = max(min(manaRestore + getAttributeSum(thisIndividual, "WILL"), 4) , 1);
+
+	restoreMana(thisIndividual, manaRestore);
+
+	sprintf(logStr, "Restored %d mana.", manaRestore);
+	cwrite(logStr);
+}
+
+int abilityIsBuffing(ability * thisAbility){
+	if(thisAbility->type == 'd'){
+		if (thisAbility->rangeEnabled
+				&& thisAbility->range->effectAndManaArray[thisAbility->range->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+	}
+
+	if(thisAbility->type == 'i'){
+		if (thisAbility->extraAttackEnabled
+				&& thisAbility->extraAttack->effectAndManaArray[thisAbility->extraAttack->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+		if (thisAbility->attackEnabled
+				&& thisAbility->attack->effectAndManaArray[thisAbility->attack->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+		if (thisAbility->damageModEnabled
+				&& thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->effectMagnitude > 0) {
+			return 1;
+		}
+	}
+
+	if (thisAbility->STREnabled
+			&& thisAbility->STR->effectAndManaArray[thisAbility->STR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->DEXEnabled
+			&& thisAbility->DEX->effectAndManaArray[thisAbility->DEX->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->CONEnabled
+			&& thisAbility->CON->effectAndManaArray[thisAbility->CON->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->WILLEnabled
+			&& thisAbility->WILL->effectAndManaArray[thisAbility->WILL->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->INTEnabled
+			&& thisAbility->INT->effectAndManaArray[thisAbility->INT->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->WISEnabled
+			&& thisAbility->WIS->effectAndManaArray[thisAbility->WIS->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->CHREnabled
+			&& thisAbility->CHR->effectAndManaArray[thisAbility->CHR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->LUCKEnabled
+			&& thisAbility->LUCK->effectAndManaArray[thisAbility->LUCK->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->acEnabled
+			&& thisAbility->ac->effectAndManaArray[thisAbility->ac->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->attackEnabled
+			&& thisAbility->attack->effectAndManaArray[thisAbility->attack->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->damageModEnabled
+			&& thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->mvmtEnabled
+			&& thisAbility->mvmt->effectAndManaArray[thisAbility->mvmt->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->baseHPEnabled
+			&& thisAbility->baseHP->effectAndManaArray[thisAbility->baseHP->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->baseManaEnabled
+			&& thisAbility->baseMana->effectAndManaArray[thisAbility->baseMana->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->bluntDREnabled
+			&& thisAbility->bluntDR->effectAndManaArray[thisAbility->bluntDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->chopDREnabled
+			&& thisAbility->chopDR->effectAndManaArray[thisAbility->chopDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->pierceDREnabled
+			&& thisAbility->pierceDR->effectAndManaArray[thisAbility->pierceDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->slashDREnabled
+			&& thisAbility->slashDR->effectAndManaArray[thisAbility->slashDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->earthDREnabled
+			&& thisAbility->earthDR->effectAndManaArray[thisAbility->earthDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->fireDREnabled
+			&& thisAbility->fireDR->effectAndManaArray[thisAbility->fireDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->waterDREnabled
+			&& thisAbility->waterDR->effectAndManaArray[thisAbility->waterDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	if (thisAbility->lightningDREnabled
+			&& thisAbility->lightningDR->effectAndManaArray[thisAbility->lightningDR->selectedIndex]->effectMagnitude > 0) {
+		return 1;
+	}
+
+	return 0;
+}
+
 int abilityIsOffensive(ability * thisAbility){
 	if(thisAbility->type == 'd' && abilityIsHarmful(thisAbility)){
 		return 1;
@@ -446,20 +601,22 @@ int abilityIsOffensive(ability * thisAbility){
 		}
 	}
 
-	if(thisAbility->type == 'i'){
-		if (thisAbility->extraAttackEnabled
-				&& thisAbility->extraAttack->effectAndManaArray[thisAbility->extraAttack->selectedIndex]->effectMagnitude > 0) {
-			return 1;
-		}
-		if (thisAbility->attackEnabled
-				&& thisAbility->attack->effectAndManaArray[thisAbility->attack->selectedIndex]->effectMagnitude > 0) {
-			return 1;
-		}
-		if (thisAbility->damageModEnabled
-				&& thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->effectMagnitude > 0) {
-			return 1;
-		}
-	}
+	//Since 'i' abilities can only be used on the self, and not targeted at others, these are only buffs.
+	//They can have the side affect of offensiveness, but that's no different than adding strength or dex, etc.
+//	if(thisAbility->type == 'i'){
+//		if (thisAbility->extraAttackEnabled
+//				&& thisAbility->extraAttack->effectAndManaArray[thisAbility->extraAttack->selectedIndex]->effectMagnitude > 0) {
+//			return 1;
+//		}
+//		if (thisAbility->attackEnabled
+//				&& thisAbility->attack->effectAndManaArray[thisAbility->attack->selectedIndex]->effectMagnitude > 0) {
+//			return 1;
+//		}
+//		if (thisAbility->damageModEnabled
+//				&& thisAbility->damageMod->effectAndManaArray[thisAbility->damageMod->selectedIndex]->effectMagnitude > 0) {
+//			return 1;
+//		}
+//	}
 
 	return 0;
 }
@@ -1085,6 +1242,24 @@ void endTurn(individual *thisIndividual){
 	thisIndividual->remainingActions += thisIndividual->totalActions;
 }
 
+int targetInRangeOfCord(individual * target, int range, int x, int y){
+	if(abs(target->playerCharacter->x - x) <= range
+	&& abs(target->playerCharacter->y - y) <= range){
+		return 1;
+	}
+	return 0;
+}
+
+int cordWithinRange(individual * thisIndividual, int x, int y){
+	int range = getAttributeSum(thisIndividual, "range");
+
+	if(abs(thisIndividual->playerCharacter->x - x) <= range
+	&& abs(thisIndividual->playerCharacter->y - y) <= range){
+		return 1;
+	}
+	return 0;
+}
+
 int individualWithinRange(individual * thisIndividual, individual * target){
 	int range = getAttributeSum(thisIndividual, "range");
 
@@ -1595,6 +1770,18 @@ void decreaseMana(individual * thisIndividual, int mana){
 	thisIndividual->mana -= mana;
 }
 
+int canUseAnyAbilities(individual * thisIndividual){
+	int i;
+
+	for(i = 0; i < thisIndividual->abilities->numAbilities; i++){
+		if(thisIndividual->abilities->abilitiesList[i] != NULL && thisIndividual->abilities->abilitiesList[i]->type != 'p' && thisIndividual->mana - thisIndividual->abilities->abilitiesList[i]->totalManaCost >= 0 ){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 int canUseAbility(individual * thisIndividual, ability * thisAbility){
 	if(thisAbility->type != 'p' && thisIndividual->mana - thisAbility->totalManaCost >= 0 && thisIndividual->activeAbilities->selectedAbility == NULL){
 		return 1;
@@ -1606,14 +1793,14 @@ int canUseAbility(individual * thisIndividual, ability * thisAbility){
 cordArr* initCordArr(){
 	cordArr * thisCordArr = malloc(sizeof(cordArr));
 	thisCordArr->numCords = 0;
-	thisCordArr->MAX_CORDS = 50;
+	thisCordArr->MAX_CORDS = 300;
 }
 
 void destroyCordArr(cordArr * thisCordArr){
 	int i;
 
 	for(i = 0; i < thisCordArr->numCords; i++){
-		free(thisCordArr->cords);
+		free(thisCordArr->cords[i]);
 	}
 
 	free(thisCordArr);

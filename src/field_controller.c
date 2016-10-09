@@ -10,10 +10,12 @@
 
 individualGroup * initGroup(){
 	int index;
+
 	individualGroup * thisGroup = malloc(sizeof(individualGroup));
 	thisGroup->numIndividuals = 0;
 	thisGroup->currentIndividualIndex = -1;
 	thisGroup->MAX_INDIVIDUALS = 50;
+
 	for(index = 0; index < 50; index++){
 		thisGroup->individuals[index] = NULL;
 	}
@@ -611,7 +613,11 @@ int individualInGroup(individual * thisIndividual, individualGroup * thisIndivid
 individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual * thisIndividual){
 	int index, individualsPassed = 0;
 
-	for( index = 0; index < thisGroup->MAX_INDIVIDUALS; index++){
+	if(thisGroup == NULL){
+		return NULL;
+	}
+
+	for(index = 0; index < thisGroup->MAX_INDIVIDUALS; index++){
 
 		if(thisGroup->individuals[index] != NULL){
 			individualsPassed++;

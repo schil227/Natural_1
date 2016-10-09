@@ -453,9 +453,10 @@ void destroyTheGlobalRegister(){
 }
 
 void loadGlobalRegister(char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
-						char * imagesData, char * targetedAbilitiesData){
+						char * imagesData, char * selfAbilitiesData, char * targetedAbilitiesData){
 	// Priority loading:
 	//individuals dependant on xAbilities
+	loadSelfAbilitiesToRegistry(mapDirectory, selfAbilitiesData);
 	loadTargetedAbilitiesToRegistry(mapDirectory, targetedAbilitiesData);
 
 	loadIndividualsToRegistry(mapDirectory, individualsData);
@@ -567,6 +568,23 @@ void loadImagesToRegistry(char* directory, char* imageFileName){
 		if (line[0] != '#') {
 			character * newCharacter = createCharacterFromLine(line);
 			addImageToRegistry(newCharacter);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void loadSelfAbilitiesToRegistry(char* directory, char* selfAbilitiesFileName){
+	char * fullFileName = appendStrings(directory, selfAbilitiesFileName);
+
+	FILE * FP = fopen(fullFileName, "r");
+	char line[128];
+
+	while(fgets(line,128,FP) != NULL){
+		if (line[0] != '#') {
+			ability * newAbility = createDurationAbilityFromLine(line);
+			addSelfAbilityToRegistry(newAbility);
 		}
 	}
 
