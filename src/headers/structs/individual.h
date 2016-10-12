@@ -80,8 +80,7 @@ typedef struct{
 	int hasAbilityAffinity;
 	int isTactical;
 	int isCowardly;
-
-	int turnsRemaining;
+	int cowardlyTurnsRemaining;
 }behavior;
 
 struct individual{

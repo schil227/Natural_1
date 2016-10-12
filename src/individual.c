@@ -69,7 +69,7 @@ individual *initIndividual(){
 	toReturn->thisBehavior->hasAbilityAffinity = 0;
 	toReturn->thisBehavior->isTactical = 0;
 	toReturn->thisBehavior->isCowardly = 0;
-	toReturn->thisBehavior->turnsRemaining = 0;
+	toReturn->thisBehavior->cowardlyTurnsRemaining = 0;
 
 	return toReturn;
 }

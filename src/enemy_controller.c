@@ -721,13 +721,18 @@ void rerollBehavior(individual * thisIndividual){
 		thisIndividual->thisBehavior->isTactical = 0;
 	}
 
-	if(isGreaterThanPercentage(thisIndividual->thisBehavior->cowardness, 100, rand() % 100)){
-		thisIndividual->thisBehavior->isCowardly = 1;
-	}else{
-		thisIndividual->thisBehavior->isCowardly = 0;
+	if(thisIndividual->thisBehavior->isCowardly){
+		thisIndividual->thisBehavior->cowardlyTurnsRemaining--;
 	}
 
-	thisIndividual->thisBehavior->turnsRemaining = (rand() % 4)+1;
+	if(thisIndividual->thisBehavior->cowardlyTurnsRemaining < 0){
+		if(isGreaterThanPercentage(thisIndividual->thisBehavior->cowardness, 100, rand() % 100)){
+			thisIndividual->thisBehavior->isCowardly = 1;
+			thisIndividual->thisBehavior->cowardlyTurnsRemaining = (rand() % 4)+1;
+		}else{
+			thisIndividual->thisBehavior->isCowardly = 0;
+		}
+	}
 }
 
 int isAlly(individual * thisIndividual, individual * possibleAlly, groupContainer * thisGroupContainer){
@@ -1304,81 +1309,113 @@ int tacticalModule(individual * enemy, individual * player, groupContainer * thi
 	return 0;
 }
 
+int tryRestoreMana(individual * enemy){
+	item * manaRestoringItem = findManaRestoringItem(enemy->backpack);
+
+	if(manaRestoringItem != NULL){
+		if(manaRestoringItem->type == 'd' && enemy->activeItems->activeItemsTotal < 40){
+			consumeItem(enemy, manaRestoringItem);
+			addItemToActiveItemList(enemy, manaRestoringItem);
+			free(removeItemFromInventory(enemy->backpack, manaRestoringItem));
+			return 1;
+		}
+
+		if(manaRestoringItem->type == 'i'){
+			consumeItem(enemy, manaRestoringItem);
+			free(removeItemFromInventory(enemy->backpack, manaRestoringItem));
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int tryHeal(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField){
+	ability * hpRestoringAbility = getRandomHPRestoringAbility(enemy->mana, enemy->abilities);
+	item * hpRestoringItem = getRandomHPRestoringItem(enemy->backpack);
+	int selectedHealingMethod = 0;
+
+	if (hpRestoringItem != NULL && hpRestoringAbility != NULL) {
+		selectedHealingMethod = (rand() % 2) + 1;
+	} else if (hpRestoringItem != NULL) {
+		selectedHealingMethod = 1;
+	} else if (hpRestoringAbility != NULL) {
+		selectedHealingMethod = 2;
+	}
+
+	if (selectedHealingMethod == 1) {
+		if(hpRestoringItem->itemType == 'd' && enemy->activeItems->activeItemsTotal < 40){
+			char msg[128];
+			sprintf(msg, "%s used %s.\n", enemy->name, hpRestoringItem->name);
+			cwrite(msg);
+			consumeItem(enemy, hpRestoringItem);
+			addItemToActiveItemList(enemy, hpRestoringItem);
+			removeItemFromInventory(enemy->backpack, hpRestoringItem);
+
+			enemy->remainingActions--;
+			return 1;
+		}
+
+		if(hpRestoringItem->itemType == 'c'){
+			char msg[128];
+			sprintf(msg, "%s used %s.\n", enemy->name, hpRestoringItem->name);
+			cwrite(msg);
+			consumeItem(enemy, hpRestoringItem);
+			free(removeItemFromInventory(enemy->backpack, hpRestoringItem));
+			enemy->remainingActions--;
+			return 1;
+		}
+
+		if(hpRestoringAbility != NULL){
+			selectedHealingMethod = 2;
+		}
+	}
+
+	if (selectedHealingMethod == 2) {
+		if(hpRestoringAbility->type == 'd' || hpRestoringAbility->type == 't'){
+			enemy->activeAbilities->selectedAbility = hpRestoringAbility;
+			useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
+			enemy->activeAbilities->selectedAbility = NULL;
+			enemy->remainingActions--;
+			return 1;
+		}else if(hpRestoringAbility->type == "i"){
+			useAbility(enemy, hpRestoringAbility);
+			enemy->remainingActions--;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int useAbilityOnTargetedSpace(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, int x, int y){
+	int numActions = 1;
+
+	useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, x, y);
+
+	if(enemy->activeAbilities->selectedAbility->actionsEnabled){
+		numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+	}
+
+	enemy->activeAbilities->selectedAbility = NULL;
+
+	enemy->remainingActions -= numActions;
+	return 0;
+}
+
 int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
 
 	//Restore Mana
 	if(isLowOnMana(enemy)){
-		item * manaRestoringItem = findManaRestoringItem(enemy->backpack);
-		if(manaRestoringItem != NULL){
-			if(manaRestoringItem->type == 'd' && enemy->activeItems->activeItemsTotal < 40){
-				consumeItem(enemy, manaRestoringItem);
-				addItemToActiveItemList(enemy, manaRestoringItem);
-				free(removeItemFromInventory(enemy->backpack, manaRestoringItem));
-				return 0;
-			}
-
-			if(manaRestoringItem->type == 'i'){
-				consumeItem(enemy, manaRestoringItem);
-				free(removeItemFromInventory(enemy->backpack, manaRestoringItem));
-				return 0;
-			}
+		if(tryRestoreMana(enemy)){
+			return 0;
 		}
 	}
 
 	//Restore HP
 	if(isLowOnHP(enemy)){
-		ability * hpRestoringAbility = getRandomHPRestoringAbility(enemy->mana, enemy->abilities);
-		item * hpRestoringItem = getRandomHPRestoringItem(enemy->backpack);
-		int selectedHealingMethod = 0;
-
-		if (hpRestoringItem != NULL && hpRestoringAbility != NULL) {
-			selectedHealingMethod = (rand() % 2) + 1;
-		} else if (hpRestoringItem != NULL) {
-			selectedHealingMethod = 1;
-		} else if (hpRestoringAbility != NULL) {
-			selectedHealingMethod = 2;
-		}
-
-		if (selectedHealingMethod == 1) {
-			if(hpRestoringItem->itemType == 'd' && enemy->activeItems->activeItemsTotal < 40){
-				char msg[128];
-				sprintf(msg, "%s used %s.\n", enemy->name, hpRestoringItem->name);
-				cwrite(msg);
-				consumeItem(enemy, hpRestoringItem);
-				addItemToActiveItemList(enemy, hpRestoringItem);
-				removeItemFromInventory(enemy->backpack, hpRestoringItem);
-
-				enemy->remainingActions--;
-				return 0;
-			}
-
-			if(hpRestoringItem->itemType == 'c'){
-				char msg[128];
-				sprintf(msg, "%s used %s.\n", enemy->name, hpRestoringItem->name);
-				cwrite(msg);
-				consumeItem(enemy, hpRestoringItem);
-				free(removeItemFromInventory(enemy->backpack, hpRestoringItem));
-				enemy->remainingActions--;
-				return 0;
-			}
-
-			if(hpRestoringAbility != NULL){
-				selectedHealingMethod = 2;
-			}
-		}
-
-		if (selectedHealingMethod == 2) {
-			if(hpRestoringAbility->type == 'd' || hpRestoringAbility->type == 't'){
-				enemy->activeAbilities->selectedAbility = hpRestoringAbility;
-				useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
-				enemy->activeAbilities->selectedAbility = NULL;
-				enemy->remainingActions--;
-				return 0;
-			}else if(hpRestoringAbility->type == "i"){
-				useAbility(enemy, hpRestoringAbility);
-				enemy->remainingActions--;
-				return 0;
-			}
+		if(tryHeal(enemy, player, thisGroupContainer, thisField)){
+			return 0;
 		}
 	}
 
@@ -1398,19 +1435,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			if(abilityIsOffensive(enemy->activeAbilities->selectedAbility)){
 				if(enemy->targetedIndividual != NULL){
 					if(abilityInRangeOfIndividual(enemy->activeAbilities->selectedAbility, enemy, enemy->targetedIndividual)){
-						int numActions = 1;
-
-						useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
-
-						if(enemy->activeAbilities->selectedAbility->actionsEnabled){
-							numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-						}
-
-						enemy->activeAbilities->selectedAbility = NULL;
-
-						enemy->remainingActions -= numActions;
-
-						return 0;
+						return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
 					}else{
 						int moving = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
 
@@ -1424,19 +1449,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			}else{//is buff ability
 				if(enemy->allyIndividual != NULL){
 					if(abilityInRangeOfIndividual(enemy->activeAbilities->selectedAbility, enemy, enemy->allyIndividual)){
-						int numActions = 1;
-
-						useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
-
-						if(enemy->activeAbilities->selectedAbility->actionsEnabled){
-							numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-						}
-
-						enemy->activeAbilities->selectedAbility = NULL;
-
-						enemy->remainingActions -= numActions;
-
-						return 0;
+						return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
 					}else{
 						int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField, thisMoveNodeMeta);
 
@@ -1454,11 +1467,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 	}
 
 	//Update behavior
-	if(enemy->thisBehavior->turnsRemaining == 0){
-		rerollBehavior(enemy);
-	}else{
-		enemy->thisBehavior->turnsRemaining--;
-	}
+	rerollBehavior(enemy);
 
 	//Cowardly Actions
 	if(enemy->thisBehavior->isCowardly){
@@ -1525,34 +1534,11 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 				if(abilityRange < range){//dont remove selected ability - it's now on deck
 					return moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
 				}else{
-					int numActions = 1;
-
-					useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
-
-					if(enemy->activeAbilities->selectedAbility->actionsEnabled){
-						numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-					}
-
-					enemy->activeAbilities->selectedAbility = NULL;
-
-					enemy->remainingActions -= numActions;
-					return 0;
+					return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
 				}
 			}else{
 				enemy->activeAbilities->selectedAbility = buffAbility;
-
-				int numActions = 1;
-
-				useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
-
-				if(enemy->activeAbilities->selectedAbility->actionsEnabled){
-					numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-				}
-
-				enemy->activeAbilities->selectedAbility = NULL;
-
-				enemy->remainingActions -= numActions;
-				return 0;
+				return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
 			}
 		}else{
 			return attackModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
@@ -1584,19 +1570,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			if(ally != NULL){
 				free(alliesInRange);
 				if(abilityInRangeOfIndividual(enemy->activeAbilities->selectedAbility, enemy, enemy->allyIndividual)){
-					int numActions = 1;
-
-					useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
-
-					if(enemy->activeAbilities->selectedAbility->actionsEnabled){
-						numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-					}
-
-					enemy->activeAbilities->selectedAbility = NULL;
-
-					enemy->remainingActions -= numActions;
-
-					return 0;
+					return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField,  enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
 				}else{
 					int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField, thisMoveNodeMeta);
 
@@ -1618,20 +1592,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 		if(randomBuffAbility->type == 'd' || randomBuffAbility->type == 'i'){
 			free(alliesInRange);
-
-			int numActions = 1;
-
-			useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
-
-			if(enemy->activeAbilities->selectedAbility->actionsEnabled){
-				numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-			}
-
-			enemy->activeAbilities->selectedAbility = NULL;
-
-			enemy->remainingActions -= numActions;
-
-			return 0;
+			return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField,  enemy->playerCharacter->x, enemy->playerCharacter->y);
 		}
 
 		enemy->allyIndividual = alliesInRange->individuals[rand() % alliesInRange->numIndividuals];
@@ -1639,19 +1600,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 		free(alliesInRange);
 
 		if(abilityInRangeOfIndividual(enemy->activeAbilities->selectedAbility, enemy, enemy->allyIndividual)){
-			int numActions = 1;
-
-			useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
-
-			if(enemy->activeAbilities->selectedAbility->actionsEnabled){
-				numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-			}
-
-			enemy->activeAbilities->selectedAbility = NULL;
-
-			enemy->remainingActions -= numActions;
-
-			return 0;
+			return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField,  enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
 		}else{
 			int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField, thisMoveNodeMeta);
 
