@@ -18,11 +18,21 @@ typedef struct {
 } individualGroup;
 
 typedef struct{
+	int initGroupActionMode;
+	int groupActionMode;
+	int groupMoveMode;
+	int postGroupActionMode;
+
+	groupType activeGroup;
+
 	individualGroup * enemies;
 	individualGroup * beasts;
 	individualGroup * allies;
 	individualGroup * npcs;
 	individualGroup * guards;
+
+	individualGroup * selectedGroup;
+
 } groupContainer;
 
 #endif /* SRC_HEADERS_STRUCTS_FIELD_CONTROLLER_H_ */

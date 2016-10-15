@@ -15,7 +15,7 @@
 
 typedef enum { STATUS_NONE, STATUS_POISONED, STATUS_PARALYZED, STATUS_CONFUSED, STATUS_BURNING, STATUS_BLEEDING, STATUS_BERZERK, STATUS_SILENCED} statusEffect;
 
-typedef enum { GROUP_ALLIES, GROUP_ENEMIES, GROUP_BEASTS, GROUP_NPCS, GROUP_GUARDS} groupType;
+typedef enum { GROUP_ALLIES, GROUP_ENEMIES, GROUP_BEASTS, GROUP_NPCS, GROUP_GUARDS, GROUP_NULL} groupType;
 
 typedef struct{
 	int x;
@@ -81,6 +81,9 @@ typedef struct{
 	int isTactical;
 	int isCowardly;
 	int cowardlyTurnsRemaining;
+
+	int isHostileToPlayer;
+	int isSurrounded;
 }behavior;
 
 struct individual{
@@ -156,7 +159,7 @@ struct individual{
 	behavior * thisBehavior;
 	struct individual * targetedIndividual;
 	struct individual * allyIndividual;
-
+	cord * desiredLocation;
 	groupType currentGroupType;
 };
 

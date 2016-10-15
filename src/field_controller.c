@@ -303,6 +303,9 @@ groupContainer * initGroupContainer(individualGroup * enemies, individualGroup* 
 	thisGroupContainer->beasts = beasts;
 	thisGroupContainer->guards = guards;
 
+	thisGroupContainer->selectedGroup = NULL;
+	thisGroupContainer->activeGroup = GROUP_NULL;
+
 	return thisGroupContainer;
 }
 
@@ -329,6 +332,35 @@ individualGroup * getGroupFromIndividual(groupContainer * thisGroupContainer, in
 		return NULL;
 	}
 
+}
+
+int setNextActiveGroup(groupContainer * thisGroupContainer){
+	switch(thisGroupContainer->activeGroup){
+	case GROUP_ALLIES:
+		thisGroupContainer->activeGroup = GROUP_ENEMIES;
+		thisGroupContainer->selectedGroup = thisGroupContainer->enemies;
+		return 1;
+	case GROUP_BEASTS:
+		thisGroupContainer->activeGroup = GROUP_GUARDS;
+		thisGroupContainer->selectedGroup = thisGroupContainer->guards;
+		return 1;
+	case GROUP_ENEMIES:
+		thisGroupContainer->activeGroup = GROUP_BEASTS;
+		thisGroupContainer->selectedGroup = thisGroupContainer->beasts;
+		return 1;
+	case GROUP_GUARDS:
+		thisGroupContainer->activeGroup = GROUP_NPCS;
+		thisGroupContainer->selectedGroup = thisGroupContainer->npcs;
+		return 1;
+	case GROUP_NPCS:
+		thisGroupContainer->selectedGroup = NULL;
+		thisGroupContainer->activeGroup = GROUP_NULL;
+		return 0;
+	default: //NULL, player just ended their turn
+		thisGroupContainer->activeGroup = GROUP_ALLIES;
+		thisGroupContainer->selectedGroup = thisGroupContainer->allies;
+		return 1;
+	}
 }
 
 void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shiftData * viewShift){

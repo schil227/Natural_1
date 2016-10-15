@@ -71,6 +71,8 @@ individual *initIndividual(){
 	toReturn->thisBehavior->isCowardly = 0;
 	toReturn->thisBehavior->cowardlyTurnsRemaining = 0;
 
+	toReturn->desiredLocation = malloc(sizeof(cord));
+
 	return toReturn;
 }
 
@@ -172,12 +174,17 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	thisIndividual->thisBehavior->abilityAffinity = abilityAffinity;
 	thisIndividual->thisBehavior->tacticalness = tacticalness;
 	thisIndividual->thisBehavior->cowardness = cowardness;
+	thisIndividual->thisBehavior->isHostileToPlayer = 0;
+	thisIndividual->thisBehavior->isSurrounded = 0;
 
 	if(loadedAbilities != NULL){
 		for(i = 0; i < loadedAbilities->numAbilities; i++){
 			addAbilityToIndividual(thisIndividual, loadedAbilities->abilitiesList[i]);
 		}
 	}
+
+	thisIndividual->desiredLocation->x = x;
+	thisIndividual->desiredLocation->y = y;
 
 	return 0;
 }
@@ -745,7 +752,6 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	}else{ //non-fatal blow
 		return 0;
 	}
-
 }
 
 int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility){
@@ -753,7 +759,7 @@ int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAb
 	char * tmp[64];
 
 	if(thisIndividual->activeAbilities->numAbilities + 1 < thisIndividual->activeAbilities->MAX_ABILITIES){
-		sprintf(tmp, "Used %s for %d turns.",thisAbility->name, duration);
+		sprintf(tmp, "%s used %s for %d turns.", thisIndividual->name, thisAbility->name, duration);
 		cwrite(tmp);
 
 		addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
