@@ -438,8 +438,9 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(tmpNPC->hp == -6);
 
 	//after decreasing the turns, the ability is no longer selected, player has action debt
-	int dummyEnemyActionMode = 0, dummyInitEnemyActionMode = 0;
-	decreaseTurns(testPlayer, &dummyEnemyActionMode, &dummyInitEnemyActionMode, 1);
+	testGroupContainer->groupActionMode = 0;
+	testGroupContainer->initGroupActionMode = 0;
+	decreaseTurns(testPlayer, testGroupContainer, 1);
 
 	//player loses 4 actions, gets 2 replenished on endTurn() call (net: 0 actions for next turn)
 	assert(testPlayer->remainingActions == 0);
@@ -448,8 +449,9 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(testPlayer->activeAbilities->selectedAbility == NULL);
 
 	//it is now the enemies turn
-	assert(dummyEnemyActionMode);
-	assert(dummyInitEnemyActionMode);
+	assert(testGroupContainer->groupActionMode);
+	assert(testGroupContainer->initGroupActionMode);
+
 
 	//break down mock up
 	destroyIndividual(testPlayer);
@@ -461,6 +463,9 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	destroyTheGlobalRegister();
 	destroyEventHandlers();
 	destroySpecialDrawInstance();
+	testGroupContainer->groupActionMode = 0;
+	testGroupContainer->initGroupActionMode = 0;
+
 	return 0;
 }
 

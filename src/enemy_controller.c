@@ -1318,12 +1318,14 @@ int tryRestoreMana(individual * thisIndividual){
 			consumeItem(thisIndividual, manaRestoringItem);
 			addItemToActiveItemList(thisIndividual, manaRestoringItem);
 			free(removeItemFromInventory(thisIndividual->backpack, manaRestoringItem));
+			thisIndividual->remainingActions--;
 			return 1;
 		}
 
 		if(manaRestoringItem->type == 'i'){
 			consumeItem(thisIndividual, manaRestoringItem);
 			free(removeItemFromInventory(thisIndividual->backpack, manaRestoringItem));
+			thisIndividual->remainingActions--;
 			return 1;
 		}
 	}
@@ -1402,6 +1404,17 @@ int useAbilityOnTargetedSpace(individual * enemy, individual * player, groupCont
 
 	enemy->remainingActions -= numActions;
 	return 0;
+}
+
+int performAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+	switch(thisIndividual->currentGroupType){
+		case GROUP_ENEMIES:
+			return enemyAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		case GROUP_NPCS:
+			return npcAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		default:
+			return 0;
+	}
 }
 
 int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
@@ -1574,6 +1587,8 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 			if(ally != NULL){
 				free(alliesInRange);
+				enemy->allyIndividual = ally;
+
 				if(abilityInRangeOfIndividual(enemy->activeAbilities->selectedAbility, enemy, enemy->allyIndividual)){
 					cwrite("CASE 5\n");
 					return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField,  enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
@@ -1677,8 +1692,7 @@ individual * getClosestIndividual(individual * thisIndividual, individualGroup *
 
 //also deal with setting targeted individual
 individual * getDangerousIndividualNearByInLoS(individual * npc, individual *  player, groupContainer * thisGroupContainer, field * thisField){
-	int i, numIndividualsPassed = 0;
-	individualGroup * dangerousIndividuals = malloc(sizeof(individualGroup));
+	individualGroup * dangerousIndividuals = initGroup();
 
 	if(npc->thisBehavior->isHostileToPlayer && isInLineOfSight(npc, player, thisField)){
 		addIndividualToGroup(dangerousIndividuals, player);
@@ -1727,6 +1741,10 @@ void findDangerousIndividualNearBy(individual * npc, individual * player, groupC
 		}
 
 	}else{
+		if(npc->targetedDuration > 0){
+			npc->targetedDuration = 0;
+		}
+
 		npc->targetedIndividual = getDangerousIndividualNearByInLoS(npc, player, thisGroupContainer, thisField);
 
 		if(npc->targetedIndividual != NULL){
@@ -1765,7 +1783,13 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 		free(targetSpace);
 
 		if(!npc->thisBehavior->isSurrounded && targetSpace->x != npc->playerCharacter->x || targetSpace->y != npc->playerCharacter->y){
-			return moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, x, y);
+			int toReturn = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, x, y);
+
+			if(!toReturn){
+				npc->remainingActions--;
+			}
+
+			return toReturn;
 		}else{
 			//TODO: needs to be more precise: should only attack individual if in range, not to seek them out.
 			if(npc->thisBehavior->isSurrounded || withinXSpacesOfTarget(npc, npc->targetedIndividual, 5)){
@@ -1778,6 +1802,8 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 
 				return toReturn;
 			}
+
+			npc->remainingActions--;
 			return 0;
 		}
 
@@ -1785,6 +1811,8 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 		if(!atDesiredLocation(npc)){
 			return moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, npc->desiredLocation->x, npc->desiredLocation->y);
 		}
+
+		npc->remainingActions--;
 		return 0;
 	}
 

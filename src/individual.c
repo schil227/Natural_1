@@ -1220,27 +1220,6 @@ void useActiveAbility(individual * thisIndividual, ability * thisAbility){
 	}
 }
 
-void decreaseTurns(individual * thisIndividual, int * enemyActionMode, int * initEnemyActionMode, int numTurns){
-
-	if(thisIndividual->activeAbilities->selectedAbility != NULL && thisIndividual->activeAbilities->selectedAbility->type == 'i'){
-
-		if(thisIndividual->activeAbilities->selectedAbility->actionsEnabled){
-			numTurns += thisIndividual->activeAbilities->selectedAbility->actions->effectAndManaArray[thisIndividual->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
-		 }
-
-		removeActiveAbility(thisIndividual, thisIndividual->activeAbilities->selectedAbility);
-
-		thisIndividual->activeAbilities->selectedAbility = NULL;
-	}
-
-	thisIndividual->remainingActions -= numTurns;
-
-	if (thisIndividual->remainingActions <= 0) {
-		endTurn(thisIndividual);
-		*enemyActionMode = 1;
-		*initEnemyActionMode = 1;
-	}
-}
 
 void endTurn(individual *thisIndividual){
 	printf("player turn ended\n");

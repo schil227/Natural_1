@@ -297,11 +297,40 @@ void loadGroup(individualGroup * group, groupType thisGroupType, char * fileName
 
 groupContainer * initGroupContainer(individualGroup * enemies, individualGroup* npcs, individualGroup* allies, individualGroup* beasts, individualGroup* guards){
 	groupContainer * thisGroupContainer = malloc(sizeof(groupContainer));
-	thisGroupContainer->enemies = enemies;
-	thisGroupContainer->npcs = npcs;
-	thisGroupContainer->allies = allies;
-	thisGroupContainer->beasts = beasts;
-	thisGroupContainer->guards = guards;
+	if(enemies == NULL){
+		thisGroupContainer->enemies = initGroup();
+	}else{
+		thisGroupContainer->enemies = enemies;
+	}
+
+	if(npcs == NULL){
+		thisGroupContainer->npcs = initGroup();
+	}else{
+		thisGroupContainer->npcs = npcs;
+	}
+
+	if(allies == NULL){
+		thisGroupContainer->allies = initGroup();
+	}else{
+		thisGroupContainer->allies = allies;
+	}
+
+	if(beasts == NULL){
+		thisGroupContainer->beasts = initGroup();
+	}else{
+		thisGroupContainer->beasts = beasts;
+	}
+
+	if(guards == NULL){
+		thisGroupContainer->guards = initGroup();
+	}else{
+		thisGroupContainer->guards = guards;
+	}
+
+	thisGroupContainer->groupActionMode = 0;
+	thisGroupContainer->initGroupActionMode = 0;
+	thisGroupContainer->groupMoveMode = 0;
+	thisGroupContainer->postGroupActionMode = 0;
 
 	thisGroupContainer->selectedGroup = NULL;
 	thisGroupContainer->activeGroup = GROUP_NULL;
@@ -360,6 +389,30 @@ int setNextActiveGroup(groupContainer * thisGroupContainer){
 		thisGroupContainer->activeGroup = GROUP_ALLIES;
 		thisGroupContainer->selectedGroup = thisGroupContainer->allies;
 		return 1;
+	}
+}
+
+
+void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContainer, int numTurns){
+
+	if(thisIndividual->activeAbilities->selectedAbility != NULL && thisIndividual->activeAbilities->selectedAbility->type == 'i'){
+
+		if(thisIndividual->activeAbilities->selectedAbility->actionsEnabled){
+			numTurns += thisIndividual->activeAbilities->selectedAbility->actions->effectAndManaArray[thisIndividual->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+		 }
+
+		removeActiveAbility(thisIndividual, thisIndividual->activeAbilities->selectedAbility);
+
+		thisIndividual->activeAbilities->selectedAbility = NULL;
+	}
+
+	thisIndividual->remainingActions -= numTurns;
+
+	if (thisIndividual->remainingActions <= 0) {
+		endTurn(thisIndividual);
+		thisGroupContainer->groupActionMode = 1;
+		thisGroupContainer->initGroupActionMode = 1;
+		setNextActiveGroup(thisGroupContainer);
 	}
 }
 

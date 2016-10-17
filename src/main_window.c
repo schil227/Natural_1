@@ -31,11 +31,6 @@ int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
 
-int initEnemyActionMode = 0;
-int enemyActionMode = 0;
-int enemyMoveMode = 0;
-int postEnemyActionMode = 0;
-
 int enemyTurn = 0;
 
 individual* player;
@@ -376,7 +371,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			break;
 		case 0x57: //w key (wait)
-			decreaseTurns(player, &enemyActionMode, &initEnemyActionMode, 1);
+			decreaseTurns(player, thisGroupContainer, 1);
 
 			break;
 		}
@@ -435,14 +430,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 		}
 	}else if(inAbilityViewMode()){
-		if(abilityViewLoop(hwnd, msg, wParam, lParam, player, &enemyActionMode, &initEnemyActionMode)){
+		if(abilityViewLoop(hwnd, msg, wParam, lParam, player)){
 			removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
 			triggerEventOnDeath(player->ID);
 			removeFromExistance(player->ID);
 		}
 		return 0;
 	}else if (inCursorMode()) {
-		return cursorLoop(hwnd, msg, wParam, lParam, &enemyActionMode, &initEnemyActionMode, main_field, player, thisGroupContainer, viewShift);
+		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift);
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
@@ -478,7 +473,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
 
-			decreaseTurns(player, &enemyActionMode, &initEnemyActionMode, 1);
+			decreaseTurns(player, thisGroupContainer, 1);
 
 			free(thisMoveNodeMeta->rootMoveNode);
 			destroyCharacter(thisMoveNodeMeta->shadowCharacter);
@@ -488,13 +483,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return 0;
 	} else if(inInventoryViewMode()){
 		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, viewShift);
-	}else if(enemyMoveMode){
+	}else if(thisGroupContainer->groupMoveMode){
 		animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
-				(enemies->individuals[enemies->currentIndividualIndex]),
-				thisMoveNodeMeta, 5, &enemyMoveMode, viewShift, 0);
+				(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]),
+				thisMoveNodeMeta, 5, &thisGroupContainer->groupMoveMode, viewShift, 0);
 
 		//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
-		if (!enemyMoveMode) {
+		if (!thisGroupContainer->groupMoveMode) {
 
 			if (thisMoveNodeMeta != NULL
 					&& thisMoveNodeMeta->rootMoveNode != NULL) {
@@ -502,79 +497,105 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			free(thisMoveNodeMeta);
 
-			postEnemyActionMode = 1;
+			thisGroupContainer->postGroupActionMode = 1;
 		}
-	}else if(enemyActionMode){
-		if(enemies->numIndividuals == 0){
-			enemyActionMode = 0;
-			initEnemyActionMode = 0;
+	}else if(thisGroupContainer->groupActionMode){
+		if(thisGroupContainer->selectedGroup->numIndividuals == 0){
+			thisGroupContainer->groupActionMode = 0;
+			thisGroupContainer->initGroupActionMode = 0;
 
-			if(startTurn(player)){
+			/**************
+			 *
+			 *
+			 *
+			 *
+			 *
+			 * do the thing here
+			 *
+			 *
+			 *
+			 *
+			 *
+			 *
+			 */
+			if(!setNextActiveGroup(thisGroupContainer)){
+				if(startTurn(player)){
 
+				}
+
+				//If player's out of actions, start enemy turn again
+				if(player->remainingActions < 0){
+					endTurn(player);
+					thisGroupContainer->groupActionMode = 1;
+					thisGroupContainer->initGroupActionMode = 1;
+					setNextActiveGroup(thisGroupContainer);
+				}
+			}else{
+				thisGroupContainer->groupActionMode = 1;
+				thisGroupContainer->initGroupActionMode = 1;
 			}
-
-			//If player's out of actions, start enemy turn again
-			if(player->remainingActions < 0){
-				endTurn(player);
-				enemyActionMode = 1;
-				initEnemyActionMode = 1;
-			}
-
 		} else {
-			if (initEnemyActionMode) {
-				initEnemyActionMode = 0;
+			if (thisGroupContainer->initGroupActionMode) {
+				thisGroupContainer->initGroupActionMode = 0;
 
 				//note:the address of the pointer to thisMoveNodeMeta is passed in because it is malloc'd inside the method
-				if(initializeEnemyTurn(enemies, player, main_field, &thisMoveNodeMeta)){
-					enemyActionMode = 0;
-					postEnemyActionMode = 1;
+				if(initializeEnemyTurn(thisGroupContainer->selectedGroup, player, main_field, &thisMoveNodeMeta)){
+					thisGroupContainer->groupActionMode = 0;
+					thisGroupContainer->postGroupActionMode = 1;
 					return 0;
 				}
 
-				if(!enemies->individuals[enemies->currentIndividualIndex]->remainingActions > 0){
-					enemyActionMode = 0;
-					postEnemyActionMode = 1;
+				if(!thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
+					thisGroupContainer->groupActionMode = 0;
+					thisGroupContainer->postGroupActionMode = 1;
 					return 0;
 				}
 			}
-			enemyActionMode = 0;
+			thisGroupContainer->groupActionMode = 0;
 
 			//If not moving
-			if(!enemyAction(enemies->individuals[enemies->currentIndividualIndex], player, thisGroupContainer, main_field, &thisMoveNodeMeta)){
-				postEnemyActionMode = 1;
+
+			if(!performAction(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex], player, thisGroupContainer, main_field, &thisMoveNodeMeta)){
+				thisGroupContainer->postGroupActionMode = 1;
 			}else{
-				enemyMoveMode = 1;
+				thisGroupContainer->groupMoveMode = 1;
 			}
 		}
 
-	}else if(postEnemyActionMode){
-		postEnemyActionMode = 0;
+	}else if(thisGroupContainer->postGroupActionMode){
+		thisGroupContainer->postGroupActionMode = 0;
 
-		if(enemies->individuals[enemies->currentIndividualIndex] != NULL ){
+		if(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex] != NULL ){
 
-			if(enemies->individuals[enemies->currentIndividualIndex]->remainingActions > 0){
-				enemyActionMode = 1;
+			if(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
+				thisGroupContainer->groupActionMode = 1;
 				return 1;
 			} else {
-				endTurn(enemies->individuals[enemies->currentIndividualIndex]);
+				endTurn(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
 			}
 		}
 
 		//determine if need to go back into enemyActionMode
-		nextAvailableIndividualIndex(enemies);
-		if(enemies->currentIndividualIndex > -1){
-			enemyActionMode = 1;
-			initEnemyActionMode = 1;
+		nextAvailableIndividualIndex(thisGroupContainer->selectedGroup);
+		if(thisGroupContainer->selectedGroup->currentIndividualIndex > -1){
+			thisGroupContainer->groupActionMode = 1;
+			thisGroupContainer->initGroupActionMode = 1;
 		}else{
-			if(startTurn(player)){
+			if(!setNextActiveGroup(thisGroupContainer)){
+				if(startTurn(player)){
 
-			}
+				}
 
-			//If player's out of actions, start enemy turn again
-			if(player->remainingActions < 0){
-				endTurn(player);
-				enemyActionMode = 1;
-				initEnemyActionMode = 1;
+				//If player's out of actions, start enemy turn again
+				if(player->remainingActions < 0){
+					endTurn(player);
+					thisGroupContainer->groupActionMode = 1;
+					thisGroupContainer->initGroupActionMode = 1;
+					setNextActiveGroup(thisGroupContainer);
+				}
+			}else{
+				thisGroupContainer->groupActionMode = 1;
+				thisGroupContainer->initGroupActionMode = 1;
 			}
 		}
 

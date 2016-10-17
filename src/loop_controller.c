@@ -7,7 +7,7 @@
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 
-int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyActionMode, int * initEnemyActionMode,
+int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift) {
 	switch (msg) {
 	case WM_KEYDOWN: {
@@ -51,7 +51,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
-					decreaseTurns(player, enemyActionMode, initEnemyActionMode, 1);
+					decreaseTurns(player, thisGroupContainer, 1);
 					toggleInCursorMode();
 				}
 
@@ -60,7 +60,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 
 				viewShift->xShift = viewShift->xShiftOld;
 				viewShift->yShift = viewShift->yShiftOld;
-				decreaseTurns(player, enemyActionMode, initEnemyActionMode, 1);
+				decreaseTurns(player, thisGroupContainer, 1);
 				toggleInCursorMode();
 			}else if (getCursorMode() == CURSOR_ABILITY){
 				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
@@ -75,7 +75,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * enemyAct
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
 
-					decreaseTurns(player, enemyActionMode, initEnemyActionMode, numActions);
+					decreaseTurns(player, thisGroupContainer, numActions);
 					toggleInCursorMode();
 				}
 			}
@@ -255,7 +255,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 }
 
 
-int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, int * enemyActionMode, int * initEnemyActionMode){
+int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
 	switch(msg){
 	case WM_KEYDOWN:{
 
