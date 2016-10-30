@@ -1714,7 +1714,7 @@ individual * getDangerousIndividualNearByInLoS(individual * npc, individual *  p
 
 void findDangerousIndividualNearBy(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
 	if(npc->targetedIndividual != NULL){
-		if(maxDistance < max(abs(npc->playerCharacter->x - npc->targetedIndividual->playerCharacter->x) , abs(npc->playerCharacter->y - npc->targetedIndividual->playerCharacter->y))){
+		if(npc->targetedIndividual->hp == 0 || maxDistance < max(abs(npc->playerCharacter->x - npc->targetedIndividual->playerCharacter->x) , abs(npc->playerCharacter->y - npc->targetedIndividual->playerCharacter->y))){
 			npc->targetedIndividual = getDangerousIndividualNearByInLoS(npc, player, thisGroupContainer, thisField);
 
 			if(npc->targetedIndividual != NULL){
@@ -1782,7 +1782,7 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 
 		free(targetSpace);
 
-		if(!npc->thisBehavior->isSurrounded && targetSpace->x != npc->playerCharacter->x || targetSpace->y != npc->playerCharacter->y){
+		if(!npc->thisBehavior->isSurrounded && !(abs(targetSpace->x - npc->playerCharacter->x) <= 1 && abs(targetSpace->y - npc->playerCharacter->y) <= 1)){
 			int toReturn = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, x, y);
 
 			if(!toReturn){
