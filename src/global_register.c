@@ -38,8 +38,8 @@ void initalizeTheGlobalRegister(){
 	thisGlobalRegister->MAX_SOUNDS = 300;
 	thisGlobalRegister->numSounds = 0;
 
-	thisGlobalRegister->MAX_IMAGES = 500;
-	thisGlobalRegister->numImages = 0;
+	thisGlobalRegister->MAX_ANIMATIONS = 10000;
+	thisGlobalRegister->numAnimations = 0;
 
 	thisGlobalRegister->MAX_TEMPLATE_ABILITIES = 4;
 	thisGlobalRegister->numTemplateAbilities = 0;
@@ -121,12 +121,32 @@ char * getSoundPathFromRegistry(int id){
 	return NULL;
 }
 
-character * getImageFromRegistry(int id){
+animation * getAnimationFromRegistry(int id){
 	int i;
 
-	for(i = 0; i < thisGlobalRegister->numImages; i++){
-		if(thisGlobalRegister->imageRegistry[i]->imageID == id){
-			return thisGlobalRegister->imageRegistry[i];
+	for(i = 0; i < thisGlobalRegister->numAnimations; i++){
+		if(thisGlobalRegister->animationRegistry[i]->imageID == id){
+			return thisGlobalRegister->animationRegistry[i];
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!IMAGE NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
+animation * cloneAnimationFromRegistry(int id){
+	int i;
+
+	if(id == -1){
+		return NULL;
+	}
+
+	for(i = 0; i < thisGlobalRegister->numAnimations; i++){
+		if(thisGlobalRegister->animationRegistry[i]->imageID == id){
+			return cloneAnimation(thisGlobalRegister->animationRegistry[i]);
 		}
 	}
 
@@ -272,14 +292,14 @@ int addSoundToRegistry(soundMap * thisSoundMap){
 	return 0;
 }
 
-int addImageToRegistry(character * image){
-	if(thisGlobalRegister->numImages< thisGlobalRegister->MAX_IMAGES){
-		thisGlobalRegister->imageRegistry[thisGlobalRegister->numImages] = image;
-		thisGlobalRegister->numImages++;
+int addAnimationToRegistry(animation * thisAnimation){
+	if(thisGlobalRegister->numAnimations< thisGlobalRegister->MAX_ANIMATIONS){
+		thisGlobalRegister->animationRegistry[thisGlobalRegister->numAnimations] = thisAnimation;
+		thisGlobalRegister->numAnimations++;
 		return 1;
 	}
 
-	cwrite("!!MAX IMAGES IN REGISTRY!!");
+	cwrite("!!MAX ANIMATIONS IN REGISTRY!!");
 
 	return 0;
 }
@@ -332,94 +352,6 @@ int addInstantAbilityToRegistry(ability * thisAbility){
 	return 0;
 }
 
-/*
-
-int removeIndividualFromRegistryByID(int id){
-	int i;
-
-	if(thisGlobalRegister->numIndividuals == 0){
-		cwrite("!!CANNOT REMOVE: INDIVIDUAL REGISTRY EMPTY!!");
-		return 0;
-	}
-
-	for(i = 0; i < thisGlobalRegister->numIndividuals; i++){
-		if(thisGlobalRegister->individualRegistry[i]->ID == id){
-			destroyIndividual(thisGlobalRegister->individualRegistry[i]);
-
-			//rebalance, place last element at i
-			thisGlobalRegister->numIndividuals--;
-			thisGlobalRegister->individualRegistry[i] = thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals];
-			thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = NULL;
-
-			return 1;
-		}
-	}
-
-	char * errLog[128];
-	sprintf(errLog, "!!CANNOT REMOVE: INDIVIDUAL NOT FOUND IN REGISTRY - %d!!", id);
-	cwrite(errLog);
-
-	return 0;
-
-}
-
-int removeItemFromRegistryByID(int id){
-	int i;
-
-	if(thisGlobalRegister->numItems == 0){
-		cwrite("!!CANNOT REMOVE: ITEM REGISTRY EMPTY!!");
-		return 0;
-	}
-
-	for(i = 0; i < thisGlobalRegister->numItems; i++){
-		if(thisGlobalRegister->itemRegistry[i]->ID == id){
-			destroyItem(thisGlobalRegister->itemRegistry[i]);
-
-			//rebalance, place last element at i
-			thisGlobalRegister->numItems--;
-			thisGlobalRegister->itemRegistry[i] = thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems];
-			thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = NULL;
-
-			return 1;
-		}
-	}
-
-	char * errLog[128];
-	sprintf(errLog, "!!CANNOT REMOVE: ITEM NOT FOUND IN REGISTRY - %d!!", id);
-	cwrite(errLog);
-
-	return 0;
-}
-
-int removeEventFromRegistry(int id){
-	int i;
-
-	if(thisGlobalRegister->numEvents == 0){
-		cwrite("!!CANNOT REMOVE: EVENT REGISTRY EMPTY!!");
-		return 0;
-	}
-
-	for(i = 0; i < thisGlobalRegister->numEvents; i++){
-		if(thisGlobalRegister->eventRegistry[i]->ID == id){
-			free(thisGlobalRegister->eventRegistry[i]);
-
-			//rebalance, place last item at i
-			thisGlobalRegister->numEvents--;
-			thisGlobalRegister->eventRegistry[i] = thisGlobalRegister->eventRegistry[thisGlobalRegister->numEvents];
-			thisGlobalRegister->eventRegistry[thisGlobalRegister->numEvents] = NULL;
-
-			return 1;
-		}
-	}
-
-	char * errLog[128];
-	sprintf(errLog, "!!CANNOT REMOVE: EVENT NOT FOUND IN REGISTRY - %d!!", id);
-	cwrite(errLog);
-
-	return 0;
-}
-
-*/
 
 /*
  * TODO: On cutover, make sure destroy individual doesn't destroy items.
@@ -436,8 +368,8 @@ void destroyTheGlobalRegister(){
 		destroyItem(thisGlobalRegister->itemRegistry[i]);
 	}
 
-	for(i = 0; i < thisGlobalRegister->numImages; i++){
-		destroyCharacter(thisGlobalRegister->imageRegistry[i]);
+	for(i = 0; i < thisGlobalRegister->numAnimations; i++){
+		destroyCharacter(thisGlobalRegister->animationRegistry[i]);
 	}
 
 //	for(i = 0; i < thisGlobalRegister->numEvents; i++){
@@ -453,17 +385,17 @@ void destroyTheGlobalRegister(){
 }
 
 void loadGlobalRegister(char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
-						char * imagesData, char * selfAbilitiesData, char * targetedAbilitiesData){
+						char * animationData, char * selfAbilitiesData, char * targetedAbilitiesData){
 	// Priority loading:
 	//individuals dependant on xAbilities
 	loadSelfAbilitiesToRegistry(mapDirectory, selfAbilitiesData);
 	loadTargetedAbilitiesToRegistry(mapDirectory, targetedAbilitiesData);
 
+	loadAnimationsToRegistry(mapDirectory, animationData);
 	loadIndividualsToRegistry(mapDirectory, individualsData);
 	loadItemsToRegistry(mapDirectory, itemsData);
 	loadEventsToRegistry(mapDirectory, eventsData);
 	loadSoundsToRegistry(mapDirectory, soundsData);
-	loadImagesToRegistry(mapDirectory, imagesData);
 }
 
 void loadIndividualsToRegistry(char* directory, char * individualsFileName){
@@ -558,16 +490,16 @@ void loadSoundsToRegistry(char* directory, char* soundFileName){
 	free(fullFileName);
 }
 
-void loadImagesToRegistry(char* directory, char* imageFileName){
-	char * fullFileName = appendStrings(directory, imageFileName);
+void loadAnimationsToRegistry(char* directory, char* animationFileName){
+	char * fullFileName = appendStrings(directory, animationFileName);
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
 	char line[128];
 
-	while(fgets(line,128,FP) != NULL){
+	while(fgets(line,512,FP) != NULL){
 		if (line[0] != '#') {
-			character * newCharacter = createCharacterFromLine(line);
-			addImageToRegistry(newCharacter);
+			animation * newAnimation = createAnimationFromLine(line);
+			addAnimationToRegistry(newAnimation);
 		}
 	}
 

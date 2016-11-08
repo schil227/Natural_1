@@ -8,20 +8,24 @@
 
 static cursor * thisCursorInstance;
 
-void initThisCursor(int imageID, COLORREF rgb, int x, int y) {
+void initThisCursor(int imageID) {
 	thisCursorInstance = malloc(sizeof(cursor));
-	thisCursorInstance->cursorCharacter = createCharacter(imageID, rgb, x, y);
+	thisCursorInstance->cursorCharacter = createCharacterFromAnimation(cloneAnimationFromRegistry(imageID));// createCharacter(imageID, rgb, x, y);
+	thisCursorInstance->cursorCharacter->x = 0;
+	thisCursorInstance->cursorCharacter->y = 0;
+	thisCursorInstance->cursorCharacter->direction = 0;
 
 	thisCursorInstance->inCursorMode = 0;
 }
 
 void drawCursor(HDC hdc, HDC hdcBuffer, shiftData * viewData){
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->imageMask);
-	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
-	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->image);
-	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
-	DeleteDC(hdcMem);
+	drawCharacterAnimation(hdc, hdcBuffer, thisCursorInstance->cursorCharacter, viewData, 0);
+//	HDC hdcMem = CreateCompatibleDC(hdc);
+//	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->imageMask);
+//	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
+//	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->image);
+//	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
+//	DeleteDC(hdcMem);
 }
 
 void toggleInCursorMode(){

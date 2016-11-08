@@ -34,7 +34,6 @@ typedef struct{
 	dialogMessage * targetMessage;
 } dialogDecision;
 
-
 typedef struct{
 	int drawBox;
 	int numRows;
@@ -52,8 +51,8 @@ typedef struct{
 
 	dialogMessage ** dialogMessages;
 	dialogMessage * currentMessage;
-	character * dialogWindow;
-	character * selectArrow;
+	fixedCharacter * dialogWindow;
+	fixedCharacter * selectArrow;
 	individualDialog * individualDialogRegistry[1000];
 } dialogInstance;
 

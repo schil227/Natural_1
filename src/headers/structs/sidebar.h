@@ -11,7 +11,7 @@
 #include "../individual_pub_methods.h";
 
 typedef struct{
-	character * thisCharacter;
+	fixedCharacter * thisCharacter;
 }sidebarInstance;
 
 #endif /* SRC_HEADERS_STRUCTS_SIDEBAR_H_ */

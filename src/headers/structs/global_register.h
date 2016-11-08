@@ -23,7 +23,7 @@ typedef struct {
 	event * eventRegistry[1000];
 	ability * templateAbilities[500];
 	soundMap * soundMapRegistry[300];
-	character * imageRegistry[500];
+	animation * animationRegistry[10000];
 	ability * perminentAbilities[100];
 	ability * selfAbilities[100];
 	ability * targetedAbilities[100];
@@ -44,8 +44,8 @@ typedef struct {
 	int MAX_SOUNDS;
 	int numSounds;
 
-	int MAX_IMAGES;
-	int numImages;
+	int MAX_ANIMATIONS;
+	int numAnimations;
 
 	int MAX_TEMPLATE_ABILITIES;
 	int numTemplateAbilities;

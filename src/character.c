@@ -99,25 +99,38 @@ HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
 	return hbmMask;
 }
 
-character * createCharacter(int imageID, COLORREF rgb, int x, int y){
-	character * thisCharacter = malloc(sizeof(character));
+fixedCharacter * createCharacter(int imageID, COLORREF rgb, int x, int y){
+	fixedCharacter * thisCharacter = malloc(sizeof(fixedCharacter));
 	BITMAP bm;
 
-	thisCharacter->imageID = imageID;
+	thisCharacter->fixedImageID = imageID;
 	thisCharacter->x = x;
 	thisCharacter->y = y;
 	thisCharacter->rgb = rgb;
 
-	thisCharacter->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
+	thisCharacter->fixedImage = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
 
-	thisCharacter->imageMask = CreateBitmapMask(thisCharacter->image, rgb);
+	thisCharacter->fixedImageMask = CreateBitmapMask(thisCharacter->fixedImage, rgb);
 
-	GetObjectA(thisCharacter->image, sizeof(bm), &bm);
+	GetObjectA(thisCharacter->fixedImage, sizeof(bm), &bm);
 
-	thisCharacter->height = bm.bmHeight;
-	thisCharacter->width = bm.bmWidth;
+	thisCharacter->fixedHeight = bm.bmHeight;
+	thisCharacter->fixedWidth = bm.bmWidth;
 
 	return thisCharacter;
+}
+
+character * createCharacterFromAnimation(animation * thisAnimation){
+	character * newCharacter = malloc(sizeof(fixedCharacter));
+
+	newCharacter->direction = 0;
+
+	newCharacter->thisAnimationContainer = initAnimationContainer();
+	newCharacter->thisAnimationContainer->animations[0] = thisAnimation;
+	newCharacter->thisAnimationContainer->numAnimations = 1;
+	newCharacter->secondaryAnimationContainer = cloneAnimationContainer(newCharacter->thisAnimationContainer);
+
+	return newCharacter;
 }
 
 character * createCharacterFromLine(char line[128]){
@@ -144,196 +157,319 @@ character * createCharacterFromLine(char line[128]){
 	return createCharacter(imageId, RGB(r,g,b), x, y);
 }
 
-void destroyCharacter(character* thisCharacter){
-	if(thisCharacter != NULL){
-		if(thisCharacter->image != NULL){
-			DeleteObject(thisCharacter->image);
-		}
+animationState pickAnimationState(char * state){
+	if(strcmp(state, "ANIMATION_IDLE") == 0){
+		return ANIMATION_IDLE;
+	}else if(strcmp(state, "ANIMATION_IDLE_EQUIPT") == 0){
+		return ANIMATION_IDLE_EQUIPT;
+	}else if(strcmp(state, "ANIMATION_ATTACK_SLASH") == 0){
+		return ANIMATION_ATTACK_SLASH;
+	}else if(strcmp(state, "ANIMATION_ATTACK_CHOP") == 0){
+		return ANIMATION_ATTACK_CHOP;
+	}else if(strcmp(state, "ANIMATION_ATTACK_BLUNT") == 0){
+		return ANIMATION_ATTACK_BLUNT;
+	}else if(strcmp(state, "ANIMATION_ATTACK_PIERCE") == 0){
+		return ANIMATION_ATTACK_PIERCE;
+	}else if(strcmp(state, "ANIMATION_ATTACK_BOW") == 0){
+		return ANIMATION_ATTACK_BOW;
+	}else if(strcmp(state, "ANIMATION_HARM") == 0){
+		return ANIMATION_HARM;
+	}else if(strcmp(state, "ANIMATION_DEATH") == 0){
+		return ANIMATION_DEATH;
+	}else if(strcmp(state, "ANIMATION_CAST") == 0){
+		return ANIMATION_CAST;
+	}else if(strcmp(state, "ANIMATION_CONSUME") == 0){
+		return ANIMATION_CONSUME;
+	}
 
-		if(thisCharacter->imageMask != NULL){
-			DeleteObject(thisCharacter->imageMask);
+	char outlog[128];
+	sprintf(outlog, "!! STATE %s NOT FOUND : USING DEFAULT !!", state);
+	cwrite(outlog);
+
+	return ANIMATION_IDLE;
+}
+
+animation * createAnimationFromLine(char line[512]){
+	char * strtok_save_pointer;
+	char * durations;
+	char * value = strtok_r(line, ";", &strtok_save_pointer);
+	int i,r,g,b,totalDuration;
+
+	animationState state = pickAnimationState(value);
+
+	animation * newAnimation = initAnimation(state);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	newAnimation->imageID = atoi(value);
+
+	newAnimation->image = LoadBitmap(GetModuleHandle(NULL) , newAnimation->imageID);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	r = atoi(value);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	g = atoi(value);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	b = atoi(value);
+
+	newAnimation->rgb = RGB(r,g,b);
+
+	newAnimation->imageMask = CreateBitmapMask(newAnimation->image, newAnimation->rgb);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	if(atoi(value) == -1){
+		newAnimation->width = 100;
+	}else{
+		newAnimation->width = atoi(value);
+	}
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	if(atoi(value) == -1){
+		newAnimation->height = 100;
+	}else{
+		newAnimation->height = atoi(value);
+	}
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+
+	newAnimation->numFrames = atoi(value);
+
+	durations = strtok_r(NULL, ";", &strtok_save_pointer);
+
+	value = strtok(durations, ",");
+	for(i = 0; i < newAnimation->numFrames; i++){
+		newAnimation->durationInTicks[i] = atoi(value);
+		totalDuration += atoi(value);
+
+		if(i+1 < newAnimation->numFrames){
+			value = strtok(NULL, ",");
 		}
 	}
+
+	newAnimation->totalDuration = totalDuration;
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	newAnimation->soundFrame = atoi(value);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	newAnimation->soundID = atoi(value);
+
+	return newAnimation;
+}
+
+void destroyCharacter(character* thisCharacter){
+//	if(thisCharacter != NULL){
+//		if(thisCharacter->image != NULL){
+//			DeleteObject(thisCharacter->image);
+//		}
+//
+//		if(thisCharacter->imageMask != NULL){
+//			DeleteObject(thisCharacter->imageMask);
+//		}
+//	}
+
+//	destroy animations/containers
 	free(thisCharacter);
 }
 
+void destroyFixedCharacter(fixedCharacter * thisCharacter){
+//	if(thisCharacter != NULL){
+//		if(thisCharacter->fixedImage != NULL){
+//			DeleteObject(thisCharacter->fixedImage);
+//		}
+//
+//		if(thisCharacter->fixedImageMask != NULL){
+//			DeleteObject(thisCharacter->fixedImageMask);
+//		}
+//	}
 
-void drawCharacter(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift){
+//	free(thisCharacter);
+}
+
+//void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, shiftData * viewShift){
+//	HDC hdcMem = CreateCompatibleDC(hdc);
+//	SelectObject(hdcMem, thisCharacter->imageMask);
+//
+//	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width , thisCharacter->height, hdcMem, 0, 0, SRCAND);
+//
+//	SelectObject(hdcMem, thisCharacter->image);
+//
+//	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
+//	DeleteDC(hdcMem);
+//}
+
+void drawUnboundCharacterAbsolute(HDC hdc, HDC hdcBuffer, int x, int y, fixedCharacter * thisCharacter){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
+	SelectObject(hdcMem, thisCharacter->fixedImageMask);
 
-	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, x, y, thisCharacter->fixedWidth , thisCharacter->fixedHeight, hdcMem, 0, 0, SRCAND);
 
-	SelectObject(hdcMem, thisCharacter->image);
+	SelectObject(hdcMem, thisCharacter->fixedImage);
 
-	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	BitBlt(hdcBuffer, x, y, thisCharacter->fixedWidth, thisCharacter->fixedHeight, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
-void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, shiftData * viewShift){
+void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, fixedCharacter * thisCharacter, shiftData * viewShift){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
+	SelectObject(hdcMem, thisCharacter->fixedImageMask);
 
-	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width , thisCharacter->height, hdcMem, 0, 0, SRCAND);
+	BitBlt(hdcBuffer, x, y, thisCharacter->fixedWidth , thisCharacter->fixedHeight, hdcMem, 0, 0, SRCAND);
 
-	SelectObject(hdcMem, thisCharacter->image);
+	SelectObject(hdcMem, thisCharacter->fixedImage);
 
-	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
-	DeleteDC(hdcMem);
-}
-
-void drawUnboundCharacterAbsolute(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter){
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
-
-	BitBlt(hdcBuffer, x, y, thisCharacter->width , thisCharacter->height, hdcMem, 0, 0, SRCAND);
-
-	SelectObject(hdcMem, thisCharacter->image);
-
-	BitBlt(hdcBuffer, x, y, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
-	DeleteDC(hdcMem);
-}
-
-void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, shiftData * viewShift){
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
-
-	BitBlt(hdcBuffer, x, y, thisCharacter->width , thisCharacter->height, hdcMem, 0, 0, SRCAND);
-
-	SelectObject(hdcMem, thisCharacter->image);
-
-	BitBlt(hdcBuffer, x, y, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
+	BitBlt(hdcBuffer, x, y, thisCharacter->fixedWidth, thisCharacter->fixedHeight, hdcMem, 0, 0, SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
 void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
 
-	int shitfX, shiftY;
+	int shitfX;
+
+	HBITMAP selectedImage, selectedImageMask;
+
 	if(useSecondaryAnimationContainer){
-		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->secondaryAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
+		selectedImage = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->image;
+		selectedImageMask = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->imageMask;
 	} else {
-		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->thisAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
+		selectedImage = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
+		selectedImageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
 	}
+	SelectObject(hdcMem, selectedImageMask);
+//
+//	BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25, thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
+////				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+//			100,100,
+//			hdcMem,
+//			shitfX,
+//			0,
+//			SRCAND);
 
-	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40,
+		BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25, thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
+	//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+				100,100,
+				hdcMem,
+				shitfX,
+				0,
+				SRCAND);
+
+	SelectObject(hdcMem, selectedImage);
+
+//	BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25, thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
+////				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+//			100,100,
+//			hdcMem,
+//			shitfX,
+//			100,
+//			SRCPAINT);
+
+	BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25,thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+			100,100,
 			hdcMem,
 			shitfX,
-			shiftY,
-			SRCAND);
-
-	SelectObject(hdcMem, thisCharacter->image);
-
-	BitBlt(hdcBuffer, thisCharacter->x*40 - (viewShift->xShift)*40, thisCharacter->y*40 - (viewShift->yShift)*40,
-//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
-			hdcMem,
-			shitfX,
-			shiftY,
+			0,
 			SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
 void drawUnboundAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
+	HBITMAP image, imageMask;
 
-	int shitfX, shiftY;
+	int shitfX;
 	if(useSecondaryAnimationContainer){
-		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->secondaryAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
+		image = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->image;
+		imageMask = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->imageMask;
 	} else{
-		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->thisAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
+		image = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
+		imageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
 	}
 
-	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord*40 - (viewShift->yShift)*40,
+	SelectObject(hdcMem, imageMask);
+
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+			100,100,
 			hdcMem,
 			shitfX,
-			shiftY,
+			0,
 			SRCAND);
 
-	SelectObject(hdcMem, thisCharacter->image);
+	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord*40 - (viewShift->yShift)*40,
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+			100,100,
 			hdcMem,
 			shitfX,
-			shiftY,
+			0,
 			SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
 void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
+	HBITMAP imageMask = NULL;
 
-	int shitfX, shiftY;
+	int shitfX;
 	if(useSecondaryAnimationContainer){
-		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->secondaryAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
+		imageMask = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->imageMask;
 	} else{
-		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->thisAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
+		imageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
 	}
 
-	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord*40 - (viewShift->yShift)*40,
-//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+	SelectObject(hdcMem, imageMask);
+
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
+			100,100,
 			hdcMem,
 			shitfX,
-			shiftY,
+			0,
 			SRCAND);
 
-//	SelectObject(hdcMem, thisCharacter->image);
-
-//	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord*40 - (viewShift->yShift)*40,
-////				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-//			40,40,
-//			hdcMem,
-//			shitfX,
-//			shiftY,
-//			SRCPAINT);
 	DeleteDC(hdcMem);
 }
 
 void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int xCord, int yCord, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->imageMask);
+	HBITMAP image, imageMask;
 
-	int shitfX, shiftY;
+	int shitfX;
 	if(useSecondaryAnimationContainer){
-		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->secondaryAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
+		image = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->image;
+		imageMask = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->imageMask;
 	} else{
-		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
-		shiftY = thisCharacter->thisAnimationContainer->currentAnimation*41;
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
+		image = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
+		imageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
 	}
 
+	SelectObject(hdcMem, imageMask);
+
 	BitBlt(hdcBuffer, xCord, yCord,
-//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+			100,100,
 			hdcMem,
 			shitfX,
-			shiftY,
+			0,
 			SRCAND);
 
-	SelectObject(hdcMem, thisCharacter->image);
+	SelectObject(hdcMem, image);
 
 	BitBlt(hdcBuffer,xCord, yCord,
-//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+			100, 100,
 			hdcMem,
 			shitfX,
-			shiftY,
+			0,
 			SRCPAINT);
 	DeleteDC(hdcMem);
 }
@@ -460,8 +596,8 @@ animationContainer * cloneAnimationContainer(animationContainer * baseAnimationC
 	newContainer->numAnimations = baseAnimationContainer->numAnimations;
 	newContainer->animationsEnabled = baseAnimationContainer->animationsEnabled;
 
-	for(i = 0; i < newContainer->MAX_ANIMATIONS; i++){
-		newContainer->animations[i] = baseAnimationContainer->animations[i];
+	for(i = 0; i < newContainer->numAnimations; i++){
+		newContainer->animations[i] = cloneAnimation(baseAnimationContainer->animations[i]);
 	}
 
 	return newContainer;
@@ -470,6 +606,9 @@ animationContainer * cloneAnimationContainer(animationContainer * baseAnimationC
 animation * initAnimation(animationState state){
 	int i;
 	animation * thisAnimation = malloc(sizeof(animation));
+
+	thisAnimation->height = 0;
+	thisAnimation->width = 0;
 
 	thisAnimation->state = state;
 	thisAnimation->MAX_FRAMES = 20;
@@ -485,6 +624,37 @@ animation * initAnimation(animationState state){
 	}
 
 	return thisAnimation;
+}
+
+animation * cloneAnimation(animation * thisAnimation){
+	animation * newAnimation = initAnimation(thisAnimation->state);
+
+	newAnimation->imageID = thisAnimation->imageID;
+	newAnimation->rgb = thisAnimation->rgb;
+
+	newAnimation->image = thisAnimation->image;//LoadBitmap(GetModuleHandle(NULL) , newAnimation->imageID);
+	newAnimation->imageMask =  thisAnimation->imageMask;//CreateBitmapMask(newAnimation->imageID, newAnimation->rgb);
+
+	newAnimation->height = thisAnimation->height;
+	newAnimation->width = thisAnimation->width;
+
+
+	newAnimation->MAX_FRAMES = thisAnimation->MAX_FRAMES;
+	newAnimation->numFrames = thisAnimation->numFrames;
+	newAnimation->totalDuration = thisAnimation->totalDuration;
+	newAnimation->animationX = thisAnimation->animationX;
+	newAnimation->currentFrame = thisAnimation->currentFrame;
+	newAnimation->soundFrame = thisAnimation->soundFrame;
+	newAnimation->soundID = thisAnimation->soundID;
+
+	return newAnimation;
+}
+
+void addAnimationToContainer(animationContainer * thisContainer, animation * thisAnimation){
+	if(thisAnimation != NULL && thisContainer->numAnimations < thisContainer->MAX_ANIMATIONS){
+		thisContainer->animations[thisContainer->numAnimations] = thisAnimation;
+		thisContainer->numAnimations++;
+	}
 }
 
 void loadAnimationFromLine(animationContainer * thisContainer, animationState state, char * line){

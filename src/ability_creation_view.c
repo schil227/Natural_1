@@ -31,10 +31,10 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
 
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
-	thisAbilityCreationInstance->selector = createCharacter(3501, rgb, x, y);
-	thisAbilityCreationInstance->leftRightArrow = createCharacter(3502, rgb, x, y);
-	thisAbilityCreationInstance->scrollUpArrow = createCharacter(3002, rgb, x, y);
-	thisAbilityCreationInstance->scrollDownArrow = createCharacter(3004, rgb, x, y);
+	thisAbilityCreationInstance->selector = createCharacter(9501, rgb, x, y);
+	thisAbilityCreationInstance->leftRightArrow = createCharacter(9502, rgb, x, y);
+	thisAbilityCreationInstance->scrollUpArrow = createCharacter(1505, rgb, x, y);
+	thisAbilityCreationInstance->scrollDownArrow = createCharacter(1507, rgb, x, y);
 
 	loadTemplateAbilities(directory, effectsFileNam);
 
@@ -129,8 +129,8 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	textRect.right = textRect.left + 240;
 
 	//draw create window
-	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->image);
-	BitBlt(hdcBuffer, thisAbilityCreationInstance->creationWindow->x, thisAbilityCreationInstance->creationWindow->y, thisAbilityCreationInstance->creationWindow->width, thisAbilityCreationInstance->creationWindow->height, hdcMem, 0, 0, SRCCOPY);
+	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->fixedImage);
+	BitBlt(hdcBuffer, thisAbilityCreationInstance->creationWindow->x, thisAbilityCreationInstance->creationWindow->y, thisAbilityCreationInstance->creationWindow->fixedWidth, thisAbilityCreationInstance->creationWindow->fixedHeight, hdcMem, 0, 0, SRCCOPY);
 
 	char tmpLine[128];
 

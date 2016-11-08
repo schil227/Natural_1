@@ -399,46 +399,73 @@ void wanderAround(field * thisField, individual * thisIndividual){
  int direction = rand() % 10+1;
  moveIndividual(thisField, thisIndividual, direction);
 }
-/*
- * take in a character, output the corrosponding background name (string)
-*/
-int generateBackground(char backgroundSymbol){
-//	printf("backgroundChar: %c\n", backgroundSymbol);
 
-	if(backgroundSymbol == 'c'){
-//		printf("Found  a C!\n");
-		return 2502;
-	}else if (backgroundSymbol == 'g'){
-		return 2501;
-	}else if (backgroundSymbol == '-'){
-		return 2511;
-	}else if (backgroundSymbol == '='){
-		return 2512;
-	}else if (backgroundSymbol == 'r'){
-		return 2513;
-	}else if (backgroundSymbol == 'u'){
-		return 2514;
-	}else if (backgroundSymbol == 'o'){
-		return 2515;
-	}else if (backgroundSymbol == 'w'){
-		return 2521;
-	}else if (backgroundSymbol == 't'){
-		return 2561;
-	}else if (backgroundSymbol == 'p'){
-		return 2541;
-	}else if (backgroundSymbol == '\\'){
-		return 2542;
-	}else if (backgroundSymbol == 'f'){
-		return 2551;
-	}else if (backgroundSymbol == 'x'){
-		return 2531;
-	}else if (backgroundSymbol == 's'){
-		return 2532;
-	}else if (backgroundSymbol == 'd'){
-		return 2533;
-	}else{
-		return 2501;
+
+animation * generateBackground(char backgroundSymbol){
+	switch(backgroundSymbol){
+		case 'c':
+			return cloneAnimationFromRegistry(7502);
+		case 'g':
+			return cloneAnimationFromRegistry(7501);
+		case '-':
+			return cloneAnimationFromRegistry(7503);
+		case '=':
+			return cloneAnimationFromRegistry(7504);
+		case 'r':
+			return cloneAnimationFromRegistry(7505);
+		case 'u':
+			return cloneAnimationFromRegistry(7506);
+		case 'o':
+			return cloneAnimationFromRegistry(7507);
+		case 't':
+			return cloneAnimationFromRegistry(7514);
+		case 'p':
+			return cloneAnimationFromRegistry(7511);
+		case '\\':
+			return cloneAnimationFromRegistry(7512);
+		case 'f':
+			return cloneAnimationFromRegistry(7513);
+		case 'x':
+			return cloneAnimationFromRegistry(7508);
+		case 's':
+			return cloneAnimationFromRegistry(7509);
+		case 'd':
+			return cloneAnimationFromRegistry(7510);
+		default:
+			return cloneAnimationFromRegistry(7501);
 	}
+
+//	if(backgroundSymbol == 'c'){
+//		return 7502;
+//	}else if (backgroundSymbol == 'g'){
+//		return 7501;
+//	}else if (backgroundSymbol == '-'){
+//		return 7503;
+//	}else if (backgroundSymbol == '='){
+//		return 7504;
+//	}else if (backgroundSymbol == 'r'){
+//		return 7505;
+//	}else if (backgroundSymbol == 'u'){
+//		return 7506;
+//	}else if (backgroundSymbol == 'o'){
+//		return 7507;
+//	}else if (backgroundSymbol == 't'){
+//		return 7514;
+//	}else if (backgroundSymbol == 'p'){
+//		return 7511;
+//	}else if (backgroundSymbol == '\\'){
+//		return 7512;
+//	}else if (backgroundSymbol == 'f'){
+//		return 7513;
+//	}else if (backgroundSymbol == 'x'){
+//		return 7508;
+//	}else if (backgroundSymbol == 's'){
+//		return 7509;
+//	}else if (backgroundSymbol == 'd'){
+//		return 7510;
+//	}else{
+//		return 7501;
+//	}
 }
 
 field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
@@ -660,20 +687,23 @@ field* initField(char* fieldFileName){
 	while(fgets(line,80,fp) != NULL){
 		init_x = 0;
 		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
+			char currentChar = line[xIndex];
 
 			space* newSpace = malloc(sizeof(space));
 			newSpace->currentIndividual = NULL;//malloc(sizeof(individual));
 			newSpace->thisTransitInfo = NULL;// malloc(sizeof(transitInfo));
-			character* backgroundCharacter = malloc(sizeof(character));
-			char currentChar = line[xIndex];
 
-			//initialize background
-			backgroundCharacter->nameLength = 0;
-			backgroundCharacter->width = 40;
-			backgroundCharacter->height = 40;
+			character* backgroundCharacter = malloc(sizeof(character));
 			backgroundCharacter->x = init_x;
 			backgroundCharacter->y = init_y;
-			backgroundCharacter->imageID = generateBackground(currentChar);
+			backgroundCharacter->thisAnimationContainer = initAnimationContainer();
+			backgroundCharacter->thisAnimationContainer->animationsEnabled = 1;
+			backgroundCharacter->thisAnimationContainer->defaultAnimation = 0;
+
+			animation * backgroundAnimation = generateBackground(currentChar);
+
+			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, backgroundAnimation);
+
 			if(currentChar == 'c'
 				|| currentChar == '-'
 				|| currentChar == '='
@@ -689,7 +719,7 @@ field* initField(char* fieldFileName){
 				newSpace->isPassable = 1;
 			}
 
-			if(currentChar == 't' || currentChar == 's'){
+			if(currentChar == 't' || currentChar == 's' ||  currentChar == 'x'){
 				newSpace->canSeeThrough = 0;
 			}else{
 				newSpace->canSeeThrough = 1;
@@ -733,7 +763,7 @@ field* initField(char* fieldFileName){
 
 void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
 
-	HDC hdcMem = CreateCompatibleDC(hdc);
+//	HDC hdcMem = CreateCompatibleDC(hdc);
 	int x, y, i;
 
 	for (y = 0; y < this_field->totalY; y++) {
@@ -742,23 +772,14 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift)
 			character * tmpBackground = this_field->grid[x][y]->background;
 
 			if(tmpBackground->direction != 0){
-				drawRotatedBackground(hdcMem, hdcBuffer, tmpBackground, viewShift);
+				drawRotatedBackground(hdc, hdcBuffer, tmpBackground, viewShift);
 			}else{
-
-			SelectObject(hdcMem, tmpBackground->image);
-
-			BitBlt(hdcBuffer,
-				tmpBackground->x*40 - (viewShift->xShift)*40,
-				tmpBackground->y*40 - (viewShift->yShift)*40,
-				tmpBackground->width,
-				tmpBackground->height, hdcMem, 0, 0,
-				SRCCOPY);
+				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
 			}
-
 		}
 	}
 
-	DeleteDC(hdcMem);
+//	DeleteDC(hdcMem);
 }
 
 void drawItemsFromField(HDC hdc, HDC hdcBuffer, fieldInventory * thisFieldInventory, shiftData * viewShift){
@@ -778,7 +799,7 @@ void drawItemsFromField(HDC hdc, HDC hdcBuffer, fieldInventory * thisFieldInvent
 	}
 }
 
-void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){
+void drawRotatedBackground(HDC hdc, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){
 
 	int direction = backgroundCharacter->direction;
 	float cosine = (float) cos(direction*M_PI/2.0);
@@ -786,12 +807,12 @@ void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundChar
 
 	// Compute dimensions of the resulting bitmap
 	// First get the coordinates of the 3 corners other than origin
-	int x1 = (int) (40 * sine);
-	int y1 = (int) (40 * cosine);
-	int x2 = (int) (40 * cosine + 40 * sine);
-	int y2 = (int) (40 * cosine - 40 * sine);
-	int x3 = (int) (40 * cosine);
-	int y3 = (int) (-40 * sine);
+	int x1 = (int) (100 * sine);
+	int y1 = (int) (100 * cosine);
+	int x2 = (int) (100 * cosine + 100 * sine);
+	int y2 = (int) (100 * cosine - 100 * sine);
+	int x3 = (int) (100 * cosine);
+	int y3 = (int) (-100 * sine);
 
 	int minx = min(0, min(x1, min(x2,x3)));
 	int miny = min(0, min(y1, min(y2,y3)));
@@ -811,17 +832,19 @@ void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundChar
 		printf("setworldtransform failed");
 	}
 
-	SelectObject(hdcMem, backgroundCharacter->image);
+//	SelectObject(hdcMem, backgroundCharacter->image);
 
 	int xMod = calcXMod(direction, backgroundCharacter, viewShift);
 	int yMod = calcYMod(direction, backgroundCharacter, viewShift);
 
-	BitBlt(hdcBuffer,
-			xMod,//*(backgroundCharacter->x - (viewShift->xShift) * 40),
-			yMod,//*(backgroundCharacter->y - (viewShift->yShift) * 40),
-			backgroundCharacter->width, backgroundCharacter->height, hdcMem, 0,
-			0,
-			SRCCOPY);
+	drawUnboundAnimationByPixels(hdc, hdcBuffer, backgroundCharacter, viewShift, xMod, yMod, 0);
+
+//	BitBlt(hdcBuffer,
+//			xMod,//*(backgroundCharacter->x - (viewShift->xShift) * 40),
+//			yMod,//*(backgroundCharacter->y - (viewShift->yShift) * 40),
+//			backgroundCharacter->width, backgroundCharacter->height, hdcMem, 0,
+//			0,
+//			SRCCOPY);
 
 	//set world transform back to normal
 	xForm.eM11 = 1;
@@ -838,22 +861,22 @@ void drawRotatedBackground(HDC hdcMem, HDC hdcBuffer, character * backgroundChar
 
 int calcXMod(int direction, character * backgroundCharacter, shiftData * viewShift){
 	if(direction == 1){
-		return -1*(backgroundCharacter->y*40 - viewShift->yShift*40);
+		return -1*((backgroundCharacter->y*50 - viewShift->yShift*50) - 25);
 	}else if(direction == 2){
-		return -1*(backgroundCharacter->x*40-viewShift->xShift*40);
+		return -1*((backgroundCharacter->x*50-viewShift->xShift*50) - 25);
 	}
 	else{
-		return (backgroundCharacter->y*40 -viewShift->yShift*40);
+		return (backgroundCharacter->y*50 -viewShift->yShift*50) - 25;
 	}
 }
 
 int calcYMod(int direction, character * backgroundCharacter, shiftData * viewShift){
 	if(direction == 1){
-		return (backgroundCharacter->x*40-viewShift->xShift*40);
+		return (backgroundCharacter->x*50-viewShift->xShift*50) - 25;
 	}else if(direction == 2){
-		return -1*(backgroundCharacter->y*40-viewShift->yShift*40);
+		return -1*((backgroundCharacter->y*50-viewShift->yShift*50) - 25);
 	}else{
-		return -1*(backgroundCharacter->x*40-viewShift->xShift*40);
+		return -1*((backgroundCharacter->x*50-viewShift->xShift*50) - 25);
 	}
 }
 

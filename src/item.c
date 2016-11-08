@@ -6,7 +6,7 @@
  */
 #include"./headers/item_pub_methods.h"
 
-item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description,double weaponStrMod,
+item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description,double weaponStrMod,
 		int strMod, int dexMod, int conMod, int willMod, int intMod, int wisMod, int chrMod, int luckMod,
 		char weaponDamageType, char armorClass, char itemType, int price, int totalHealthMod, int healthMod, int totalManaMod,
 		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
@@ -15,11 +15,10 @@ item * createItem(int npcID, int imageID, COLORREF rgb, int x, int y, int ID, ch
 		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 
 	item * thisItem = malloc(sizeof(item));
-	thisItem->itemCharacter = createCharacter(imageID,rgb,x,y);
-
-	if (thisItem->itemCharacter->image == NULL) {
-		return NULL;
-	}
+	thisItem->itemCharacter = malloc(sizeof(character));
+	thisItem->itemCharacter->direction = 0;
+	thisItem->itemCharacter->x = x;
+	thisItem->itemCharacter->y = y;
 
 	thisItem->itemCharacter->thisAnimationContainer = thisAnimationContainer;
 	thisItem->itemCharacter->secondaryAnimationContainer = secondaryAnimationContainer;
@@ -85,15 +84,14 @@ void destroyItem(item * thisItem){
 
 item * cloneItem(item * thisItem){
 	item * newItem = malloc(sizeof(item));
-	newItem->itemCharacter = createCharacter(thisItem->itemCharacter->imageID, thisItem->itemCharacter->rgb,
-								thisItem->itemCharacter->x, thisItem->itemCharacter->y);
+	newItem->itemCharacter = malloc(sizeof(character));
+	newItem->itemCharacter->x = thisItem->itemCharacter->x;
+	newItem->itemCharacter->y = thisItem->itemCharacter->y;
+	newItem->itemCharacter->direction = thisItem->itemCharacter->direction;
 
 	newItem->itemCharacter->thisAnimationContainer = cloneAnimationContainer(thisItem->itemCharacter->thisAnimationContainer);
 	newItem->itemCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisItem->itemCharacter->secondaryAnimationContainer);
 
-	if (thisItem->itemCharacter->image == NULL) {
-			return NULL;
-	}
 
 	newItem->npcID = thisItem->npcID;
 	newItem->ID = thisItem->ID;

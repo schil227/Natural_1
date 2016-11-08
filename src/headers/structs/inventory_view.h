@@ -9,11 +9,11 @@
 #define SRC_HEADERS_STRUCTS_INVENTORY_VIEW_H_
 #include"../individual_pub_methods.h"
 typedef struct {
-	character * inventoryBackground;
-	character * itemFrame;
-	character * selectArrow;
-	character * scrollUpArrow;
-	character * scrollDownArrow;
+	fixedCharacter * inventoryBackground;
+	fixedCharacter * itemFrame;
+	fixedCharacter * selectArrow;
+	fixedCharacter * scrollUpArrow;
+	fixedCharacter * scrollDownArrow;
 	inventory * playerItems;
 	item * viewedItems[10];
 	int slotsPerScreen;

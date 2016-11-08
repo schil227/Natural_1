@@ -32,26 +32,6 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	BITMAP bm;
 	UINT ret;
 
-//	testPlayer = initIndividual();
-//	testGroupContainer->enemies = initGroup();
-//	testGroupContainer->npcs = initGroup();
-//	testShiftData = initShiftData();
-//	initThisCursor(2004,RGB(224, 64, 192),0,0);
-//	initThisConsole(2010,0,0,300,200);
-//	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
-//	initalizeTheGlobalRegister();
-//	initEventHandlers();
-//	initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
-//	initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
-//	initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
-//	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
-//	loadIndividualsToRegistry(mapTestDirectory,"test_individuals.txt");
-//	loadItemsToRegistry(mapTestDirectory, "test_items.txt");
-//	loadEventsToRegistry(mapTestDirectory, "test_events.txt");
-
-//	if (defineIndividual(testPlayer, 2001, 0, RGB(255, 70, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,50)) {
-//		}
-
 	int x, y;
 //	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, testGroupContainer->enemies, testGroupContainer->npcs);
 	int imageID;
@@ -60,19 +40,19 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	assert(testGroupContainer->npcs->numIndividuals == 1);
 
-	for (y = 0; y < main_test_field->totalY; y++) {
-		for (x = 0; x < main_test_field->totalX; x++) {
-			imageID = (main_test_field->grid[x][y]->background)->imageID;
-			main_test_field->grid[x][y]->background->image = malloc(
-					sizeof(HBITMAP));
-			main_test_field->grid[x][y]->background->image = LoadBitmap(
-					GetModuleHandle(NULL), imageID);
-			if (main_test_field->grid[x][y]->background->image == NULL) {
-				printf("failed\n");
-			}
-
-		}
-	}
+//	for (y = 0; y < main_test_field->totalY; y++) {
+//		for (x = 0; x < main_test_field->totalX; x++) {
+//			imageID = (main_test_field->grid[x][y]->background)->imageID;
+//			main_test_field->grid[x][y]->background->image = malloc(
+//					sizeof(HBITMAP));
+//			main_test_field->grid[x][y]->background->image = LoadBitmap(
+//					GetModuleHandle(NULL), imageID);
+//			if (main_test_field->grid[x][y]->background->image == NULL) {
+//				printf("failed\n");
+//			}
+//
+//		}
+//	}
 
 //player is on field at their coordinates, name check
 	individual * tmpIndividual;// = malloc(sizeof(tmpIndividual));

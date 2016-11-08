@@ -7,8 +7,8 @@
 
 #include"./headers/individual_pub_methods.h"
 
-static int HIT_IMAGE_ID = 4000;
-static int MISS_IMAGE_ID = 4001;
+static int HIT_IMAGE_ID = 10000;
+static int MISS_IMAGE_ID = 10001;
 
 static int SOUND_BLUNT_ID = 4;
 static int SOUND_CHOP_ID = 5;
@@ -76,7 +76,7 @@ individual *initIndividual(){
 	return toReturn;
 }
 
-int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF rgb, char * name, int direction, int x,
+int defineIndividual(individual * thisIndividual, int ID, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
@@ -85,24 +85,7 @@ int defineIndividual(individual * thisIndividual, int imageID, int ID, COLORREF 
 	int i;
 	BITMAP bm;
 
-	thisIndividual->playerCharacter->imageID = imageID;
 	thisIndividual->ID = ID;
-	thisIndividual->playerCharacter->image = LoadBitmap(GetModuleHandle(NULL),
-			MAKEINTRESOURCE(imageID));
-
-	if(thisIndividual->playerCharacter->image == NULL) {
-		return 1;
-	}
-
-	thisIndividual->playerCharacter->imageMask = CreateBitmapMask(
-			thisIndividual->playerCharacter->image, rgb);
-
-	GetObjectA(thisIndividual->playerCharacter->image, sizeof(bm), &bm);
-
-	thisIndividual->playerCharacter->height = bm.bmHeight;
-	thisIndividual->playerCharacter->width = bm.bmWidth;
-
-	thisIndividual->playerCharacter->rgb = rgb;
 
 	strcpy(thisIndividual->name, name);
 	thisIndividual->playerCharacter->direction = direction;
@@ -235,19 +218,19 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_SLASH);
 
 	if(d20 == 20){
-		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
+		addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(HIT_IMAGE_ID)), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		return damageIndividual(thisIndividual, targetIndividual, 1);
 	} else if(d20 == 1){ //THE natural one.
-		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(MISS_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
+		addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(MISS_IMAGE_ID)), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		cwrite("Where'd you learn to fight?\n");
 		return 0;
 	}
 
 	if(totalAttack >= totalAC){ //Tie goes to attacker, of course.
-		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
+		addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(HIT_IMAGE_ID)), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		return damageIndividual(thisIndividual, targetIndividual, 0);
 	}else{ //miss
-		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(MISS_IMAGE_ID), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
+		addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(MISS_IMAGE_ID)), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 		sendMissedDialog(thisIndividual->name,targetIndividual->name,d20,totalAC);
 		return 0;
 	}
@@ -297,7 +280,7 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 	}
 
 	if(isTargeted){
-		addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), target->playerCharacter->x, target->playerCharacter->y);
+		addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(HIT_IMAGE_ID)), target->playerCharacter->x, target->playerCharacter->y);
 		return damageIndividualWithAbility(thisIndividual, target);
 	}else{
 		int statValue = 0, d20;
@@ -311,10 +294,10 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 
 		if((d20 + statValue*2) < 13){
 			cwrite("Saving throw failed!");
-			addCharacterToSpecialDrawWithCoords(getImageFromRegistry(HIT_IMAGE_ID), target->playerCharacter->x, target->playerCharacter->y);
+			addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(HIT_IMAGE_ID)), target->playerCharacter->x, target->playerCharacter->y);
 			return 	damageIndividualWithAbility(thisIndividual, target);
 		}else{
-			addCharacterToSpecialDrawWithCoords(getImageFromRegistry(MISS_IMAGE_ID), target->playerCharacter->x, target->playerCharacter->y);
+			addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(MISS_IMAGE_ID)), target->playerCharacter->x, target->playerCharacter->y);
 			sprintf(statOut, "%s's ability failed!", thisIndividual->name);
 			cwrite(statOut);
 			return 0;
@@ -1464,28 +1447,32 @@ void drawEquiptItems(HDC hdc, HDC hdcBuffer, individual* thisIndividual,  shiftD
 
 void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, animationContainer * baseAnimation, int xCord, int yCord, shiftData * viewShift){
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, layer->imageMask);
+	HBITMAP image, imageMask;
 
-	int shitfX, shiftY;
-	shitfX = baseAnimation->animations[baseAnimation->currentAnimation]->currentFrame*40;
-	shiftY = layer->thisAnimationContainer->currentAnimation*41;
+	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord *40 - (viewShift->yShift)*40,
+	int shitfX;
+	shitfX = baseAnimation->animations[baseAnimation->currentAnimation]->currentFrame*50;
+
+	image = layer->thisAnimationContainer->animations[layer->thisAnimationContainer->currentAnimation]->image;
+	imageMask = layer->thisAnimationContainer->animations[layer->thisAnimationContainer->currentAnimation]->imageMask;
+
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord *50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+			100,100,
 			hdcMem,
 			shitfX,
-			shiftY,
+			100,
 			SRCAND);
 
-	SelectObject(hdcMem, layer->image);
+	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*40 - (viewShift->xShift)*40, yCord*40 - (viewShift->yShift)*40,
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord *50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-			40,40,
+			100,100,
 			hdcMem,
 			shitfX,
-			shiftY,
+			100,
 			SRCPAINT);
 	DeleteDC(hdcMem);
 }

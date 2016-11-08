@@ -70,8 +70,8 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 	textNameRect.bottom = textNameRect.top + 20;
 	textNameRect.right = textNameRect.left + 150;
 
-	SelectObject(hdcMem, thisNameBoxInstance->nameBox->image);
-	BitBlt(hdcBuffer, thisNameBoxInstance->nameBox->x, thisNameBoxInstance->nameBox->y, thisNameBoxInstance->nameBox->width, thisNameBoxInstance->nameBox->height, hdcMem, 0, 0, SRCCOPY);
+	SelectObject(hdcMem, thisNameBoxInstance->nameBox->fixedImage);
+	BitBlt(hdcBuffer, thisNameBoxInstance->nameBox->x, thisNameBoxInstance->nameBox->y, thisNameBoxInstance->nameBox->fixedWidth, thisNameBoxInstance->nameBox->fixedHeight, hdcMem, 0, 0, SRCCOPY);
 
 	//cursor
 
@@ -84,7 +84,7 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 }
 
 void destroyNameBoxInstance(){
-	destroyCharacter(thisNameBoxInstance->nameBox);
+	destroyFixedCharacter(thisNameBoxInstance->nameBox);
 
 	free(thisNameBoxInstance);
 }

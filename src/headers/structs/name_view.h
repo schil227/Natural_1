@@ -23,7 +23,7 @@ typedef struct{
 	int MAX_COLUMNS;
 	int MAX_NAME_LENGTH;
 
-	character * nameBox;
+	fixedCharacter * nameBox;
 }nameBoxInstance;
 
 #endif /* SRC_HEADERS_STRUCTS_NAME_VIEW_H_ */

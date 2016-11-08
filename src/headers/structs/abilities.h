@@ -171,11 +171,11 @@ typedef struct {
 	creation_modes mode;
 	effect_types selectedType;
 
-	character * creationWindow;
-	character * selector;
-	character * leftRightArrow;
-	character * scrollUpArrow;
-	character * scrollDownArrow;
+	fixedCharacter * creationWindow;
+	fixedCharacter * selector;
+	fixedCharacter * leftRightArrow;
+	fixedCharacter * scrollUpArrow;
+	fixedCharacter * scrollDownArrow;
 	ability * abilityTemplates[4];
 
 	ability * abilityInsance;
@@ -193,8 +193,8 @@ typedef struct{
 
 	ability * abilitiesList[64];
 
-	character * abilityViewWindow;
-	character * selector;
+	fixedCharacter * abilityViewWindow;
+	fixedCharacter * selector;
 } abilityView;
 
 #endif /* SRC_HEADERS_STRUCTS_ABILITIES_H_ */

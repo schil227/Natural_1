@@ -21,7 +21,7 @@ void initThisAbilityView(int imageID, COLORREF rgb, int x, int y){
 	thisAbilityView->MAX_ABILITIES_ON_WINDOW =3;
 
 	thisAbilityView->abilityViewWindow = createCharacter(imageID, rgb, x, y);
-	thisAbilityView->selector = createCharacter(3501, rgb, x, y);
+	thisAbilityView->selector = createCharacter(9501, rgb, x, y);
 }
 
 void toggleAbilityViewMode(){
@@ -92,8 +92,8 @@ void drawThisAbilityView(HDC hdc, HDC hdcBuffer, RECT * prc){
 	manaRect.bottom = manaRect.top + 20;
 	manaRect.right = manaRect.left + 100;
 
-	SelectObject(hdcMem, thisAbilityView->abilityViewWindow->image);
-	BitBlt(hdcBuffer, thisAbilityView->abilityViewWindow->x, thisAbilityView->abilityViewWindow->y, thisAbilityView->abilityViewWindow->width, thisAbilityView->abilityViewWindow->height, hdcMem, 0, 0, SRCCOPY);
+	SelectObject(hdcMem, thisAbilityView->abilityViewWindow->fixedImage);
+	BitBlt(hdcBuffer, thisAbilityView->abilityViewWindow->x, thisAbilityView->abilityViewWindow->y, thisAbilityView->abilityViewWindow->fixedWidth, thisAbilityView->abilityViewWindow->fixedHeight, hdcMem, 0, 0, SRCCOPY);
 
 
 

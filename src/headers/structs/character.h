@@ -25,6 +25,15 @@ typedef enum {
 } animationState;
 
 typedef struct {
+	int imageID;
+	HBITMAP image;
+	HBITMAP imageMask;
+
+	int width;
+	int height;
+
+	COLORREF rgb;
+
 	animationState state;
 	int animationX;
 	int durationInTicks[20]; // e.g. [10, 15, 2, 1]
@@ -51,21 +60,30 @@ typedef struct {
 
 typedef struct {
 	size_t size;
-	int nameLength;
-
-	int width;
-	int height;
+	int direction;
 	int x;
 	int y;
-	int direction;
-
-	int imageID;
-	HBITMAP image;
-	HBITMAP imageMask;
-	COLORREF rgb;
 	animationContainer * thisAnimationContainer;
 	animationContainer * secondaryAnimationContainer;
 } character;
+
+
+typedef struct {
+	size_t size;
+	int x;
+	int y;
+
+	int fixedImageID;
+	HBITMAP fixedImage;
+	HBITMAP fixedImageMask;
+
+	COLORREF rgb;
+
+	int fixedWidth;
+	int fixedHeight;
+
+	int direction;
+} fixedCharacter;
 
 typedef struct {
 	int xShift;
@@ -73,6 +91,5 @@ typedef struct {
 	int xShiftOld;
 	int yShiftOld;
 } shiftData;
-
 
 #endif /* SRC_HEADERS_CHARACTER_H_ */

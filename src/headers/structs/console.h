@@ -17,7 +17,7 @@ typedef struct{
 } messageNode;
 
 typedef struct {
-	character * consoleCharacter;
+	fixedCharacter * consoleCharacter;
 	messageNode * newestMessageNode;
 	messageNode * currentMessageNode;
 	messageNode * oldestMessageNode;

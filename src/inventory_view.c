@@ -14,10 +14,10 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView = malloc(sizeof(inventoryView));
 	thisInventoryView->playerItems = playerInventory;
 	thisInventoryView->inventoryBackground = createCharacter(imageID, RGB(255,0,255), x, y);
-	thisInventoryView->selectArrow = createCharacter(3001, RGB(255,0,255), x, y);
-	thisInventoryView->scrollUpArrow = createCharacter(3002, RGB(255,0,255), x, y);
-	thisInventoryView->scrollDownArrow = createCharacter(3004, RGB(255,0,255), x, y);
-	thisInventoryView->itemFrame = createCharacter(3003, RGB(255,0,255), x, y);
+	thisInventoryView->selectArrow = createCharacter(1504, RGB(255,0,255), x, y);
+	thisInventoryView->scrollUpArrow = createCharacter(1505, RGB(255,0,255), x, y);
+	thisInventoryView->scrollDownArrow = createCharacter(1507, RGB(255,0,255), x, y);
+	thisInventoryView->itemFrame = createCharacter(1506, RGB(255,0,255), x, y);
 	thisInventoryView->slotsPerScreen = slotsPerScreen;
 	thisInventoryView->selectedItemIndex = 0;
 	thisInventoryView->viewMode = 0;
@@ -31,11 +31,11 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 }
 
 void destroyTheInventoryView(){
-	destroyCharacter(thisInventoryView->inventoryBackground);
-	destroyCharacter(thisInventoryView->itemFrame);
-	destroyCharacter(thisInventoryView->scrollDownArrow);
-	destroyCharacter(thisInventoryView->scrollUpArrow);
-	destroyCharacter(thisInventoryView->selectArrow);
+	destroyFixedCharacter(thisInventoryView->inventoryBackground);
+	destroyFixedCharacter(thisInventoryView->itemFrame);
+	destroyFixedCharacter(thisInventoryView->scrollDownArrow);
+	destroyFixedCharacter(thisInventoryView->scrollUpArrow);
+	destroyFixedCharacter(thisInventoryView->selectArrow);
 
 	free(thisInventoryView);
 }
@@ -103,9 +103,9 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 	int i;
 
 	RECT textBoxRect;
-		textBoxRect.bottom = thisInventoryView->inventoryBackground->height + thisInventoryView->inventoryBackground->y;
+		textBoxRect.bottom = thisInventoryView->inventoryBackground->fixedHeight + thisInventoryView->inventoryBackground->y;
 		textBoxRect.top =  thisInventoryView->inventoryBackground->y+60;
-		textBoxRect.right = thisInventoryView->inventoryBackground->width + thisInventoryView->inventoryBackground->x;
+		textBoxRect.right = thisInventoryView->inventoryBackground->fixedWidth + thisInventoryView->inventoryBackground->x;
 		textBoxRect.left = thisInventoryView->inventoryBackground->x + 85;
 
 	//draw inventory view
@@ -128,7 +128,7 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 					thisInventoryView->itemFrame, viewShift);
 
 			drawUnboundAnimationByPixels(hdc, hdcBuffer, thisInventoryView->viewedItems[i]->itemCharacter, viewShift,
-					thisInventoryView->inventoryBackground->x+40, thisInventoryView->inventoryBackground->y + 50+50*i, 1);
+					thisInventoryView->inventoryBackground->x+10, thisInventoryView->inventoryBackground->y + 20+50*i, 1);
 
 //			//draw item frame
 //			drawUnboundCharacterByPixels(hdc, hdcBuffer,
@@ -176,7 +176,7 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer,
 							thisInventoryView->inventoryBackground->x+100,
 							thisInventoryView->inventoryBackground->y +
-								thisInventoryView->inventoryBackground->height - 40,
+								thisInventoryView->inventoryBackground->fixedHeight - 40,
 							thisInventoryView->scrollDownArrow,
 							viewShift);
 	}

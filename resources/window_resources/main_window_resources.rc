@@ -55,79 +55,120 @@ BEGIN
 	
 END
 
-//The player bitmap:
-//IDB_PLAYER BITMAP DISCARDABLE "../images/player.bmp"
-2001 BITMAP DISCARDABLE "../images/human_full.bmp"
-//2002 BITMAP DISCARDABLE "../images/grass.bmp"
-//2003 BITMAP DISCARDABLE "../images/black.bmp"
-2004 BITMAP DISCARDABLE "../images/cursor2.bmp"
-2005 BITMAP DISCARDABLE "../images/skelly_full.bmp"
-2006 BITMAP DISCARDABLE "../images/skelly2_full.bmp"
-2007 BITMAP DISCARDABLE "../images/skelly3_full.bmp"
-2008 BITMAP DISCARDABLE "../images/skelly4_full.bmp"
-2009 BITMAP DISCARDABLE "../images/skelly5_full.bmp"
-2011 BITMAP DISCARDABLE "../images/red_skelly_full.bmp"
-2013 BITMAP DISCARDABLE "../images/red_robed.bmp"
+//Menu images 1500 - 2000
+1500 BITMAP DISCARDABLE "../images/console_bg.bmp" //2010
+1501 BITMAP DISCARDABLE "../images/dialog_box.bmp" //2012
+1502 BITMAP DISCARDABLE "../images/sidebar_bg.bmp" //2014
 
-2010 BITMAP DISCARDABLE "../images/console_bg.bmp"
-2012 BITMAP DISCARDABLE "../images/dialog_box.bmp"
-2014 BITMAP DISCARDABLE "../images/sidebar_bg.bmp"
+	//inventory screen
+1503 BITMAP DISCARDABLE "../images/inventory_bg.bmp" //3000
+1504 BITMAP DISCARDABLE "../images/select_arrow.bmp" //3001
+1505 BITMAP DISCARDABLE "../images/scroll_up_arrow.bmp" //3002
+1506 BITMAP DISCARDABLE "../images/item_bg.bmp" //3003
+1507 BITMAP DISCARDABLE "../images/scroll_down_arrow.bmp" //3004
 
-2500 BITMAP DISCARDABLE "../images/black.bmp"
-2501 BITMAP DISCARDABLE "../images/grass.bmp"
-2502 BITMAP DISCARDABLE "../images/sea.bmp"
+1508 BITMAP DISCARDABLE "../images/cursor.bmp" //2004
 
-//shore images
-2511 BITMAP DISCARDABLE "../images/shore_edge.bmp"
-2512 BITMAP DISCARDABLE "../images/shore_split.bmp"
-2513 BITMAP DISCARDABLE "../images/shore_corner.bmp"
-2514 BITMAP DISCARDABLE "../images/shore_cove.bmp"
-2515 BITMAP DISCARDABLE "../images/shore_pond.bmp"
+//Base character images 2000 - 2500
+2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001
+2002 BITMAP DISCARDABLE "../images/human_attack_slash.bmp"
+2003 BITMAP DISCARDABLE "../images/human_attack_pierce.bmp"
+2004 BITMAP DISCARDABLE "../images/human_death.bmp"
 
-//mountain images
-2521 BITMAP DISCARDABLE "../images/wall.bmp"
-2522 BITMAP DISCARDABLE "../images/tmp_ground.bmp"
 
-//building
-2531 BITMAP DISCARDABLE "../images/stone_wall.bmp"
-2532 BITMAP DISCARDABLE "../images/stone_wall_top.bmp"
-2533 BITMAP DISCARDABLE "../images/stone_wall_doorway.bmp"
+//Enemy images 2500 - 3500
+	//skelly
+2501 BITMAP DISCARDABLE "../images/skelly_idle.bmp" //full: 2005
+2502 BITMAP DISCARDABLE "../images/skelly_attack.bmp" 
+2503 BITMAP DISCARDABLE "../images/skelly_death.bmp" 
 
-//walkway
-2541 BITMAP DISCARDABLE "../images/path.bmp"
-2542 BITMAP DISCARDABLE "../images/path_diag.bmp"
+	//red skelly
+2510 BITMAP DISCARDABLE "../images/red_skelly_idle.bmp" //full: 2011
+2511 BITMAP DISCARDABLE "../images/red_skelly_attack.bmp"
+2512 BITMAP DISCARDABLE "../images/red_skelly_death.bmp"
 
-//floor
-2551 BITMAP DISCARDABLE "../images/floor_wood.bmp"
+//Beast images 3500 - 4500
 
-//wilderness
-2561 BITMAP DISCARDABLE "../images/tree.bmp"
 
-//items
-//inventory screen
-3000 BITMAP DISCARDABLE "../images/inventory_bg.bmp"
-3001 BITMAP DISCARDABLE "../images/select_arrow.bmp"
-3002 BITMAP DISCARDABLE "../images/scroll_up_arrow.bmp"
-3003 BITMAP DISCARDABLE "../images/item_bg.bmp"
-3004 BITMAP DISCARDABLE "../images/scroll_down_arrow.bmp"
+//NPC images 4500 - 5500
+4500 BITMAP DISCARDABLE "../images/red_robed.bmp" //2013
 
-//items
-3020 BITMAP DISCARDABLE "../images/sword_1_full.bmp"
-3021 BITMAP DISCARDABLE "../images/herb.bmp"
-3022 BITMAP DISCARDABLE "../images/health_potion.bmp"
-3023 BITMAP DISCARDABLE "../images/mana_potion.bmp"
-3024 BITMAP DISCARDABLE "../images/armor_1_full.bmp"
+//Guard images 5500 - 6500
 
-//Ability
-3500 BITMAP DISCARDABLE "../images/ability_creation_bg.bmp"
-3501 BITMAP DISCARDABLE "../images/selector.bmp"
-3502 BITMAP DISCARDABLE "../images/left_right_arrows.bmp"
-3503 BITMAP DISCARDABLE "../images/name_entry_box.bmp"
-3504 BITMAP DISCARDABLE "../images/abilities_view.bmp"
+//Ally images 6500 - 7500
 
-//Misc. Images
-4000 BITMAP DISCARDABLE "../images/hit.bmp"
-4001 BITMAP DISCARDABLE "../images/miss.bmp"
+//Background images 7500 - 8500
+7500 BITMAP DISCARDABLE "../images/black.bmp" //2500
+7501 BITMAP DISCARDABLE "../images/grass.bmp" //2501
+7502 BITMAP DISCARDABLE "../images/sea.bmp" //2502
+
+	//shore images
+7503 BITMAP DISCARDABLE "../images/shore_edge.bmp" //2511
+7504 BITMAP DISCARDABLE "../images/shore_split.bmp" //2512
+7505 BITMAP DISCARDABLE "../images/shore_corner.bmp" //2513
+7506 BITMAP DISCARDABLE "../images/shore_cove.bmp" //2514
+7507 BITMAP DISCARDABLE "../images/shore_pond.bmp" //2515
+
+	//building
+7508 BITMAP DISCARDABLE "../images/stone_wall.bmp" //2531
+7509 BITMAP DISCARDABLE "../images/stone_wall_top.bmp" //2532
+7510 BITMAP DISCARDABLE "../images/stone_wall_doorway.bmp" //2533
+
+	//walkway
+7511 BITMAP DISCARDABLE "../images/path.bmp" //2541
+7512 BITMAP DISCARDABLE "../images/path_diag.bmp"//2542
+
+	//floor
+7513 BITMAP DISCARDABLE "../images/floor_wood.bmp" //2551
+
+	//wilderness
+7514 BITMAP DISCARDABLE "../images/tree.bmp" //2561
+
+//item images 8500 - 9500
+8500 BITMAP DISCARDABLE "../images/sword_1_idle.bmp" //full: 3020
+8501 BITMAP DISCARDABLE "../images/sword_1_attack_slash.bmp"
+8502 BITMAP DISCARDABLE "../images/sword_1_death.bmp"
+
+8503 BITMAP DISCARDABLE "../images/armor_1_idle.bmp" //full: 3024
+8504 BITMAP DISCARDABLE "../images/armor_1_attack_slash.bmp"
+8505 BITMAP DISCARDABLE "../images/armor_1_attack_pierce.bmp"
+8506 BITMAP DISCARDABLE "../images/armor_1_death.bmp"
+
+8507 BITMAP DISCARDABLE "../images/armor_2_idle.bmp"
+8508 BITMAP DISCARDABLE "../images/armor_2_attack_slash.bmp"
+8509 BITMAP DISCARDABLE "../images/armor_2_attack_pierce.bmp"
+8510 BITMAP DISCARDABLE "../images/armor_2_death.bmp"
+
+8511 BITMAP DISCARDABLE "../images/herb.bmp" //3021
+8512 BITMAP DISCARDABLE "../images/health_potion.bmp" //3022
+8513 BITMAP DISCARDABLE "../images/mana_potion.bmp" //3023
+
+8514 BITMAP DISCARDABLE "../images/spear_1_idle.bmp" 
+8515 BITMAP DISCARDABLE "../images/spear_1_attack_pierce.bmp"
+8516 BITMAP DISCARDABLE "../images/armor_1_death.bmp"
+
+8517 BITMAP DISCARDABLE "../images/shield_1_idle.bmp" 
+8518 BITMAP DISCARDABLE "../images/shield_1_attack_slash.bmp"
+8519 BITMAP DISCARDABLE "../images/shield_1_attack_pierce.bmp"
+8520 BITMAP DISCARDABLE "../images/shield_1_death.bmp"
+
+8521 BITMAP DISCARDABLE "../images/sword_1_item.bmp"
+8522 BITMAP DISCARDABLE "../images/armor_1_item.bmp"
+8523 BITMAP DISCARDABLE "../images/armor_2_item.bmp"
+8524 BITMAP DISCARDABLE "../images/spear_1_item.bmp" 
+8525 BITMAP DISCARDABLE "../images/shield_1_item.bmp"
+
+
+//Ability images 9500 - 10000
+9500 BITMAP DISCARDABLE "../images/ability_creation_bg.bmp" //3500
+9501 BITMAP DISCARDABLE "../images/selector.bmp" //3501
+9502 BITMAP DISCARDABLE "../images/left_right_arrows.bmp" //3502
+9503 BITMAP DISCARDABLE "../images/name_entry_box.bmp" //3503
+9504 BITMAP DISCARDABLE "../images/abilities_view.bmp" //3504
+
+//Misc. Images 10000+
+10000 BITMAP DISCARDABLE "../images/hit.bmp" //4000
+10001 BITMAP DISCARDABLE "../images/miss.bmp" //4001
 
 
 //The Icon :)

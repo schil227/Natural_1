@@ -22,10 +22,10 @@ console * initConsole(int imageID, int x, int y, int width, int height){
 
 	thisNewConsole->consoleCharacter->x = x;
 	thisNewConsole->consoleCharacter->y = y;
-	thisNewConsole->consoleCharacter->width = width;
-	thisNewConsole->consoleCharacter->height = height;
-	thisNewConsole->consoleCharacter->imageID = imageID;
-	thisNewConsole->consoleCharacter->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
+	thisNewConsole->consoleCharacter->fixedWidth = width;
+	thisNewConsole->consoleCharacter->fixedHeight = height;
+	thisNewConsole->consoleCharacter->fixedImageID = imageID;
+	thisNewConsole->consoleCharacter->fixedImage = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
 
 	thisNewConsole->rowLength = 40;
 	thisNewConsole->numRows = 11;
@@ -56,7 +56,7 @@ void destroyConsoleInstance(){
 		free(currentNode);
 	}
 
-	destroyCharacter(thisConsole->consoleCharacter);
+	destroyFixedCharacter(thisConsole->consoleCharacter);
 	free(thisConsole);
 
 }
@@ -111,14 +111,14 @@ void clearMessages(){
 void drawThisConsole(HDC hdc, HDC hdcBuffer, RECT * prc){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
-	SelectObject(hdcMem, thisConsole->consoleCharacter->image);
+	SelectObject(hdcMem, thisConsole->consoleCharacter->fixedImage);
 
 	StretchBlt(hdcBuffer,
 	 			 0,prc->bottom - 200,
 	 			 prc->right,200,
 	 			 hdcMem,
 	 			 0,0,
-				 thisConsole->consoleCharacter->width, thisConsole->consoleCharacter->height,
+				 thisConsole->consoleCharacter->fixedWidth, thisConsole->consoleCharacter->fixedHeight,
 	 			 SRCCOPY);
 
 	DeleteDC(hdcMem);

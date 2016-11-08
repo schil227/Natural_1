@@ -197,14 +197,14 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		npcs = initGroup();
 		thisGroupContainer = initGroupContainer(enemies,npcs, NULL, NULL, NULL);
 		initalizeTheGlobalRegister();
-		initThisCursor(2004,RGB(224, 64, 192),0,0);
-		initThisConsole(2010,0,0,300,200);
-		initSidebarInstance(2014,0,0,185,400);
-		initThisDialogBox(2012,10,10,RGB(255, 70, 255));
-		initThisInventoryView(3000, 100, 100, 4, player->backpack);
-		initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
-		initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
-		initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
+
+		initThisConsole(1500,0,0,300,200);
+		initSidebarInstance(1502,0,0,185,400);
+		initThisDialogBox(1501,10,10,RGB(255, 70, 255));
+		initThisInventoryView(1503, 100, 100, 4, player->backpack);
+		initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
+		initThisAbilityView(9504, RGB(255, 0, 255), 10, 10);
+		initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 		initSpecialDrawInstance();
 		initEventHandlers();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");
@@ -212,6 +212,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
 		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
+		initThisCursor(1508);
 
 		enableSound();
 
@@ -222,16 +223,21 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		animationContainer * playerAnimationContainer = initAnimationContainer();
 		animationContainer * secondaryAnimationContainer = NULL;
-		char line[] = "2,30,30,-1";
-		loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
-		char line2[] = "7,5,5,5,5,5,5,5,3,7";
-		loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
-		char line3[] = "13,10,10,10,10,10,10,10,10,10,10,10,10,100,-1";
-		loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
+//		char line[] = "2,30,30,-1";
+//		loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
+//		char line2[] = "7,5,5,5,5,5,5,5,3,7";
+//		loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
+//		char line3[] = "13,10,10,10,10,10,10,10,10,10,10,10,10,100,-1";
+//		loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
+
+		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2001));
+		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2002));
+		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2003));
+		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2004));
 
 		secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-		if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -242,19 +248,19 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		int x, y;
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
-		int imageID;
+//		int imageID;
 
-		for (y = 0; y < main_field->totalY; y++) {
-			for (x = 0; x < main_field->totalX; x++) {
-				imageID = (main_field->grid[x][y]->background)->imageID;
-				main_field->grid[x][y]->background->image = LoadBitmap(
-						GetModuleHandle(NULL), imageID);
-				if (main_field->grid[x][y]->background->image == NULL) {
-					printf("failed\n");
-				}
-
-			}
-		}
+//		for (y = 0; y < main_field->totalY; y++) {
+//			for (x = 0; x < main_field->totalX; x++) {
+//				imageID = (main_field->grid[x][y]->background)->imageID;
+//				main_field->grid[x][y]->background->image = LoadBitmap(
+//						GetModuleHandle(NULL), imageID);
+//				if (main_field->grid[x][y]->background->image == NULL) {
+//					printf("failed\n");
+//				}
+//
+//			}
+//		}
 
 		ret = SetTimer(hwnd, ID_TIMER, 16, NULL); //fires every 16 ms - 60 fps
 
@@ -441,10 +447,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
-			character * shadowCharacter = createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb,
-								player->playerCharacter->x, player->playerCharacter->y);
+			character * shadowCharacter = malloc(sizeof(character));
+			//createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb, player->playerCharacter->x, player->playerCharacter->y);
 			shadowCharacter->thisAnimationContainer = cloneAnimationContainer(player->playerCharacter->thisAnimationContainer);
 			shadowCharacter->secondaryAnimationContainer = cloneAnimationContainer(player->playerCharacter->secondaryAnimationContainer);
+
+			shadowCharacter->x = player->playerCharacter->x;
+			shadowCharacter->y = player->playerCharacter->y;
+			shadowCharacter->direction = player->playerCharacter->direction;
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
 //			thisMoveNodeMeta->shadowCharacter = malloc(sizeof(character));
@@ -636,35 +646,40 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	thisGroupContainer = initGroupContainer(enemies,npcs, NULL, NULL, NULL);
 
 	viewShift = initShiftData();
-	initThisCursor(2004,RGB(224, 64, 192),0,0);
-	initThisConsole(2010,0,0,300,200);
-	initSidebarInstance(2014,0,0,185,400);
-	initThisDialogBox(2012,10,10,RGB(255, 70, 255));
+	initThisConsole(1500,0,0,300,200);
+	initSidebarInstance(1502,0,0,185,400);
+	initThisDialogBox(1501,10,10,RGB(255, 70, 255));
 	initSpecialDrawInstance();
 	initalizeTheGlobalRegister();
 	initEventHandlers();
-	initAbilityCreationInstance(3500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
-	initThisAbilityView(3504, RGB(255, 0, 255), 10, 10);
-	initNameBoxInstance(3503, RGB(255,0,255), 20, 20);
+	initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
+	initThisAbilityView(9504, RGB(255, 0, 255), 10, 10);
+	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
 
 	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
 
+	initThisCursor(1508);
 	initSoundPlayerInstance();
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;
 
-	char line[] = "2,60,60,-1";
-	loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
-	char line2[] = "7,1000,1000,1000,1000,1000,1000,1000,3,7";
-	loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
-	char line3[] = "13,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,-1";
-	loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
+//	char line[] = "2,60,60,-1";
+//	loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
+//	char line2[] = "7,1000,1000,1000,1000,1000,1000,1000,3,7";
+//	loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
+//	char line3[] = "13,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,-1";
+//	loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
+
+	addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2001));
+	addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2002));
+	addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2003));
+	addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2004));
 
 	secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-	if (defineIndividual(player, 2001, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);

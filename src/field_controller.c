@@ -57,7 +57,7 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 }
 
 void createIndividualFromLine(individual * newIndividual, char * line){
-	int imageID,ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,isSneaking,
+	int ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,isSneaking,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
 	int offensiveness, abilityAffinity, tacticalness, cowardness;
@@ -71,9 +71,6 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	loadedAbilities.numAbilities = 0;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
-	imageID = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
 	ID = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -208,28 +205,28 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	//load each applicable animation and data
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_IDLE, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_SLASH, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_CHOP, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BLUNT, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_PIERCE, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BOW, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_HARM, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_DEATH, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CAST, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
-	if(defineIndividual(newIndividual,imageID,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
+	if(defineIndividual(newIndividual,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, offensiveness, abilityAffinity, tacticalness, cowardness,
 			&loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
@@ -479,7 +476,7 @@ item * createFieldItemFromFile(char line[1024]){
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
 	char * strtok_save_pointer;
-	int npcID, imageID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int npcID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
@@ -489,9 +486,6 @@ item * createFieldItemFromFile(char line[1024]){
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	npcID = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	imageID = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	ID = atoi(value);
@@ -612,34 +606,34 @@ item * createFieldItemFromFile(char line[1024]){
 	thisAnimationContainer->defaultAnimation = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_IDLE, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_IDLE_EQUIPT, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_SLASH, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_CHOP, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BLUNT, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_PIERCE, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_ATTACK_BOW, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_HARM, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_DEATH, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CAST, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	loadAnimationFromLine(thisAnimationContainer, ANIMATION_CONSUME, value);
+	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(description, value);
 
-	newItem = createItem(npcID, imageID, RGB(r,g,b),x,y, ID, type, name, description,weaponStrMod,
+	newItem = createItem(npcID, RGB(r,g,b),x,y, ID, type, name, description,weaponStrMod,
 			strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
 			weaponDamType, armorClass, itemType, price,
 			totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
@@ -727,7 +721,7 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
 		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
-			int x, y, imageID;
+//			int x, y, imageID;
 			char mapName[256];
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
@@ -735,20 +729,23 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			destroyField(*thisField, player);
 			clearGroup(thisGroupContainer->enemies);
 			clearGroup(thisGroupContainer->npcs);
+			clearGroup(thisGroupContainer->beasts);
+			clearGroup(thisGroupContainer->guards);
+
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
-			viewShift->xShift = 0;
-			viewShift->yShift = 0;
-			//load images for new map
-			for (y = 0; y < (*thisField)->totalY; y++) {
-				for (x = 0; x < (*thisField)->totalX; x++) {
-					imageID = ((*thisField)->grid[x][y]->background)->imageID;
-					(*thisField)->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
-					if ((*thisField)->grid[x][y]->background->image == NULL) {
-						printf("failed\n");
-					}
-				}
-			}
+//			viewShift->xShift = 0;
+//			viewShift->yShift = 0;
+//			//load images for new map
+//			for (y = 0; y < (*thisField)->totalY; y++) {
+//				for (x = 0; x < (*thisField)->totalX; x++) {
+//					imageID = ((*thisField)->grid[x][y]->background)->imageID;
+//					(*thisField)->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
+//					if ((*thisField)->grid[x][y]->background->image == NULL) {
+//						printf("failed\n");
+//					}
+//				}
+//			}
 
 			clearMessages();
 			return 1;

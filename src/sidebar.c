@@ -15,29 +15,29 @@ void initSidebarInstance(int imageID, int x, int y, int width, int height){
 	thisSidebarInstance->thisCharacter = malloc(sizeof(character));
 	thisSidebarInstance->thisCharacter->x = x;
 	thisSidebarInstance->thisCharacter->y = y;
-	thisSidebarInstance->thisCharacter->width = width;
-	thisSidebarInstance->thisCharacter->height = height;
-	thisSidebarInstance->thisCharacter->imageID = imageID;
-	thisSidebarInstance->thisCharacter->image = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
+	thisSidebarInstance->thisCharacter->fixedWidth = width;
+	thisSidebarInstance->thisCharacter->fixedHeight = height;
+	thisSidebarInstance->thisCharacter->fixedImageID = imageID;
+	thisSidebarInstance->thisCharacter->fixedImage = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
 }
 
 void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
-	int x = prc->right - thisSidebarInstance->thisCharacter->width;
+	int x = prc->right - thisSidebarInstance->thisCharacter->fixedWidth;
 	int y = 0;
-	int width = thisSidebarInstance->thisCharacter->width;
+	int width = thisSidebarInstance->thisCharacter->fixedWidth;
 	int height = prc->bottom - 200;
 
 
-	SelectObject(hdcMem, thisSidebarInstance->thisCharacter->image);
+	SelectObject(hdcMem, thisSidebarInstance->thisCharacter->fixedImage);
 
 	StretchBlt(hdcBuffer,
 				 x, y,
 				 width, height,
 	 			 hdcMem,
 	 			 0,0,
-				 thisSidebarInstance->thisCharacter->width, thisSidebarInstance->thisCharacter->height,
+				 thisSidebarInstance->thisCharacter->fixedWidth, thisSidebarInstance->thisCharacter->fixedHeight,
 	 			 SRCCOPY);
 
 	DeleteDC(hdcMem);
