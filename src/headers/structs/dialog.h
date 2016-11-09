@@ -49,11 +49,11 @@ typedef struct{
 	int numTicks;
 	int speakSoundID;
 
-	dialogMessage ** dialogMessages;
 	dialogMessage * currentMessage;
 	fixedCharacter * dialogWindow;
 	fixedCharacter * selectArrow;
 	individualDialog * individualDialogRegistry[1000];
+	dialogMessage ** dialogMessages;
 } dialogInstance;
 
 #endif /* SRC_DIALOG_H_ */

@@ -514,20 +514,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->groupActionMode = 0;
 			thisGroupContainer->initGroupActionMode = 0;
 
-			/**************
-			 *
-			 *
-			 *
-			 *
-			 *
-			 * do the thing here
-			 *
-			 *
-			 *
-			 *
-			 *
-			 *
-			 */
 			if(!setNextActiveGroup(thisGroupContainer)){
 				if(startTurn(player)){
 
@@ -648,8 +634,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	viewShift = initShiftData();
 	initThisConsole(1500,0,0,300,200);
 	initSidebarInstance(1502,0,0,185,400);
-	initThisDialogBox(1501,10,10,RGB(255, 70, 255));
 	initSpecialDrawInstance();
+	initThisDialogBox(1501,10,10,RGB(255, 70, 255));
+
 	initalizeTheGlobalRegister();
 	initEventHandlers();
 	initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
@@ -657,9 +644,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
 
+
+
 	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
 
-	initThisCursor(1508);
+	initThisCursor(1508,RGB(224, 64, 192),0,0);
 	initSoundPlayerInstance();
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();

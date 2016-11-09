@@ -193,7 +193,7 @@ animation * createAnimationFromLine(char line[512]){
 	char * strtok_save_pointer;
 	char * durations;
 	char * value = strtok_r(line, ";", &strtok_save_pointer);
-	int i,r,g,b,totalDuration;
+	int i,r,g,b,totalDuration = 0;
 
 	animationState state = pickAnimationState(value);
 
@@ -474,6 +474,26 @@ void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharac
 	DeleteDC(hdcMem);
 }
 
+/*
+ * Note that this method was used because using a mask with rotated characters was very taxing for some reason.
+ */
+void drawRotatedBackgroundByPixel(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int xCord, int yCord, int useSecondaryAnimationContainer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+
+	int shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
+	HBITMAP image = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
+
+	SelectObject(hdcMem, image);
+
+	BitBlt(hdcBuffer,xCord, yCord,
+			100, 100,
+			hdcMem,
+			shitfX,
+			0,
+			SRCPAINT);
+	DeleteDC(hdcMem);
+}
+
 void updateAnimation(character * thisCharacter){
 	thisCharacter->thisAnimationContainer->clockTickCount++;
 
@@ -627,6 +647,7 @@ animation * initAnimation(animationState state){
 }
 
 animation * cloneAnimation(animation * thisAnimation){
+	int i;
 	animation * newAnimation = initAnimation(thisAnimation->state);
 
 	newAnimation->imageID = thisAnimation->imageID;
@@ -638,6 +659,9 @@ animation * cloneAnimation(animation * thisAnimation){
 	newAnimation->height = thisAnimation->height;
 	newAnimation->width = thisAnimation->width;
 
+	for(i = 0; i < newAnimation->MAX_FRAMES; i++){
+		newAnimation->durationInTicks[i] = thisAnimation->durationInTicks[i];
+	}
 
 	newAnimation->MAX_FRAMES = thisAnimation->MAX_FRAMES;
 	newAnimation->numFrames = thisAnimation->numFrames;

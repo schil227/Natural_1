@@ -10,12 +10,18 @@
 static dialogInstance * thisDialogInstance;
 
 dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
+
+
 	dialogInstance * toReturn = malloc(sizeof(dialogInstance));
+	toReturn->dialogWindow = malloc(sizeof(fixedCharacter));
+	toReturn->selectArrow = malloc(sizeof(fixedCharacter));
+
 	toReturn->currentMessage = NULL;
 	toReturn->dialogMessages = NULL;
 	toReturn->numRows = 6;
 	toReturn->numDialogMessages = 0;
 	toReturn->decisionIndex = 0;
+
 	toReturn->dialogWindow = createCharacter(imageID, rgb, x, y);
 	toReturn->selectArrow = createCharacter(1504, RGB(255,0,255), x + 20, y);
 	toReturn->drawBox = 0;
@@ -32,6 +38,7 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 }
 
 void initThisDialogBox(int imageID, int x, int y, COLORREF rgb){
+
 	thisDialogInstance = initDialogBox(imageID, x, y, rgb);
 }
 

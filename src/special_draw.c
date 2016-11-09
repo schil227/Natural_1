@@ -10,7 +10,6 @@ static specialDraw * specialDrawInstance;
 
 void initSpecialDrawInstance(){
 	specialDrawInstance = malloc(sizeof(specialDraw));
-
 	specialDrawInstance->numImagesToDraw = 0;
 	specialDrawInstance->MAX_IMAGES_TO_DRAW = 50;
 

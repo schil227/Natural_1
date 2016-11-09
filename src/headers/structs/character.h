@@ -74,15 +74,15 @@ typedef struct {
 	int y;
 
 	int fixedImageID;
-	HBITMAP fixedImage;
-	HBITMAP fixedImageMask;
-
-	COLORREF rgb;
 
 	int fixedWidth;
 	int fixedHeight;
-
 	int direction;
+
+	COLORREF rgb;
+
+	HBITMAP fixedImage;
+	HBITMAP fixedImageMask;
 } fixedCharacter;
 
 typedef struct {

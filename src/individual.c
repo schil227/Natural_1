@@ -1449,20 +1449,20 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	HBITMAP image, imageMask;
 
-	SelectObject(hdcMem, imageMask);
-
 	int shitfX;
-	shitfX = baseAnimation->animations[baseAnimation->currentAnimation]->currentFrame*50;
+	shitfX = baseAnimation->animations[baseAnimation->currentAnimation]->currentFrame*100;
 
 	image = layer->thisAnimationContainer->animations[layer->thisAnimationContainer->currentAnimation]->image;
 	imageMask = layer->thisAnimationContainer->animations[layer->thisAnimationContainer->currentAnimation]->imageMask;
+
+	SelectObject(hdcMem, imageMask);
 
 	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord *50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
 			shitfX,
-			100,
+			0,
 			SRCAND);
 
 	SelectObject(hdcMem, image);
@@ -1472,7 +1472,7 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 			100,100,
 			hdcMem,
 			shitfX,
-			100,
+			0,
 			SRCPAINT);
 	DeleteDC(hdcMem);
 }

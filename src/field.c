@@ -770,7 +770,8 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift)
 		for (x = 0; x < this_field->totalX; x++) {
 
 			character * tmpBackground = this_field->grid[x][y]->background;
-
+			updateAnimation(tmpBackground);
+//
 			if(tmpBackground->direction != 0){
 				drawRotatedBackground(hdc, hdcBuffer, tmpBackground, viewShift);
 			}else{
@@ -837,7 +838,7 @@ void drawRotatedBackground(HDC hdc, HDC hdcBuffer, character * backgroundCharact
 	int xMod = calcXMod(direction, backgroundCharacter, viewShift);
 	int yMod = calcYMod(direction, backgroundCharacter, viewShift);
 
-	drawUnboundAnimationByPixels(hdc, hdcBuffer, backgroundCharacter, viewShift, xMod, yMod, 0);
+	drawRotatedBackgroundByPixel(hdc, hdcBuffer, backgroundCharacter, viewShift, xMod, yMod, 0);
 
 //	BitBlt(hdcBuffer,
 //			xMod,//*(backgroundCharacter->x - (viewShift->xShift) * 40),

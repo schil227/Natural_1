@@ -12,7 +12,7 @@ static sidebarInstance * thisSidebarInstance;
 void initSidebarInstance(int imageID, int x, int y, int width, int height){
 	thisSidebarInstance = malloc(sizeof(sidebarInstance));
 
-	thisSidebarInstance->thisCharacter = malloc(sizeof(character));
+	thisSidebarInstance->thisCharacter = malloc(sizeof(fixedCharacter));
 	thisSidebarInstance->thisCharacter->x = x;
 	thisSidebarInstance->thisCharacter->y = y;
 	thisSidebarInstance->thisCharacter->fixedWidth = width;
