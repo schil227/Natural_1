@@ -475,7 +475,7 @@ void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharac
 }
 
 /*
- * Note that this method was used because using a mask with rotated characters was very taxing for some reason.
+ * Note that this method was created because using a mask with rotated characters was very taxing for some reason.
  */
 void drawRotatedBackgroundByPixel(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int xCord, int yCord, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);

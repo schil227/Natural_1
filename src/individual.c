@@ -203,6 +203,35 @@ item * getActiveWeapon(inventory * backpack){
 	return NULL;
 }
 
+void setAttackAnimation(individual * thisIndividual){
+	item * weapon = getActiveWeapon(thisIndividual->backpack);
+
+	if(weapon == NULL){
+		//Use default animation, currently slash
+		setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_SLASH);
+	}else{
+		switch (weapon->weaponDamageType){
+			case 's':
+				setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_SLASH);
+				break;
+			case 'b':
+				setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_BLUNT);
+				break;
+			case 'c':
+				setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_CHOP);
+				break;
+			case 'p':
+				setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_PIERCE);
+				break;
+			case 'a':
+				setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_BOW);
+				break;
+			default:
+				setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_SLASH);
+				break;
+		}
+	}
+}
 
 int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int d20 = rand() % 20 + 1;
@@ -215,7 +244,8 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 
 	enableSpecialDrawMode();
 	setDurationInTimerTicks(20);
-	setIndividualAnimation(thisIndividual, ANIMATION_ATTACK_SLASH);
+
+	setAttackAnimation(thisIndividual);
 
 	if(d20 == 20){
 		addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(cloneAnimationFromRegistry(HIT_IMAGE_ID)), targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
@@ -817,7 +847,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 	item * weapon = getActiveWeapon(thisIndividual->backpack);
 	attackType = getIndividualAttackType(thisIndividual, weapon);
 
-	triggerAttackSound(attackType);
+//	triggerAttackSound(attackType);
 
 	baseDam = getAttributeSum(thisIndividual,"baseDam"); //doesn't include STR mod
 
@@ -1355,6 +1385,11 @@ int animationFrameTickUpdate(character * thisCharacter){
 		toReturn = 1;
 	  }else{
 		thisAnimationSet->currentFrame++;
+
+		if(thisAnimationSet->soundFrame == thisAnimationSet->currentFrame){
+			triggerSoundEffect(thisAnimationSet->soundID);
+		}
+
 	  }
 	  thisCharacter->thisAnimationContainer->clockTickCount = 0;
 	}

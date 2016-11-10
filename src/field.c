@@ -839,7 +839,7 @@ void drawRotatedBackground(HDC hdc, HDC hdcBuffer, character * backgroundCharact
 	int yMod = calcYMod(direction, backgroundCharacter, viewShift);
 
 	drawRotatedBackgroundByPixel(hdc, hdcBuffer, backgroundCharacter, viewShift, xMod, yMod, 0);
-
+//drawUnboundAnimationByPixels(hdc, hdcBuffer, backgroundCharacter, viewShift, xMod, yMod, 0);
 //	BitBlt(hdcBuffer,
 //			xMod,//*(backgroundCharacter->x - (viewShift->xShift) * 40),
 //			yMod,//*(backgroundCharacter->y - (viewShift->yShift) * 40),
