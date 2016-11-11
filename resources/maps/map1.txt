@@ -1,8 +1,8 @@
 map1_transit.txt
 map1_enemies.txt
-map1_enemy_items.txt
+map1_beasts.txt
 map1_npcs.txt
-map1_npc_items.txt
+map1_guards.txt
 map1_items.txt
 map1_dialog.txt
 t^t^t^t^t^g^g^r>-v->g^g^r>

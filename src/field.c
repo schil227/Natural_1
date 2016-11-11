@@ -215,6 +215,30 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 
 }
 
+int tryAttackIndividual(groupContainer * thisGroupContainer, individual * player, field * thisField, int x, int y){
+	individual * tmpIndividual = getIndividualFromField(thisField, x, y);
+	int i, numTimesToAttack = 1;
+
+	numTimesToAttack += calcExtraTimesToAttack(player);
+
+	if(tmpIndividual != NULL && tmpIndividual != player && individualWithinRange(player, tmpIndividual)){
+		for(i = 0; i < numTimesToAttack; i++){
+
+			if(tmpIndividual->hp > 0){
+
+				if (attackIndividual(player, tmpIndividual)) {
+					deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, tmpIndividual), tmpIndividual);
+					removeIndividualFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+				}
+			}
+		}
+
+		return 1;
+	}
+
+	return 0;
+}
+
 int tryAttackEnemies(individualGroup * enemies, individual * player, field * thisField, int x, int y){
 	int i, j, enemiesPassed = 0, numTimesToAttack = 1;
 
@@ -294,9 +318,13 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 
 	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, minX, maxX, minY, maxY);
 	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, minX, maxX, minY, maxY);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->guards, thisField, minX, maxX, minY, maxY);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->beasts, thisField, minX, maxX, minY, maxY);
 
 	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, minX, maxX, minY, maxY);
 	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, minX, maxX, minY, maxY);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->guards, thisField, minX, maxX, minY, maxY);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->beasts, thisField, minX, maxX, minY, maxY);
 
 	if(player->hp > 0 && player->playerCharacter->x >= minX && player->playerCharacter->x <= maxX &&
 		player->playerCharacter->y >= minY && player->playerCharacter->y <= maxY ){
@@ -470,7 +498,7 @@ animation * generateBackground(char backgroundSymbol){
 
 field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
 
-	char transitMap[80], enemyMap[80], enemyItemMap[80], npcMap[80], npcItemMap[80], fieldItemMap[80], dialog[80];
+	char transitMap[80], enemyMap[80], beastMap[80], npcMap[80], guardMap[80], fieldItemMap[80], dialog[80];
 	char * fullMapName = appendStrings(directory, mapName);
 //	fullMapName[strlen(fullMapName)-1] = '\0'; //remove /n at end
 
@@ -482,14 +510,14 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 	//enemy filename
 	fgets(enemyMap,80,fp);
 
-	//enemy item filename
-	fgets(enemyItemMap,80,fp);
+	//beasts filename
+	fgets(beastMap,80,fp);
 
-	//enemy filename
+	//npc filename
 	fgets(npcMap,80,fp);
 
-	//enemy item filename
-	fgets(npcItemMap,80,fp);
+	//guards filename
+	fgets(guardMap,80,fp);
 
 	//field item filename
 	fgets(fieldItemMap,80,fp);
@@ -500,7 +528,9 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 	fclose(fp);
 
 	loadGroup(thisGroupContainer->enemies, GROUP_ENEMIES, enemyMap, directory);
+	loadGroup(thisGroupContainer->beasts, GROUP_BEASTS, beastMap, directory);
 	loadGroup(thisGroupContainer->npcs, GROUP_NPCS, npcMap, directory);
+	loadGroup(thisGroupContainer->guards, GROUP_GUARDS, guardMap, directory);
 	loadDialog(dialog, directory);
 
 	field* thisField = initField(fullMapName);
@@ -512,6 +542,8 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 	moveIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
 	setGroupToField(thisField, thisGroupContainer->enemies);
 	setGroupToField(thisField, thisGroupContainer->npcs);
+	setGroupToField(thisField, thisGroupContainer->guards);
+	setGroupToField(thisField, thisGroupContainer->beasts);
 
 	free(fullMapName);
 

@@ -1412,6 +1412,12 @@ int performAction(individual * thisIndividual, individual * player, groupContain
 			return enemyAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
 		case GROUP_NPCS:
 			return npcAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		case GROUP_BEASTS:
+			thisIndividual->remainingActions = 0;
+			return 0;
+		case GROUP_GUARDS:
+			thisIndividual->remainingActions = 0;
+			return 0;
 		default:
 			return 0;
 	}

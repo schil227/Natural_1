@@ -416,6 +416,8 @@ void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContai
 void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shiftData * viewShift){
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->npcs, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->enemies, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->guards, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->beasts, viewShift);
 	//TODO: add other groups
 
 	//draw animated enemy/npc over others
@@ -425,6 +427,14 @@ void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shi
 
 	if(thisGroupContainer->npcs->currentIndividualIndex != -1){
 		drawIndividual(hdc, hdcBuffer, thisGroupContainer->npcs->individuals[thisGroupContainer->npcs->currentIndividualIndex], viewShift);
+	}
+
+	if(thisGroupContainer->beasts->currentIndividualIndex != -1){
+		drawIndividual(hdc, hdcBuffer, thisGroupContainer->beasts->individuals[thisGroupContainer->beasts->currentIndividualIndex], viewShift);
+	}
+
+	if(thisGroupContainer->guards->currentIndividualIndex != -1){
+		drawIndividual(hdc, hdcBuffer, thisGroupContainer->guards->individuals[thisGroupContainer->guards->currentIndividualIndex], viewShift);
 	}
 }
 
@@ -628,6 +638,8 @@ item * createFieldItemFromFile(char line[1024]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 
+	thisAnimationContainer->currentAnimation = thisAnimationContainer->defaultAnimation;
+
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -754,7 +766,11 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 }
 
 void tryTalkGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){
-	if(!tryTalk(thisGroupContainer->npcs,player,getCursorX(),getCursorY()) && !tryTalk(thisGroupContainer->enemies,player,getCursorX(),getCursorY())){
+	if(!tryTalk(thisGroupContainer->npcs,player,getCursorX(),getCursorY()) &&
+			!tryTalk(thisGroupContainer->beasts,player,getCursorX(),getCursorY()) &&
+			!tryTalk(thisGroupContainer->guards,player,getCursorX(),getCursorY()) &&
+			!tryTalk(thisGroupContainer->allies,player,getCursorX(),getCursorY()) &&
+			!tryTalk(thisGroupContainer->enemies,player,getCursorX(),getCursorY())){
 		cwrite("There's nobody there.");
 	}
 }

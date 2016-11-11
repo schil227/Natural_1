@@ -47,7 +47,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		case 0x0D: //enter //TODO: when attacking, supply both enemies and NPCs, ensure the character cannot attack themselves
 		{
 			if (getCursorMode() == CURSOR_ATTACK) {//attack the individual
-				if(tryAttackEnemies(thisGroupContainer->enemies, player, main_field, getCursorX(), getCursorY())){
+				if(tryAttackIndividual(thisGroupContainer->enemies, player, main_field, getCursorX(), getCursorY())){
 
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
