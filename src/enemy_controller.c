@@ -1416,8 +1416,7 @@ int performAction(individual * thisIndividual, individual * player, groupContain
 			thisIndividual->remainingActions = 0;
 			return 0;
 		case GROUP_GUARDS:
-			thisIndividual->remainingActions = 0;
-			return 0;
+			return guardAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
 		default:
 			return 0;
 	}
@@ -1642,6 +1641,232 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 	}
 }
 
+int guardAction(individual * guard, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+
+	//Restore Mana
+	if(isLowOnMana(guard)){
+		if(tryRestoreMana(guard)){
+			return 0;
+		}
+	}
+
+	//Restore HP
+	if(isLowOnHP(guard)){
+		if(tryHeal(guard, player, thisGroupContainer, thisField)){
+			return 0;
+		}
+	}
+
+	//Do checkForTargets, if null walk about, else go to target.
+
+	findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField);
+
+	if(guard->targetedIndividual == NULL){
+		if(!atDesiredLocation(guard)){
+			return moveToSelectedLocation(guard, thisField, thisMoveNodeMeta, guard->desiredLocation->x, guard->desiredLocation->y);
+		}
+
+		guard->remainingActions = 0;
+		if(isGreaterThanPercentage(rand(), 100, 50)){//wander a bit.
+			return 0;
+		}else{//do nothing
+			return 0;
+		}//Add a 'speak' option
+	}
+
+	//On Deck Ability
+	if(guard->activeAbilities->selectedAbility != NULL){
+		if(guard->mana >= guard->activeAbilities->selectedAbility->totalManaCost){
+			if(abilityIsOffensive(guard->activeAbilities->selectedAbility)){
+				if(guard->targetedIndividual != NULL){
+					if(abilityInRangeOfIndividual(guard->activeAbilities->selectedAbility, guard, guard->targetedIndividual)){
+						cwrite("CASE 1\n");
+						return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->targetedIndividual->playerCharacter->x, guard->targetedIndividual->playerCharacter->y);
+					}else{
+						int moving = moveCloserToTarget(guard, guard->targetedIndividual, thisField, thisMoveNodeMeta);
+
+						if(moving){
+							return moving;
+						}
+					}
+				}else{
+					guard->activeAbilities->selectedAbility = NULL;
+				}
+			}else{//is buff ability
+				if(guard->allyIndividual != NULL){
+					if(abilityInRangeOfIndividual(guard->activeAbilities->selectedAbility, guard, guard->allyIndividual)){
+						cwrite("CASE 2\n");
+						return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->allyIndividual->playerCharacter->x, guard->allyIndividual->playerCharacter->y);
+					}else{
+						int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField, thisMoveNodeMeta);
+
+						if(moving){
+							return moving;
+						}
+					}
+				}else{
+					guard->activeAbilities->selectedAbility = NULL;
+				}
+			}
+		}else{
+			guard->activeAbilities->selectedAbility = NULL;
+		}
+	}
+
+	//Update behavior
+	rerollBehavior(guard);
+
+	//Cowardly Actions
+	if(guard->thisBehavior->isCowardly){
+		if(noEnemiesInRange(guard, thisGroupContainer, thisField, 4)){
+			char fleeText[128];
+
+			if(isGreaterThanPercentage((rand() %100) + getAttributeSum(guard, "DEX")*10 + getAttributeSum(guard, "WIS")*5 ,100, 50)){
+				sprintf(fleeText, "%s fled the fight!", guard->name);
+				cwrite(fleeText);
+
+				deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, guard), guard);
+				removeIndividualFromField(thisField, guard->playerCharacter->x, guard->playerCharacter->y);
+				guard->remainingActions--;
+				return 0;
+			}else{
+				sprintf(fleeText, "%s tried to flee, but couldn't escape!", guard->name);
+				cwrite(fleeText);
+
+				guard->remainingActions--;
+				return 0;
+			}
+		} else {
+			int isMoving = retreatFromTarget(guard, thisGroupContainer, thisField, thisMoveNodeMeta);
+
+			guard->remainingActions--;
+			return isMoving;
+		}
+	}
+
+	//Offensive
+	if (guard->thisBehavior->isOffensive) {
+
+		if(guard->thisBehavior->isTactical && guard->backpack->inventorySize > 0 && isGreaterThanPercentage(rand()%100,100,67)){
+			item * randomBuffItem = getBuffItem(guard->backpack);
+
+			if(randomBuffItem != NULL){
+				modifyItem(randomBuffItem, guard);
+				return 0;
+			}
+		}
+
+		//has attack ability to use?
+		if (isGreaterThanPercentage(guard->thisBehavior->abilityAffinity, 100, rand() % 100) && hasOffensiveAbilityInRange(guard)) {
+
+			ability * buffAbility = getRandomBuffAbility(guard);
+			ability * offensiveAbility = getRandomOffensiveAbility(guard);
+
+			if(offensiveAbility == NULL && buffAbility == NULL){
+				return attackModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			}else if(offensiveAbility != NULL && buffAbility != NULL){
+				if(rand() % 2){
+					offensiveAbility = NULL;
+				} else{
+					buffAbility = NULL;
+				}
+			}
+
+			if(offensiveAbility != NULL){
+				guard->activeAbilities->selectedAbility = offensiveAbility;
+
+				int range = max(abs(guard->playerCharacter->x - guard->targetedIndividual->playerCharacter->x) , abs(guard->playerCharacter->y - guard->targetedIndividual->playerCharacter->y));
+				int abilityRange = offensiveAbility->range->effectAndManaArray[offensiveAbility->range->selectedIndex]->effectMagnitude;
+
+				if(abilityRange < range){//dont remove selected ability - it's now on deck
+					return moveCloserToTarget(guard, guard->targetedIndividual, thisField, thisMoveNodeMeta);
+				}else{
+					cwrite("CASE 3\n");
+					return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->targetedIndividual->playerCharacter->x, guard->targetedIndividual->playerCharacter->y);
+				}
+			}else{
+				guard->activeAbilities->selectedAbility = buffAbility;
+				cwrite("CASE 4\n");
+				return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->playerCharacter->x, guard->playerCharacter->y);
+			}
+		}else{
+			return attackModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+	}
+
+	//Supportive
+	else{
+		cwrite("Being supportive~~ :3");
+
+		if(guard->abilities->numAbilities == 0){
+			return attackModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+
+		if(guard->thisBehavior->isTactical && isGreaterThanPercentage(rand() % 100, 100, 30)){
+			return tacticalModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+
+		if(((guard->mana < (getTotalMana(guard)/2)) && isGreaterThanPercentage(rand() % 100, 100, 30)) || !canUseAnyAbilities(guard)){
+			channelMana(guard);
+			return 0;
+		}
+
+		individualGroup * alliesInRange = getAlliesInRange(guard, thisGroupContainer, thisField, 8);
+
+		if(selectHealingAbility(guard)){
+			individual * ally  = allyRequiringHealing(guard, alliesInRange);
+
+			if(ally != NULL){
+				free(alliesInRange);
+				guard->allyIndividual = ally;
+
+				if(abilityInRangeOfIndividual(guard->activeAbilities->selectedAbility, guard, guard->allyIndividual)){
+					cwrite("CASE 5\n");
+					return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField,  guard->allyIndividual->playerCharacter->x, guard->allyIndividual->playerCharacter->y);
+				}else{
+					int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField, thisMoveNodeMeta);
+
+					if(moving){
+						return moving;
+					}
+				}
+			}
+		}
+
+		ability * randomBuffAbility = getRandomBuffAbility(guard);
+
+		if(randomBuffAbility == NULL){
+			channelMana(guard);
+			return 0;
+		}
+
+		guard->activeAbilities->selectedAbility = randomBuffAbility;
+
+		if(randomBuffAbility->type == 'd' || randomBuffAbility->type == 'i'){
+			free(alliesInRange);
+			cwrite("CASE 6\n");
+			return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField,  guard->playerCharacter->x, guard->playerCharacter->y);
+		}
+
+		guard->allyIndividual = alliesInRange->individuals[rand() % alliesInRange->numIndividuals];
+
+		free(alliesInRange);
+
+		if(abilityInRangeOfIndividual(guard->activeAbilities->selectedAbility, guard, guard->allyIndividual)){
+			cwrite("CASE 7\n");
+			return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField,  guard->allyIndividual->playerCharacter->x, guard->allyIndividual->playerCharacter->y);
+		}else{
+			int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField, thisMoveNodeMeta);
+
+			if(moving){
+				return moving;
+			}
+		}
+
+		return 0;
+	}
+}
+
 int withinXSpacesOfTarget(individual * thisIndividual, individual * targetIndividual, int numSpaces){
 	return (numSpaces >= max(abs(targetIndividual->playerCharacter->x - thisIndividual->playerCharacter->x),abs(targetIndividual->playerCharacter->y - thisIndividual->playerCharacter->y)));
 }
@@ -1697,66 +1922,67 @@ individual * getClosestIndividual(individual * thisIndividual, individualGroup *
 }
 
 //also deal with setting targeted individual
-individual * getDangerousIndividualNearByInLoS(individual * npc, individual *  player, groupContainer * thisGroupContainer, field * thisField){
+individual * getDangerousIndividualNearByInLoS(individual * friendlyIndividual, individual *  player, groupContainer * thisGroupContainer, field * thisField){
 	individualGroup * dangerousIndividuals = initGroup();
 
-	if(npc->thisBehavior->isHostileToPlayer && isInLineOfSight(npc, player, thisField)){
+	if(friendlyIndividual->thisBehavior->isHostileToPlayer && isInLineOfSight(friendlyIndividual, player, thisField)){
 		addIndividualToGroup(dangerousIndividuals, player);
+		addIndividualsInLineOfSight(friendlyIndividual, thisGroupContainer->allies, dangerousIndividuals, thisField);
 	}
 
-	addIndividualsInLineOfSight(npc, thisGroupContainer->enemies, dangerousIndividuals, thisField);
-	addIndividualsInLineOfSight(npc, thisGroupContainer->beasts, dangerousIndividuals, thisField);
+	addIndividualsInLineOfSight(friendlyIndividual, thisGroupContainer->enemies, dangerousIndividuals, thisField);
+	addIndividualsInLineOfSight(friendlyIndividual, thisGroupContainer->beasts, dangerousIndividuals, thisField);
 
-	if(npc->thisBehavior->isHostileToPlayer){
-		addIndividualsInLineOfSight(npc, thisGroupContainer->allies, dangerousIndividuals, thisField);
+	if(friendlyIndividual->thisBehavior->isHostileToPlayer){
+		addIndividualsInLineOfSight(friendlyIndividual, thisGroupContainer->allies, dangerousIndividuals, thisField);
 	}
 
-	individual * toReturn = getClosestIndividual(npc, dangerousIndividuals);
+	individual * toReturn = getClosestIndividual(friendlyIndividual, dangerousIndividuals);
 
 	free(dangerousIndividuals);
 
 	return toReturn;
 }
 
-void findDangerousIndividualNearBy(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
-	if(npc->targetedIndividual != NULL){
-		if(npc->targetedIndividual->hp == 0 || maxDistance < max(abs(npc->playerCharacter->x - npc->targetedIndividual->playerCharacter->x) , abs(npc->playerCharacter->y - npc->targetedIndividual->playerCharacter->y))){
-			npc->targetedIndividual = getDangerousIndividualNearByInLoS(npc, player, thisGroupContainer, thisField);
+void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
+	if(friendlyIndividual->targetedIndividual != NULL){
+		if(friendlyIndividual->targetedIndividual->hp == 0 || maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
+			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
-			if(npc->targetedIndividual != NULL){
-				npc->targetedDuration = (rand() % 4) + 6;
+			if(friendlyIndividual->targetedIndividual != NULL){
+				friendlyIndividual->targetedDuration = (rand() % 4) + 6;
 			}else{
-				npc->thisBehavior->isSurrounded = 0;
+				friendlyIndividual->thisBehavior->isSurrounded = 0;
 			}
 
 			return;
 		}
 
-		npc->targetedDuration--;
+		friendlyIndividual->targetedDuration--;
 
-		if(npc->targetedDuration == 0){
-			npc->targetedIndividual = getDangerousIndividualNearByInLoS(npc, player, thisGroupContainer, thisField);
+		if(friendlyIndividual->targetedDuration == 0){
+			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
-			if(npc->targetedIndividual != NULL){
-				npc->targetedDuration = (rand() % 4) + 6;
+			if(friendlyIndividual->targetedIndividual != NULL){
+				friendlyIndividual->targetedDuration = (rand() % 4) + 6;
 			}else{
-				npc->thisBehavior->isSurrounded = 0;
+				friendlyIndividual->thisBehavior->isSurrounded = 0;
 			}
 
 			return;
 		}
 
 	}else{
-		if(npc->targetedDuration > 0){
-			npc->targetedDuration = 0;
+		if(friendlyIndividual->targetedDuration > 0){
+			friendlyIndividual->targetedDuration = 0;
 		}
 
-		npc->targetedIndividual = getDangerousIndividualNearByInLoS(npc, player, thisGroupContainer, thisField);
+		friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
-		if(npc->targetedIndividual != NULL){
-			npc->targetedDuration = (rand() % 4) + 6;
+		if(friendlyIndividual->targetedIndividual != NULL){
+			friendlyIndividual->targetedDuration = (rand() % 4) + 6;
 		}else{
-			npc->thisBehavior->isSurrounded = 0;
+			friendlyIndividual->thisBehavior->isSurrounded = 0;
 		}
 
 		return;

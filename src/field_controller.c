@@ -418,7 +418,6 @@ void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shi
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->enemies, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->guards, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->beasts, viewShift);
-	//TODO: add other groups
 
 	//draw animated enemy/npc over others
 	if(thisGroupContainer->enemies->currentIndividualIndex != -1){

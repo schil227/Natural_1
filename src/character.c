@@ -349,7 +349,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 //			0,
 //			SRCAND);
 
-		BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25, thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
+		BitBlt(hdcBuffer, thisCharacter->x*52 - (viewShift->xShift)*52 - 25, thisCharacter->y*52 - (viewShift->yShift)*52 - 25,
 	//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 				100,100,
 				hdcMem,
@@ -367,7 +367,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 //			100,
 //			SRCPAINT);
 
-	BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25,thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
+	BitBlt(hdcBuffer, thisCharacter->x*52 - (viewShift->xShift)*52 - 25,thisCharacter->y*52 - (viewShift->yShift)*52 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -394,7 +394,7 @@ void drawUnboundAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, characte
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
+	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -404,7 +404,7 @@ void drawUnboundAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, characte
 
 	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
+	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -429,7 +429,7 @@ void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, ch
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
+	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
 			100,100,
 			hdcMem,
 			shitfX,

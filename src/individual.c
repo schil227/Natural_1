@@ -1492,7 +1492,7 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord *50 - (viewShift->yShift)*50 - 25,
+	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord *52 - (viewShift->yShift)*52 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -1502,7 +1502,7 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 
 	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord *50 - (viewShift->yShift)*50 - 25,
+	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord *52 - (viewShift->yShift)*52 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,

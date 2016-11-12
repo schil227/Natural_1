@@ -894,22 +894,22 @@ void drawRotatedBackground(HDC hdc, HDC hdcBuffer, character * backgroundCharact
 
 int calcXMod(int direction, character * backgroundCharacter, shiftData * viewShift){
 	if(direction == 1){
-		return -1*((backgroundCharacter->y*50 - viewShift->yShift*50) - 25);
+		return -1*((backgroundCharacter->y*52 - viewShift->yShift*52) - 25);
 	}else if(direction == 2){
-		return -1*((backgroundCharacter->x*50-viewShift->xShift*50) - 25);
+		return -1*((backgroundCharacter->x*52-viewShift->xShift*52) - 25);
 	}
 	else{
-		return (backgroundCharacter->y*50 -viewShift->yShift*50) - 25;
+		return (backgroundCharacter->y*52 -viewShift->yShift*52) - 25;
 	}
 }
 
 int calcYMod(int direction, character * backgroundCharacter, shiftData * viewShift){
 	if(direction == 1){
-		return (backgroundCharacter->x*50-viewShift->xShift*50) - 25;
+		return (backgroundCharacter->x*52-viewShift->xShift*52) - 25;
 	}else if(direction == 2){
-		return -1*((backgroundCharacter->y*50-viewShift->yShift*50) - 25);
+		return -1*((backgroundCharacter->y*52-viewShift->yShift*52) - 25);
 	}else{
-		return -1*((backgroundCharacter->x*50-viewShift->xShift*50) - 25);
+		return -1*((backgroundCharacter->x*52-viewShift->xShift*52) - 25);
 	}
 }
 
