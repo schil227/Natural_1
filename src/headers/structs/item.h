@@ -69,6 +69,9 @@ typedef struct {
 
 	short int isEquipt;
 	short int price;
+	short int isStolen;
+	short int stolenPrice;
+
 } item;
 
 #endif /* SRC_HEADERS_STRUCTS_ITEM_H_ */

@@ -1409,31 +1409,6 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftDat
 		}
 
 		drawCharacterAnimation(hdc, hdcBuffer, thisIndividual->playerCharacter, viewShift, 0);
-//		HDC hdcMem = CreateCompatibleDC(hdc);
-//		SelectObject(hdcMem, thisIndividual->playerCharacter->imageMask);
-//
-//		int shitfX, shiftY;
-//		shitfX = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->currentFrame*40;
-//		shiftY = thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation*41;
-//
-//		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40,
-////				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-//				40,40,
-//				hdcMem,
-//				shitfX,
-//				shiftY,
-//				SRCAND);
-//
-//		SelectObject(hdcMem, thisIndividual->playerCharacter->image);
-//
-//		BitBlt(hdcBuffer, thisIndividual->playerCharacter->x*40 - (viewShift->xShift)*40, thisIndividual->playerCharacter->y*40 - (viewShift->yShift)*40,
-////				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-//				40,40,
-//				hdcMem,
-//				shitfX,
-//				shiftY,
-//				SRCPAINT);
-//		DeleteDC(hdcMem);
 
 		drawEquiptItems(hdc, hdcBuffer, thisIndividual, viewShift);
 }
@@ -2116,6 +2091,146 @@ cordArr * cordsBetweenTwoIndividuals(individual * thisIndividual, individual * t
 	}
 
 	return thisCordArr;
+}
+
+void addActiveCrimeFromEntry(individual * player, activeCrimeEntry * thisEntry){
+	int i;
+
+	if(player->thisActiveCrimes->numActiveCrimes == player->thisActiveCrimes->MAX_ACTIVE_CRIMES){
+		cwrite("!! TOO MANY ACTIVE CRIMES !!");
+		free(thisEntry);
+		return;
+	}
+
+	for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
+		if(player->thisActiveCrimes->activeCrimeList[i] == NULL){
+			player->thisActiveCrimes->activeCrimeList[i] = thisEntry;
+			player->thisActiveCrimes->numActiveCrimes++;
+			return;
+		}
+	}
+
+	cwrite("!! TOO MANY ACTIVE CRIMES !!");
+	free(thisEntry);
+}
+
+void addReportedCrimeFromEntry(individual * player, activeCrimeEntry * thisEntry){
+	int i;
+
+	if(player->thisReportedCrimes->numReportedCrimes == player->thisReportedCrimes->MAX_REPORTED_CRIMES){
+		cwrite("!! TOO MANY REPORTED CRIMES !!");
+		free(thisEntry);
+		return;
+	}
+
+	for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
+		if(player->thisReportedCrimes->reportedCrimeList[i] == NULL){
+			player->thisReportedCrimes->reportedCrimeList[i] = thisEntry;
+			player->thisReportedCrimes->numReportedCrimes++;
+			return;
+		}
+	}
+
+	cwrite("!! TOO MANY REPORTED CRIMES !!");
+	free(thisEntry);
+}
+
+void reportActiveCrimes(individual * player){
+	int i, crimesPassed = 0;
+
+	if(player->thisActiveCrimes->numActiveCrimes > 0){
+		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
+			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
+
+				addReportedCrimeFromEntry(player, player->thisActiveCrimes->activeCrimeList[i]);
+				player->thisActiveCrimes->activeCrimeList[i] = NULL;
+				crimesPassed++;
+
+				if(crimesPassed == player->thisActiveCrimes->numActiveCrimes){
+					break;
+				}
+			}
+		}
+	}
+}
+
+void addReportedCrime(individual * player, int crimeType, int bounty){
+	activeCrimeEntry * crime = malloc(sizeof(activeCrimeEntry));
+	crime->crimeType = crimeType;
+	crime->crimeBounty = bounty;
+
+	addReportedCrimeFromEntry(player, crime);
+}
+
+void addActiveCrime(individual * player, int crimeType, int bounty, individual * npc){
+	activeCrimeEntry * crime = malloc(sizeof(activeCrimeEntry));
+	crime->crimeType = crimeType;
+	crime->crimeBounty = bounty;
+	crime->witness = npc;
+
+	addActiveCrimeFromEntry(player, crime);
+}
+
+void removeActiveCrime(individual * player, individual * npc){
+	int i, crimesPassed = 0;
+
+	if(player->thisActiveCrimes->numActiveCrimes > 0){
+		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
+			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
+
+				if(player->thisActiveCrimes->activeCrimeList[i]->witness == npc){
+					free(player->thisActiveCrimes->activeCrimeList[i]);
+					player->thisActiveCrimes->activeCrimeList[i] = NULL;
+					player->thisActiveCrimes->numActiveCrimes--;
+					crimesPassed--;
+				}
+
+				crimesPassed++;
+				if(crimesPassed == player->thisActiveCrimes->numActiveCrimes){
+					break;
+				}
+			}
+		}
+	}
+}
+
+void clearReportedCrimes(individual * player){
+	int i;
+
+	if(player->thisReportedCrimes->numReportedCrimes == 0){
+		return;
+	}
+
+	for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
+		if(player->thisReportedCrimes->reportedCrimeList[i] != NULL){
+			free(player->thisReportedCrimes->reportedCrimeList[i]);
+			player->thisReportedCrimes->reportedCrimeList[i] = NULL;
+			player->thisReportedCrimes->numReportedCrimes--;
+
+			if(player->thisReportedCrimes->numReportedCrimes){
+				break;
+			}
+		}
+	}
+}
+
+int getCurrentBounty(individual * player){
+	int i, sum = 0, crimesPassed = 0;
+
+	if(player->thisReportedCrimes->numReportedCrimes > 0){
+		for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
+			if(player->thisReportedCrimes->reportedCrimeList[i] != NULL){
+				sum += player->thisReportedCrimes->reportedCrimeList[i]->crimeBounty;
+				crimesPassed++;
+
+				if(crimesPassed == player->thisReportedCrimes->numReportedCrimes){
+					break;
+				}
+			}
+		}
+	}
+
+	return sum;
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

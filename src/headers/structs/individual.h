@@ -84,7 +84,27 @@ typedef struct{
 
 	int isHostileToPlayer;
 	int isSurrounded;
+	int isThreatened;
 }behavior;
+
+typedef struct{
+	int crimeType;
+	int crimeBounty;
+	struct individual * witness;
+	struct individual * victim;
+} activeCrimeEntry;
+
+typedef struct{
+	activeCrimeEntry * activeCrimeList[200];
+	int numActiveCrimes;
+	int MAX_ACTIVE_CRIMES;
+} activeCrimes;
+
+typedef struct{
+	activeCrimeEntry * reportedCrimeList[200];
+	int numReportedCrimes;
+	int MAX_REPORTED_CRIMES;
+} reportedCrimes;
 
 struct individual{
 	character* playerCharacter;
@@ -156,10 +176,13 @@ struct individual{
 
 	int faction;
 	int targetedDuration;
+
 	behavior * thisBehavior;
 	struct individual * targetedIndividual;
 	struct individual * allyIndividual;
 	cord * desiredLocation;
+	reportedCrimes * thisReportedCrimes;
+	activeCrimes * thisActiveCrimes;
 	groupType currentGroupType;
 };
 

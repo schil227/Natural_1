@@ -254,6 +254,48 @@ void statCheck(individual * player, event * thisEvent){
 
 }
 
+void crimeCommittedInLoS(individual * player, individualGroup * guards, individualGroup * npcs, field * thisField, int crimeType, int bounty){
+	int i, individuals_passed = 0;
+
+	if(guards->numIndividuals > 0){
+		for(i = 0; i < guards->MAX_INDIVIDUALS; i++){
+			if(guards->individuals[i] != NULL){
+
+				if(isInLineOfSight(guards->individuals[i], player, thisField)){
+
+					reportActiveCrimes(player);
+					addReportedCrime(crimeType, bounty);
+
+					return;
+				}
+
+				individuals_passed++;
+				if(individuals_passed == guards->numIndividuals){
+					break;
+				}
+			}
+		}
+	}
+
+	individuals_passed = 0;
+	if(npcs->numIndividuals > 0){
+		for(i = 0; i < npcs->MAX_INDIVIDUALS; i++){
+			if(npcs->individuals[i] != NULL){
+
+				if(isInLineOfSight(npcs->individuals[i], player, thisField)){
+					addActiveCrime(crimeType, bounty, npcs->individuals[i]);
+				}
+
+				individuals_passed++;
+				if(individuals_passed == npcs->numIndividuals){
+					break;
+				}
+			}
+		}
+	}
+	//smooth criminal
+}
+
 void processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
 
 	event * thisEvent = getEventFromRegistry(eventID);
@@ -270,6 +312,9 @@ void processEvent(int eventID, individual * player, groupContainer * thisGroupCo
 			break;
 		case 4: // stat check
 			statCheck(player, thisEvent);
+			break;
+		case 5:
+			crimeCommittedInLoS(player, thisGroupContainer->guards, thisGroupContainer->npcs, thisField, thisEvent->intA, thisEvent->intB);
 			break;
 	}
 

@@ -284,7 +284,7 @@ void destroyFixedCharacter(fixedCharacter * thisCharacter){
 //		}
 //	}
 
-//	free(thisCharacter);
+	free(thisCharacter);
 }
 
 //void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, shiftData * viewShift){

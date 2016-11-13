@@ -1,0 +1,10 @@
+===================
+==== TODO LIST ====
+===================
+- (11/12/16) Implement Crimes
+- (11/12/16) Update path finding algorithm (and consequently tests) to 
+
+==BACK BURNER==
+- (11/12/16) for some reason, there's a lot of slowdown when drawing a rotated image mask, so I had to make a separate function just to draw the image without the mask (which works as intended). Not sure if this is something I'll ever have to fix, but for awareness.
+- (11/12/16) Add more enemies to the field
+- (11/12/16) Add casting animations
