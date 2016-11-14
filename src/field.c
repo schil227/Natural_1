@@ -303,7 +303,7 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 		}
 
 		removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
-		triggerEventOnDeath(thisIndividual->ID);
+		triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
 		removeFromExistance(thisIndividual->ID);
 	}
 
@@ -358,14 +358,14 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 						tmp->playerCharacter->y >= minY &&
 						tmp->playerCharacter->y <= maxY ){
 					if(thisIndividual->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility)){
-						triggerEventOnAttack(tmp->ID);
+						triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
 
 						if(!individualInGroup(tmp, thisGroup)){
 							individualsPassed--;
 						}
 					}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 						if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
-							triggerEventOnAttack(tmp->ID);
+							triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
 
 							if(!individualInGroup(tmp, thisGroup)){
 								individualsPassed--;
@@ -498,9 +498,8 @@ animation * generateBackground(char backgroundSymbol){
 
 field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
 
-	char transitMap[80], enemyMap[80], beastMap[80], npcMap[80], guardMap[80], fieldItemMap[80], dialog[80];
+	char transitMap[80], enemyMap[80], beastMap[80], npcMap[80], guardMap[80], fieldItemMap[80];
 	char * fullMapName = appendStrings(directory, mapName);
-//	fullMapName[strlen(fullMapName)-1] = '\0'; //remove /n at end
 
 	FILE * fp = fopen(fullMapName, "r");
 
@@ -521,17 +520,12 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 
 	//field item filename
 	fgets(fieldItemMap,80,fp);
-
-	//dialog filename
-	fgets(dialog, 80,fp);
-
 	fclose(fp);
 
 	loadGroup(thisGroupContainer->enemies, GROUP_ENEMIES, enemyMap, directory);
 	loadGroup(thisGroupContainer->beasts, GROUP_BEASTS, beastMap, directory);
 	loadGroup(thisGroupContainer->npcs, GROUP_NPCS, npcMap, directory);
 	loadGroup(thisGroupContainer->guards, GROUP_GUARDS, guardMap, directory);
-	loadDialog(dialog, directory);
 
 	field* thisField = initField(fullMapName);
 
@@ -681,6 +675,9 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 			if(theItem->itemCharacter->x == itemX && theItem->itemCharacter->y == itemY){
 				removeItemFromField(thisField->thisFieldInventory, theItem);
 				addItemToInventory(thisIndividual->backpack, theItem);
+
+				triggerEventOnPickup(theItem->ID, thisIndividual->isPlayer);
+
 				return 1;
 			}
 
@@ -700,8 +697,7 @@ field* initField(char* fieldFileName){
 	char line[80];
 	int init_y = 0, init_x = 0, xIndex, i, j;
 
-	//used to get rid of the first 7 lines which are file names
-	fgets(line,80,fp);
+	//used to get rid of the first 6 lines which are file names
 	fgets(line,80,fp);
 	fgets(line,80,fp);
 	fgets(line,80,fp);

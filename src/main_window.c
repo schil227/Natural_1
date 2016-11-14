@@ -207,11 +207,13 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 		initSpecialDrawInstance();
 		initEventHandlers();
-		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt");
+		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt", "onPickupTriggerMap.txt");
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
 		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
+		loadDialog("dialog.txt", mapTestDirectory);
+
 		initThisCursor(1508);
 
 		enableSound();
@@ -237,7 +239,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-		if (defineIndividual(player, 0, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -438,7 +440,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if(inAbilityViewMode()){
 		if(abilityViewLoop(hwnd, msg, wParam, lParam, player)){
 			removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
-			triggerEventOnDeath(player->ID);
+			triggerEventOnDeath(player->ID, player->isPlayer);
 			removeFromExistance(player->ID);
 		}
 		return 0;
@@ -642,11 +644,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
 	initThisAbilityView(9504, RGB(255, 0, 255), 10, 10);
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
-	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt");
-
-
+	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt", "test_onPickupTriggerMap.txt");
 
 	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
+
+	loadDialog("dialog.txt", mapTestDirectory);
 
 	initThisCursor(1508,RGB(224, 64, 192),0,0);
 	initSoundPlayerInstance();
@@ -668,7 +670,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-	if (defineIndividual(player, 0, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);

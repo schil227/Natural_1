@@ -11,6 +11,7 @@
 
 typedef struct{
 	int individualID;
+	int specialID;
 	int dialogID;
 } individualDialog;
 
@@ -38,6 +39,8 @@ typedef struct{
 	int drawBox;
 	int numRows;
 	int numDialogMessages;
+	int MAX_INDIVIDUAL_DIALOG_REGISTRY;
+	int MAX_DIALOG_MESSAGES;
 	int decisionIndex;
 	int decisionIndexRow[10];
 	int speakingIndividualID;
@@ -52,8 +55,8 @@ typedef struct{
 	dialogMessage * currentMessage;
 	fixedCharacter * dialogWindow;
 	fixedCharacter * selectArrow;
-	individualDialog * individualDialogRegistry[1000];
-	dialogMessage ** dialogMessages;
+	individualDialog * individualDialogRegistry[2000];
+	dialogMessage * dialogMessages[10000];
 } dialogInstance;
 
 #endif /* SRC_DIALOG_H_ */

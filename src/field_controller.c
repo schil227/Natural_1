@@ -226,7 +226,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
-	if(defineIndividual(newIndividual,ID,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
+	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, offensiveness, abilityAffinity, tacticalness, cowardness,
 			&loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
@@ -759,6 +759,10 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 //			}
 
 			clearMessages();
+			if(reportActiveCrimes(player)){
+				cwrite("Your crimes have been reported by witnesses!");
+
+			}
 			return 1;
 		}
 	return 0;

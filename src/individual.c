@@ -71,12 +71,27 @@ individual *initIndividual(){
 	toReturn->thisBehavior->isCowardly = 0;
 	toReturn->thisBehavior->cowardlyTurnsRemaining = 0;
 
+	toReturn->specialDialog = malloc(sizeof(specialDialogs));
+	toReturn->specialDialog->playerAttackedMe = 0;
+	toReturn->specialDialog->playerIsMarkedForDeath = 0;
+	toReturn->specialDialog->playerPickPocketedMe = 0;
+	toReturn->specialDialog->playerStoleItemFromMe = 0;
+	toReturn->specialDialog->sawPlayerCrime = 0;
+
+	toReturn->thisActiveCrimes = malloc(sizeof(activeCrimes));
+	toReturn->thisActiveCrimes->numActiveCrimes = 0;
+	toReturn->thisActiveCrimes->MAX_ACTIVE_CRIMES = 200;
+
+	toReturn->thisReportedCrimes = malloc(sizeof(reportedCrimes));
+	toReturn->thisReportedCrimes->numReportedCrimes = 0;
+	toReturn->thisReportedCrimes->MAX_REPORTED_CRIMES = 200;
+
 	toReturn->desiredLocation = malloc(sizeof(cord));
 
 	return toReturn;
 }
 
-int defineIndividual(individual * thisIndividual, int ID, COLORREF rgb, char * name, int direction, int x,
+int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
@@ -86,6 +101,7 @@ int defineIndividual(individual * thisIndividual, int ID, COLORREF rgb, char * n
 	BITMAP bm;
 
 	thisIndividual->ID = ID;
+	thisIndividual->isPlayer = isPlayer;
 
 	strcpy(thisIndividual->name, name);
 	thisIndividual->playerCharacter->direction = direction;
@@ -240,7 +256,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	int i;
 	item * tmpItem;
 
-	triggerEventOnAttack(targetIndividual->ID);
+	triggerEventOnAttack(targetIndividual->ID, thisIndividual->isPlayer);
 
 	enableSpecialDrawMode();
 	setDurationInTimerTicks(20);
@@ -301,9 +317,6 @@ int attackIndividualWithAbility(individual * thisIndividual, individual * target
 
 	enableSpecialDrawMode();
 	setDurationInTimerTicks(20);
-
-	//Handled in the preprocessIndividalGroupsInAOE() function
-//	triggerEventOnAttack(target->ID);
 
 	if(targetAbility->targetedEnabled){
 		isTargeted = targetAbility->targeted->effectAndManaArray[targetAbility->targeted->selectedIndex]->effectMagnitude;
@@ -738,7 +751,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	}
 
 	if(totalDamage > 0){
-		triggerEventOnHarm(targetIndividual->ID);
+		triggerEventOnHarm(targetIndividual->ID, thisIndividual->isPlayer);
 	}
 
 	sendHitDialog(thisIndividual->name, targetIndividual->name, 20, totalDamage);
@@ -758,7 +771,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
-		triggerEventOnDeath(targetIndividual->ID);
+		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 		return 1;
@@ -885,7 +898,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 	}
 
 	if(totalDamage > 0){
-		triggerEventOnHarm(targetIndividual->ID);
+		triggerEventOnHarm(targetIndividual->ID, thisIndividual->isPlayer);
 	}
 
 	sendHitDialog(thisIndividual->name, targetIndividual->name, thisIndividual->maxDam, totalDamage);
@@ -893,7 +906,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
-		triggerEventOnDeath(targetIndividual->ID);
+		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
@@ -2135,8 +2148,12 @@ void addReportedCrimeFromEntry(individual * player, activeCrimeEntry * thisEntry
 	free(thisEntry);
 }
 
-void reportActiveCrimes(individual * player){
+int reportActiveCrimes(individual * player){
 	int i, crimesPassed = 0;
+
+	if(player->thisActiveCrimes->numActiveCrimes > 0){
+		return 0;
+	}
 
 	if(player->thisActiveCrimes->numActiveCrimes > 0){
 		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
@@ -2152,6 +2169,8 @@ void reportActiveCrimes(individual * player){
 			}
 		}
 	}
+
+	return 1;
 }
 
 void addReportedCrime(individual * player, int crimeType, int bounty){

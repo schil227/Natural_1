@@ -17,7 +17,6 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->selectArrow = malloc(sizeof(fixedCharacter));
 
 	toReturn->currentMessage = NULL;
-	toReturn->dialogMessages = NULL;
 	toReturn->numRows = 6;
 	toReturn->numDialogMessages = 0;
 	toReturn->decisionIndex = 0;
@@ -27,6 +26,8 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->drawBox = 0;
 	toReturn->speakingIndividualID = 0;
 	toReturn->individualDialogRegistry[0] = NULL;
+	toReturn->MAX_INDIVIDUAL_DIALOG_REGISTRY = 2000;
+	toReturn->MAX_DIALOG_MESSAGES = 10000;
 
 	toReturn->speakMode = 1;
 	toReturn->speakDrawLength = 1;
@@ -58,14 +59,8 @@ int shouldDrawDialogBox(){
 	return 0;
 }
 
-void setDialogMessages(dialogMessage ** messageArr, int numMessages){
-	thisDialogInstance->dialogMessages = messageArr;
-	thisDialogInstance->numDialogMessages = numMessages;
-}
-
 void clearDialogMessages(){
 	//TODO: step through and free all messages
-	thisDialogInstance->dialogMessages = NULL;
 	thisDialogInstance->numDialogMessages = 0;
 }
 
@@ -225,11 +220,15 @@ void toggleDrawDialogBox(){
 int setCurrentMessageByIndividualID(int individualID){
 	int i;
 
-	for(i = 0; i < 500; i++){
+	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
 		if(thisDialogInstance->individualDialogRegistry[i] == NULL){
 			return 0;
 		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){
-			return setCurrentMessageByMessageID(thisDialogInstance->individualDialogRegistry[i]->dialogID);
+			if(thisDialogInstance->individualDialogRegistry[i]->specialID != 0){
+				return setCurrentMessageByMessageID(thisDialogInstance->individualDialogRegistry[i]->specialID);
+			}else{
+				return setCurrentMessageByMessageID(thisDialogInstance->individualDialogRegistry[i]->dialogID);
+			}
 		}
 	}
 
@@ -273,26 +272,56 @@ int setCurrentMessageByMessageID(int messageID){
 	return 0;
 }
 
+int removeSpecialDialog(int individualID){
+	int i = 0;
+
+	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
+		if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID ){
+			thisDialogInstance->individualDialogRegistry[i]->specialID = 0;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int setSpecialDialogId(int individualID, int specialID){
+	int i = 0;
+
+	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
+		if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID ){
+			thisDialogInstance->individualDialogRegistry[i]->specialID = specialID;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 int loadOrAddIndividualDialog(int individualID, int dialogID){
 	int i;
 
-	if(dialogID == 0){
+	if(dialogID == 0 ){
 		return 0;
 	}
 
-	for(i = 0; i < 500; i++){
+	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
 		if(thisDialogInstance->individualDialogRegistry[i] == NULL){ //entry not found, create new entry
 			individualDialog * thisDialogEntry = malloc(sizeof(individualDialog));
 			thisDialogEntry->individualID = individualID;
 			thisDialogEntry->dialogID = dialogID;
+			thisDialogEntry->specialID = 0;
 
 			thisDialogInstance->individualDialogRegistry[i] = thisDialogEntry;
-			if(i+1 < 500){
+			if(i+1 < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY){
 				thisDialogInstance->individualDialogRegistry[i+1] = NULL;
 			}
 
 			return dialogID;
 		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){ //entry already exists
+			if(thisDialogInstance->individualDialogRegistry[i]->specialID != 0){
+				return thisDialogInstance->individualDialogRegistry[i]->specialID;
+			}
 			return thisDialogInstance->individualDialogRegistry[i]->dialogID;
 		}
 	}
@@ -304,7 +333,7 @@ int loadOrAddIndividualDialog(int individualID, int dialogID){
 void setIndividualDialog(int dialogID){
 	int i;
 
-	for(i = 0; i < 500; i++){
+	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
 		if(thisDialogInstance->individualDialogRegistry[i]->individualID == thisDialogInstance->speakingIndividualID){
 			thisDialogInstance->individualDialogRegistry[i]->dialogID = dialogID;
 			return;
@@ -388,27 +417,23 @@ void addDecisionToDialogMessage(dialogMessage * thisMessage, dialogDecision * th
 
 void loadDialog(char * fileName, char * directory){
 	char * fullFileName = appendStrings(directory, fileName);
-	fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
-	int numMessages, i, j, foundNode = 0, nextNotNull;
+	int numMessages = 0, i, j, foundNode = 0, nextNotNull;
 	char line[512];
 
-	if(!fgets(line,160,FP)){ //get num messages, exit if file is empty
-		return;
-	}
+	fgets(line, 512, FP);
 
-	numMessages = atoi(line);
-
-	dialogMessage ** messageArr = malloc(sizeof(dialogMessage)*numMessages);
-
-	for(i = 0; i < numMessages; i++){
+	while(line[0] != '\n'){
+		thisDialogInstance->dialogMessages[numMessages] = createDialogMessageFromLine(line);
+		numMessages++;
 		fgets(line, 512, FP);
-		messageArr[i] = createDialogMessageFromLine(line);
 	}
+
+	thisDialogInstance->numDialogMessages = numMessages;
 
 	//Populate DialogMessage's next DialogMessage
 	for(i = 0; i < numMessages; i++){
-		messageArr[i]->nextMessage = findNextDialogMessage(messageArr[i], messageArr, numMessages);
+		thisDialogInstance->dialogMessages[i]->nextMessage = findNextDialogMessage(thisDialogInstance->dialogMessages[i], thisDialogInstance->dialogMessages, numMessages);
 	}
 
 	int rootFound = 0, targetFound = 0;
@@ -416,14 +441,14 @@ void loadDialog(char * fileName, char * directory){
 		dialogDecision * tmpDecision = createDialogDecisionFromLine(line);
 
 		for(i = 0; i < numMessages; i++){
-			if(messageArr[i]->messageID == tmpDecision->rootMessageID){
+			if(thisDialogInstance->dialogMessages[i]->messageID == tmpDecision->rootMessageID){
 				rootFound = 1;
-				addDecisionToDialogMessage(messageArr[i], tmpDecision);
+				addDecisionToDialogMessage(thisDialogInstance->dialogMessages[i], tmpDecision);
 			}
 
-			if(messageArr[i]->messageID == tmpDecision->targetMessageID){
+			if(thisDialogInstance->dialogMessages[i]->messageID == tmpDecision->targetMessageID){
 				targetFound = 1;
-				tmpDecision->targetMessage = messageArr[i];
+				tmpDecision->targetMessage = thisDialogInstance->dialogMessages[i];
 			}
 
 			if(rootFound && targetFound){
@@ -434,6 +459,4 @@ void loadDialog(char * fileName, char * directory){
 			}
 		}
 	}
-
-	setDialogMessages(messageArr, numMessages);
 }

@@ -27,14 +27,17 @@ void initEventTriggerManager(){
 	theEventTriggerManager->onAttackTriggerMap = malloc(sizeof(individualEventMap));
 	theEventTriggerManager->onHarmTriggerMap = malloc(sizeof(individualEventMap));
 	theEventTriggerManager->onDeathTriggerMap = malloc(sizeof(individualEventMap));
+	theEventTriggerManager->onPickupTriggerMap = malloc(sizeof(itemEventMap));
 
 	theEventTriggerManager->onAttackTriggerMap->MAX_MAP_SIZE = 1000;
 	theEventTriggerManager->onHarmTriggerMap->MAX_MAP_SIZE = 1000;
 	theEventTriggerManager->onDeathTriggerMap->MAX_MAP_SIZE = 1000;
+	theEventTriggerManager->onPickupTriggerMap->MAX_MAP_SIZE = 1000;
 
 	theEventTriggerManager->onAttackTriggerMap->numIndividualEvents = 0;
 	theEventTriggerManager->onHarmTriggerMap->numIndividualEvents = 0;
 	theEventTriggerManager->onDeathTriggerMap->numIndividualEvents = 0;
+	theEventTriggerManager->onPickupTriggerMap->numItemEvents = 0;
 }
 
 void destroyEventHandlers(){
@@ -68,39 +71,64 @@ void destroyEventTriggerManager(){
 	free(theEventTriggerManager);
 }
 
-event * triggerEventOnAttack(int thisIndividualID){
+event * triggerEventOnAttack(int thisIndividualID, int isPlayer){
 	int i;
 
 	for(i = 0; i < theEventTriggerManager->onAttackTriggerMap->numIndividualEvents; i++){
 		if(theEventTriggerManager->onAttackTriggerMap->map[i]->individualID == thisIndividualID){
-			triggerEvent(theEventTriggerManager->onAttackTriggerMap->map[i]->eventID);
-			return 1;
+			int onlyTriggerableByPlayer = eventOnlyTriggerableByPlayer(theEventTriggerManager->onAttackTriggerMap->map[i]->eventID);
+
+			if(!onlyTriggerableByPlayer || (onlyTriggerableByPlayer && isPlayer)){
+				triggerEvent(theEventTriggerManager->onAttackTriggerMap->map[i]->eventID);
+			}
 		}
 	}
 
 	return 0;
 }
 
-event * triggerEventOnHarm(int thisIndividualID){
+event * triggerEventOnHarm(int thisIndividualID, int isPlayer){
 	int i;
 
 	for(i = 0; i < theEventTriggerManager->onHarmTriggerMap->numIndividualEvents; i++){
 		if(theEventTriggerManager->onHarmTriggerMap->map[i]->individualID == thisIndividualID){
-			triggerEvent(theEventTriggerManager->onHarmTriggerMap->map[i]->eventID);
-			return 1;
+			int onlyTriggerableByPlayer = eventOnlyTriggerableByPlayer(theEventTriggerManager->onHarmTriggerMap->map[i]->eventID);
+
+			if(!onlyTriggerableByPlayer || (onlyTriggerableByPlayer && isPlayer)){
+				triggerEvent(theEventTriggerManager->onHarmTriggerMap->map[i]->eventID);
+			}
 		}
 	}
 
 	return 0;
 }
 
-event * triggerEventOnDeath(int thisIndividualID){
+event * triggerEventOnDeath(int thisIndividualID, int isPlayer){
 	int i;
 
 	for(i = 0; i < theEventTriggerManager->onDeathTriggerMap->numIndividualEvents; i++){
 		if(theEventTriggerManager->onDeathTriggerMap->map[i]->individualID == thisIndividualID){
-			triggerEvent(theEventTriggerManager->onDeathTriggerMap->map[i]->eventID);
-			return 1;
+			int onlyTriggerableByPlayer = eventOnlyTriggerableByPlayer(theEventTriggerManager->onDeathTriggerMap->map[i]->eventID);
+
+			if(!onlyTriggerableByPlayer || (onlyTriggerableByPlayer && isPlayer)){
+				triggerEvent(theEventTriggerManager->onDeathTriggerMap->map[i]->eventID);
+			}
+		}
+	}
+
+	return 0;
+}
+
+event * triggerEventOnPickup(int thisItemID, int isPlayer){
+	int i;
+
+	for(i = 0; i < theEventTriggerManager->onPickupTriggerMap->numItemEvents; i++){
+		if(theEventTriggerManager->onPickupTriggerMap->map[i]->itemID == thisItemID){
+			int onlyTriggerableByPlayer = eventOnlyTriggerableByPlayer(theEventTriggerManager->onPickupTriggerMap->map[i]->eventID);
+
+			if(!onlyTriggerableByPlayer || (onlyTriggerableByPlayer && isPlayer)){
+				triggerEvent(theEventTriggerManager->onPickupTriggerMap->map[i]->eventID);
+			}
 		}
 	}
 
@@ -143,10 +171,11 @@ event * createEventFromFile(char * line){
 	return newEvent;
 }
 
-void loadTriggerMaps(char* directory, char* onAttackTriggerFileName, char* onHarmTriggerFileName, char* onDeathTriggerFileName){
+void loadTriggerMaps(char* directory, char* onAttackTriggerFileName, char* onHarmTriggerFileName, char* onDeathTriggerFileName, char* onPickupTriggerFileName){
 	loadIndividualEventsToTriggerManager(directory, onAttackTriggerFileName, theEventTriggerManager->onAttackTriggerMap);
 	loadIndividualEventsToTriggerManager(directory, onHarmTriggerFileName, theEventTriggerManager->onHarmTriggerMap);
 	loadIndividualEventsToTriggerManager(directory, onDeathTriggerFileName, theEventTriggerManager->onDeathTriggerMap);
+	loadItemEventsToTriggerManager(directory, onPickupTriggerFileName, theEventTriggerManager->onPickupTriggerMap);
 }
 
 individualEvent * createIndividualEventFromLine(char * line){
@@ -161,17 +190,43 @@ individualEvent * createIndividualEventFromLine(char * line){
 	return newIE;
 }
 
+itemEvent * createItemEventFromLine(char * line){
+	itemEvent * newItemEvent = malloc(sizeof(itemEvent));
+
+	char * value = strtok(line, ";");
+	newItemEvent->itemID = atoi(value);
+
+	value = strtok(NULL, ";");
+	newItemEvent->eventID = atoi(value);
+
+	return newItemEvent;
+}
+
 void loadIndividualEventsToTriggerManager(char* directory, char* triggerFileName, individualEventMap * triggerMap){
 	char * fullFileName = appendStrings(directory, triggerFileName);
-	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
 	char line[32];
-
 
 	while(fgets(line,32,FP) != NULL){
 		if (line[0] != '#') {
 			individualEvent * newIndividualEvent = createIndividualEventFromLine(line);
 			addIndividualEventToMap(newIndividualEvent, triggerMap);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void loadItemEventsToTriggerManager(char * directory, char * triggerFileName, itemEventMap * triggerMap){
+	char * fullFileName = appendStrings(directory, triggerFileName);
+	FILE * FP = fopen(fullFileName, "r");
+	char line[32];
+
+	while(fgets(line,32,FP) != NULL){
+		if (line[0] != '#') {
+			itemEvent * newItemEvent = createItemEventFromLine(line);
+			addItemEventToMap(newItemEvent, triggerMap);
 		}
 	}
 
@@ -191,6 +246,18 @@ void addIndividualEventToMap(individualEvent * newIndividualEvent, individualEve
 	triggerMap->map[triggerMap->numIndividualEvents] = NULL;
 }
 
+void addItemEventToMap(itemEvent * newItemEvent, itemEventMap * triggerMap){
+	if(triggerMap->numItemEvents +1 == triggerMap->MAX_MAP_SIZE){
+		char * errLog[128];
+		sprintf(errLog, "!! COULD NOT ADD TO EVENT TRIGGER MAP: INDIVIDUAL ID: %d, EVENT ID: %d", newItemEvent->itemID, newItemEvent->eventID);
+		cwrite(errLog);
+	}
+
+	triggerMap->map[triggerMap->numItemEvents] = newItemEvent;
+	triggerMap->numItemEvents++;
+	triggerMap->map[triggerMap->numItemEvents] = NULL;
+}
+
 void removeIndividualEventFromMap(individualEvent * thisIndividualEvent, individualEventMap * triggerMap){
 	int i;
 
@@ -203,6 +270,15 @@ void removeIndividualEventFromMap(individualEvent * thisIndividualEvent, individ
 			triggerMap->map[i] = triggerMap->map[triggerMap->numIndividualEvents];
 			triggerMap->map[triggerMap->numIndividualEvents] = NULL;
 		}
+	}
+}
+
+int eventOnlyTriggerableByPlayer(int eventID){
+	switch(eventID){
+	case 5: //Crime
+		return 1;
+	default:
+		return 0;
 	}
 }
 

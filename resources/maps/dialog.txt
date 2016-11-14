@@ -1,4 +1,3 @@
-7
 1000;Hello, adventurer.;0;1001;0;0
 1001;Do you fancy these robes?;2;0;1;0
 1002;I agree - I found them in the graveyard to the east.;0;0;0;1
@@ -6,7 +5,9 @@
 1006;(CHR check);0;0;0;4
 1005;Have at you!;0;0;0;2
 1007;Ah - forgive me for my aggression. It takes a stronger man to say the honest thing.;0;0;0;0
+1004;Welcome! We've got the lowest prices!;0;1005;0;3
+
 1001;Yes - they are quite flattering, fit for a wealthy noble;1002
 1001;No - they look rather dingy;1003
 1003;Yes! Have at you, poorly dressed mongrel!;1005
-1003;No! I'm mearly trying to inform you as a friend! (CHR Check);1006
+1003;No! I'm merely trying to inform you as a friend! (CHR Check);1006

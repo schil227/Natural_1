@@ -71,6 +71,14 @@ typedef struct{
 }statusList;
 
 typedef struct{
+	int sawPlayerCrime;
+	int playerAttackedMe;
+	int playerStoleItemFromMe;
+	int playerPickPocketedMe;
+	int playerIsMarkedForDeath;
+} specialDialogs;
+
+typedef struct{
 	int offensiveness;
 	int abilityAffinity;
 	int tacticalness;
@@ -110,6 +118,7 @@ struct individual{
 	character* playerCharacter;
 	char name[32];
 	int ID;
+	int isPlayer;
 
 	inventory * backpack;
 	activeItemList * activeItems;
@@ -178,6 +187,7 @@ struct individual{
 	int targetedDuration;
 
 	behavior * thisBehavior;
+	specialDialogs * specialDialog;
 	struct individual * targetedIndividual;
 	struct individual * allyIndividual;
 	cord * desiredLocation;
