@@ -18,12 +18,19 @@ typedef struct{
 typedef struct{
 	int messageID;
 	char message[256];
+	char parsedMessage[256];
+	int MESSAGE_SIZE;
 	int numDialogDecision;
 
 	int dialogCheckpoint; //if the user should start at this message
 	int eventID; //the event this flag triggers
 
+	char * messageInserts[5];
+	int MAX_MESSAGE_INSERTS;
+	int numMessageInserts;
+
 	int nextMessageID;
+
 	struct dialogMessage * nextMessage;
 	struct dialogDecision * decisions[10];
 }dialogMessage;

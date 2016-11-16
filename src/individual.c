@@ -2173,21 +2173,21 @@ int reportActiveCrimes(individual * player){
 	return 1;
 }
 
-void addReportedCrime(individual * player, int crimeType, int bounty){
-	activeCrimeEntry * crime = malloc(sizeof(activeCrimeEntry));
-	crime->crimeType = crimeType;
-	crime->crimeBounty = bounty;
+void addReportedCrime(individual * player, crimeType crime, int bounty){
+	activeCrimeEntry * thisCrime = malloc(sizeof(activeCrimeEntry));
+	thisCrime->crime = crime;
+	thisCrime->crimeBounty = bounty;
 
-	addReportedCrimeFromEntry(player, crime);
+	addReportedCrimeFromEntry(player, thisCrime);
 }
 
-void addActiveCrime(individual * player, int crimeType, int bounty, individual * npc){
-	activeCrimeEntry * crime = malloc(sizeof(activeCrimeEntry));
-	crime->crimeType = crimeType;
-	crime->crimeBounty = bounty;
-	crime->witness = npc;
+void addActiveCrime(individual * player, crimeType crime, int bounty, individual * npc){
+	activeCrimeEntry * thisCrime = malloc(sizeof(activeCrimeEntry));
+	thisCrime->crime = crime;
+	thisCrime->crimeBounty = bounty;
+	thisCrime->witness = npc;
 
-	addActiveCrimeFromEntry(player, crime);
+	addActiveCrimeFromEntry(player, thisCrime);
 }
 
 void removeActiveCrime(individual * player, individual * npc){
@@ -2250,6 +2250,58 @@ int getCurrentBounty(individual * player){
 	}
 
 	return sum;
+}
+
+char * getCrimeString(crimeType thisCrime){
+	char * crimeStr = malloc(sizeof(char) * 32);
+
+	switch(thisCrime){
+		case CRIME_STEALING:
+			strcpy(crimeStr, "stealing");
+			return crimeStr;
+		case CRIME_PICKPOCKETING:
+			strcpy(crimeStr, "pickpocketing");
+			return crimeStr;
+		case CRIME_ASSULT:
+			strcpy(crimeStr, "assult");
+			return crimeStr;
+		case CRIME_MURDER:
+			strcpy(crimeStr, "murder");
+			return crimeStr;
+		case CRIME_TREASON:
+			strcpy(crimeStr, "treason");
+			return crimeStr;
+		default:
+			free(crimeStr);
+			return NULL;
+	}
+}
+
+char * getWorstCrime(individual * player){
+	int i, crimesPassed = 0;
+	crimeType worstCrime = -1;
+
+	if(player->thisReportedCrimes->numReportedCrimes > 0){
+		for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
+			if(player->thisReportedCrimes->reportedCrimeList[i] != NULL){
+				if(worstCrime < player->thisReportedCrimes->reportedCrimeList[i]->crime){
+					worstCrime = player->thisReportedCrimes->reportedCrimeList[i]->crime;
+				}
+
+				crimesPassed++;
+
+				if(crimesPassed == player->thisReportedCrimes->numReportedCrimes){
+					break;
+				}
+			}
+
+		}
+
+		return getCrimeString(worstCrime);
+
+	}else{
+		return NULL;
+	}
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

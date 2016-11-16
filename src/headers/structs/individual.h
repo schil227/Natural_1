@@ -17,6 +17,9 @@ typedef enum { STATUS_NONE, STATUS_POISONED, STATUS_PARALYZED, STATUS_CONFUSED, 
 
 typedef enum { GROUP_ALLIES, GROUP_ENEMIES, GROUP_BEASTS, GROUP_NPCS, GROUP_GUARDS, GROUP_NULL} groupType;
 
+//Ordered from least to most severe
+typedef enum { CRIME_STEALING, CRIME_PICKPOCKETING, CRIME_ASSULT, CRIME_MURDER, CRIME_TREASON} crimeType;
+
 typedef struct{
 	int x;
 	int y;
@@ -96,7 +99,7 @@ typedef struct{
 }behavior;
 
 typedef struct{
-	int crimeType;
+	crimeType crime;
 	int crimeBounty;
 	struct individual * witness;
 	struct individual * victim;

@@ -395,3 +395,22 @@ void processEvent(int eventID, individual * player, groupContainer * thisGroupCo
 	}
 
 }
+
+char * processContextKey(char * contextKey, individual * player, groupContainer * thisGroupContainer, field * thisField){
+	if(strcmp(contextKey, "NAME") == 0){
+		char * toReturn = malloc(sizeof(char) * 32);
+		strcpy(toReturn, player->name);
+		return toReturn;
+	}
+
+	if(strcmp(contextKey, "BOUNTY")){
+		int bounty = getCurrentBounty(player);
+		char * toReturn = malloc(sizeof(char) * 32);
+		itoa(bounty, toReturn, 10);
+		return toReturn;
+	}
+
+	if(strcmp(contextKey, "WORST_CRIME")){
+		return getWorstCrime(player);
+	}
+}

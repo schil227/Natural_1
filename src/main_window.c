@@ -607,6 +607,10 @@ int triggerEvent(int eventID){
 	processEvent(eventID, player, thisGroupContainer, main_field);
 }
 
+char * getContextData(char * contextKey){
+	return processContextKey(contextKey, player, thisGroupContainer, main_field);
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		LPSTR lpCmdLine, int nCmdShow) {
 

@@ -35,6 +35,7 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->numTicks = 0;
 	toReturn->speakSoundID = 8;
 
+
 	return toReturn;
 }
 
@@ -85,16 +86,16 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 		textBoxRect.right = textBoxRect.left +  thisDialogInstance->dialogWindow->fixedWidth - 20;
 
 	messageNode drawMessageNode;
-	if(thisDialogInstance->speakMode && thisDialogInstance->speakDrawLength == strlen(thisDialogInstance->currentMessage->message)){
+	if(thisDialogInstance->speakMode && thisDialogInstance->speakDrawLength == strlen(thisDialogInstance->currentMessage->parsedMessage)){
 		thisDialogInstance->speakMode = 0;
 		thisDialogInstance->numTicks = 0;
 	}
 
 	if(thisDialogInstance->speakMode){
-		strncpy(drawMessageNode.message,thisDialogInstance->currentMessage->message, thisDialogInstance->speakDrawLength);
+		strncpy(drawMessageNode.message,thisDialogInstance->currentMessage->parsedMessage, thisDialogInstance->speakDrawLength);
 		drawMessageNode.message[thisDialogInstance->speakDrawLength] = '\0';
 	} else{
-		strcpy(drawMessageNode.message,thisDialogInstance->currentMessage->message);
+		strcpy(drawMessageNode.message,thisDialogInstance->currentMessage->parsedMessage);
 	}
 
 	drawMessageNode.nextMessageNode = NULL;
@@ -139,8 +140,28 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, thisDialogInstance->numRows, rowLength);
 }
 
+void updateParsedMessage(){
+	strcpy(thisDialogInstance->currentMessage->parsedMessage, thisDialogInstance->currentMessage->message);
+
+	if(thisDialogInstance->currentMessage->numMessageInserts > 0){
+		int i;
+
+		for(i = 0; i < thisDialogInstance->currentMessage->numMessageInserts; i++){
+			char * tmpStr = getContextData(thisDialogInstance->currentMessage->messageInserts[i]);
+			if(tmpStr != NULL){
+				if(strlen(tmpStr) + strlen(thisDialogInstance->currentMessage->parsedMessage) < thisDialogInstance->currentMessage->MESSAGE_SIZE){
+					insertIntoMessage(thisDialogInstance->currentMessage->parsedMessage, tmpStr);
+				}
+
+				free(tmpStr);
+			}
+		}
+	}
+}
+
 void setCurrentMessage(dialogMessage * currentMessage){
 	thisDialogInstance->currentMessage = currentMessage;
+	updateParsedMessage();
 }
 
 void setSpeakingIndividualID(int ID){
@@ -177,12 +198,41 @@ int disableSpeakModeIfEnabled(){
 	return 0;
 }
 
+void insertIntoMessage(char * sourceString, char * insertValue){
+	int i, index = -1;
+
+	for(i = 0; i < strlen(sourceString); i++){
+		if(sourceString[i] == '@'){
+			index = i;
+			break;
+		}
+	}
+
+	if(index == -1){
+		return;
+	}
+
+	int restLength = strlen(sourceString) - index;
+	printf("index: %d, length: %d, length-index: %d\n",index, strlen(sourceString), restLength);
+
+	char * rest = malloc(sizeof(char) * restLength);
+
+	strncpy(rest, &sourceString[index+1], restLength);
+	sourceString[index] = '\0';
+	strcat(sourceString, insertValue);
+	strcat(sourceString, rest);
+
+	free(rest);
+}
+
 void advanceDialog(){
 	if(thisDialogInstance->currentMessage->nextMessage != NULL || thisDialogInstance->currentMessage->numDialogDecision > 0){
 		if(thisDialogInstance->currentMessage->nextMessage != NULL){
 			thisDialogInstance->speakMode = 1;
 			thisDialogInstance->speakDrawLength = 1;
 			thisDialogInstance->currentMessage = thisDialogInstance->currentMessage->nextMessage;
+			updateParsedMessage();
+
 		}else{
 			selectDecision();
 			thisDialogInstance->decisionIndex = 0;
@@ -208,6 +258,7 @@ int getEventFromCurrentMessage(){
 void setSimpleDialogMessage(char * string){
 	thisDialogInstance->currentMessage = malloc(sizeof(dialogMessage));
 	strcpy(thisDialogInstance->currentMessage->message, string);
+	strcpy(thisDialogInstance->currentMessage->parsedMessage, string);
 	thisDialogInstance->currentMessage->numDialogDecision = 0;
 	thisDialogInstance->currentMessage->nextMessage = NULL;
 	thisDialogInstance->currentMessage->eventID = 0;
@@ -358,26 +409,56 @@ dialogDecision * createDialogDecisionFromLine(char * line){
 
 dialogMessage * createDialogMessageFromLine(char * line){
 	dialogMessage * newDialogMessage = malloc(sizeof(dialogMessage));
+	int i;
+	char * strtok_save_pointer;
+	char * inserts;
+	char * value = strtok_r(line,";",&strtok_save_pointer);
 
-	char * value = strtok(line,";");
+	newDialogMessage->MAX_MESSAGE_INSERTS = 5;
+	newDialogMessage->MESSAGE_SIZE = 256;
+
 	newDialogMessage->messageID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(newDialogMessage->message, value);
+	strcpy(newDialogMessage->parsedMessage, newDialogMessage->message);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newDialogMessage->numDialogDecision = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newDialogMessage->nextMessageID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newDialogMessage->dialogCheckpoint = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newDialogMessage->eventID = atoi(value);
 
 	newDialogMessage->decisions[0] = NULL;
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newDialogMessage->numMessageInserts = atoi(value);
+
+	inserts = strtok_r(NULL,";",&strtok_save_pointer);;
+
+	value = strtok(inserts, ",");
+	for(i = 0; i < newDialogMessage->numMessageInserts; i++){
+		char * tmpVal = malloc(sizeof(char) * 16);
+		strcpy(tmpVal, value);
+
+		//strip trailing \n
+		int len = strlen(tmpVal) - 1;
+		if(tmpVal[len] == '\n'){
+			tmpVal[len] = '\0';
+		}
+
+		newDialogMessage->messageInserts[i] = tmpVal;
+
+		if(i+1 < newDialogMessage->numMessageInserts){
+			value = strtok(NULL, ",");
+		}
+	}
 
 	return newDialogMessage;
 }
