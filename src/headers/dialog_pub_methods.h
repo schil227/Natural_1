@@ -9,5 +9,6 @@
 #define SRC_HEADERS_DIALOG_PUB_METHODS_H_
 #include"./structs/dialog.h"
 
+dialogDecision * cloneDecisionDialog(dialogDecision * thisDecision);
 
 #endif /* SRC_HEADERS_DIALOG_PUB_METHODS_H_ */

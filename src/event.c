@@ -160,13 +160,26 @@ event * createEventFromFile(char * line){
 	newEvent->intB = atoi(value);
 
 	value = strtok(NULL, ";");
-	newEvent->dialogIDA = atoi(value);
+	newEvent->dialogIDCritSuccess = atoi(value);
 
 	value = strtok(NULL, ";");
-	newEvent->dialogIDB = atoi(value);
+	newEvent->dialogIDSuccess = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->dialogIDInconclusive = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->dialogIDFailure = atoi(value);
+
+	value = strtok(NULL, ";");
+	newEvent->dialogIDCritFailure = atoi(value);
 
 	value = strtok(NULL, ";");
 	strcpy(newEvent->message, value);
+
+	if(newEvent->message[strlen(newEvent->message) - 1] == '\n' ){
+		newEvent->message[strlen(newEvent->message) - 1] = '\0';
+	}
 
 	return newEvent;
 }
@@ -284,36 +297,45 @@ int eventOnlyTriggerableByPlayer(int eventID){
 
 ///// Process Event Functions /////
 
-void becomeNPC(int individualID, groupContainer * thisGroupContainer){
+int becomeNPC(int individualID, groupContainer * thisGroupContainer){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
 	if(thisIndividual->currentGroupType != GROUP_NPCS){
 		deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer,thisIndividual), thisIndividual);
 		addIndividualToGroup(thisGroupContainer->npcs, thisIndividual);
 		thisIndividual->currentGroupType = GROUP_NPCS;
+
+		return 1;
 	}
 
+	return 0;
 }
 
-void becomeEnemy(int individualID, groupContainer * thisGroupContainer){
+int becomeEnemy(int individualID, groupContainer * thisGroupContainer){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
 	if(thisIndividual->currentGroupType != GROUP_ENEMIES){
 		deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer,thisIndividual), thisIndividual);
 		addIndividualToGroup(thisGroupContainer->enemies, thisIndividual);
 		thisIndividual->currentGroupType = GROUP_ENEMIES;
+
+		return 1;
 	}
+
+	return 0;
 
 }
 
-void enterBuyMode(int individualID){
+int enterBuyMode(int individualID){
 	individual * merchant = getIndividualFromRegistry(individualID);
 	enableInventoryBuyMode();
 	enableInventoryViewMode(merchant->backpack);
+
+	return 1;
 }
 
-void statCheck(individual * player, event * thisEvent){
-	int statValue = 0, d20;
+int statCheck(individual * player, event * thisEvent){
+	int statValue = 0, d20, toReturn;
 
 	statValue = getAttributeSum(player, thisEvent->message);
 	d20 = rand() % 20 + 1;
@@ -323,15 +345,19 @@ void statCheck(individual * player, event * thisEvent){
 	cwrite(statOut);
 
 	if((d20 + statValue*2) >= thisEvent->intA){
-		setNextMessageByID(thisEvent->dialogIDA);
+		setNextMessageByID(thisEvent->dialogIDSuccess);
+		toReturn = 1;
 	}else{//failed
-		setNextMessageByID(thisEvent->dialogIDB);
+		setNextMessageByID(thisEvent->dialogIDFailure);
+
+		toReturn = 0;
 	}
 
+	return toReturn;
 }
 
-void crimeCommittedInLoS(individual * player, individualGroup * guards, individualGroup * npcs, field * thisField, int crimeType, int bounty){
-	int i, individuals_passed = 0;
+int crimeCommittedInLoS(individual * player, individualGroup * guards, individualGroup * npcs, field * thisField, int crimeType, int bounty){
+	int i, individuals_passed = 0, toReturn = 0;
 
 	if(guards->numIndividuals > 0){
 		for(i = 0; i < guards->MAX_INDIVIDUALS; i++){
@@ -342,7 +368,7 @@ void crimeCommittedInLoS(individual * player, individualGroup * guards, individu
 					reportActiveCrimes(player);
 					addReportedCrime(crimeType, bounty);
 
-					return;
+					return -1;
 				}
 
 				individuals_passed++;
@@ -360,6 +386,7 @@ void crimeCommittedInLoS(individual * player, individualGroup * guards, individu
 
 				if(isInLineOfSight(npcs->individuals[i], player, thisField)){
 					addActiveCrime(crimeType, bounty, npcs->individuals[i]);
+					toReturn++;
 				}
 
 				individuals_passed++;
@@ -369,31 +396,126 @@ void crimeCommittedInLoS(individual * player, individualGroup * guards, individu
 			}
 		}
 	}
-	//smooth criminal
+
+	return toReturn;
 }
 
-void processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
+int multiStatDialogCheck(individual * player, event * thisEvent){
+	int toBeat = 12, statSum = 0, d20;
+	int numStats = thisEvent->intA;
+
+	if(thisEvent->intB > 0){
+		toBeat = thisEvent->intB;
+	}
+
+	d20 = rand() % 20 + 1;
+
+	if(d20 == 20){
+		cwrite("Natural 20!");
+		if(thisEvent->dialogIDCritSuccess > 0){
+			return thisEvent->dialogIDCritSuccess;
+		}else{
+			return thisEvent->dialogIDSuccess;
+		}
+	}else if(d20 == 1){
+		cwrite("Natural 1!");
+		if(thisEvent->dialogIDCritFailure > 0){
+			return thisEvent->dialogIDCritFailure;
+		}else{
+			return thisEvent->dialogIDFailure;
+		}
+	}
+
+	char * value = strtok(thisEvent->message,",");
+
+	while(value != NULL){
+		int tmpTotal = getAttributeSum(player, value);
+
+		//get magnitued of stat
+		value = strtok(NULL,",");
+		statSum += tmpTotal * atoi(value);
+
+		value = strtok(NULL,",");
+	}
+
+	d20 += statSum;
+
+	if(d20 == toBeat && thisEvent->dialogIDInconclusive > 0){
+		return thisEvent->dialogIDInconclusive;
+	}
+
+	if(d20 > toBeat){
+		return thisEvent->dialogIDSuccess;
+	}else{
+		return thisEvent->dialogIDFailure;
+	}
+}
+
+int statsAtLeastX(individual * player, event * thisEvent){
+	int numStats = thisEvent->intA;
+	int allMustSucceed = thisEvent->intB;
+	int atLeastOneSucceeded = 0;
+
+	char * value = strtok(thisEvent->message,",");
+
+	while(value != NULL){
+		int tmpTotal = getAttributeSum(player, value);
+
+		//get magnitued of stat
+		value = strtok(NULL,",");
+
+		if(tmpTotal < atoi(value) && allMustSucceed){
+			return 0;
+		}else if(tmpTotal >= atoi(value)){
+			if(!allMustSucceed){
+				return 1;
+			}
+
+			atLeastOneSucceeded = 1;
+		}
+
+		value = strtok(NULL,",");
+	}
+
+	if(atLeastOneSucceeded){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int tryReturnStolenWitnessedItems(individual * player, int witnessID){
+	return 0;
+}
+
+int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
 
 	event * thisEvent = getEventFromRegistry(eventID);
 
 	switch(thisEvent->eventType){
 		case 1://become npc
-			becomeNPC(thisEvent->individualID, thisGroupContainer);
-			break;
+			return becomeNPC(thisEvent->individualID, thisGroupContainer);
 		case 2: // become enemy
-			becomeEnemy(thisEvent->individualID, thisGroupContainer);
-			break;
+			return becomeEnemy(thisEvent->individualID, thisGroupContainer);
 		case 3: // enable buy mode
-			enterBuyMode(thisEvent->individualID);
-			break;
+			return enterBuyMode(thisEvent->individualID);
 		case 4: // stat check
-			statCheck(player, thisEvent);
-			break;
+			return statCheck(player, thisEvent);
 		case 5:
-			crimeCommittedInLoS(player, thisGroupContainer->guards, thisGroupContainer->npcs, thisField, thisEvent->intA, thisEvent->intB);
-			break;
+			return crimeCommittedInLoS(player, thisGroupContainer->guards, thisGroupContainer->npcs, thisField, thisEvent->intA, thisEvent->intB);
+		case 6: // remove active crimes from talking witness
+			return removeActiveCrimesFromTalkingWitness(player, getSpeakingIndividualID());
+		case 7: // report all active crimes
+			return reportActiveCrimes(player);
+		case 8: // multi stat dialog check
+			return multiStatDialogCheck(player, thisEvent);
+		case 9: // stats at least X
+			return statsAtLeastX(player, thisEvent);
+		case 10:// try return stolen witnessed items
+			return tryReturnStolenWitnessedItems(player, getSpeakingIndividualID());
 	}
 
+	return 0;
 }
 
 char * processContextKey(char * contextKey, individual * player, groupContainer * thisGroupContainer, field * thisField){

@@ -2190,14 +2190,14 @@ void addActiveCrime(individual * player, crimeType crime, int bounty, individual
 	addActiveCrimeFromEntry(player, thisCrime);
 }
 
-void removeActiveCrime(individual * player, individual * npc){
+void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
 	int i, crimesPassed = 0;
 
 	if(player->thisActiveCrimes->numActiveCrimes > 0){
 		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
 			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
 
-				if(player->thisActiveCrimes->activeCrimeList[i]->witness == npc){
+				if(player->thisActiveCrimes->activeCrimeList[i]->witness->ID == witnessID){
 					free(player->thisActiveCrimes->activeCrimeList[i]);
 					player->thisActiveCrimes->activeCrimeList[i] = NULL;
 					player->thisActiveCrimes->numActiveCrimes--;

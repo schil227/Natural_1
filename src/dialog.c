@@ -110,16 +110,16 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	BitBlt(hdcBuffer, thisDialogInstance->dialogWindow->x, thisDialogInstance->dialogWindow->y,
 			thisDialogInstance->dialogWindow->fixedWidth, thisDialogInstance->dialogWindow->fixedHeight, hdcMem, 0, 0, SRCCOPY);
 
-	if(thisDialogInstance->currentMessage->numDialogDecision > 0 && !thisDialogInstance->speakMode){
+	if(thisDialogInstance->currentMessage->numDialogDecisionsParsed > 0 && !thisDialogInstance->speakMode){
 		int i, rowToStartOn;
 
-		for(i = 0; i < thisDialogInstance->currentMessage->numDialogDecision; i++){
+		for(i = 0; i < thisDialogInstance->currentMessage->numDialogDecisionsParsed; i++){
 			rowToStartOn = calcNumIndexes(drawMessageNode.message, rowLength, hdcBuffer, (int)(textBoxRect.right - textBoxRect.right*0.9));
 			thisDialogInstance->decisionIndexRow[i] = rowToStartOn;
-			dialogDecision * tmpDecision = thisDialogInstance->currentMessage->decisions[i];
+			dialogDecision * tmpDecision = thisDialogInstance->currentMessage->parsedDecisions[i];
 			char tmpDecisionStr[70];
 			strcpy(tmpDecisionStr, "&     ");
-			strcat(tmpDecisionStr, tmpDecision->message);
+			strcat(tmpDecisionStr, tmpDecision->processedMessage);
 
 			strcat(drawMessageNode.message, tmpDecisionStr);
 		}
@@ -141,11 +141,10 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 }
 
 void updateParsedMessage(){
+	int i;
 	strcpy(thisDialogInstance->currentMessage->parsedMessage, thisDialogInstance->currentMessage->message);
 
 	if(thisDialogInstance->currentMessage->numMessageInserts > 0){
-		int i;
-
 		for(i = 0; i < thisDialogInstance->currentMessage->numMessageInserts; i++){
 			char * tmpStr = getContextData(thisDialogInstance->currentMessage->messageInserts[i]);
 			if(tmpStr != NULL){
@@ -157,19 +156,67 @@ void updateParsedMessage(){
 			}
 		}
 	}
+
+	if(thisDialogInstance->currentMessage->numDialogDecision > 0){
+
+		//clear old ones
+		if(thisDialogInstance->currentMessage->numDialogDecisionsParsed > 0){
+			for(i = 0; i < thisDialogInstance->currentMessage->numDialogDecisionsParsed; i++){
+				destroyDialogDecision(thisDialogInstance->currentMessage->parsedDecisions[i]);
+			}
+		}
+
+		thisDialogInstance->currentMessage->numDialogDecisionsParsed = 0;
+
+		for(i = 0; i < thisDialogInstance->currentMessage->numDialogDecision; i++){
+			if(thisDialogInstance->currentMessage->decisions[i]->displayEventID == 0 || triggerEvent(thisDialogInstance->currentMessage->decisions[i]->displayEventID) ){
+				dialogDecision * newParsedDecision = cloneDecisionDialog(thisDialogInstance->currentMessage->decisions[i]);
+
+				thisDialogInstance->currentMessage->parsedDecisions[thisDialogInstance->currentMessage->numDialogDecisionsParsed] = newParsedDecision;
+				thisDialogInstance->currentMessage->numDialogDecisionsParsed++;
+
+				if(newParsedDecision->numMessageInserts > 0){
+					int j;
+
+					for(j = 0; j < newParsedDecision->numMessageInserts; j++){
+						char * tmpStr = getContextData(newParsedDecision->messageInserts[j]);
+						if(tmpStr != NULL){
+							if(strlen(tmpStr) + strlen(newParsedDecision->processedMessage) < newParsedDecision->MESSAGE_SIZE){
+								insertIntoMessage(newParsedDecision->processedMessage, tmpStr);
+							}
+
+							free(tmpStr);
+						}
+					}
+				}
+
+
+			}
+		}
+	}
 }
 
 void setCurrentMessage(dialogMessage * currentMessage){
-	thisDialogInstance->currentMessage = currentMessage;
-	updateParsedMessage();
+	if(currentMessage == NULL){ //stop speaking
+		thisDialogInstance->currentMessage->nextMessage = NULL;
+//		thisDialogInstance->speakingIndividualID = 0;
+//		toggleDrawDialogBox();
+	}else{
+		thisDialogInstance->currentMessage = currentMessage;
+		updateParsedMessage();
+	}
 }
 
 void setSpeakingIndividualID(int ID){
 	thisDialogInstance->speakingIndividualID = ID;
 }
 
+int getSpeakingIndividualID(){
+	return thisDialogInstance->speakingIndividualID;
+}
+
 void nextDialogDecision(){
-	if(thisDialogInstance->decisionIndex+1 < thisDialogInstance->currentMessage->numDialogDecision){
+	if(thisDialogInstance->decisionIndex+1 < thisDialogInstance->currentMessage->numDialogDecisionsParsed){
 		thisDialogInstance->decisionIndex++;
 	}else{ //roll over to 0
 		thisDialogInstance->decisionIndex = 0;
@@ -180,13 +227,35 @@ void previousDialogDecision(){
 	if(thisDialogInstance->decisionIndex != 0){
 		thisDialogInstance->decisionIndex--;
 	}else{
-		thisDialogInstance->decisionIndex = thisDialogInstance->currentMessage->numDialogDecision-1;
+		thisDialogInstance->decisionIndex = thisDialogInstance->currentMessage->numDialogDecisionsParsed-1;
 	}
 }
 
+dialogMessage * getDialogMessageByID(int id){
+	int i;
+
+	for(i = 0; i < thisDialogInstance->numDialogMessages; i++){
+		if(thisDialogInstance->dialogMessages[i]->messageID == id){
+			return thisDialogInstance->dialogMessages[i];
+		}
+	}
+
+	char outlog[128];
+	sprintf(outlog, "!! COULD NOT FIND DIALOG MESSAGE BY ID: %d !!", id);
+	cwrite(outlog);
+
+	return NULL;
+}
+
 void selectDecision(){
-	dialogDecision * theDecision = thisDialogInstance->currentMessage->decisions[thisDialogInstance->decisionIndex];
-	setCurrentMessage(theDecision->targetMessage);
+	dialogDecision * theDecision = thisDialogInstance->currentMessage->parsedDecisions[thisDialogInstance->decisionIndex];
+
+	if(theDecision->eventID > 0){
+		dialogMessage * nextMessage = getDialogMessageByID(triggerEvent(theDecision->eventID));
+		setCurrentMessage(nextMessage);
+	}else{
+		setCurrentMessage(theDecision->targetMessage);
+	}
 }
 
 int disableSpeakModeIfEnabled(){
@@ -226,7 +295,7 @@ void insertIntoMessage(char * sourceString, char * insertValue){
 }
 
 void advanceDialog(){
-	if(thisDialogInstance->currentMessage->nextMessage != NULL || thisDialogInstance->currentMessage->numDialogDecision > 0){
+	if(thisDialogInstance->currentMessage->nextMessage != NULL || thisDialogInstance->currentMessage->numDialogDecisionsParsed > 0){
 		if(thisDialogInstance->currentMessage->nextMessage != NULL){
 			thisDialogInstance->speakMode = 1;
 			thisDialogInstance->speakDrawLength = 1;
@@ -260,6 +329,7 @@ void setSimpleDialogMessage(char * string){
 	strcpy(thisDialogInstance->currentMessage->message, string);
 	strcpy(thisDialogInstance->currentMessage->parsedMessage, string);
 	thisDialogInstance->currentMessage->numDialogDecision = 0;
+	thisDialogInstance->currentMessage->numDialogDecisionsParsed = 0;
 	thisDialogInstance->currentMessage->nextMessage = NULL;
 	thisDialogInstance->currentMessage->eventID = 0;
 }
@@ -385,7 +455,7 @@ void setIndividualDialog(int dialogID){
 	int i;
 
 	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
-		if(thisDialogInstance->individualDialogRegistry[i]->individualID == thisDialogInstance->speakingIndividualID){
+		if(thisDialogInstance->individualDialogRegistry[i] != NULL && thisDialogInstance->individualDialogRegistry[i]->individualID == thisDialogInstance->speakingIndividualID){
 			thisDialogInstance->individualDialogRegistry[i]->dialogID = dialogID;
 			return;
 		}
@@ -393,18 +463,81 @@ void setIndividualDialog(int dialogID){
 }
 
 dialogDecision * createDialogDecisionFromLine(char * line){
+	int i;
+	char * strtok_save_pointer;
+	char * inserts;
 	dialogDecision * newDialogDecision = malloc(sizeof(dialogDecision));
 
-	char * value = strtok(line,";");
+	newDialogDecision->MESSAGE_SIZE = 256;
+	newDialogDecision->MAX_MESSAGE_INSERTS = 5;
+	newDialogDecision->numMessageInserts = 0;
+
+	char * value = strtok_r(line,";",&strtok_save_pointer);
 	newDialogDecision->rootMessageID = atoi(value);
 
-	value = strtok(NULL,";");
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(newDialogDecision->message, value);
+	strcpy(newDialogDecision->processedMessage, newDialogDecision->message);
 
-	value = strtok(NULL,";");
-	newDialogDecision->targetMessageID = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newDialogDecision->defaultDialogID = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newDialogDecision->displayEventID = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newDialogDecision->eventID = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newDialogDecision->numMessageInserts = atoi(value);
+
+	inserts = strtok_r(NULL,";",&strtok_save_pointer);
+
+	value = strtok(inserts, ",");
+	for(i = 0; i < newDialogDecision->numMessageInserts; i++){
+		char * tmpVal = malloc(sizeof(char) * 32);
+		strcpy(tmpVal, value);
+
+		//strip trailing \n
+		int len = strlen(tmpVal) - 1;
+		if(tmpVal[len] == '\n'){
+			tmpVal[len] = '\0';
+		}
+
+		newDialogDecision->messageInserts[i] = tmpVal;
+
+		if(i+1 < newDialogDecision->numMessageInserts){
+			value = strtok(NULL, ",");
+		}
+	}
 
 	return newDialogDecision;
+}
+
+dialogDecision * cloneDecisionDialog(dialogDecision * thisDecision){
+	int i;
+	dialogDecision * newDecision = malloc(sizeof(dialogDecision));
+
+	newDecision->MAX_MESSAGE_INSERTS = thisDecision->MAX_MESSAGE_INSERTS;
+	newDecision->MESSAGE_SIZE = thisDecision->MESSAGE_SIZE;
+	newDecision->numMessageInserts = thisDecision->numMessageInserts;
+	newDecision->defaultDialogID = thisDecision->defaultDialogID;
+	newDecision->displayEventID = thisDecision->displayEventID;
+	newDecision->eventID = thisDecision->eventID;
+	newDecision->rootMessageID = thisDecision->rootMessageID;
+	strcpy(newDecision->message,thisDecision->message);
+	strcpy(newDecision->processedMessage, thisDecision->processedMessage);
+
+	for(i = 0; i < newDecision->numMessageInserts; i++){
+		char * tmpStr = malloc(sizeof(char) * 32);
+		strcpy(tmpStr, thisDecision->messageInserts[i]);
+		newDecision->messageInserts[i] = tmpStr;
+	}
+
+	//Figure out how targetMessage is used,
+	newDecision->targetMessage = thisDecision->targetMessage;
+
+	return newDecision;
 }
 
 dialogMessage * createDialogMessageFromLine(char * line){
@@ -425,6 +558,7 @@ dialogMessage * createDialogMessageFromLine(char * line){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newDialogMessage->numDialogDecision = atoi(value);
+	newDialogMessage->numDialogDecisionsParsed = 0;
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newDialogMessage->nextMessageID = atoi(value);
@@ -440,11 +574,11 @@ dialogMessage * createDialogMessageFromLine(char * line){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newDialogMessage->numMessageInserts = atoi(value);
 
-	inserts = strtok_r(NULL,";",&strtok_save_pointer);;
+	inserts = strtok_r(NULL,";",&strtok_save_pointer);
 
 	value = strtok(inserts, ",");
 	for(i = 0; i < newDialogMessage->numMessageInserts; i++){
-		char * tmpVal = malloc(sizeof(char) * 16);
+		char * tmpVal = malloc(sizeof(char) * 32);
 		strcpy(tmpVal, value);
 
 		//strip trailing \n
@@ -461,6 +595,16 @@ dialogMessage * createDialogMessageFromLine(char * line){
 	}
 
 	return newDialogMessage;
+}
+
+void destroyDialogDecision(dialogDecision * thisDecision){
+	int i;
+
+	for(i = 0; i < thisDecision->numMessageInserts; i++){
+		free(thisDecision->messageInserts[i]);
+	}
+
+	free(thisDecision);
 }
 
 dialogMessage * findNextDialogMessage(dialogMessage * thisMessage, dialogMessage ** messageArr, int numMessages){
@@ -521,13 +665,14 @@ void loadDialog(char * fileName, char * directory){
 	while(fgets(line, 512,FP)){
 		dialogDecision * tmpDecision = createDialogDecisionFromLine(line);
 
+		tmpDecision->targetMessage = NULL;
 		for(i = 0; i < numMessages; i++){
 			if(thisDialogInstance->dialogMessages[i]->messageID == tmpDecision->rootMessageID){
 				rootFound = 1;
 				addDecisionToDialogMessage(thisDialogInstance->dialogMessages[i], tmpDecision);
 			}
 
-			if(thisDialogInstance->dialogMessages[i]->messageID == tmpDecision->targetMessageID){
+			if(thisDialogInstance->dialogMessages[i]->messageID == tmpDecision->defaultDialogID){
 				targetFound = 1;
 				tmpDecision->targetMessage = thisDialogInstance->dialogMessages[i];
 			}
@@ -535,7 +680,6 @@ void loadDialog(char * fileName, char * directory){
 			if(rootFound && targetFound){
 				rootFound = 0;
 				targetFound = 0;
-
 				break;
 			}
 		}

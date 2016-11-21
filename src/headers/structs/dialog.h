@@ -15,12 +15,30 @@ typedef struct{
 	int dialogID;
 } individualDialog;
 
+
+typedef struct{
+	int rootMessageID;
+	int defaultDialogID;
+	int displayEventID;
+	int eventID;
+	int MESSAGE_SIZE;
+	char message[256];
+	char processedMessage[256];
+
+	char * messageInserts[5];
+	int MAX_MESSAGE_INSERTS;
+	int numMessageInserts;
+
+	struct dialogMessage * targetMessage;
+} dialogDecision;
+
 typedef struct{
 	int messageID;
 	char message[256];
 	char parsedMessage[256];
 	int MESSAGE_SIZE;
 	int numDialogDecision;
+	int numDialogDecisionsParsed;
 
 	int dialogCheckpoint; //if the user should start at this message
 	int eventID; //the event this flag triggers
@@ -32,15 +50,9 @@ typedef struct{
 	int nextMessageID;
 
 	struct dialogMessage * nextMessage;
-	struct dialogDecision * decisions[10];
+	dialogDecision * decisions[10];
+	dialogDecision * parsedDecisions[10];
 }dialogMessage;
-
-typedef struct{
-	int rootMessageID;
-	int targetMessageID;
-	char message[64];
-	dialogMessage * targetMessage;
-} dialogDecision;
 
 typedef struct{
 	int drawBox;

@@ -21,8 +21,11 @@ typedef struct{
 	int intA;
 	int intB;
 
-	int dialogIDA;
-	int dialogIDB;
+	int dialogIDCritSuccess;
+	int dialogIDSuccess;
+	int dialogIDInconclusive;
+	int dialogIDFailure;
+	int dialogIDCritFailure;
 
 	char message[256];
 } event;

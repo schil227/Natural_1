@@ -604,7 +604,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 int triggerEvent(int eventID){
-	processEvent(eventID, player, thisGroupContainer, main_field);
+	return processEvent(eventID, player, thisGroupContainer, main_field);
 }
 
 char * getContextData(char * contextKey){
