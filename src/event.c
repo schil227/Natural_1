@@ -295,7 +295,6 @@ int eventOnlyTriggerableByPlayer(int eventID){
 	}
 }
 
-
 int processCrimeEvent(crimeType crime, int bounty){
 	int i;
 
@@ -367,8 +366,27 @@ int statCheck(individual * player, event * thisEvent){
 	return toReturn;
 }
 
-int crimeCommittedInLoS(individual * player, individualGroup * guards, individualGroup * npcs, field * thisField, int crimeType, int bounty){
+int crimeCommittedInLoS(individual * player, individualGroup * guards, individualGroup * npcs, field * thisField, int crimeTypeID, int bounty){
 	int i, individuals_passed = 0, toReturn = 0;
+
+	if(crimeAlertsVictim((crimeType) crimeTypeID)){
+		if(player->targetedIndividual != NULL){
+			if(player->targetedIndividual->currentGroupType == GROUP_GUARDS){
+				reportActiveCrimes(player);
+				clearSpecialDialogForGroup(npcs, DIALOG_CRIME_WITNESS);
+				setGroupDialogType(guards, DIALOG_CRIME_WITNESS);
+				setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
+
+				addReportedCrime(player, (crimeType) crimeTypeID, bounty);
+
+				return -1;
+			}else if(player->targetedIndividual->currentGroupType == GROUP_NPCS){
+				addActiveCrime(player, (crimeType) crimeTypeID, bounty, player->targetedIndividual);
+				setSpecialDialogId(player->targetedIndividual->ID, player->targetedIndividual->specialDialog->sawPlayerCrime);
+				player->targetedIndividual->specialDialog->activeDialog = DIALOG_CRIME_WITNESS;
+			}
+		}
+	}
 
 	if(guards->numIndividuals > 0){
 		for(i = 0; i < guards->MAX_INDIVIDUALS; i++){
@@ -381,7 +399,7 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 					setGroupDialogType(guards, DIALOG_CRIME_WITNESS);
 					setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
 
-					addReportedCrime(player, crimeType, bounty);
+					addReportedCrime(player, (crimeType) crimeTypeID, bounty);
 
 					return -1;
 				}
@@ -400,7 +418,7 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 			if(npcs->individuals[i] != NULL){
 
 				if(isInLineOfSight(npcs->individuals[i], player, thisField)){
-					addActiveCrime(player, crimeType, bounty, npcs->individuals[i]);
+					addActiveCrime(player, (crimeType) crimeTypeID, bounty, npcs->individuals[i]);
 					setSpecialDialogId(npcs->individuals[i]->ID, npcs->individuals[i]->specialDialog->sawPlayerCrime);
 					npcs->individuals[i]->specialDialog->activeDialog = DIALOG_CRIME_WITNESS;
 					toReturn++;

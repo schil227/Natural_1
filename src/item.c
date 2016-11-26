@@ -94,7 +94,7 @@ item * cloneItem(item * thisItem){
 
 
 	newItem->npcID = thisItem->npcID;
-	newItem->ID = thisItem->ID;
+	newItem->ID = 0;
 	newItem->type = thisItem->type;
 	strcpy(newItem->name, thisItem->name);
 	strcpy(newItem->description, thisItem->description);

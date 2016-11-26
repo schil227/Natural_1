@@ -552,6 +552,27 @@ void loadTargetedAbilitiesToRegistry(char* directory, char* targetedAbilitiesFil
 	free(fullFileName);
 }
 
+int addClonedItemToRegistry(item * thisItem){
+	int i, newID = 0;
+
+	for(i = 0; i < thisGlobalRegister->numItems; i++){
+		if(newID < thisGlobalRegister->itemRegistry[i]->ID){
+			newID = thisGlobalRegister->itemRegistry[i]->ID;
+		}
+	}
+
+	newID++;
+	thisItem->ID = newID;
+	thisGlobalRegister->itemRegistry[i] = thisItem;
+	thisGlobalRegister->numItems++;
+
+	thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = NULL;
+
+	return newID;
+}
+
+
+
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);
 }

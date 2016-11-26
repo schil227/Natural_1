@@ -2,7 +2,13 @@
 ==== TODO LIST ====
 ===================
 - (11/12/16) Implement Crimes
+
 - (11/12/16) Update path finding algorithm (and consequently tests) to 
+
+
+==BUGS==
+- (11/25/16) player enters/exits shop, skeletons occupy the same space as him when pathfinding
+   -also viewshift sucks - related somehow? probably not
 
 ==BACK BURNER==
 - (11/12/16) for some reason, there's a lot of slowdown when drawing a rotated image mask, so I had to make a separate function just to draw the image without the mask (which works as intended). Not sure if this is something I'll ever have to fix, but for awareness.

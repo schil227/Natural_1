@@ -13,8 +13,11 @@
 
 
 individual* getIndividualFromField(field* thisField, int x, int y){
-	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
+	if(thisField == NULL){
+		return NULL;
+	}
 
+	if(x < thisField->totalX && x >= 0 && y < thisField->totalY && y >= 0){
 		return thisField->grid[x][y]->currentIndividual;
 	}
 
@@ -365,6 +368,10 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 					if(thisIndividual->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility)){
 						triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
 
+						if(thisIndividual->isPlayer){
+							thisIndividual->targetedIndividual = tmp;
+						}
+
 						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
 							processCrimeEvent(CRIME_ASSULT, 40);
 						}
@@ -375,6 +382,10 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 					}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 						if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
 							triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
+
+							if(thisIndividual->isPlayer){
+								thisIndividual->targetedIndividual = tmp;
+							}
 
 							if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
 								processCrimeEvent(CRIME_ASSULT, 40);

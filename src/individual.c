@@ -265,6 +265,10 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 
 	triggerEventOnAttack(targetIndividual->ID, thisIndividual->isPlayer);
 
+	if(thisIndividual->isPlayer){
+		thisIndividual->targetedIndividual = targetIndividual;
+	}
+
 	if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
 		processCrimeEvent(CRIME_ASSULT, 40);
 	}
@@ -1700,7 +1704,6 @@ int getTotalMana(individual * thisIndividual){
 }
 
 int attemptToBuyItem(item * thisItem, individual * thisIndividual){
-
 	if(thisItem->price <= thisIndividual->gold){
 		item * newItem = cloneItem(thisItem);
 
@@ -1710,7 +1713,7 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 			return 0;
 		}
 
-		addItemToRegistry(newItem);
+		addClonedItemToRegistry(newItem);
 		addItemToInventory(thisIndividual->backpack, newItem);
 
 		thisIndividual->gold -= thisItem->price;
@@ -2315,6 +2318,14 @@ char * getCrimeString(crimeType thisCrime){
 		default:
 			free(crimeStr);
 			return NULL;
+	}
+}
+
+int crimeAlertsVictim(crimeType thisCrime){
+	if(thisCrime == CRIME_ASSULT || thisCrime == CRIME_MURDER){
+		return 1;
+	}else{
+		return 0;
 	}
 }
 
