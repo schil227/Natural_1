@@ -245,9 +245,13 @@ node * shallowCloneNode(node * thisNode){
 	return newNode;
 }
 
-node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes, nodeArr * nodePath){
+node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndividual, int moveRange, int distanceFromLastNode, field * thisField, node ** allNodes, nodeArr * nodePath, int debugDepth){
 	int i;
 	node * newActiveNodes[300];
+
+	if(debugDepth > 100){
+		cwrite("!! FIND OPEN NODE FAILURE !!");
+	}
 
 	for(i = 0; i < 300; i++){
 		newActiveNodes[i] = NULL;
@@ -296,12 +300,12 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 
 				addNodeToList(tmpNode,allNodes);
 //				printf("called from a\n");
-				return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes, nodePath);
+				return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes, nodePath, debugDepth++);
 			}
 		}
 	}else{
 //		printf("called from b\n");
-		return findOpenNode(endNode, newActiveNodes, thisIndividual, moveRange-1, distanceFromLastNode, thisField, allNodes,nodePath);
+		return findOpenNode(endNode, newActiveNodes, thisIndividual, moveRange-1, distanceFromLastNode, thisField, allNodes,nodePath, debugDepth++);
 	}
 
 }
@@ -325,7 +329,7 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 		addNodeToList(endNodeCopy, activeNodes);
 		addNodeToList(endNodeCopy, allNodes);
 
-		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes, nodePath);
+		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes, nodePath, 0);
 
 		if(targetNode != NULL){
 			int targetx, targety;
@@ -1009,6 +1013,8 @@ cord * getCordWithTargetInRange(individual * thisIndividual, groupContainer * th
 int moveToSelectedLocation(individual * thisIndividual, field * thisField,  moveNodeMeta ** thisMoveNodeMeta, int x, int y){
 	nodeArr * enemyNodeArr = getSpaceClosestToSpace(thisField, thisIndividual, x, y);
 
+	thisIndividual->remainingActions--;
+
 	//nowhere to go, nothing to animate
 	if (enemyNodeArr->size == 0) {
 		destroyNodeArr(enemyNodeArr);
@@ -1027,7 +1033,7 @@ int moveToSelectedLocation(individual * thisIndividual, field * thisField,  move
 
 	destroyNodeArr(enemyNodeArr);
 
-	thisIndividual->remainingActions--;
+
 	return 1;
 }
 
@@ -1526,6 +1532,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 			if(randomBuffItem != NULL){
 				modifyItem(randomBuffItem, enemy);
+				enemy->remainingActions--;
 				return 0;
 			}
 		}
@@ -1752,6 +1759,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 			if(randomBuffItem != NULL){
 				modifyItem(randomBuffItem, guard);
+				guard->remainingActions--;
 				return 0;
 			}
 		}
@@ -1946,7 +1954,7 @@ individual * getDangerousIndividualNearByInLoS(individual * friendlyIndividual, 
 
 void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
 	if(friendlyIndividual->targetedIndividual != NULL){
-		if(friendlyIndividual->targetedIndividual->hp == 0 || maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
+		if(friendlyIndividual->targetedIndividual->hp <= 0 || maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
 			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
 			if(friendlyIndividual->targetedIndividual != NULL){
@@ -2016,10 +2024,6 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 
 		if(!npc->thisBehavior->isSurrounded && !(abs(targetSpace->x - npc->playerCharacter->x) <= 1 && abs(targetSpace->y - npc->playerCharacter->y) <= 1)){
 			int toReturn = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, x, y);
-
-			if(!toReturn){
-				npc->remainingActions--;
-			}
 
 			return toReturn;
 		}else{

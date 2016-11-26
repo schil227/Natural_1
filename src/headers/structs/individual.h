@@ -18,7 +18,9 @@ typedef enum { STATUS_NONE, STATUS_POISONED, STATUS_PARALYZED, STATUS_CONFUSED, 
 typedef enum { GROUP_ALLIES, GROUP_ENEMIES, GROUP_BEASTS, GROUP_NPCS, GROUP_GUARDS, GROUP_NULL} groupType;
 
 //Ordered from least to most severe
-typedef enum { CRIME_STEALING, CRIME_PICKPOCKETING, CRIME_ASSULT, CRIME_MURDER, CRIME_TREASON} crimeType;
+typedef enum { CRIME_NONE, CRIME_STEALING, CRIME_PICKPOCKETING, CRIME_ASSULT, CRIME_MURDER, CRIME_TREASON} crimeType;
+
+typedef enum {DIALOG_DEFAULT, DIALOG_CRIME_WITNESS} dialogType;
 
 typedef struct{
 	int x;
@@ -74,10 +76,8 @@ typedef struct{
 }statusList;
 
 typedef struct{
+	dialogType activeDialog;
 	int sawPlayerCrime;
-	int playerAttackedMe;
-	int playerStoleItemFromMe;
-	int playerPickPocketedMe;
 	int playerIsMarkedForDeath;
 } specialDialogs;
 

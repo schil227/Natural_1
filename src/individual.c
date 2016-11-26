@@ -72,19 +72,24 @@ individual *initIndividual(){
 	toReturn->thisBehavior->cowardlyTurnsRemaining = 0;
 
 	toReturn->specialDialog = malloc(sizeof(specialDialogs));
-	toReturn->specialDialog->playerAttackedMe = 0;
 	toReturn->specialDialog->playerIsMarkedForDeath = 0;
-	toReturn->specialDialog->playerPickPocketedMe = 0;
-	toReturn->specialDialog->playerStoleItemFromMe = 0;
 	toReturn->specialDialog->sawPlayerCrime = 0;
 
 	toReturn->thisActiveCrimes = malloc(sizeof(activeCrimes));
 	toReturn->thisActiveCrimes->numActiveCrimes = 0;
 	toReturn->thisActiveCrimes->MAX_ACTIVE_CRIMES = 200;
 
+	for(i = 0; i < toReturn->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
+		toReturn->thisActiveCrimes->activeCrimeList[i] = NULL;
+	}
+
 	toReturn->thisReportedCrimes = malloc(sizeof(reportedCrimes));
 	toReturn->thisReportedCrimes->numReportedCrimes = 0;
 	toReturn->thisReportedCrimes->MAX_REPORTED_CRIMES = 200;
+
+	for(i = 0; i < toReturn->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
+		toReturn->thisReportedCrimes->reportedCrimeList[i] = NULL;
+	}
 
 	toReturn->desiredLocation = malloc(sizeof(cord));
 
@@ -96,7 +101,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness, int dialogID, int gold, int faction, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
-		abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
+		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 	int i;
 	BITMAP bm;
 
@@ -151,6 +156,8 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->lightiningWeakness = lightiningWeakness;
 
 	thisIndividual->dialogID = dialogID;
+
+	thisIndividual->specialDialog = thisDialog;
 
 	thisIndividual->gold = gold;
 	thisIndividual->faction = faction;
@@ -257,6 +264,10 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	item * tmpItem;
 
 	triggerEventOnAttack(targetIndividual->ID, thisIndividual->isPlayer);
+
+	if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
+		processCrimeEvent(CRIME_ASSULT, 40);
+	}
 
 	enableSpecialDrawMode();
 	setDurationInTimerTicks(20);
@@ -772,6 +783,11 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
 		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
+
+		if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
+			processCrimeEvent(CRIME_MURDER, 300);
+		}
+
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 		return 1;
@@ -907,6 +923,11 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
 		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
+
+		if(targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS){
+			processCrimeEvent(CRIME_MURDER, 300);
+		}
+
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
@@ -2211,6 +2232,26 @@ void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
 			}
 		}
 	}
+
+	resetSpecialDialogForSpeakingIndividual(DIALOG_CRIME_WITNESS, witnessID);
+
+}
+
+void clearActiveCrimes(individual * player){
+	int i;
+
+	if(player->thisActiveCrimes->numActiveCrimes > 0){
+		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
+			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
+				free(player->thisActiveCrimes->activeCrimeList[i]);
+				player->thisActiveCrimes->activeCrimeList[i] = NULL;
+
+				if(player->thisActiveCrimes->numActiveCrimes == 0){
+					break;
+				}
+			}
+		}
+	}
 }
 
 void clearReportedCrimes(individual * player){
@@ -2226,7 +2267,7 @@ void clearReportedCrimes(individual * player){
 			player->thisReportedCrimes->reportedCrimeList[i] = NULL;
 			player->thisReportedCrimes->numReportedCrimes--;
 
-			if(player->thisReportedCrimes->numReportedCrimes){
+			if(player->thisReportedCrimes->numReportedCrimes == 0){
 				break;
 			}
 		}
@@ -2279,7 +2320,7 @@ char * getCrimeString(crimeType thisCrime){
 
 char * getWorstCrime(individual * player){
 	int i, crimesPassed = 0;
-	crimeType worstCrime = -1;
+	crimeType worstCrime = CRIME_NONE;
 
 	if(player->thisReportedCrimes->numReportedCrimes > 0){
 		for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
@@ -2301,6 +2342,17 @@ char * getWorstCrime(individual * player){
 
 	}else{
 		return NULL;
+	}
+}
+
+dialogType getDialogTypefromInt(int dialogInt){
+	switch(dialogInt){
+		case 0:
+			return DIALOG_DEFAULT;
+		case 1:
+			return DIALOG_CRIME_WITNESS;
+		default:
+			return DIALOG_DEFAULT;
 	}
 }
 

@@ -1,14 +1,16 @@
-1008;Halt @! You are under arrest for @! Pay the fine of @ gold and surrender your stolen goods immediately! ;3;0;1;0;3;NAME,WORST_CRIME,BOUNTY
+1008;Halt @! You are under arrest for @! Pay the fine of @ gold and surrender your stolen goods immediately! ;3;0;1;8;3;NAME,WORST_CRIME,BOUNTY
 1013;There is no future for you, hellion. En guarde.;0;0;0;0;0;0
-1014;Thank you for your cooperation. You're free to go.;0;0;0;6;0;0
-1015;Then you shal serve out the rest of your bounty in prison.;0;0;0;7;0;0
-1016;[@ witnessed your crime of @];2;0;1;0;2;TARGET_NAME,WITNESSED_CRIME
+1014;Thank you for your cooperation. You're free to go.;0;0;0;20;0;0
+1015;Then you shal serve out the rest of your bounty in prison.;0;0;0;20;0;0
+1024;Hail, adventurer. Beware, cursed undead wander near these woods.;0;0;0;0;0;0
+1016;[@ witnessed your crime of @];4;0;1;0;2;TARGET_NAME,WITNESSED_CRIME
 1017;[SUCCESS: They dont want any trouble];0;0;0;7;0;0
-1018;[FAILURE: They shout for the guards];0;0;0;8;0;0
-1019;[SUCCESS: They are confused, and dont know what happend];0;0;0;7;0;0
-1020;[FAILURE: They shout for the guards];0;0;0;8;0;0
-1021;[SUCCESS: They content with your apology];0;0;0;7;0;0
+1018;[FAILURE: They shout for the guards];0;0;0;7;0;0
+1019;[SUCCESS: They are confused, and dont know what happend];0;0;0;6;0;0
+1020;[FAILURE: They shout for the guards];0;0;0;7;0;0
+1021;[SUCCESS: They content with your apology];0;0;0;6;0;0
 1022;[FAILURE: They shout for the guards];0;0;0;8;0;0
+1023;[@ doesnt respond - they look terrified];0;0;1;0;1;TARGET_NAME
 1000;Hello, @.;0;1001;0;0;1;NAME
 1001;Do you fancy these robes?;2;0;1;0;0;0
 1002;I agree - I found them in the graveyard to the east.;0;0;0;1;0;0

@@ -82,6 +82,10 @@ int removeIndividualFromField(field * thisField, int x, int y){
 		return 1;
 	}
 
+	char logOut[128];
+	sprintf(logOut, "!! COULD NOT REMOVE INDIVIDUAL FROM FIELD AT [%d, %d] !!", x, y);
+	cwrite(logOut);
+
 	return 0;
 }
 
@@ -304,6 +308,7 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 
 		removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
 		triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
+
 		removeFromExistance(thisIndividual->ID);
 	}
 
@@ -360,12 +365,20 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 					if(thisIndividual->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility)){
 						triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
 
+						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
+							processCrimeEvent(CRIME_ASSULT, 40);
+						}
+
 						if(!individualInGroup(tmp, thisGroup)){
 							individualsPassed--;
 						}
 					}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 						if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
 							triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
+
+							if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
+								processCrimeEvent(CRIME_ASSULT, 40);
+							}
 
 							if(!individualInGroup(tmp, thisGroup)){
 								individualsPassed--;
@@ -407,6 +420,13 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 
 					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
+
+						triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
+
+						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
+							processCrimeEvent(CRIME_MURDER, 300);
+						}
+
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeFromExistance(tmp->ID);
 

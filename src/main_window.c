@@ -212,7 +212,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
 		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
-		loadDialog("dialog.txt", mapTestDirectory);
+		loadDialog("dialog.txt", mapDirectory);
 
 		initThisCursor(1508);
 
@@ -239,7 +239,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		specialDialogs * playerDialog = malloc(sizeof(specialDialogs));
+		playerDialog->activeDialog = DIALOG_DEFAULT;
+		playerDialog->sawPlayerCrime = 0;
+		playerDialog->playerIsMarkedForDeath = 0;
+
+		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -674,7 +679,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
 
-	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+	specialDialogs * playerDialog = malloc(sizeof(specialDialogs));
+	playerDialog->activeDialog = DIALOG_DEFAULT;
+	playerDialog->sawPlayerCrime = 0;
+	playerDialog->playerIsMarkedForDeath = 0;
+
+	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);

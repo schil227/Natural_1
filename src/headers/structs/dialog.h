@@ -72,6 +72,7 @@ typedef struct{
 	int speakSoundID;
 
 	dialogMessage * currentMessage;
+	dialogMessage * nullMessage;
 	fixedCharacter * dialogWindow;
 	fixedCharacter * selectArrow;
 	individualDialog * individualDialogRegistry[2000];

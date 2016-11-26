@@ -27,6 +27,6 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness, int dialogID, int gold, int faction, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
-		abilityList * loadedAbilities, animationContainer * thisAnimationContainer,  animationContainer * secondaryAnimationContainer);
+		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer,  animationContainer * secondaryAnimationContainer);
 
 #endif /* SRC_HEADERS_INDIVIDUAL_PUB_METHODS_H_ */

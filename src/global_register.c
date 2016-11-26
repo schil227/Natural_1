@@ -89,6 +89,16 @@ item * getItemFromRegistry(int id){
 	return NULL;
 }
 
+event * getEventFromRegistryByTypeAndIntA(int type, int intA){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numEvents; i++){
+		if(thisGlobalRegister->eventRegistry[i]->eventType == type && thisGlobalRegister->eventRegistry[i]->intA == intA){
+			return thisGlobalRegister->eventRegistry[i];
+		}
+	}
+}
+
 event * getEventFromRegistry(int id){
 	int i;
 

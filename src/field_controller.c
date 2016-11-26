@@ -64,6 +64,8 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	char * name = malloc(sizeof(char) * 32);
 	char * strtok_save_pointer;
 	char critType[4];
+	specialDialogs * thisDialog = malloc(sizeof(specialDialogs));
+	thisDialog->activeDialog = DIALOG_DEFAULT;
 	animationContainer * thisAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;
 	abilityList loadedAbilities;
@@ -166,6 +168,12 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	dialogID = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisDialog->sawPlayerCrime = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisDialog->playerIsMarkedForDeath = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	gold = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -228,7 +236,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	dialogID = loadOrAddIndividualDialog(ID,dialogID);
 	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, offensiveness, abilityAffinity, tacticalness, cowardness,
-			&loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
+			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
 
@@ -725,6 +733,10 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 		}
 	}
 
+	char logOut[128];
+	sprintf(logOut, "!! COULD NOT FIND INDIVIDUAL TO REMOVE FROM GROUP: %s !!", thisIndividual->name);
+	cwrite(logOut);
+
 	return NULL;
 }
 
@@ -737,6 +749,11 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
+			if(reportActiveCrimes(player)){
+				cwrite("Your crimes have been reported by witnesses!");
+				clearSpecialDialogForGroup(thisGroupContainer->npcs, DIALOG_CRIME_WITNESS);
+			}
+
 			destroyField(*thisField, player);
 			clearGroup(thisGroupContainer->enemies);
 			clearGroup(thisGroupContainer->npcs);
@@ -745,24 +762,12 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
-//			viewShift->xShift = 0;
-//			viewShift->yShift = 0;
-//			//load images for new map
-//			for (y = 0; y < (*thisField)->totalY; y++) {
-//				for (x = 0; x < (*thisField)->totalX; x++) {
-//					imageID = ((*thisField)->grid[x][y]->background)->imageID;
-//					(*thisField)->grid[x][y]->background->image = LoadBitmap(GetModuleHandle(NULL), imageID);
-//					if ((*thisField)->grid[x][y]->background->image == NULL) {
-//						printf("failed\n");
-//					}
-//				}
-//			}
-
 			clearMessages();
-			if(reportActiveCrimes(player)){
-				cwrite("Your crimes have been reported by witnesses!");
 
+			if(player->thisReportedCrimes->numReportedCrimes > 0){
+				setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
 			}
+
 			return 1;
 		}
 	return 0;
@@ -801,4 +806,68 @@ int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursor
 		}
 	}
 	return 0;
+}
+
+void setGroupDialogType(individualGroup * thisGroup, dialogType type){
+	int i, individualsPassed = 0;;
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] != NULL){
+			if(thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_DEFAULT){
+				thisGroup->individuals[i]->specialDialog->activeDialog = type;
+			}
+
+			individualsPassed++;
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+
+		}
+	}
+}
+
+void setGroupSpecialDialog(individualGroup * thisGroup, dialogType thisType){
+	int i, individualsPassed = 0;;
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] != NULL){
+
+			if(thisGroup->individuals[i]->specialDialog->activeDialog == thisType){
+				switch(thisType){
+					case DIALOG_CRIME_WITNESS:
+						setSpecialDialogId(thisGroup->individuals[i]->ID, thisGroup->individuals[i]->specialDialog->sawPlayerCrime);
+						thisGroup->individuals[i]->specialDialog->activeDialog = thisType;
+				}
+
+			}
+
+			individualsPassed++;
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+
+		}
+	}
+}
+
+void clearSpecialDialogForGroup(individualGroup * thisGroup, dialogType thisDialogType){
+	int i, individualsPassed = 0;
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] != NULL){
+
+			if(thisGroup->individuals[i]->specialDialog->activeDialog == thisDialogType){
+				removeSpecialDialog(thisGroup->individuals[i]->ID);
+				thisGroup->individuals[i]->specialDialog->activeDialog = DIALOG_DEFAULT;
+			}
+
+			individualsPassed++;
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+		}
+	}
 }

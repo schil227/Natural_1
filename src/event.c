@@ -295,6 +295,17 @@ int eventOnlyTriggerableByPlayer(int eventID){
 	}
 }
 
+
+int processCrimeEvent(crimeType crime, int bounty){
+	int i;
+
+	event * thisCrimeEvent = getEventFromRegistryByTypeAndIntA(5,crime);
+
+	thisCrimeEvent->intB = bounty;
+
+	return triggerEvent(thisCrimeEvent->ID);
+}
+
 ///// Process Event Functions /////
 
 int becomeNPC(int individualID, groupContainer * thisGroupContainer){
@@ -366,7 +377,11 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 				if(isInLineOfSight(guards->individuals[i], player, thisField)){
 
 					reportActiveCrimes(player);
-					addReportedCrime(crimeType, bounty);
+					clearSpecialDialogForGroup(npcs, DIALOG_CRIME_WITNESS);
+					setGroupDialogType(guards, DIALOG_CRIME_WITNESS);
+					setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
+
+					addReportedCrime(player, crimeType, bounty);
 
 					return -1;
 				}
@@ -385,7 +400,9 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 			if(npcs->individuals[i] != NULL){
 
 				if(isInLineOfSight(npcs->individuals[i], player, thisField)){
-					addActiveCrime(crimeType, bounty, npcs->individuals[i]);
+					addActiveCrime(player, crimeType, bounty, npcs->individuals[i]);
+					setSpecialDialogId(npcs->individuals[i]->ID, npcs->individuals[i]->specialDialog->sawPlayerCrime);
+					npcs->individuals[i]->specialDialog->activeDialog = DIALOG_CRIME_WITNESS;
 					toReturn++;
 				}
 
@@ -488,6 +505,146 @@ int tryReturnStolenWitnessedItems(individual * player, int witnessID){
 	return 0;
 }
 
+int makeIndividualHostileToPlayer(int individualID){
+	individual * thisIndividual = getIndividualFromRegistry(individualID);
+	if(thisIndividual != NULL){
+		thisIndividual->thisBehavior->isHostileToPlayer = 1;
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int makeIndividualFriendlyToPlayer(int individualID){
+	individual * thisIndividual = getIndividualFromRegistry(individualID);
+
+	if(thisIndividual != NULL){
+		thisIndividual->thisBehavior->isHostileToPlayer = 0;
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int resetSpecialDialogForSpeakingIndividual(int specialDialogType, int speakingIndividualID){
+	dialogType type = getDialogTypefromInt(specialDialogType);
+
+	individual * speakingIndividual = getIndividualFromRegistry(speakingIndividualID);
+	if(speakingIndividual->specialDialog->activeDialog == type){
+		removeSpecialDialog(speakingIndividualID);
+	}
+
+	return 0;
+}
+
+int resetSpecialDialogForSpeakingIndividualGroup(int specialDialogType, int speakingIndividualID, groupContainer * thisGroupContainer){
+	int i, individualsPassed = 0;
+	dialogType type = getDialogTypefromInt(specialDialogType);
+	individual * speakingIndividual = getIndividualFromRegistry(speakingIndividualID);
+	individualGroup * thisGroup = getGroupFromIndividual(thisGroupContainer, speakingIndividualID);
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i]  != NULL){
+			if(thisGroup->individuals[i]->specialDialog->activeDialog == type){
+				removeSpecialDialog(thisGroup->individuals[i]->ID);
+			}
+
+			individualsPassed++;
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int markPlayerHostileToFriendlyGroups(individualGroup * guards, individualGroup * npcs){
+	int i, individualsPassed = 0;
+
+	if(guards->numIndividuals > 0){
+		for(i = 0; i < guards->numIndividuals; i++){
+			if(guards->individuals[i] != NULL){
+				guards->individuals[i]->thisBehavior->isHostileToPlayer = 1;
+
+				individualsPassed++;
+
+				if(individualsPassed == guards->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+
+			}
+		}
+	}
+
+	if(npcs->numIndividuals > 0){
+		for(i = 0; i < npcs->numIndividuals; i++){
+			if(npcs->individuals[i] != NULL){
+				npcs->individuals[i]->thisBehavior->isHostileToPlayer = 1;
+
+				individualsPassed++;
+
+				if(individualsPassed == npcs->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+
+			}
+		}
+	}
+
+	return 0;
+}
+
+int clearCrimesAndSpecialDialog(individual * player, individualGroup * guards, individualGroup * npcs){
+	clearActiveCrimes(player);
+	clearReportedCrimes(player);
+	clearSpecialDialogForGroup(guards, DIALOG_CRIME_WITNESS);
+	clearSpecialDialogForGroup(npcs, DIALOG_CRIME_WITNESS);
+
+	return 1;
+}
+
+int markPlayerFriendlyToFriendlyGroups(individualGroup * guards, individualGroup * npcs){
+	int i, individualsPassed = 0;
+
+	if(guards->numIndividuals > 0){
+		for(i = 0; i < guards->numIndividuals; i++){
+			if(guards->individuals[i] != NULL){
+				guards->individuals[i]->thisBehavior->isHostileToPlayer = 0;
+
+				individualsPassed++;
+
+				if(individualsPassed == guards->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+
+			}
+		}
+	}
+
+	if(npcs->numIndividuals > 0){
+		for(i = 0; i < npcs->numIndividuals; i++){
+			if(npcs->individuals[i] != NULL){
+				npcs->individuals[i]->thisBehavior->isHostileToPlayer = 0;
+
+				individualsPassed++;
+
+				if(individualsPassed == npcs->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+
+			}
+		}
+	}
+
+	return 0;
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
 
 	event * thisEvent = getEventFromRegistry(eventID);
@@ -513,8 +670,18 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return statsAtLeastX(player, thisEvent);
 		case 10:// try return stolen witnessed items
 			return tryReturnStolenWitnessedItems(player, getSpeakingIndividualID());
+		case 11:
+			return makeIndividualHostileToPlayer(thisEvent->individualID);
+		case 12:
+			return makeIndividualFriendlyToPlayer(thisEvent->individualID);
+		case 13: // reset special dialog for speaking individual
+			return resetSpecialDialogForSpeakingIndividual(thisEvent->intA, getSpeakingIndividualID());
+		case 14: // reset special dialog for speaking individual group
+			return resetSpecialDialogForSpeakingIndividualGroup(thisEvent->intA, getSpeakingIndividualID(), thisGroupContainer);
+		case 15: //clear crimes and special dialogs
+			clearCrimesAndSpecialDialog(player, thisGroupContainer->guards, thisGroupContainer->npcs);
 	}
-
+	
 	return 0;
 }
 
@@ -525,14 +692,24 @@ char * processContextKey(char * contextKey, individual * player, groupContainer 
 		return toReturn;
 	}
 
-	if(strcmp(contextKey, "BOUNTY")){
+	if(strcmp(contextKey, "BOUNTY") == 0){
 		int bounty = getCurrentBounty(player);
 		char * toReturn = malloc(sizeof(char) * 32);
 		itoa(bounty, toReturn, 10);
 		return toReturn;
 	}
 
-	if(strcmp(contextKey, "WORST_CRIME")){
+	if(strcmp(contextKey, "WORST_CRIME") == 0){
 		return getWorstCrime(player);
 	}
+
+	if(strcmp(contextKey, "TARGET_NAME") == 0){
+		char * toReturn = malloc(sizeof(char) * 32);
+		strcpy(toReturn, "TARGET_NAME");
+		return toReturn;
+	}
+
+	char * toReturn = malloc(sizeof(char) * 10);
+	strcpy(toReturn, "NOT_FOUND");
+	return toReturn;
 }

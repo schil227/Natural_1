@@ -35,6 +35,13 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->numTicks = 0;
 	toReturn->speakSoundID = 8;
 
+	toReturn->nullMessage = malloc(sizeof(dialogMessage));
+	toReturn->nullMessage->messageID = 0;
+	toReturn->nullMessage->numDialogDecision = 0;
+	toReturn->nullMessage->numDialogDecisionsParsed = 0;
+	toReturn->nullMessage->nextMessage = NULL;
+	toReturn->nullMessage->message[0] = '\0';
+	toReturn->nullMessage->parsedMessage[0] = '\0';
 
 	return toReturn;
 }
@@ -198,9 +205,9 @@ void updateParsedMessage(){
 
 void setCurrentMessage(dialogMessage * currentMessage){
 	if(currentMessage == NULL){ //stop speaking
-		thisDialogInstance->currentMessage->nextMessage = NULL;
+		thisDialogInstance->currentMessage = thisDialogInstance->nullMessage;
 //		thisDialogInstance->speakingIndividualID = 0;
-//		toggleDrawDialogBox();
+		toggleDrawDialogBox();
 	}else{
 		thisDialogInstance->currentMessage = currentMessage;
 		updateParsedMessage();
@@ -250,7 +257,10 @@ dialogMessage * getDialogMessageByID(int id){
 void selectDecision(){
 	dialogDecision * theDecision = thisDialogInstance->currentMessage->parsedDecisions[thisDialogInstance->decisionIndex];
 
-	if(theDecision->eventID > 0){
+
+	if(theDecision->eventID == 0 && theDecision->targetMessage == 0){
+		setCurrentMessage(NULL);
+	}else if(theDecision->eventID > 0){
 		dialogMessage * nextMessage = getDialogMessageByID(triggerEvent(theDecision->eventID));
 		setCurrentMessage(nextMessage);
 	}else{
