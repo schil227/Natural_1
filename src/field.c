@@ -373,7 +373,7 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 						}
 
 						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
-							processCrimeEvent(CRIME_ASSULT, 40);
+							processCrimeEvent(CRIME_ASSULT, 40, tmp->ID, 0);
 						}
 
 						if(!individualInGroup(tmp, thisGroup)){
@@ -388,7 +388,7 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 							}
 
 							if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
-								processCrimeEvent(CRIME_ASSULT, 40);
+								processCrimeEvent(CRIME_ASSULT, 40, tmp->ID, 0);
 							}
 
 							if(!individualInGroup(tmp, thisGroup)){
@@ -435,7 +435,7 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 						triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
 
 						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
-							processCrimeEvent(CRIME_MURDER, 300);
+							processCrimeEvent(CRIME_MURDER, 300, tmp->ID, 0);
 						}
 
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
@@ -699,6 +699,10 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 	int itemY = thisIndividual->playerCharacter->y;
 	item * theItem = NULL;
 
+	if(thisField->thisFieldInventory->inventorySize == 0){
+		return 0;
+	}
+
 	for(i = 0; i < 1000; i++){
 		if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
 			theItem = thisField->thisFieldInventory->inventoryArr[i];
@@ -708,6 +712,12 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 				addItemToInventory(thisIndividual->backpack, theItem);
 
 				triggerEventOnPickup(theItem->ID, thisIndividual->isPlayer);
+
+				if(theItem->owner != 0 && theItem->isStolen == 0){
+					theItem->isStolen = 1;
+
+					processCrimeEvent(CRIME_STEALING, theItem->price, theItem->owner, theItem->ID);
+				}
 
 				return 1;
 			}

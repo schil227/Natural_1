@@ -70,7 +70,7 @@ typedef struct {
 	short int isEquipt;
 	short int price;
 	short int isStolen;
-	short int stolenPrice;
+	short int owner;
 
 } item;
 

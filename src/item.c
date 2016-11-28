@@ -8,7 +8,7 @@
 
 item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description,double weaponStrMod,
 		int strMod, int dexMod, int conMod, int willMod, int intMod, int wisMod, int chrMod, int luckMod,
-		char weaponDamageType, char armorClass, char itemType, int price, int totalHealthMod, int healthMod, int totalManaMod,
+		char weaponDamageType, char armorClass, char itemType, int price, int owner, int isStolen, int totalHealthMod, int healthMod, int totalManaMod,
 		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
 		int mvmtMod, int rangeMod, int bluntDRMod, int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod,
 		int fireDRMod, int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
@@ -33,6 +33,8 @@ item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char
 	thisItem->armorClass = armorClass;
 	thisItem->itemType = itemType;
 	thisItem->price = price;
+	thisItem->owner = owner;
+	thisItem->isStolen = isStolen;
 	thisItem->weaponStrMod = weaponStrMod;
 
 	thisItem->strMod = strMod;
@@ -82,7 +84,7 @@ void destroyItem(item * thisItem){
 	free(thisItem);
 }
 
-item * cloneItem(item * thisItem){
+item * cloneItem(item * thisItem, int keepOwner){
 	item * newItem = malloc(sizeof(item));
 	newItem->itemCharacter = malloc(sizeof(character));
 	newItem->itemCharacter->x = thisItem->itemCharacter->x;
@@ -103,6 +105,12 @@ item * cloneItem(item * thisItem){
 	newItem->armorClass = thisItem->armorClass;
 	newItem->itemType = thisItem->itemType;
 	newItem->price = thisItem->price;
+
+	if(keepOwner){
+		newItem->owner = thisItem->owner;
+	}
+
+	newItem->isStolen = 0;
 
 	newItem->totalHealthMod = thisItem->totalHealthMod;
 	newItem->healthMod = thisItem->healthMod;

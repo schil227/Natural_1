@@ -20,7 +20,7 @@ typedef enum { GROUP_ALLIES, GROUP_ENEMIES, GROUP_BEASTS, GROUP_NPCS, GROUP_GUAR
 //Ordered from least to most severe
 typedef enum { CRIME_NONE, CRIME_STEALING, CRIME_PICKPOCKETING, CRIME_ASSULT, CRIME_MURDER, CRIME_TREASON} crimeType;
 
-typedef enum {DIALOG_DEFAULT, DIALOG_CRIME_WITNESS} dialogType;
+typedef enum {DIALOG_DEFAULT, DIALOG_CRIME_WITNESS, DIALOG_HOSTILE_TO_PLAYER} dialogType;
 
 typedef struct{
 	int x;
@@ -78,6 +78,7 @@ typedef struct{
 typedef struct{
 	dialogType activeDialog;
 	int sawPlayerCrime;
+	int hostileToPlayer;
 	int playerIsMarkedForDeath;
 } specialDialogs;
 
@@ -101,8 +102,9 @@ typedef struct{
 typedef struct{
 	crimeType crime;
 	int crimeBounty;
-	struct individual * witness;
-	struct individual * victim;
+	int witnessID;
+	int victimID;
+	int stolenItemID;
 } activeCrimeEntry;
 
 typedef struct{

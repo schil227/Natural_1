@@ -255,19 +255,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		int x, y;
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
-//		int imageID;
-
-//		for (y = 0; y < main_field->totalY; y++) {
-//			for (x = 0; x < main_field->totalX; x++) {
-//				imageID = (main_field->grid[x][y]->background)->imageID;
-//				main_field->grid[x][y]->background->image = LoadBitmap(
-//						GetModuleHandle(NULL), imageID);
-//				if (main_field->grid[x][y]->background->image == NULL) {
-//					printf("failed\n");
-//				}
-//
-//			}
-//		}
 
 		ret = SetTimer(hwnd, ID_TIMER, 16, NULL); //fires every 16 ms - 60 fps
 

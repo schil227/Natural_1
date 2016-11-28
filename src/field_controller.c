@@ -493,7 +493,7 @@ item * createFieldItemFromFile(char line[1024]){
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
 	char * strtok_save_pointer;
-	int npcID, ID, price, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int npcID, ID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
@@ -521,6 +521,12 @@ item * createFieldItemFromFile(char line[1024]){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	price = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	owner = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	isStolen = atoi(value);
+
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	r = atoi(value);
@@ -654,7 +660,7 @@ item * createFieldItemFromFile(char line[1024]){
 
 	newItem = createItem(npcID, RGB(r,g,b),x,y, ID, type, name, description,weaponStrMod,
 			strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
-			weaponDamType, armorClass, itemType, price,
+			weaponDamType, armorClass, itemType, price, owner, isStolen,
 			totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 			mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
@@ -838,6 +844,11 @@ void setGroupSpecialDialog(individualGroup * thisGroup, dialogType thisType){
 					case DIALOG_CRIME_WITNESS:
 						setSpecialDialogId(thisGroup->individuals[i]->ID, thisGroup->individuals[i]->specialDialog->sawPlayerCrime);
 						thisGroup->individuals[i]->specialDialog->activeDialog = thisType;
+						break;
+					case DIALOG_HOSTILE_TO_PLAYER:
+						setSpecialDialogId(thisGroup->individuals[i]->ID, thisGroup->individuals[i]->specialDialog->sawPlayerCrime);
+						thisGroup->individuals[i]->specialDialog->activeDialog = thisType;
+						break;
 				}
 
 			}

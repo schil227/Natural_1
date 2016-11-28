@@ -270,7 +270,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	}
 
 	if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
-		processCrimeEvent(CRIME_ASSULT, 40);
+		processCrimeEvent(CRIME_ASSULT, 40, targetIndividual->ID, 0);
 	}
 
 	enableSpecialDrawMode();
@@ -789,7 +789,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
 
 		if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
-			processCrimeEvent(CRIME_MURDER, 300);
+			processCrimeEvent(CRIME_MURDER, 300, targetIndividual->ID, 0);
 		}
 
 		removeFromExistance(targetIndividual->ID);
@@ -929,7 +929,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
 
 		if(targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS){
-			processCrimeEvent(CRIME_MURDER, 300);
+			processCrimeEvent(CRIME_MURDER, 300, targetIndividual->ID, 0);
 		}
 
 		removeFromExistance(targetIndividual->ID);
@@ -1705,7 +1705,7 @@ int getTotalMana(individual * thisIndividual){
 
 int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 	if(thisItem->price <= thisIndividual->gold){
-		item * newItem = cloneItem(thisItem);
+		item * newItem = cloneItem(thisItem, 0);
 
 		if(newItem == NULL){
 			char * errLog[128];
@@ -2160,6 +2160,10 @@ void addReportedCrimeFromEntry(individual * player, activeCrimeEntry * thisEntry
 		return;
 	}
 
+	if(crimeAlreadyReported(player, thisEntry->crime, thisEntry->victimID, thisEntry->stolenItemID)){
+		return;
+	}
+
 	for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
 		if(player->thisReportedCrimes->reportedCrimeList[i] == NULL){
 			player->thisReportedCrimes->reportedCrimeList[i] = thisEntry;
@@ -2182,7 +2186,7 @@ int reportActiveCrimes(individual * player){
 	if(player->thisActiveCrimes->numActiveCrimes > 0){
 		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
 			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
-
+				player->thisActiveCrimes->activeCrimeList[i]->witnessID = 0;
 				addReportedCrimeFromEntry(player, player->thisActiveCrimes->activeCrimeList[i]);
 				player->thisActiveCrimes->activeCrimeList[i] = NULL;
 				crimesPassed++;
@@ -2197,19 +2201,24 @@ int reportActiveCrimes(individual * player){
 	return 1;
 }
 
-void addReportedCrime(individual * player, crimeType crime, int bounty){
+void addReportedCrime(individual * player, crimeType crime, int bounty, int victimID, int stolenItemID){
 	activeCrimeEntry * thisCrime = malloc(sizeof(activeCrimeEntry));
 	thisCrime->crime = crime;
 	thisCrime->crimeBounty = bounty;
+	thisCrime->victimID = victimID;
+	thisCrime->stolenItemID = stolenItemID;
+	thisCrime->witnessID = 0;
 
 	addReportedCrimeFromEntry(player, thisCrime);
 }
 
-void addActiveCrime(individual * player, crimeType crime, int bounty, individual * npc){
+void addActiveCrime(individual * player, crimeType crime, int bounty, int victimID, int stolenItemID, int witnessID){
 	activeCrimeEntry * thisCrime = malloc(sizeof(activeCrimeEntry));
 	thisCrime->crime = crime;
 	thisCrime->crimeBounty = bounty;
-	thisCrime->witness = npc;
+	thisCrime->witnessID = witnessID;
+	thisCrime->victimID = victimID;
+	thisCrime->stolenItemID = stolenItemID;
 
 	addActiveCrimeFromEntry(player, thisCrime);
 }
@@ -2221,7 +2230,7 @@ void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
 		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
 			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
 
-				if(player->thisActiveCrimes->activeCrimeList[i]->witness->ID == witnessID){
+				if(player->thisActiveCrimes->activeCrimeList[i]->witnessID == witnessID){
 					free(player->thisActiveCrimes->activeCrimeList[i]);
 					player->thisActiveCrimes->activeCrimeList[i] = NULL;
 					player->thisActiveCrimes->numActiveCrimes--;
@@ -2237,7 +2246,6 @@ void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
 	}
 
 	resetSpecialDialogForSpeakingIndividual(DIALOG_CRIME_WITNESS, witnessID);
-
 }
 
 void clearActiveCrimes(individual * player){
@@ -2275,6 +2283,114 @@ void clearReportedCrimes(individual * player){
 			}
 		}
 	}
+}
+
+int stealingCrimeAlreadyExists(activeCrimeEntry * thisCrime, int victimID, int itemID, int witnessID){
+	return (thisCrime->victimID == victimID && thisCrime->stolenItemID == itemID && witnessID == thisCrime->witnessID);
+}
+
+int pickpocketCrimeAlreadyExists(activeCrimeEntry * thisCrime, int victimID, int itemID, int witnessID){
+	return (thisCrime->victimID == victimID && thisCrime->stolenItemID == itemID && witnessID == thisCrime->witnessID);
+}
+
+int assaultCrimeAlreadyExists(activeCrimeEntry * thisCrime, int victimID, int witnessID){
+	return (thisCrime->victimID == victimID  && witnessID == thisCrime->witnessID);
+}
+
+int murderCrimeAlreadyExists(activeCrimeEntry * thisCrime, int victimID, int witnessID){
+	return (thisCrime->victimID == victimID  && witnessID == thisCrime->witnessID);
+}
+
+int activeCrimeAlreadyExists(individual * player, crimeType crime, int victimID, int itemID, int witnessID){
+	int i, numCrimesPassed;
+
+		if(player->thisActiveCrimes->numActiveCrimes== 0){
+			return 0;
+		}
+
+		for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
+			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
+				numCrimesPassed++;
+
+				if(player->thisActiveCrimes->activeCrimeList[i]->crime == crime){
+					switch(crime){
+						case CRIME_STEALING:
+							if(stealingCrimeAlreadyExists(player->thisActiveCrimes->activeCrimeList[i], victimID, itemID, witnessID)){
+								return 1;
+							}
+							break;
+						case CRIME_PICKPOCKETING:
+							if(pickpocketCrimeAlreadyExists(player->thisActiveCrimes->activeCrimeList[i], victimID, itemID, witnessID)){
+								return 1;
+							}
+							break;
+						case CRIME_ASSULT:
+							if(assaultCrimeAlreadyExists(player->thisActiveCrimes->activeCrimeList[i], victimID, witnessID)){
+								return 1;
+							}
+							break;
+						case CRIME_MURDER:
+							if(murderCrimeAlreadyExists(player->thisActiveCrimes->activeCrimeList[i], victimID, witnessID)){
+								return 1;
+							}
+							break;
+					}
+				}
+
+				if(numCrimesPassed == player->thisActiveCrimes->numActiveCrimes){
+					break;
+				}
+
+			}
+		}
+
+		return 0;
+}
+
+int crimeAlreadyReported(individual * player, crimeType crime, int victimID, int itemID){
+	int i, numCrimesPassed;
+
+	if(player->thisReportedCrimes->numReportedCrimes == 0){
+		return 0;
+	}
+
+	for(i = 0; i < player->thisReportedCrimes->MAX_REPORTED_CRIMES; i++){
+		if(player->thisReportedCrimes->reportedCrimeList[i] != NULL){
+			if(player->thisReportedCrimes->reportedCrimeList[i]->crime == crime){
+				switch(crime){
+					case CRIME_STEALING:
+						if(stealingCrimeAlreadyExists(player->thisReportedCrimes->reportedCrimeList[i], victimID, itemID, 0)){
+							return 1;
+						}
+						break;
+					case CRIME_PICKPOCKETING:
+						if(pickpocketCrimeAlreadyExists(player->thisReportedCrimes->reportedCrimeList[i], victimID, itemID, 0)){
+							return 1;
+						}
+						break;
+					case CRIME_ASSULT:
+						if(assaultCrimeAlreadyExists(player->thisReportedCrimes->reportedCrimeList[i], victimID, 0)){
+							return 1;
+						}
+						break;
+					case CRIME_MURDER:
+						if(murderCrimeAlreadyExists(player->thisReportedCrimes->reportedCrimeList[i], victimID, 0)){
+							return 1;
+						}
+						break;
+				}
+			}
+
+			numCrimesPassed++;
+
+			if(numCrimesPassed == player->thisReportedCrimes->numReportedCrimes){
+				break;
+			}
+
+		}
+	}
+
+	return 0;
 }
 
 int getCurrentBounty(individual * player){
@@ -2362,6 +2478,8 @@ dialogType getDialogTypefromInt(int dialogInt){
 			return DIALOG_DEFAULT;
 		case 1:
 			return DIALOG_CRIME_WITNESS;
+		case 2:
+			return DIALOG_HOSTILE_TO_PLAYER;
 		default:
 			return DIALOG_DEFAULT;
 	}
