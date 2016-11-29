@@ -597,7 +597,7 @@ int isInLineOfSight(individual * thisIndividual, individual * targetIndividual, 
 individual * acquireTarget(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField){
 	int i, individualsPassed = 0, playerInLineOfSight = isInLineOfSight(enemy, player, thisField);
 
-	if(player->hp > 0 && playerInLineOfSight && isGreaterThanPercentage(rand() % 100, 100, 50)){
+	if(player->hp > 0 && playerInLineOfSight && (isGreaterThanPercentage(rand() % 100, 100, 50) || enemy->thisBehavior->isFocusedOnPlayer)){
 		return player;
 	}
 
@@ -605,7 +605,7 @@ individual * acquireTarget(individual * enemy, individual * player, groupContain
 	if(thisGroupContainer->enemies->numIndividuals > 0){
 		for(i = 0; i < thisGroupContainer->enemies->MAX_INDIVIDUALS; i++){
 			if(thisGroupContainer->enemies->individuals[i] != NULL){
-				if(thisGroupContainer->enemies->individuals[i]->faction != enemy->faction && isInLineOfSight(enemy, thisGroupContainer->enemies->individuals[i], thisField)){
+				if((thisGroupContainer->enemies->individuals[i]->faction == -1 || thisGroupContainer->enemies->individuals[i]->faction != enemy->faction) && isInLineOfSight(enemy, thisGroupContainer->enemies->individuals[i], thisField)){
 					return thisGroupContainer->enemies->individuals[i];
 				}
 				individualsPassed++;
@@ -743,7 +743,7 @@ void rerollBehavior(individual * thisIndividual){
 int isAlly(individual * thisIndividual, individual * possibleAlly, groupContainer * thisGroupContainer){
 	int i, individualsPassed = 0;
 
-	if(thisIndividual->faction != possibleAlly->faction){
+	if(possibleAlly->faction == -1 || thisIndividual->faction != possibleAlly->faction){
 		return 0;
 	}
 
@@ -1954,7 +1954,7 @@ individual * getDangerousIndividualNearByInLoS(individual * friendlyIndividual, 
 
 void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
 	if(friendlyIndividual->targetedIndividual != NULL){
-		if(friendlyIndividual->targetedIndividual->hp <= 0 || maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
+		if(friendlyIndividual->targetedIndividual->hp <= 0 || isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual,thisGroupContainer) || maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
 			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
 			if(friendlyIndividual->targetedIndividual != NULL){

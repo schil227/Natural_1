@@ -256,7 +256,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		int x, y;
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 
-		ret = SetTimer(hwnd, ID_TIMER, 16, NULL); //fires every 16 ms - 60 fps
+		ret = SetTimer(hwnd, ID_TIMER, 16, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps
 
 		if (ret == 0) {
 			MessageBox(hwnd, "Could not SetTimer()!", "Error",
@@ -431,11 +431,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return createAbilityLoop(hwnd, msg, wParam, lParam, player);
 		}
 	}else if(inAbilityViewMode()){
-		if(abilityViewLoop(hwnd, msg, wParam, lParam, player)){
-			removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
-			triggerEventOnDeath(player->ID, player->isPlayer);
-			removeFromExistance(player->ID);
-		}
+		abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 		return 0;
 	}else if (inCursorMode()) {
 		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift);

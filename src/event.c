@@ -309,13 +309,20 @@ int processCrimeEvent(crimeType crime, int bounty, int victimID, int itemID){
 
 ///// Process Event Functions /////
 
-int becomeNPC(int individualID, groupContainer * thisGroupContainer){
+int becomeNPC(individual * player, int individualID, int faction, groupContainer * thisGroupContainer){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
 	if(thisIndividual->currentGroupType != GROUP_NPCS){
 		deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer,thisIndividual), thisIndividual);
 		addIndividualToGroup(thisGroupContainer->npcs, thisIndividual);
 		thisIndividual->currentGroupType = GROUP_NPCS;
+		thisIndividual->thisBehavior->isFocusedOnPlayer = 0;
+		thisIndividual->faction = faction;
+
+		if(thisIndividual->targetedIndividual == player){
+			thisIndividual->targetedIndividual = NULL;
+			thisIndividual->targetedDuration = 0;
+		}
 
 		return 1;
 	}
@@ -323,14 +330,15 @@ int becomeNPC(int individualID, groupContainer * thisGroupContainer){
 	return 0;
 }
 
-int becomeEnemy(int individualID, groupContainer * thisGroupContainer){
+int becomeEnemy(int individualID, int faction, int focusedOnPlayer, groupContainer * thisGroupContainer){
 	individual * thisIndividual = getIndividualFromRegistry(individualID);
 
 	if(thisIndividual->currentGroupType != GROUP_ENEMIES){
 		deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer,thisIndividual), thisIndividual);
 		addIndividualToGroup(thisGroupContainer->enemies, thisIndividual);
 		thisIndividual->currentGroupType = GROUP_ENEMIES;
-
+		thisIndividual->thisBehavior->isFocusedOnPlayer = focusedOnPlayer;
+		thisIndividual->faction = faction;
 		return 1;
 	}
 
@@ -683,9 +691,9 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 
 	switch(thisEvent->eventType){
 		case 1://become npc
-			return becomeNPC(thisEvent->individualID, thisGroupContainer);
+			return becomeNPC(player, thisEvent->individualID, thisEvent->intA, thisGroupContainer);
 		case 2: // become enemy
-			return becomeEnemy(thisEvent->individualID, thisGroupContainer);
+			return becomeEnemy(thisEvent->individualID, thisEvent->intA, thisEvent->intB, thisGroupContainer);
 		case 3: // enable buy mode
 			return enterBuyMode(thisEvent->individualID);
 		case 4: // stat check

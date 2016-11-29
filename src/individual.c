@@ -70,6 +70,10 @@ individual *initIndividual(){
 	toReturn->thisBehavior->isTactical = 0;
 	toReturn->thisBehavior->isCowardly = 0;
 	toReturn->thisBehavior->cowardlyTurnsRemaining = 0;
+	toReturn->thisBehavior->isHostileToPlayer = 0;
+	toReturn->thisBehavior->isFocusedOnPlayer = 0;
+	toReturn->thisBehavior->isThreatened = 0;
+	toReturn->thisBehavior->isSurrounded = 0;
 
 	toReturn->specialDialog = malloc(sizeof(specialDialogs));
 	toReturn->specialDialog->playerIsMarkedForDeath = 0;
@@ -181,6 +185,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->thisBehavior->tacticalness = tacticalness;
 	thisIndividual->thisBehavior->cowardness = cowardness;
 	thisIndividual->thisBehavior->isHostileToPlayer = 0;
+	thisIndividual->thisBehavior->isFocusedOnPlayer = 0;
 	thisIndividual->thisBehavior->isSurrounded = 0;
 
 	if(loadedAbilities != NULL){

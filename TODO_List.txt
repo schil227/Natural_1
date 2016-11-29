@@ -1,10 +1,12 @@
 ===================
 ==== TODO LIST ====
 ===================
-- (11/12/16) Implement Crimes
+- (11/12/16) Implement Crimes (IN PROGRESS)
 
 - (11/12/16) Update path finding algorithm (and consequently tests) to 
 
+-(11/28/16) Update images to be 2x long. At 30 fps the animations are the right tempo, too jittery at 60
+-(11/28/16) When skelly attack, there appears to be another image drawn behind them
 
 ==BUGS==
 - (11/25/16) player enters/exits shop, skeletons occupy the same space as him when pathfinding

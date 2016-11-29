@@ -255,7 +255,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 }
 
 
-int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player){
+int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, field * thisField){
 	switch(msg){
 	case WM_KEYDOWN:{
 
@@ -268,7 +268,10 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 			case 0x0D: { //enter
 				if(canUseAbility(player,getAbilityToActivate())){
 					if(useAbility(player,getAbilityToActivate())){
-						return 1;
+						removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
+						triggerEventOnDeath(player->ID, player->isPlayer);
+						removeFromExistance(player->ID);
+						return 0;
 					}
 
 					if(player->activeAbilities->selectedAbility != NULL && (player->activeAbilities->selectedAbility->type == 't' || player->activeAbilities->selectedAbility->type == 'd')){
