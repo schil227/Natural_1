@@ -377,50 +377,18 @@ int statCheck(individual * player, event * thisEvent){
 }
 
 int crimeCommittedInLoS(individual * player, individualGroup * guards, individualGroup * npcs, field * thisField, event * crimeEvent){
-	int i, individuals_passed = 0, toReturn = 0;
+	int i, individuals_passed = 0, toReturn = 0, isInGuardLoS = 0;
 	int crimeTypeID = crimeEvent->intA;
 	int bounty = crimeEvent->intB;
 
-	if(crimeAlreadyReported(player, crimeTypeID, crimeEvent->individualID, crimeEvent->itemID)){
-		return -1;
-	}
-
-	if(crimeAlertsVictim((crimeType) crimeTypeID)){
-		if(player->targetedIndividual != NULL){
-			if(player->targetedIndividual->currentGroupType == GROUP_GUARDS){
-				reportActiveCrimes(player);
-				clearSpecialDialogForGroup(npcs, DIALOG_CRIME_WITNESS);
-				setGroupDialogType(guards, DIALOG_CRIME_WITNESS);
-				setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
-
-				addReportedCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID);
-
-				return -1;
-			}else if(player->targetedIndividual->currentGroupType == GROUP_NPCS){
-				if(!activeCrimeAlreadyExists(player, crimeTypeID, crimeEvent->individualID, crimeEvent->itemID, crimeEvent->individualID)){
-					addActiveCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID, crimeEvent->individualID);
-				}
-
-				setSpecialDialogId(player->targetedIndividual->ID, player->targetedIndividual->specialDialog->sawPlayerCrime);
-				player->targetedIndividual->specialDialog->activeDialog = DIALOG_CRIME_WITNESS;
-			}
-		}
-	}
-
+	//Can a guard see the player
 	if(guards->numIndividuals > 0){
 		for(i = 0; i < guards->MAX_INDIVIDUALS; i++){
 			if(guards->individuals[i] != NULL){
 
 				if(isInLineOfSight(guards->individuals[i], player, thisField)){
-
-					reportActiveCrimes(player);
-					clearSpecialDialogForGroup(npcs, DIALOG_CRIME_WITNESS);
-					setGroupDialogType(guards, DIALOG_CRIME_WITNESS);
-					setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
-
-					addReportedCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID);
-
-					return -1;
+					isInGuardLoS = 1;
+					break;
 				}
 
 				individuals_passed++;
@@ -429,6 +397,52 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 				}
 			}
 		}
+	}
+
+	//If it's a violent crime, whether or not it's reported, make applicable groups hostile
+	if(crimeAlertsVictim((crimeType) crimeTypeID)){
+		if(player->targetedIndividual != NULL){
+			if(player->targetedIndividual->currentGroupType == GROUP_GUARDS || isInGuardLoS){
+				changePlayerDispositionForFriendlyGroups(guards, npcs, 1);
+			}
+
+			player->targetedIndividual->thisBehavior->isHostileToPlayer = 1;
+		}
+	}
+
+	if(crimeAlreadyReported(player, (crimeType) crimeTypeID, crimeEvent->individualID, crimeEvent->itemID)){
+		return -1;
+	}
+
+	if(crimeAlertsVictim((crimeType) crimeTypeID)){
+		if(player->targetedIndividual != NULL){
+			if(player->targetedIndividual->currentGroupType == GROUP_GUARDS){
+				reportActiveCrimes(player);
+				clearCrimeSpecialDialogForGroup(npcs);
+				setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
+
+				addReportedCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID);
+				changePlayerDispositionForFriendlyGroups(guards, npcs, 1);
+				return -1;
+			}else if(player->targetedIndividual->currentGroupType == GROUP_NPCS){
+				if(!activeCrimeAlreadyExists(player,(crimeType)  crimeTypeID, crimeEvent->individualID, crimeEvent->itemID, crimeEvent->individualID)){
+					addActiveCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID, crimeEvent->individualID);
+				}
+
+				setSpecialDialogId(player->targetedIndividual->ID, player->targetedIndividual->specialDialog->attackedByPlayer);
+				player->targetedIndividual->specialDialog->activeDialog = DIALOG_ATTACKED_BY_PLAYER;
+			}
+		}
+	}
+
+	if(isInGuardLoS){
+		reportActiveCrimes(player);
+		clearCrimeSpecialDialogForGroup(npcs);
+		setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
+
+		addReportedCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID);
+
+		return -1;
 	}
 
 	individuals_passed = 0;
@@ -441,8 +455,10 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 						addActiveCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID, npcs->individuals[i]);
 					}
 
-					setSpecialDialogId(npcs->individuals[i]->ID, npcs->individuals[i]->specialDialog->sawPlayerCrime);
-					npcs->individuals[i]->specialDialog->activeDialog = DIALOG_CRIME_WITNESS;
+					if(npcs->individuals[i]->specialDialog->activeDialog == DIALOG_DEFAULT){
+						setSpecialDialogId(npcs->individuals[i]->ID, npcs->individuals[i]->specialDialog->sawPlayerCrime);
+						npcs->individuals[i]->specialDialog->activeDialog = DIALOG_CRIME_WITNESS;
+					}
 					toReturn++;
 				}
 
@@ -566,26 +582,36 @@ int makeIndividualFriendlyToPlayer(int individualID){
 	}
 }
 
-int resetSpecialDialogForSpeakingIndividual(int specialDialogType, int speakingIndividualID){
-	dialogType type = getDialogTypefromInt(specialDialogType);
-
+int makeSpeakingIndividualFriendlyToPlayer(int speakingIndividualID){
 	individual * speakingIndividual = getIndividualFromRegistry(speakingIndividualID);
-	if(speakingIndividual->specialDialog->activeDialog == type){
+
+	if(speakingIndividual != NULL){
+		speakingIndividual->thisBehavior->isHostileToPlayer = 0;
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int resetSpecialDialogForSpeakingIndividual(dialogType specialDialogType, int speakingIndividualID){
+	individual * speakingIndividual = getIndividualFromRegistry(speakingIndividualID);
+
+	if(speakingIndividual->specialDialog->activeDialog == specialDialogType){
 		removeSpecialDialog(speakingIndividualID);
 	}
 
 	return 0;
 }
 
-int resetSpecialDialogForSpeakingIndividualGroup(int specialDialogType, int speakingIndividualID, groupContainer * thisGroupContainer){
+int resetSpecialDialogForSpeakingIndividualGroup(dialogType specialDialogType, int speakingIndividualID, groupContainer * thisGroupContainer){
 	int i, individualsPassed = 0;
-	dialogType type = getDialogTypefromInt(specialDialogType);
+
 	individual * speakingIndividual = getIndividualFromRegistry(speakingIndividualID);
 	individualGroup * thisGroup = getGroupFromIndividual(thisGroupContainer, speakingIndividualID);
 
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		if(thisGroup->individuals[i]  != NULL){
-			if(thisGroup->individuals[i]->specialDialog->activeDialog == type){
+			if(thisGroup->individuals[i]->specialDialog->activeDialog == specialDialogType){
 				removeSpecialDialog(thisGroup->individuals[i]->ID);
 			}
 
@@ -600,13 +626,22 @@ int resetSpecialDialogForSpeakingIndividualGroup(int specialDialogType, int spea
 	return 0;
 }
 
-int markPlayerHostileToFriendlyGroups(individualGroup * guards, individualGroup * npcs){
+int clearCrimesAndSpecialDialog(individual * player, individualGroup * guards, individualGroup * npcs){
+	clearActiveCrimes(player);
+	clearReportedCrimes(player);
+	clearCrimeSpecialDialogForGroup(guards);
+	clearCrimeSpecialDialogForGroup(npcs);
+
+	return 1;
+}
+
+int changePlayerDispositionForFriendlyGroups(individualGroup * guards, individualGroup * npcs, int isHostile){
 	int i, individualsPassed = 0;
 
 	if(guards->numIndividuals > 0){
 		for(i = 0; i < guards->numIndividuals; i++){
 			if(guards->individuals[i] != NULL){
-				guards->individuals[i]->thisBehavior->isHostileToPlayer = 1;
+				guards->individuals[i]->thisBehavior->isHostileToPlayer = isHostile;
 
 				individualsPassed++;
 
@@ -622,7 +657,7 @@ int markPlayerHostileToFriendlyGroups(individualGroup * guards, individualGroup 
 	if(npcs->numIndividuals > 0){
 		for(i = 0; i < npcs->numIndividuals; i++){
 			if(npcs->individuals[i] != NULL){
-				npcs->individuals[i]->thisBehavior->isHostileToPlayer = 1;
+				npcs->individuals[i]->thisBehavior->isHostileToPlayer = isHostile;
 
 				individualsPassed++;
 
@@ -638,49 +673,8 @@ int markPlayerHostileToFriendlyGroups(individualGroup * guards, individualGroup 
 	return 0;
 }
 
-int clearCrimesAndSpecialDialog(individual * player, individualGroup * guards, individualGroup * npcs){
-	clearActiveCrimes(player);
-	clearReportedCrimes(player);
-	clearSpecialDialogForGroup(guards, DIALOG_CRIME_WITNESS);
-	clearSpecialDialogForGroup(npcs, DIALOG_CRIME_WITNESS);
-
-	return 1;
-}
-
-int markPlayerFriendlyToFriendlyGroups(individualGroup * guards, individualGroup * npcs){
-	int i, individualsPassed = 0;
-
-	if(guards->numIndividuals > 0){
-		for(i = 0; i < guards->numIndividuals; i++){
-			if(guards->individuals[i] != NULL){
-				guards->individuals[i]->thisBehavior->isHostileToPlayer = 0;
-
-				individualsPassed++;
-
-				if(individualsPassed == guards->numIndividuals){
-					individualsPassed = 0;
-					break;
-				}
-
-			}
-		}
-	}
-
-	if(npcs->numIndividuals > 0){
-		for(i = 0; i < npcs->numIndividuals; i++){
-			if(npcs->individuals[i] != NULL){
-				npcs->individuals[i]->thisBehavior->isHostileToPlayer = 0;
-
-				individualsPassed++;
-
-				if(individualsPassed == npcs->numIndividuals){
-					individualsPassed = 0;
-					break;
-				}
-
-			}
-		}
-	}
+int tryRobIndividual(individual * player, event * thisEvent, int individualID){
+	int d20 = rand() %20 + 1;
 
 	return 0;
 }
@@ -719,7 +713,13 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 14: // reset special dialog for speaking individual group
 			return resetSpecialDialogForSpeakingIndividualGroup(thisEvent->intA, getSpeakingIndividualID(), thisGroupContainer);
 		case 15: //clear crimes and special dialogs
-			clearCrimesAndSpecialDialog(player, thisGroupContainer->guards, thisGroupContainer->npcs);
+			return clearCrimesAndSpecialDialog(player, thisGroupContainer->guards, thisGroupContainer->npcs);
+		case 16:
+			return makeSpeakingIndividualFriendlyToPlayer(getSpeakingIndividualID());
+		case 17://try rob individual
+			return tryRobIndividual(player, thisEvent, getSpeakingIndividualID());
+		case 18: //make player hostile to friendlies
+			return changePlayerDispositionForFriendlyGroups(thisGroupContainer->guards, thisGroupContainer->npcs, thisEvent->intA);
 	}
 	
 	return 0;

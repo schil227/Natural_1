@@ -242,6 +242,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		specialDialogs * playerDialog = malloc(sizeof(specialDialogs));
 		playerDialog->activeDialog = DIALOG_DEFAULT;
 		playerDialog->sawPlayerCrime = 0;
+		playerDialog->attackedByPlayer = 0;
+		playerDialog->stolenFromByPlayer = 0;
 		playerDialog->playerIsMarkedForDeath = 0;
 
 		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
@@ -666,6 +668,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	specialDialogs * playerDialog = malloc(sizeof(specialDialogs));
 	playerDialog->activeDialog = DIALOG_DEFAULT;
 	playerDialog->sawPlayerCrime = 0;
+	playerDialog->attackedByPlayer = 0;
+	playerDialog->stolenFromByPlayer = 0;
 	playerDialog->playerIsMarkedForDeath = 0;
 
 	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
@@ -674,6 +678,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
 
 	test_main(player, thisGroupContainer, main_field, viewShift);
+
+	//break down mock up
+	destroyIndividual(player);
+	clearGroup(thisGroupContainer->enemies);
+	clearGroup(thisGroupContainer->npcs);
+//	destroyField(main_field, NULL);
+	destroyThisDialogBox();
+	destroyConsoleInstance();
+	destroyTheGlobalRegister();
+	destroyEventHandlers();
+	destroySpecialDrawInstance();
+	thisGroupContainer->groupActionMode = 0;
+	thisGroupContainer->initGroupActionMode = 0;
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){

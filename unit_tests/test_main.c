@@ -432,20 +432,6 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(testGroupContainer->groupActionMode);
 	assert(testGroupContainer->initGroupActionMode);
 
-
-	//break down mock up
-	destroyIndividual(testPlayer);
-	clearGroup(testGroupContainer->enemies);
-	clearGroup(testGroupContainer->npcs);
-	destroyField(main_test_field, NULL);
-	destroyThisDialogBox();
-	destroyConsoleInstance();
-	destroyTheGlobalRegister();
-	destroyEventHandlers();
-	destroySpecialDrawInstance();
-	testGroupContainer->groupActionMode = 0;
-	testGroupContainer->initGroupActionMode = 0;
-
 	return 0;
 }
 

@@ -75,9 +75,7 @@ individual *initIndividual(){
 	toReturn->thisBehavior->isThreatened = 0;
 	toReturn->thisBehavior->isSurrounded = 0;
 
-	toReturn->specialDialog = malloc(sizeof(specialDialogs));
-	toReturn->specialDialog->playerIsMarkedForDeath = 0;
-	toReturn->specialDialog->sawPlayerCrime = 0;
+	toReturn->specialDialog = NULL;
 
 	toReturn->thisActiveCrimes = malloc(sizeof(activeCrimes));
 	toReturn->thisActiveCrimes->numActiveCrimes = 0;
@@ -2231,6 +2229,8 @@ void addActiveCrime(individual * player, crimeType crime, int bounty, int victim
 void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
 	int i, crimesPassed = 0;
 
+	individual * thisNPC = getIndividualFromRegistry(witnessID);
+
 	if(player->thisActiveCrimes->numActiveCrimes > 0){
 		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
 			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
@@ -2250,7 +2250,14 @@ void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
 		}
 	}
 
-	resetSpecialDialogForSpeakingIndividual(DIALOG_CRIME_WITNESS, witnessID);
+	if(thisNPC->specialDialog->activeDialog == DIALOG_CRIME_WITNESS){
+		resetSpecialDialogForSpeakingIndividual(DIALOG_CRIME_WITNESS, witnessID);
+	}else if(thisNPC->specialDialog->activeDialog == DIALOG_ATTACKED_BY_PLAYER){
+		resetSpecialDialogForSpeakingIndividual(DIALOG_ATTACKED_BY_PLAYER, witnessID);
+	}else if(thisNPC->specialDialog->activeDialog == DIALOG_STOLEN_FROM_BY_PLAYER){
+		resetSpecialDialogForSpeakingIndividual(DIALOG_STOLEN_FROM_BY_PLAYER, witnessID);
+	}
+
 }
 
 void clearActiveCrimes(individual * player){
@@ -2474,19 +2481,6 @@ char * getWorstCrime(individual * player){
 
 	}else{
 		return NULL;
-	}
-}
-
-dialogType getDialogTypefromInt(int dialogInt){
-	switch(dialogInt){
-		case 0:
-			return DIALOG_DEFAULT;
-		case 1:
-			return DIALOG_CRIME_WITNESS;
-		case 2:
-			return DIALOG_HOSTILE_TO_PLAYER;
-		default:
-			return DIALOG_DEFAULT;
 	}
 }
 

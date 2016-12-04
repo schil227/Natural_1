@@ -171,6 +171,12 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	thisDialog->sawPlayerCrime = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisDialog->attackedByPlayer = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisDialog->stolenFromByPlayer = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	thisDialog->playerIsMarkedForDeath = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -757,7 +763,7 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 
 			if(reportActiveCrimes(player)){
 				cwrite("Your crimes have been reported by witnesses!");
-				clearSpecialDialogForGroup(thisGroupContainer->npcs, DIALOG_CRIME_WITNESS);
+				clearCrimeSpecialDialogForGroup(thisGroupContainer->npcs);
 			}
 
 			destroyField(*thisField, player);
@@ -780,11 +786,11 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 }
 
 void tryTalkGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){
-	if(!tryTalk(thisGroupContainer->npcs,player,getCursorX(),getCursorY()) &&
-			!tryTalk(thisGroupContainer->beasts,player,getCursorX(),getCursorY()) &&
-			!tryTalk(thisGroupContainer->guards,player,getCursorX(),getCursorY()) &&
-			!tryTalk(thisGroupContainer->allies,player,getCursorX(),getCursorY()) &&
-			!tryTalk(thisGroupContainer->enemies,player,getCursorX(),getCursorY())){
+	if(!tryTalk(thisGroupContainer->npcs,player,cursorX,cursorY) &&
+			!tryTalk(thisGroupContainer->beasts,player,cursorX,cursorY) &&
+			!tryTalk(thisGroupContainer->guards,player,cursorX,cursorY) &&
+			!tryTalk(thisGroupContainer->allies,player,cursorX,cursorY) &&
+			!tryTalk(thisGroupContainer->enemies,player,cursorX,cursorY)){
 		cwrite("There's nobody there.");
 	}
 }
@@ -799,7 +805,7 @@ int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursor
 			individualsPassed++;
 
 			if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
-				if (setCurrentMessageByIndividualID(tmpIndividual->ID)) {
+				if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)))){
 					setSpeakingIndividualID(tmpIndividual->ID);
 					toggleDrawDialogBox();
 				}
@@ -814,43 +820,15 @@ int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursor
 	return 0;
 }
 
-void setGroupDialogType(individualGroup * thisGroup, dialogType type){
-	int i, individualsPassed = 0;;
-
-	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
-		if(thisGroup->individuals[i] != NULL){
-			if(thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_DEFAULT){
-				thisGroup->individuals[i]->specialDialog->activeDialog = type;
-			}
-
-			individualsPassed++;
-
-			if(individualsPassed == thisGroup->numIndividuals){
-				break;
-			}
-
-		}
-	}
-}
-
 void setGroupSpecialDialog(individualGroup * thisGroup, dialogType thisType){
 	int i, individualsPassed = 0;;
 
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		if(thisGroup->individuals[i] != NULL){
 
-			if(thisGroup->individuals[i]->specialDialog->activeDialog == thisType){
-				switch(thisType){
-					case DIALOG_CRIME_WITNESS:
-						setSpecialDialogId(thisGroup->individuals[i]->ID, thisGroup->individuals[i]->specialDialog->sawPlayerCrime);
-						thisGroup->individuals[i]->specialDialog->activeDialog = thisType;
-						break;
-					case DIALOG_HOSTILE_TO_PLAYER:
-						setSpecialDialogId(thisGroup->individuals[i]->ID, thisGroup->individuals[i]->specialDialog->sawPlayerCrime);
-						thisGroup->individuals[i]->specialDialog->activeDialog = thisType;
-						break;
-				}
-
+			if(thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_DEFAULT){
+				setSpecialDialogId(thisGroup->individuals[i]->ID, thisGroup->individuals[i]->specialDialog->sawPlayerCrime);
+				thisGroup->individuals[i]->specialDialog->activeDialog = thisType;
 			}
 
 			individualsPassed++;
@@ -870,6 +848,28 @@ void clearSpecialDialogForGroup(individualGroup * thisGroup, dialogType thisDial
 		if(thisGroup->individuals[i] != NULL){
 
 			if(thisGroup->individuals[i]->specialDialog->activeDialog == thisDialogType){
+				removeSpecialDialog(thisGroup->individuals[i]->ID);
+				thisGroup->individuals[i]->specialDialog->activeDialog = DIALOG_DEFAULT;
+			}
+
+			individualsPassed++;
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+		}
+	}
+}
+
+void clearCrimeSpecialDialogForGroup(individualGroup * thisGroup){
+	int i, individualsPassed = 0;
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] != NULL){
+
+			if(thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_CRIME_WITNESS ||
+					thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_ATTACKED_BY_PLAYER ||
+					thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_STOLEN_FROM_BY_PLAYER){
 				removeSpecialDialog(thisGroup->individuals[i]->ID);
 				thisGroup->individuals[i]->specialDialog->activeDialog = DIALOG_DEFAULT;
 			}

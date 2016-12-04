@@ -1,8 +1,8 @@
 test_map1_transit.txt
 test_map1_enemies.txt
-test_map1_enemy_items.txt
+test_map1_beasts.txt
 test_map1_npcs.txt
-test_map1_npc_items.txt
+test_map1_guards.txt
 test_map1_items.txt
 g^g^g^g^g^g^g^r>-v->g^g^r>
 g^g^g^g^g^g^g^g^g^=>g^g^g^

@@ -7,6 +7,7 @@
 #include"./headers/dialog_pub_methods.h"
 #include<stdio.h>
 
+#define YIELD_DIALOG_ID 1030
 static dialogInstance * thisDialogInstance;
 
 dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
@@ -348,14 +349,16 @@ void toggleDrawDialogBox(){
 	thisDialogInstance->drawBox = (thisDialogInstance->drawBox+1)%2;
 }
 
-int setCurrentMessageByIndividualID(int individualID){
+int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlayer){
 	int i;
 
 	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
 		if(thisDialogInstance->individualDialogRegistry[i] == NULL){
 			return 0;
 		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){
-			if(thisDialogInstance->individualDialogRegistry[i]->specialID != 0){
+			if(isNPCHostileTowardPlayer){
+				return setCurrentMessageByMessageID(YIELD_DIALOG_ID);
+			}else if(thisDialogInstance->individualDialogRegistry[i]->specialID != 0){
 				return setCurrentMessageByMessageID(thisDialogInstance->individualDialogRegistry[i]->specialID);
 			}else{
 				return setCurrentMessageByMessageID(thisDialogInstance->individualDialogRegistry[i]->dialogID);
