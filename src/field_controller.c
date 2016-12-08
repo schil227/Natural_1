@@ -177,6 +177,9 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	thisDialog->stolenFromByPlayer = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisDialog->afraidOfPlayer = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	thisDialog->playerIsMarkedForDeath = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -761,6 +764,8 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
+			clearMessages();
+
 			if(reportActiveCrimes(player)){
 				cwrite("Your crimes have been reported by witnesses!");
 				clearCrimeSpecialDialogForGroup(thisGroupContainer->npcs);
@@ -774,7 +779,7 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
-			clearMessages();
+
 
 			if(player->thisReportedCrimes->numReportedCrimes > 0){
 				setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
@@ -869,7 +874,8 @@ void clearCrimeSpecialDialogForGroup(individualGroup * thisGroup){
 
 			if(thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_CRIME_WITNESS ||
 					thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_ATTACKED_BY_PLAYER ||
-					thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_STOLEN_FROM_BY_PLAYER){
+					thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_STOLEN_FROM_BY_PLAYER ||
+					thisGroup->individuals[i]->specialDialog->activeDialog == DIALOG_AFRAID_OF_PLAYER){
 				removeSpecialDialog(thisGroup->individuals[i]->ID);
 				thisGroup->individuals[i]->specialDialog->activeDialog = DIALOG_DEFAULT;
 			}

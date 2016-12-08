@@ -2182,7 +2182,7 @@ void addReportedCrimeFromEntry(individual * player, activeCrimeEntry * thisEntry
 int reportActiveCrimes(individual * player){
 	int i, crimesPassed = 0;
 
-	if(player->thisActiveCrimes->numActiveCrimes > 0){
+	if(player->thisActiveCrimes->numActiveCrimes == 0){
 		return 0;
 	}
 
@@ -2226,16 +2226,16 @@ void addActiveCrime(individual * player, crimeType crime, int bounty, int victim
 	addActiveCrimeFromEntry(player, thisCrime);
 }
 
-void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
+void removeActiveCrimesFromTalkingIndividual(individual * player, int individualID){
 	int i, crimesPassed = 0;
 
-	individual * thisNPC = getIndividualFromRegistry(witnessID);
+	individual * thisNPC = getIndividualFromRegistry(individualID);
 
 	if(player->thisActiveCrimes->numActiveCrimes > 0){
 		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
 			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
 
-				if(player->thisActiveCrimes->activeCrimeList[i]->witnessID == witnessID){
+				if(player->thisActiveCrimes->activeCrimeList[i]->witnessID == individualID || player->thisActiveCrimes->activeCrimeList[i]->victimID == individualID){
 					free(player->thisActiveCrimes->activeCrimeList[i]);
 					player->thisActiveCrimes->activeCrimeList[i] = NULL;
 					player->thisActiveCrimes->numActiveCrimes--;
@@ -2251,11 +2251,11 @@ void removeActiveCrimesFromTalkingWitness(individual * player, int witnessID){
 	}
 
 	if(thisNPC->specialDialog->activeDialog == DIALOG_CRIME_WITNESS){
-		resetSpecialDialogForSpeakingIndividual(DIALOG_CRIME_WITNESS, witnessID);
+		resetSpecialDialogForSpeakingIndividual(DIALOG_CRIME_WITNESS, individualID);
 	}else if(thisNPC->specialDialog->activeDialog == DIALOG_ATTACKED_BY_PLAYER){
-		resetSpecialDialogForSpeakingIndividual(DIALOG_ATTACKED_BY_PLAYER, witnessID);
+		resetSpecialDialogForSpeakingIndividual(DIALOG_ATTACKED_BY_PLAYER, individualID);
 	}else if(thisNPC->specialDialog->activeDialog == DIALOG_STOLEN_FROM_BY_PLAYER){
-		resetSpecialDialogForSpeakingIndividual(DIALOG_STOLEN_FROM_BY_PLAYER, witnessID);
+		resetSpecialDialogForSpeakingIndividual(DIALOG_STOLEN_FROM_BY_PLAYER, individualID);
 	}
 
 }
@@ -2482,6 +2482,36 @@ char * getWorstCrime(individual * player){
 	}else{
 		return NULL;
 	}
+}
+
+int robIndividual(individual * player, individual * targetIndividual){
+	int gold = 0;
+	int d20 = rand() %20 + 1;
+
+	if(targetIndividual->gold <= 0 || d20 == 1){
+		cwrite("They dont have any gold.");
+		return 0;
+	}
+
+	if(d20 == 20){
+		player->gold = targetIndividual->gold;
+		targetIndividual->gold = 0;
+
+		return gold;
+	}
+
+	d20 = min(d20 + (getAttributeSum(player,"LUCK") * 2),20);
+
+	gold = (d20 * 10 * targetIndividual->gold)/200;
+	targetIndividual->gold = targetIndividual->gold - gold;
+
+	player->gold += gold;
+
+	char outStr[128];
+	sprintf(outStr, "Robbed %d gold.", gold);
+	cwrite(outStr);
+
+	return gold;
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

@@ -429,8 +429,10 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 					addActiveCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID, crimeEvent->individualID);
 				}
 
-				setSpecialDialogId(player->targetedIndividual->ID, player->targetedIndividual->specialDialog->attackedByPlayer);
-				player->targetedIndividual->specialDialog->activeDialog = DIALOG_ATTACKED_BY_PLAYER;
+				if(player->targetedIndividual->specialDialog->activeDialog != DIALOG_AFRAID_OF_PLAYER){
+					setSpecialDialogId(player->targetedIndividual->ID, player->targetedIndividual->specialDialog->attackedByPlayer);
+					player->targetedIndividual->specialDialog->activeDialog = DIALOG_ATTACKED_BY_PLAYER;
+				}
 			}
 		}
 	}
@@ -674,7 +676,14 @@ int changePlayerDispositionForFriendlyGroups(individualGroup * guards, individua
 }
 
 int tryRobIndividual(individual * player, event * thisEvent, int individualID){
-	int d20 = rand() %20 + 1;
+	individual * targetIndividual = getIndividualFromRegistry(individualID);
+
+	robIndividual(player, targetIndividual);
+
+	//disallow player from removing crime
+	targetIndividual->thisBehavior->isHostileToPlayer = 0;
+	targetIndividual->specialDialog->activeDialog = DIALOG_AFRAID_OF_PLAYER;
+	setSpecialDialogId(individualID, targetIndividual->specialDialog->afraidOfPlayer);
 
 	return 0;
 }
@@ -695,7 +704,7 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 5:
 			return crimeCommittedInLoS(player, thisGroupContainer->guards, thisGroupContainer->npcs, thisField, thisEvent);
 		case 6: // remove active crimes from talking witness
-			return removeActiveCrimesFromTalkingWitness(player, getSpeakingIndividualID());
+			return removeActiveCrimesFromTalkingIndividual(player, getSpeakingIndividualID());
 		case 7: // report all active crimes
 			return reportActiveCrimes(player);
 		case 8: // multi stat dialog check
