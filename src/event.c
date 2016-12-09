@@ -637,8 +637,17 @@ int clearCrimesAndSpecialDialog(individual * player, individualGroup * guards, i
 	return 1;
 }
 
-int changePlayerDispositionForFriendlyGroups(individualGroup * guards, individualGroup * npcs, int isHostile){
+int changePlayerDispositionForFriendlyGroups(individualGroup * guards, individualGroup * npcs, int speakingIndividualID, int isHostile){
 	int i, individualsPassed = 0;
+
+	if(speakingIndividualID != 0 && !isHostile){
+		individual * tmpindividual = getIndividualFromRegistry(speakingIndividualID);
+
+		if(tmpindividual != NULL){
+			tmpindividual->thisBehavior->hasAlreadyYieldedToPlayer = 1;
+		}
+
+	}
 
 	if(guards->numIndividuals > 0){
 		for(i = 0; i < guards->numIndividuals; i++){
@@ -682,6 +691,7 @@ int tryRobIndividual(individual * player, event * thisEvent, int individualID){
 
 	//disallow player from removing crime
 	targetIndividual->thisBehavior->isHostileToPlayer = 0;
+	targetIndividual->thisBehavior->hasAlreadyYieldedToPlayer = 1;
 	targetIndividual->specialDialog->activeDialog = DIALOG_AFRAID_OF_PLAYER;
 	setSpecialDialogId(individualID, targetIndividual->specialDialog->afraidOfPlayer);
 
@@ -728,7 +738,7 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 17://try rob individual
 			return tryRobIndividual(player, thisEvent, getSpeakingIndividualID());
 		case 18: //make player hostile to friendlies
-			return changePlayerDispositionForFriendlyGroups(thisGroupContainer->guards, thisGroupContainer->npcs, thisEvent->intA);
+			return changePlayerDispositionForFriendlyGroups(thisGroupContainer->guards, thisGroupContainer->npcs, getSpeakingIndividualID(), thisEvent->intA);
 	}
 	
 	return 0;

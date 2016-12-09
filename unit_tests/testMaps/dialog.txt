@@ -18,6 +18,7 @@
 1007;Ah - forgive me for my aggression. It takes a stronger man to say the honest thing.;0;0;0;0;0;0
 1004;Welcome! We've got the lowest prices!;0;1005;0;3;0;0
 1024;Hail, adventurer. Beware, cursed undead wander near these woods.;0;0;0;0;0;0
+1034;[@ ignores your attempts to surrender];0;0;0;0;1;TARGET_NAME
 
 1008;I Surrender.;1014;0;0;0;0
 1008;I Surrender, although I do not have enough money.;1015;0;0;0;0

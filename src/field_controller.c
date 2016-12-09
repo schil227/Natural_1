@@ -771,6 +771,8 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 				clearCrimeSpecialDialogForGroup(thisGroupContainer->npcs);
 			}
 
+			groupTransitUpdate(thisGroupContainer);
+
 			destroyField(*thisField, player);
 			clearGroup(thisGroupContainer->enemies);
 			clearGroup(thisGroupContainer->npcs);
@@ -778,8 +780,6 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			clearGroup(thisGroupContainer->guards);
 
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
-
-
 
 			if(player->thisReportedCrimes->numReportedCrimes > 0){
 				setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
@@ -810,7 +810,7 @@ int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursor
 			individualsPassed++;
 
 			if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
-				if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)))){
+				if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)), tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer)){
 					setSpeakingIndividualID(tmpIndividual->ID);
 					toggleDrawDialogBox();
 				}
@@ -826,7 +826,7 @@ int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursor
 }
 
 void setGroupSpecialDialog(individualGroup * thisGroup, dialogType thisType){
-	int i, individualsPassed = 0;;
+	int i, individualsPassed = 0;
 
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		if(thisGroup->individuals[i] != NULL){
@@ -888,3 +888,60 @@ void clearCrimeSpecialDialogForGroup(individualGroup * thisGroup){
 		}
 	}
 }
+
+void groupTransitUpdate(groupContainer * thisGroupContainer){
+	int i, individualsPassed = 0;
+
+	if(thisGroupContainer->npcs->numIndividuals > 0){
+
+		for(i = 0; i < thisGroupContainer->npcs->MAX_INDIVIDUALS; i++){
+			if(thisGroupContainer->npcs->individuals[i] != NULL){
+
+				individual * tmpIndividual = thisGroupContainer->npcs->individuals[i];
+
+				tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer = 0;
+
+				individualsPassed++;
+
+				if(individualsPassed == thisGroupContainer->npcs->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+
+			}
+		}
+	}
+
+	if(thisGroupContainer->guards->numIndividuals > 0){
+
+		for(i = 0; i < thisGroupContainer->guards->MAX_INDIVIDUALS; i++){
+			if(thisGroupContainer->guards->individuals[i] != NULL){
+
+				individual * tmpIndividual = thisGroupContainer->guards->individuals[i];
+
+				tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer = 0;
+
+				individualsPassed++;
+
+				if(individualsPassed == thisGroupContainer->guards->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+
+			}
+		}
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+

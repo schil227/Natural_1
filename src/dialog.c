@@ -8,6 +8,7 @@
 #include<stdio.h>
 
 #define YIELD_DIALOG_ID 1030
+#define WONT_YIELD_DIALOG_ID 1034
 static dialogInstance * thisDialogInstance;
 
 dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
@@ -349,7 +350,7 @@ void toggleDrawDialogBox(){
 	thisDialogInstance->drawBox = (thisDialogInstance->drawBox+1)%2;
 }
 
-int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlayer){
+int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlayer, int alreadyYielded){
 	int i;
 
 	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
@@ -357,7 +358,11 @@ int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlay
 			return 0;
 		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){
 			if(isNPCHostileTowardPlayer){
-				return setCurrentMessageByMessageID(YIELD_DIALOG_ID);
+				if(alreadyYielded){
+					return setCurrentMessageByMessageID(WONT_YIELD_DIALOG_ID);
+				}else{
+					return setCurrentMessageByMessageID(YIELD_DIALOG_ID);
+				}
 			}else if(thisDialogInstance->individualDialogRegistry[i]->specialID != 0){
 				return setCurrentMessageByMessageID(thisDialogInstance->individualDialogRegistry[i]->specialID);
 			}else{

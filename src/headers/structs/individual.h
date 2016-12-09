@@ -98,6 +98,7 @@ typedef struct{
 	int cowardlyTurnsRemaining;
 
 	int isHostileToPlayer;
+	int hasAlreadyYieldedToPlayer;
 	int isFocusedOnPlayer;
 	int isSurrounded;
 	int isThreatened;
