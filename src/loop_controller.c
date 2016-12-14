@@ -44,7 +44,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			viewShift->xShift = viewShift->xShiftOld;
 			viewShift->yShift = viewShift->yShiftOld;
 			break;
-		case 0x0D: //enter //TODO: when attacking, supply both enemies and NPCs, ensure the character cannot attack themselves
+		case 0x0D: //enter
 		{
 			if (getCursorMode() == CURSOR_ATTACK) {//attack the individual
 				if(tryAttackIndividual(thisGroupContainer, player, main_field, getCursorX(), getCursorY())){
@@ -78,6 +78,12 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					decreaseTurns(player, thisGroupContainer, numActions);
 					toggleInCursorMode();
 				}
+			}else if(getCursorMode() == CURSOR_PICKPOCKET){
+				tryPickPocketGroups(thisGroupContainer, player, getCursorX(), getCursorY());
+
+				viewShift->xShift = viewShift->xShiftOld;
+				viewShift->yShift = viewShift->yShiftOld;
+				toggleInCursorMode();
 			}
 
 		}
@@ -396,6 +402,10 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 				disableInventoryBuyMode();
 			}
 
+			if(inPickPocketMode()){
+				disableInventoryPickPocketMode();
+			}
+
 			break;
 		case 0x0D: //enter
 		{
@@ -404,6 +414,17 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 			if (tmpItem != NULL) {
 				if (inBuyMode()) {
 					attemptToBuyItem(tmpItem, player);
+				} else if(inPickPocketMode()){
+					int isLastItem = !selectedIndexIsntLastPlayerItem();
+
+					int pickpocketSuccess = attemptToPickPocketItem(tmpItem, player);
+
+					if(pickpocketSuccess && isLastItem){
+						selectPreviousItemUp();
+					}else if(!pickpocketSuccess){
+						disableInventoryPickPocketMode();
+						disableInventoryViewMode();
+					}
 				} else {
 					modifyItem(tmpItem, player);
 					refreshInventory(player->backpack);

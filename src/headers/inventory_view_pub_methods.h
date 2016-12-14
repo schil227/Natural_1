@@ -9,5 +9,4 @@
 #define SRC_HEADERS_INVENTORY_VIEW_PUB_METHODS_H_
 #include"./structs/inventory_view.h";
 
-
 #endif /* SRC_HEADERS_INVENTORY_VIEW_PUB_METHODS_H_ */

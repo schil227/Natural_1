@@ -354,7 +354,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x54://t key (talk)
 			{
 				toggleInCursorMode();
-				refreshCursor(CURSOR_TALK, player->playerCharacter->x, player->playerCharacter->y);
+				if(player->isSneaking){
+					refreshCursor(CURSOR_PICKPOCKET, player->playerCharacter->x, player->playerCharacter->y);
+				}else{
+					refreshCursor(CURSOR_TALK, player->playerCharacter->x, player->playerCharacter->y);
+				}
+
 				viewShift->xShiftOld = viewShift->xShift;
 				viewShift->yShiftOld = viewShift->yShift;
 			}

@@ -790,6 +790,45 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 	return 0;
 }
 
+void tryPickPocketGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){
+	if(!tryPickPocketGroup(thisGroupContainer->npcs,player,cursorX,cursorY, 1) &&
+			!tryPickPocketGroup(thisGroupContainer->beasts,player,cursorX,cursorY, 0) &&
+			!tryPickPocketGroup(thisGroupContainer->guards,player,cursorX,cursorY, 1) &&
+			!tryPickPocketGroup(thisGroupContainer->allies,player,cursorX,cursorY, 0) &&
+			!tryPickPocketGroup(thisGroupContainer->enemies,player,cursorX,cursorY, 0)){
+	}
+}
+
+int tryPickPocketGroup(individualGroup * thisGroup, individual * player, int cursorX, int cursorY, int isCrime){
+	int i, individualsPassed = 0;
+
+	if(thisGroup->numIndividuals == 0){
+		return 0;
+	}
+
+	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
+		if(thisGroup->individuals[i] != NULL){
+			individual * tmpIndividual = thisGroup->individuals[i];
+
+			if(tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY){
+				tryPickPocketIndividualShowView(player, tmpIndividual, isCrime);
+				player->targetedIndividual = tmpIndividual;
+				return 1;
+			}
+
+
+			individualsPassed++;
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+
+		}
+	}
+
+	return 0;
+}
+
 void tryTalkGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){
 	if(!tryTalk(thisGroupContainer->npcs,player,cursorX,cursorY) &&
 			!tryTalk(thisGroupContainer->beasts,player,cursorX,cursorY) &&

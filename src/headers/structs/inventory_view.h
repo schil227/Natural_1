@@ -20,6 +20,7 @@ typedef struct {
 	int selectedItemIndex;
 	int viewMode;
 	int buyMode;
+	int pickpocketMode;
 } inventoryView;
 
 #endif /* SRC_HEADERS_STRUCTS_INVENTORY_VIEW_H_ */

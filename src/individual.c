@@ -2514,6 +2514,87 @@ int robIndividual(individual * player, individual * targetIndividual){
 	return gold;
 }
 
+int attemptToPickPocketItem(item * thisItem, individual * player){
+	individual * targetIndividual = player->targetedIndividual;
+
+	int d20 = (rand() % 20) + 1;
+
+	if(d20 == 20){
+		removeItemFromInventory(targetIndividual->backpack, thisItem);
+		addItemToInventory(player->backpack, thisItem);
+		refreshInventory(targetIndividual->backpack);
+		return 1;
+	}else if(d20 == 1){
+		if(targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS){
+			processCrimeEvent(CRIME_PICKPOCKETING, 10 + thisItem->price, targetIndividual->ID, 0);
+		}
+
+		char outStr[128];
+		sprintf(outStr, "%s has caught you pickpocketing!", targetIndividual->name);
+		cwrite(outStr);
+
+		return 0;
+	}
+
+	d20 += getAttributeSum(player, "DEX") * 2;
+
+	if(d20 >= 10 + getAttributeSum(targetIndividual, "DEX")){
+		removeItemFromInventory(targetIndividual->backpack, thisItem);
+		addItemToInventory(player->backpack, thisItem);
+		refreshInventory(targetIndividual->backpack);
+		return 1;
+	}else{
+		if(targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS){
+			processCrimeEvent(CRIME_PICKPOCKETING, 10 + thisItem->price, targetIndividual->ID, 0);
+		}
+
+		char outStr[128];
+		sprintf(outStr, "%s has caught you pickpocketing!", targetIndividual->name);
+		cwrite(outStr);
+
+		return 0;
+	}
+
+}
+
+int tryPickPocketIndividualShowView(individual * player, individual * targetIndividual, int isCrime){
+	int d20 = (rand() % 20) + 1;
+
+	if(d20 == 20){
+		enableInventoryPickPocketMode();
+		enableInventoryViewMode(targetIndividual->backpack);
+		return 1;
+	}else if(d20 == 1){
+		if(isCrime){
+			processCrimeEvent(CRIME_PICKPOCKETING, 10, targetIndividual->ID, 0);
+		}
+
+		char outStr[128];
+		sprintf(outStr, "%s has caught you trying to pickpocket!", targetIndividual->name);
+		cwrite(outStr);
+
+		return 0;
+	}
+
+	d20 += getAttributeSum(player, "DEX") * 2;
+
+	if(d20 >= 10 + getAttributeSum(targetIndividual, "DEX")){
+		enableInventoryPickPocketMode();
+		enableInventoryViewMode(targetIndividual->backpack);
+		return 1;
+	}else{
+		if(isCrime){
+			processCrimeEvent(CRIME_PICKPOCKETING, 10, targetIndividual->ID, 0);
+		}
+
+		char outStr[128];
+		sprintf(outStr, "%s has caught you trying to pickpocket!", targetIndividual->name);
+		cwrite(outStr);
+
+		return 0;
+	}
+}
+
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	int toReturn = 0;
 

@@ -22,6 +22,7 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView->selectedItemIndex = 0;
 	thisInventoryView->viewMode = 0;
 	thisInventoryView->buyMode = 0;
+	thisInventoryView->pickpocketMode = 0;
 
 	for(i = 0; i < slotsPerScreen; i++){
 		thisInventoryView->viewedItems[i] = NULL;
@@ -60,6 +61,7 @@ void disableInventoryViewMode(){
 
 void refreshInventory(inventory * playerInventory){
 	int i,j=0,availableSlots;
+	int isPickPocketMode = inPickPocketMode();
 
 	if(thisInventoryView->viewedItems[0] != NULL){
 		for(i = 0; i < thisInventoryView->slotsPerScreen; i++){
@@ -76,8 +78,8 @@ void refreshInventory(inventory * playerInventory){
 			break;
 		}
 
-		if(thisInventoryView->playerItems->inventoryArr[i] != NULL){
-			thisInventoryView->viewedItems[j] =  thisInventoryView->playerItems->inventoryArr[i];
+		if(thisInventoryView->playerItems->inventoryArr[i] != NULL && (!isPickPocketMode || (isPickPocketMode && !thisInventoryView->playerItems->inventoryArr[i]->isEquipt))){
+			thisInventoryView->viewedItems[j] = thisInventoryView->playerItems->inventoryArr[i];
 			j++;
 		}
 	}
@@ -332,6 +334,17 @@ void selectPreviousItemUp(){
 	}
 }
 
+void shiftPreviousIfNecessairy(){
+	if(canSelectPreviousItemUp()){
+		//selecting last element
+		if(thisInventoryView->selectedItemIndex == 0){
+			shiftItemsDown();
+		}else{
+			thisInventoryView->selectedItemIndex--;
+		}
+	}
+}
+
 void shiftItemsDown(){
 	int i, getNextItem = 0;
 	item * tmpItem;
@@ -383,6 +396,18 @@ item * getSelectedItem(){
 	}else{
 		return thisInventoryView->viewedItems[thisInventoryView->selectedItemIndex];
 	}
+}
+
+void enableInventoryPickPocketMode(){
+	thisInventoryView->pickpocketMode = 1;
+}
+
+void disableInventoryPickPocketMode(){
+	thisInventoryView->pickpocketMode = 0;
+}
+
+int inPickPocketMode(){
+	return thisInventoryView->pickpocketMode;
 }
 
 void enableInventoryBuyMode(){
