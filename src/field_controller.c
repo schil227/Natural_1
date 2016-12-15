@@ -790,17 +790,24 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 	return 0;
 }
 
-void tryPickPocketGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){
-	if(!tryPickPocketGroup(thisGroupContainer->npcs,player,cursorX,cursorY, 1) &&
-			!tryPickPocketGroup(thisGroupContainer->beasts,player,cursorX,cursorY, 0) &&
-			!tryPickPocketGroup(thisGroupContainer->guards,player,cursorX,cursorY, 1) &&
-			!tryPickPocketGroup(thisGroupContainer->allies,player,cursorX,cursorY, 0) &&
-			!tryPickPocketGroup(thisGroupContainer->enemies,player,cursorX,cursorY, 0)){
+int tryPickPocketIndividualFromField(individual * player, field * thisField, int cursorX, int cursorY){
+	individual * targetIndividual = getIndividualFromField(thisField, cursorX, cursorY);
+	int isCrime = 0;
+
+	if(targetIndividual != NULL){
+		if(targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS){
+			isCrime = 1;
+		}
+
+		player->targetedIndividual = targetIndividual;
+		return tryPickPocketIndividualShowView(player, targetIndividual, isCrime);
 	}
+
+	return -1; //no individual found
 }
 
 int tryPickPocketGroup(individualGroup * thisGroup, individual * player, int cursorX, int cursorY, int isCrime){
-	int i, individualsPassed = 0;
+	int i, individualsPassed = 0, toReturn = 0;
 
 	if(thisGroup->numIndividuals == 0){
 		return 0;
@@ -811,9 +818,9 @@ int tryPickPocketGroup(individualGroup * thisGroup, individual * player, int cur
 			individual * tmpIndividual = thisGroup->individuals[i];
 
 			if(tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY){
-				tryPickPocketIndividualShowView(player, tmpIndividual, isCrime);
+				toReturn = tryPickPocketIndividualShowView(player, tmpIndividual, isCrime);
 				player->targetedIndividual = tmpIndividual;
-				return 1;
+				return toReturn;
 			}
 
 
@@ -826,7 +833,7 @@ int tryPickPocketGroup(individualGroup * thisGroup, individual * player, int cur
 		}
 	}
 
-	return 0;
+	return toReturn;
 }
 
 void tryTalkGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){

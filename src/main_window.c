@@ -491,7 +491,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		return 0;
 	} else if(inInventoryViewMode()){
-		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, viewShift);
+		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift);
 	}else if(thisGroupContainer->groupMoveMode){
 		animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
 				(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]),

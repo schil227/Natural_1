@@ -79,7 +79,9 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					toggleInCursorMode();
 				}
 			}else if(getCursorMode() == CURSOR_PICKPOCKET){
-				tryPickPocketGroups(thisGroupContainer, player, getCursorX(), getCursorY());
+				if(tryPickPocketIndividualFromField(player, main_field, getCursorX(), getCursorY()) == 0){
+					decreaseTurns(player, thisGroupContainer, 1);
+				}
 
 				viewShift->xShift = viewShift->xShiftOld;
 				viewShift->yShift = viewShift->yShiftOld;
@@ -378,7 +380,7 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 	return 0;
 }
 
-int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, shiftData * viewShift) {
+int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 
@@ -404,6 +406,7 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 
 			if(inPickPocketMode()){
 				disableInventoryPickPocketMode();
+				decreaseTurns(player, thisGroupContainer, 1);
 			}
 
 			break;
@@ -424,6 +427,8 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 					}else if(!pickpocketSuccess){
 						disableInventoryPickPocketMode();
 						disableInventoryViewMode();
+
+						decreaseTurns(player, thisGroupContainer, 1);
 					}
 				} else {
 					modifyItem(tmpItem, player);
