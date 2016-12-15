@@ -454,7 +454,7 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 
 				if(isInLineOfSight(npcs->individuals[i], player, thisField)){
 					if(!activeCrimeAlreadyExists(player, crimeTypeID, crimeEvent->individualID, crimeEvent->itemID, npcs->individuals[i]->ID)){
-						addActiveCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID, npcs->individuals[i]);
+						addActiveCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID, npcs->individuals[i]->ID);
 					}
 
 					if(npcs->individuals[i]->specialDialog->activeDialog == DIALOG_DEFAULT){
@@ -714,7 +714,7 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 5:
 			return crimeCommittedInLoS(player, thisGroupContainer->guards, thisGroupContainer->npcs, thisField, thisEvent);
 		case 6: // remove active crimes from talking witness
-			return removeActiveCrimesFromTalkingIndividual(player, getSpeakingIndividualID());
+			return removeActiveCrimesFromIndividual(player, getSpeakingIndividualID());
 		case 7: // report all active crimes
 			return reportActiveCrimes(player);
 		case 8: // multi stat dialog check

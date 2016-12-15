@@ -775,18 +775,6 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	sendHitDialog(thisIndividual->name, targetIndividual->name, 20, totalDamage);
 	targetIndividual->hp = targetIndividual->hp - totalDamage;
 
-	//Add status - or dont, let useDurationAbilityOnIndividual take care of that
-//	if(targetAbility->statusEnabled){
-//		int sum = 0, dummy = 0;
-//		calcStatusCost(&sum, &dummy, targetAbility);
-//		if(sum > 0){
-//			status * newStatus = createStatusFromAbility(targetAbility);
-//			addStatusToIndividual(targetIndividual, newStatus);
-//			processStatus(targetIndividual, newStatus);
-//		}
-//
-//	}
-
 	if(targetIndividual->hp <= 0){ //target is dead
 		sendDeathDialog(targetIndividual->name, thisIndividual->name);
 		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
@@ -2180,7 +2168,7 @@ void addReportedCrimeFromEntry(individual * player, activeCrimeEntry * thisEntry
 }
 
 int reportActiveCrimes(individual * player){
-	int i, crimesPassed = 0;
+	int i, newReportedCrimes = 0;
 
 	if(player->thisActiveCrimes->numActiveCrimes == 0){
 		return 0;
@@ -2189,19 +2177,29 @@ int reportActiveCrimes(individual * player){
 	if(player->thisActiveCrimes->numActiveCrimes > 0){
 		for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
 			if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
-				player->thisActiveCrimes->activeCrimeList[i]->witnessID = 0;
-				addReportedCrimeFromEntry(player, player->thisActiveCrimes->activeCrimeList[i]);
-				player->thisActiveCrimes->activeCrimeList[i] = NULL;
-				crimesPassed++;
+			
+				//This check is in the event that an individual died (on their turn or otherwise) but was witness to crimes
+				if(doesExist(player->thisActiveCrimes->activeCrimeList[i]->witnessID) != 0){
+					player->thisActiveCrimes->activeCrimeList[i]->witnessID = 0;
+					addReportedCrimeFromEntry(player, player->thisActiveCrimes->activeCrimeList[i]);
+					newReportedCrimes++;
+				}
 
-				if(crimesPassed == player->thisActiveCrimes->numActiveCrimes){
+				player->thisActiveCrimes->activeCrimeList[i] = NULL;
+				player->thisActiveCrimes->numActiveCrimes--;
+
+				if(player->thisActiveCrimes->numActiveCrimes == 0){
 					break;
 				}
 			}
 		}
 	}
 
-	return 1;
+	if(newReportedCrimes){
+		return 1;
+	}else{
+		return 0;
+	}
 }
 
 void addReportedCrime(individual * player, crimeType crime, int bounty, int victimID, int stolenItemID){
@@ -2226,7 +2224,35 @@ void addActiveCrime(individual * player, crimeType crime, int bounty, int victim
 	addActiveCrimeFromEntry(player, thisCrime);
 }
 
-void removeActiveCrimesFromTalkingIndividual(individual * player, int individualID){
+/*
+void removeActiveCrimesWitnessOnly(individual * player, int individualID){
+	int i, crimesPassed = 0;
+
+	if(player->thisActiveCrimes->numActiveCrimes == 0){
+		return;
+	}
+
+	for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
+		if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
+
+			if(player->thisActiveCrimes->activeCrimeList[i]->witnessID == individualID){
+				free(player->thisActiveCrimes->activeCrimeList[i]);
+				player->thisActiveCrimes->activeCrimeList[i] = NULL;
+				player->thisActiveCrimes->numActiveCrimes--;
+				crimesPassed--;
+			}
+
+			crimesPassed++;
+			if(crimesPassed == player->thisActiveCrimes->numActiveCrimes){
+				break;
+			}
+		}
+	}
+
+}
+*/
+
+void removeActiveCrimesFromIndividual(individual * player, int individualID){
 	int i, crimesPassed = 0;
 
 	individual * thisNPC = getIndividualFromRegistry(individualID);
@@ -2314,7 +2340,7 @@ int murderCrimeAlreadyExists(activeCrimeEntry * thisCrime, int victimID, int wit
 }
 
 int activeCrimeAlreadyExists(individual * player, crimeType crime, int victimID, int itemID, int witnessID){
-	int i, numCrimesPassed;
+	int i, numCrimesPassed = 0;
 
 		if(player->thisActiveCrimes->numActiveCrimes== 0){
 			return 0;
@@ -2526,7 +2552,7 @@ int attemptToPickPocketItem(item * thisItem, individual * player){
 		return 1;
 	}else if(d20 == 1){
 		if(targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS){
-			processCrimeEvent(CRIME_PICKPOCKETING, 10 + thisItem->price, targetIndividual->ID, 0);
+			processCrimeEvent(CRIME_PICKPOCKETING, 10 + thisItem->price, targetIndividual->ID, thisItem->ID);
 		}
 
 		char outStr[128];
@@ -2545,7 +2571,7 @@ int attemptToPickPocketItem(item * thisItem, individual * player){
 		return 1;
 	}else{
 		if(targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS){
-			processCrimeEvent(CRIME_PICKPOCKETING, 10 + thisItem->price, targetIndividual->ID, 0);
+			processCrimeEvent(CRIME_PICKPOCKETING, 10 + thisItem->price, targetIndividual->ID, thisItem->ID);
 		}
 
 		char outStr[128];
