@@ -243,6 +243,10 @@ void previousDialogDecision(){
 dialogMessage * getDialogMessageByID(int id){
 	int i;
 
+	if(id == 0){
+		return NULL;
+	}
+
 	for(i = 0; i < thisDialogInstance->numDialogMessages; i++){
 		if(thisDialogInstance->dialogMessages[i]->messageID == id){
 			return thisDialogInstance->dialogMessages[i];

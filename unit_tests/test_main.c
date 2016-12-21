@@ -248,13 +248,13 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(testPlayer->playerCharacter->x == 6 && testPlayer->playerCharacter->y == 8);
 
 	//try talking to npc, too far away
-	assert(!tryTalk(testGroupContainer->npcs, testPlayer,0,2));
+	assert(!tryTalkIndividualFromField(testPlayer,main_test_field,0,2));
 
 	//warp player closer to npc
 	moveIndividualSpace(main_test_field,testPlayer,1,1);
 
 	//talking will be successful now:
-	assert(tryTalk(testGroupContainer->npcs, testPlayer,0,2));
+	assert(tryTalkIndividualFromField(testPlayer,main_test_field,0,2));
 
 	//advance dialog (enter) "Hello"
 	advanceDialog();

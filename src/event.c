@@ -403,7 +403,7 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 	if(crimeAlertsVictim((crimeType) crimeTypeID)){
 		if(player->targetedIndividual != NULL){
 			if(player->targetedIndividual->currentGroupType == GROUP_GUARDS || isInGuardLoS){
-				changePlayerDispositionForFriendlyGroups(guards, npcs, 1);
+				changePlayerDispositionForFriendlyGroups(guards, npcs, 0, 1);
 			}
 
 			player->targetedIndividual->thisBehavior->isHostileToPlayer = 1;
@@ -422,7 +422,7 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 				setGroupSpecialDialog(guards, DIALOG_CRIME_WITNESS);
 
 				addReportedCrime(player, (crimeType) crimeTypeID, bounty, crimeEvent->individualID, crimeEvent->itemID);
-				changePlayerDispositionForFriendlyGroups(guards, npcs, 1);
+				changePlayerDispositionForFriendlyGroups(guards, npcs, 0, 1);
 				return -1;
 			}else if(player->targetedIndividual->currentGroupType == GROUP_NPCS){
 				if(!activeCrimeAlreadyExists(player,(crimeType)  crimeTypeID, crimeEvent->individualID, crimeEvent->itemID, crimeEvent->individualID)){

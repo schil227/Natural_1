@@ -56,12 +56,13 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				}
 
 			}else if(getCursorMode() == CURSOR_TALK){ //talk to the individual
-				tryTalkGroups(thisGroupContainer, player, getCursorX(), getCursorY());
+				if(tryTalkIndividualFromField(player, main_field, getCursorX(), getCursorY())){
+					viewShift->xShift = viewShift->xShiftOld;
+					viewShift->yShift = viewShift->yShiftOld;
+					decreaseTurns(player, thisGroupContainer, 1);
+					toggleInCursorMode();
+				}
 
-				viewShift->xShift = viewShift->xShiftOld;
-				viewShift->yShift = viewShift->yShiftOld;
-				decreaseTurns(player, thisGroupContainer, 1);
-				toggleInCursorMode();
 			}else if (getCursorMode() == CURSOR_ABILITY){
 				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
 					int numActions = 1;

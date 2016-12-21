@@ -74,6 +74,7 @@ individual *initIndividual(){
 	toReturn->thisBehavior->isFocusedOnPlayer = 0;
 	toReturn->thisBehavior->isThreatened = 0;
 	toReturn->thisBehavior->isSurrounded = 0;
+	toReturn->thisBehavior->hasAlreadyYieldedToPlayer = 0;
 
 	toReturn->specialDialog = NULL;
 
@@ -1292,6 +1293,14 @@ int individualWithinRange(individual * thisIndividual, individual * target){
 
 	if(abs(thisIndividual->playerCharacter->x - target->playerCharacter->x) <= range
 	&& abs(thisIndividual->playerCharacter->y - target->playerCharacter->y) <= range){
+		return 1;
+	}
+	return 0;
+}
+
+int individualWithinTalkingRange(individual * thisIndividual, individual * target, int talkingRange){
+	if(abs(thisIndividual->playerCharacter->x - target->playerCharacter->x) <= talkingRange
+	&& abs(thisIndividual->playerCharacter->y - target->playerCharacter->y) <= talkingRange){
 		return 1;
 	}
 	return 0;

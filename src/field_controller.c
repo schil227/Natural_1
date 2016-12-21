@@ -836,38 +836,22 @@ int tryPickPocketGroup(individualGroup * thisGroup, individual * player, int cur
 	return toReturn;
 }
 
-void tryTalkGroups(groupContainer * thisGroupContainer, individual * player, int cursorX, int cursorY){
-	if(!tryTalk(thisGroupContainer->npcs,player,cursorX,cursorY) &&
-			!tryTalk(thisGroupContainer->beasts,player,cursorX,cursorY) &&
-			!tryTalk(thisGroupContainer->guards,player,cursorX,cursorY) &&
-			!tryTalk(thisGroupContainer->allies,player,cursorX,cursorY) &&
-			!tryTalk(thisGroupContainer->enemies,player,cursorX,cursorY)){
+int tryTalkIndividualFromField(individual * player, field * thisField, int cursorX, int cursorY){
+	individual * tmpIndividual = getIndividualFromField(thisField, cursorX, cursorY);
+
+	if(tmpIndividual == NULL){
 		cwrite("There's nobody there.");
+		return 0;
 	}
-}
 
-int tryTalk(individualGroup * thisGroup, individual * thisIndividual, int cursorX, int cursorY){
-	int index, individualsPassed = 0;
-	for (index = 0; index < thisGroup->MAX_INDIVIDUALS; index++) {
-
-		individual * tmpIndividual = thisGroup->individuals[index];
-
-		if (tmpIndividual != NULL) {
-			individualsPassed++;
-
-			if (tmpIndividual->playerCharacter->x == cursorX && tmpIndividual->playerCharacter->y == cursorY && individualWithinRange(thisIndividual, tmpIndividual)) {
-				if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)), tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer)){
-					setSpeakingIndividualID(tmpIndividual->ID);
-					toggleDrawDialogBox();
-				}
-				return 1;
-			}
-
-			if (individualsPassed == thisGroup->numIndividuals){
-				break;
-			}
+	if(individualWithinTalkingRange(player, tmpIndividual, 2)){
+		if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)), tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer)){
+			setSpeakingIndividualID(tmpIndividual->ID);
+			toggleDrawDialogBox();
+			return 1;
 		}
 	}
+
 	return 0;
 }
 

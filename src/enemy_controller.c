@@ -1669,6 +1669,22 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 	findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField);
 
 	if(guard->targetedIndividual == NULL){
+
+		//talk to player if they have a bounty
+		if(getCurrentBounty(player) > 0){
+			if(individualWithinTalkingRange(guard, player, 2)){
+				setCurrentMessageByIndividualID(guard->ID, (guard->thisBehavior->isHostileToPlayer && (guard->currentGroupType == GROUP_NPCS || guard->currentGroupType == GROUP_GUARDS)), guard->thisBehavior->hasAlreadyYieldedToPlayer);
+
+				setSpeakingIndividualID(guard->ID);
+				toggleDrawDialogBox();
+				guard->remainingActions--;
+				return 0;
+
+			}else{
+				return moveCloserToTarget(guard, player, thisField, thisMoveNodeMeta);
+			}
+		}
+
 		if(!atDesiredLocation(guard)){
 			return moveToSelectedLocation(guard, thisField, thisMoveNodeMeta, guard->desiredLocation->x, guard->desiredLocation->y);
 		}
@@ -1954,7 +1970,10 @@ individual * getDangerousIndividualNearByInLoS(individual * friendlyIndividual, 
 
 void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
 	if(friendlyIndividual->targetedIndividual != NULL){
-		if(friendlyIndividual->targetedIndividual->hp <= 0 || isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual,thisGroupContainer) || maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
+		if(friendlyIndividual->targetedIndividual->hp <= 0
+				|| isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual,thisGroupContainer)
+				|| (friendlyIndividual->targetedIndividual->isPlayer && !friendlyIndividual->thisBehavior->isHostileToPlayer)
+				|| maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
 			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
 			if(friendlyIndividual->targetedIndividual != NULL){
