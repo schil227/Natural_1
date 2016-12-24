@@ -92,7 +92,7 @@ cordArr * getUniquePassableCordsSurroundingCord(individual * thisIndividual, gro
 
 			space * tmpSpace = getSpaceFromField(thisField, newX, newY);
 
-			if(tmpSpace != NULL && tmpSpace->isPassable && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual, thisGroupContainer))){
+			if(tmpSpace != NULL && tmpSpace->isPassable && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual))){
 				cord * newCord = malloc(sizeof(cord));
 				newCord->x = newX;
 				newCord->y = newY;
@@ -637,7 +637,7 @@ int checkForTargets(individual * enemy, individual * player, groupContainer * th
 
 			enemy->targetedDuration--;
 
-			if(enemy->targetedDuration == 0){
+			if(enemy->targetedDuration <= 0){
 				int targetResubscription = rand() % 100;
 
 				if(targetIsInSight && isGreaterThanPercentage(targetResubscription, 100, 50)){
@@ -740,27 +740,36 @@ void rerollBehavior(individual * thisIndividual){
 	}
 }
 
-int isAlly(individual * thisIndividual, individual * possibleAlly, groupContainer * thisGroupContainer){
-	int i, individualsPassed = 0;
-
-	if(possibleAlly->faction == -1 || thisIndividual->faction != possibleAlly->faction){
+int isAlly(individual * thisIndividual, individual * possibleAlly){
+	if(thisIndividual->faction == -1 || possibleAlly->faction == -1){
 		return 0;
 	}
 
-	individualGroup * thisGroup =  getGroupFromIndividual(thisGroupContainer, thisIndividual);
+	if(thisIndividual->currentGroupType == possibleAlly->currentGroupType && thisIndividual->faction == possibleAlly->faction){
+		return 1;
+	}
 
-	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
-		if(thisGroup->individuals[i] != NULL){
-			individualsPassed++;
-		}
-
-		if(thisGroup->individuals[i] == possibleAlly){
+	if(thisIndividual->isPlayer || thisIndividual->currentGroupType == GROUP_ALLIES){
+		if(!possibleAlly->thisBehavior->isHostileToPlayer){
 			return 1;
+		}else{
+			return 0;
 		}
+	}
 
-		if(individualsPassed == thisGroup->numIndividuals){
-			break;
+	if(possibleAlly->isPlayer || possibleAlly->currentGroupType == GROUP_ALLIES){
+		if(!thisIndividual->thisBehavior->isHostileToPlayer){
+			return 1;
+		}else{
+			return 0;
 		}
+	}
+
+	//guards dont attack NPCs, NPCs dont attack each other
+	if((thisIndividual->currentGroupType == GROUP_GUARDS && possibleAlly->currentGroupType == GROUP_NPCS)
+			|| (thisIndividual->currentGroupType == GROUP_NPCS && possibleAlly->currentGroupType == GROUP_GUARDS)
+			|| (thisIndividual->currentGroupType == GROUP_NPCS && possibleAlly->currentGroupType == GROUP_NPCS)){
+		return 1;
 	}
 
 	return 0;
@@ -810,7 +819,7 @@ cord * findRetreatSpace(individual * thisIndividual, groupContainer * thisGroupC
 
 			space * nextSpace = getSpaceFromField(thisField, newX, newY);
 
-			if(nextSpace != NULL && nextSpace->isPassable && (nextSpace->currentIndividual == NULL || isAlly(thisIndividual, nextSpace->currentIndividual, thisGroupContainer)) ){
+			if(nextSpace != NULL && nextSpace->isPassable && (nextSpace->currentIndividual == NULL || isAlly(thisIndividual, nextSpace->currentIndividual)) ){
 				retreatSpot->x = newX;
 				retreatSpot->y = newY;
 
@@ -1081,7 +1090,7 @@ int noEnemiesInRange(individual * enemy, groupContainer * thisGroupContainer, fi
 		for(j = startingY; j < startingY + (range*2 + 1); j++){
 			space * tmpSpace = getSpaceFromField(thisField, i, j);
 
-			if(tmpSpace != NULL && tmpSpace->currentIndividual != NULL && !isAlly(enemy, tmpSpace->currentIndividual, thisGroupContainer) ){
+			if(tmpSpace != NULL && tmpSpace->currentIndividual != NULL && !isAlly(enemy, tmpSpace->currentIndividual) ){
 				return 0;
 			}
 		}
@@ -1180,7 +1189,7 @@ int selectHealingAbility(individual * thisIndividual){
 	return 1;
 }
 
-individualGroup * getAlliesInRange(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField, int radius){
+individualGroup * getAlliesInRange(individual * thisIndividual, field * thisField, int radius){
 	int startingX = max(thisIndividual->playerCharacter->x - radius,0);
 	int startingY = max(thisIndividual->playerCharacter->y - radius,0);
 	int i, j;
@@ -1191,7 +1200,7 @@ individualGroup * getAlliesInRange(individual * thisIndividual, groupContainer *
 		for(j = startingY; j < startingY + radius*2 + 1; j++){
 			individual * tmpIndiviudal = getIndividualFromField(thisField, i, j);
 
-			if(tmpIndiviudal != NULL && isAlly(thisIndividual, tmpIndiviudal, thisGroupContainer)){
+			if(tmpIndiviudal != NULL && isAlly(thisIndividual, tmpIndiviudal)){
 				addIndividualToGroup(alliesInRange, tmpIndiviudal);
 			}
 		}
@@ -1295,7 +1304,7 @@ int tacticalModule(individual * enemy, individual * player, groupContainer * thi
 			return moveToGetTargetInRange(enemy, thisGroupContainer, thisField, thisMoveNodeMeta);
 		}
 	}else{
-		individualGroup * allies = getAlliesInRange(enemy,thisGroupContainer, thisField,4);
+		individualGroup * allies = getAlliesInRange(enemy, thisField,4);
 
 		//Move closer to an ally nearby
 		if(allies->numIndividuals > 0){
@@ -1592,7 +1601,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			return 0;
 		}
 
-		individualGroup * alliesInRange = getAlliesInRange(enemy, thisGroupContainer, thisField, 8);
+		individualGroup * alliesInRange = getAlliesInRange(enemy, thisField, 8);
 
 		if(selectHealingAbility(enemy)){
 			individual * ally  = allyRequiringHealing(enemy, alliesInRange);
@@ -1835,7 +1844,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 			return 0;
 		}
 
-		individualGroup * alliesInRange = getAlliesInRange(guard, thisGroupContainer, thisField, 8);
+		individualGroup * alliesInRange = getAlliesInRange(guard, thisField, 8);
 
 		if(selectHealingAbility(guard)){
 			individual * ally  = allyRequiringHealing(guard, alliesInRange);
@@ -1971,7 +1980,7 @@ individual * getDangerousIndividualNearByInLoS(individual * friendlyIndividual, 
 void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
 	if(friendlyIndividual->targetedIndividual != NULL){
 		if(friendlyIndividual->targetedIndividual->hp <= 0
-				|| isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual,thisGroupContainer)
+				|| isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual)
 				|| (friendlyIndividual->targetedIndividual->isPlayer && !friendlyIndividual->thisBehavior->isHostileToPlayer)
 				|| maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
 			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);

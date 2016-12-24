@@ -319,7 +319,7 @@ int becomeNPC(individual * player, int individualID, int faction, groupContainer
 		thisIndividual->thisBehavior->isFocusedOnPlayer = 0;
 		thisIndividual->faction = faction;
 
-		if(thisIndividual->targetedIndividual == player){
+		if(thisIndividual->targetedIndividual->isPlayer){
 			thisIndividual->targetedIndividual = NULL;
 			thisIndividual->targetedDuration = 0;
 		}

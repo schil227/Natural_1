@@ -259,7 +259,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		int x, y;
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 
-		ret = SetTimer(hwnd, ID_TIMER, 16, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps
+		ret = SetTimer(hwnd, ID_TIMER, 32, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps, 48 - 15 fps
 
 		if (ret == 0) {
 			MessageBox(hwnd, "Could not SetTimer()!", "Error",
@@ -477,7 +477,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
 	} else if(postMoveMode){
 //		printf("looping in moveMode\n");
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode, viewShift, 1);
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,3,&postMoveMode, viewShift, 1);
 		if (!postMoveMode) {
 
 			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
@@ -549,7 +549,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->groupActionMode = 0;
 
 			//If not moving
-
 			if(!performAction(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex], player, thisGroupContainer, main_field, &thisMoveNodeMeta)){
 				thisGroupContainer->postGroupActionMode = 1;
 			}else{
