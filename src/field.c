@@ -153,8 +153,6 @@ int yMoveChange(int dir){
 int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 	int inX = thisIndividual->playerCharacter->x;
 	int inY = thisIndividual->playerCharacter->y;
-	//space * currentSpace = getSpaceFromField(thisField,inX,inY);
-//	space * newSpace;
 	int newX = thisIndividual->playerCharacter->x + xMoveChange(direction);
 	int newY = thisIndividual->playerCharacter->y + yMoveChange(direction);
 
@@ -163,10 +161,6 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 		return 0;
 	}
 
-	//space exists, wont be null
-//	newSpace = getSpaceFromField(thisField,newX,newY);
-
-	//can the individual go to this space?
 	if(getSpaceFromField(thisField,newX,newY)->isPassable && getSpaceFromField(thisField,newX,newY)->currentIndividual == NULL){
 		getSpaceFromField(thisField,inX,inY)->currentIndividual = NULL;
 		getSpaceFromField(thisField,newX,newY)->currentIndividual = thisIndividual;
@@ -174,7 +168,6 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 		thisIndividual->playerCharacter->y = newY;
 		return 1;
 	}else{
-//		printf("is not passable");
 		return 0;
 	}
 }

@@ -493,7 +493,6 @@ void setGroupToField(field * thisField, individualGroup * thisGroup){
 				break;
 			}
 		}
-
 	}
 }
 
@@ -829,7 +828,6 @@ int tryPickPocketGroup(individualGroup * thisGroup, individual * player, int cur
 			if(individualsPassed == thisGroup->numIndividuals){
 				break;
 			}
-
 		}
 	}
 

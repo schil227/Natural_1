@@ -43,36 +43,36 @@ void addNodeToList(node * newNode, node ** nodeList){
 
 }
 
-node ** getNewActiveNodes(node * parentNode, node ** allNodes, field * thisField){
+node ** getNewActiveNodes(node * parentNode, node ** allNodes, int targetX, int targetY, individual * thisIndividual, field * thisField){
 	node** newActiveNodes = malloc(sizeof(node*)*9);
 	int x,dx,dy,newX,newY, index=0;
 	for(x = 0; x < 9; x++){
 		newActiveNodes[x] = NULL;
 	}
 
-//	printf("getting new active nodes \n");
 	if (parentNode->pathLength < 10) {
 		for (dx = -1; dx < 2; dx++) {
 			for (dy = -1; dy < 2; dy++) {
 				newX = parentNode->x + dx;
 				newY = parentNode->y + dy;
-//				tmpSpace = getSpaceAddressFromField(thisField, newX, newY);
-//				printf("got space \n");
 
-				if (isSpacePassable(thisField, newX, newY) == 1 && containsNode(newX, newY, allNodes) == 0) {
-//					printf("found new node. \n");
+				space * tmpSpace = getSpaceFromField(thisField, newX, newY);
+
+				if(tmpSpace == NULL || containsNode(newX, newY, allNodes)){
+					continue;
+				}
+
+				if (tmpSpace->isPassable && (thisIndividual == NULL || tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual) || (newX == targetX && newY == targetY))){
 					node * newNode = createNewNode(parentNode->pathLength + 1, newX, newY);
 					newNode->previousNode = parentNode;
 					addNodeToList(newNode, allNodes);
 					newActiveNodes[index] = newNode;
 					index++;
 				}
-//				printf("done with if \n");
 			}
 		}
 	}
-//	printf("index: %d\n", index);
-//	printf("done with getNewActiveNodes call \n");
+
 	newActiveNodes[index] = NULL;
 	return newActiveNodes;
 }
@@ -105,23 +105,18 @@ cordArr * getUniquePassableCordsSurroundingCord(individual * thisIndividual, gro
 	return toReturn;
 }
 
-node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, field * thisField){
+node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, individual * thisIndividual, field * thisField){
 	node * newActiveNodes[100];
 	int x, i=0, numNewActiveNodes = 0;
 	for(x = 0; x < 100; x++){
 		newActiveNodes[x] = NULL;
 	}
 
-	//	printf("New pathFind iteration \n");
-
 	while(activeNodes[i] != NULL){
-	//	printf("active node %d \n", i);
 		int j = 0;
-		node ** newNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField);
+		node ** newNodes = getNewActiveNodes(activeNodes[i], allNodes, targetX, targetY, thisIndividual, thisField);
 
 		while(newNodes[j] != NULL){
-		//	printf("checking new node: [%d,%d] == [%d,%d] \n", newNodes[j]->x, newNodes[j]->y, targetX, targetY);
-
 			if(newNodes[j]->x == targetX && newNodes[j]->y == targetY){ //found target space
 				node * foundTargetSpace = newNodes[j];
 				free(newNodes);
@@ -132,38 +127,22 @@ node* pathFind(int targetX, int targetY, node ** allNodes, node ** activeNodes, 
 			numNewActiveNodes++;
 			addNodeToList(newNodes[j], newActiveNodes);
 			j++;
-
 		}
+
 		free(newNodes);
 		i++;
 	}
 
-//	free(activeNodes);
-
 	if(numNewActiveNodes == 0){
-//		printf("Path not found.");
 		return createNewNode(-1,-1,-1);
 	}
 
-//	printf("recurring on the following spaces:");
-//	printNodeList(newActiveNodes);
-//	printf("all nodes:");
-//	printNodeList(allNodes);
-	return pathFind(targetX, targetY, allNodes, newActiveNodes, thisField);
+	return pathFind(targetX, targetY, allNodes, newActiveNodes, thisIndividual, thisField);
 }
 
-/*
- * getFullNodePath:
- * This is the pathfinding algorithm, which finds the shortest path between two individuals.
- * This function returns a struct nodeArr, which is a list of node pointers (node closest to
- *  thisIndividual first) and the size of the nodePointers
- *
- *  Note that this algorithm does not include 'weighted' spaces, meaning that each space takes
- *  the same movement-cost to traverse (
- */
-nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, int targetY){
+nodeArr * getFullNodePath(field * thisField, individual * thisIndividual, int thisX, int thisY, int targetX, int targetY){
 	int i, size = 0;
-	node * startingNode = createNewNode(0,thisX,thisY); //startingSpace);
+	node * startingNode = createNewNode(0,thisX,thisY);
 	startingNode->previousNode = NULL;
 	node * allNodes[300];
 
@@ -176,8 +155,8 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 	}
 	allNodes[0] = startingNode;
 	activeNodes[0] = startingNode;
-//	printf("starting:3\n");
-	node * endNode = pathFind(targetX, targetY, allNodes, activeNodes, thisField);
+
+	node * endNode = pathFind(targetX, targetY, allNodes, activeNodes, thisIndividual, thisField);
 
 	nodeArr * resultArr = malloc(sizeof(nodeArr));
 	resultArr->size = 0;
@@ -196,7 +175,6 @@ nodeArr * getFullNodePath(field * thisField, int thisX,int thisY,int  targetX, i
 		}
 
 		resultArr->size = size;
-//		resultArr->nodeArray = malloc(sizeof(node*)*size);
 
 		tmpNode = endNode;
 
@@ -258,27 +236,23 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 	}
 
 	i = 0;
-	printf("endnode: [%d,%d]\n", endNode->x,endNode->y);
-	//check for free spaces in active nodes
-	while(activeNodes[i] != NULL){
-//		addNodeToList(activeNodes[i], allNodes);
 
+	while(activeNodes[i] != NULL){
 		if( !spaceIsTaken(activeNodes[i], thisField)){
 			return activeNodes[i];
 		}
 
 		if(moveRange > 0){
-			node ** tmpNodes = getNewActiveNodes(activeNodes[i], allNodes, thisField); // filters out blocked nodes and nodes in allNodes
+			node ** tmpNodes = getNewActiveNodes(activeNodes[i], allNodes, -1, -1, thisIndividual, thisField); // filters out blocked nodes and nodes in allNodes
 			int j = 0;
 
 			while(tmpNodes[j] != NULL){
-
 				if(!spaceIsTaken(tmpNodes[j], thisField)){
 					addNodeToList(tmpNodes[j], newActiveNodes);
 				}
-//				printf("j: %d\n",j);
 				j++;
 			}
+
 			free(tmpNodes);
 		}
 
@@ -299,20 +273,18 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 				addNodeToList(tmpNode, newActiveNodes);
 
 				addNodeToList(tmpNode,allNodes);
-//				printf("called from a\n");
 				return findOpenNode( endNode->previousNode, newActiveNodes, thisIndividual, distanceFromLastNode, distanceFromLastNode +1, thisField, allNodes, nodePath, debugDepth++);
 			}
 		}
 	}else{
-//		printf("called from b\n");
 		return findOpenNode(endNode, newActiveNodes, thisIndividual, moveRange-1, distanceFromLastNode, thisField, allNodes,nodePath, debugDepth++);
 	}
 
 }
 
-nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividaul){
+nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIndividual){
 	int i;
-	int nodeIndex = max(min(nodePath->size, getAttributeSum(thisIndividaul,"mvmt")), 0);
+	int nodeIndex = max(min(nodePath->size, getAttributeSum(thisIndividual,"mvmt")), 0);
 
 
 	if(nodeIndex > 0){ //going somewhere
@@ -329,7 +301,7 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 		addNodeToList(endNodeCopy, activeNodes);
 		addNodeToList(endNodeCopy, allNodes);
 
-		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividaul, 0, 1, thisField, allNodes, nodePath, 0);
+		node * targetNode = findOpenNode(endNode, activeNodes, thisIndividual, 0, 1, thisField, allNodes, nodePath, 0);
 
 		if(targetNode != NULL){
 			int targetx, targety;
@@ -345,7 +317,7 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 				}
 			}
 
-			return getFullNodePath(thisField, thisIndividaul->playerCharacter->x, thisIndividaul->playerCharacter->y, targetx, targety);
+			return getFullNodePath(thisField, thisIndividual, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, targetx, targety);
 		} else {
 			printf("returning null\n");
 
@@ -371,7 +343,7 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 }
 
 nodeArr * getSpaceClosestToSpace(field * thisField, individual * thisIndividual, int x, int y){
-	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, x, y);
+	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, x, y);
 
 	nodeArr * actualPath = processPath(thisField, resultArr, thisIndividual);
 	destroyNodeArr(resultArr);
@@ -380,7 +352,7 @@ nodeArr * getSpaceClosestToSpace(field * thisField, individual * thisIndividual,
 }
 
 nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual, individual * targetIndividual){
-	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
+	nodeArr * resultArr = getFullNodePath(thisField, thisIndividual, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, targetIndividual->playerCharacter->x, targetIndividual->playerCharacter->y);
 
 	nodeArr * actualPath = processPath(thisField, resultArr, thisIndividual);
 	destroyNodeArr(resultArr);
@@ -749,7 +721,8 @@ int isAlly(individual * thisIndividual, individual * possibleAlly){
 		return 1;
 	}
 
-	if(thisIndividual->isPlayer || thisIndividual->currentGroupType == GROUP_ALLIES){
+	if((thisIndividual->isPlayer || thisIndividual->currentGroupType == GROUP_ALLIES)
+			&& (possibleAlly->currentGroupType == GROUP_NPCS || possibleAlly->currentGroupType == GROUP_GUARDS)){
 		if(!possibleAlly->thisBehavior->isHostileToPlayer){
 			return 1;
 		}else{
@@ -757,7 +730,8 @@ int isAlly(individual * thisIndividual, individual * possibleAlly){
 		}
 	}
 
-	if(possibleAlly->isPlayer || possibleAlly->currentGroupType == GROUP_ALLIES){
+	if((possibleAlly->isPlayer || possibleAlly->currentGroupType == GROUP_ALLIES)
+			&& (thisIndividual->currentGroupType == GROUP_NPCS || thisIndividual->currentGroupType == GROUP_GUARDS)){
 		if(!thisIndividual->thisBehavior->isHostileToPlayer){
 			return 1;
 		}else{

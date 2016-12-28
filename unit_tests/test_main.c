@@ -33,28 +33,13 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	UINT ret;
 
 	int x, y;
-//	main_test_field = loadMap("test_map1.txt", mapTestDirectory, testPlayer, testGroupContainer->enemies, testGroupContainer->npcs);
 	int imageID;
 
 	assert(testGroupContainer->enemies->numIndividuals == 6);
 
 	assert(testGroupContainer->npcs->numIndividuals == 1);
 
-//	for (y = 0; y < main_test_field->totalY; y++) {
-//		for (x = 0; x < main_test_field->totalX; x++) {
-//			imageID = (main_test_field->grid[x][y]->background)->imageID;
-//			main_test_field->grid[x][y]->background->image = malloc(
-//					sizeof(HBITMAP));
-//			main_test_field->grid[x][y]->background->image = LoadBitmap(
-//					GetModuleHandle(NULL), imageID);
-//			if (main_test_field->grid[x][y]->background->image == NULL) {
-//				printf("failed\n");
-//			}
-//
-//		}
-//	}
-
-//player is on field at their coordinates, name check
+	//player is on field at their coordinates, name check
 	individual * tmpIndividual;// = malloc(sizeof(tmpIndividual));
 	tmpIndividual = getIndividualFromField( main_test_field,testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
 
@@ -117,7 +102,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 
 	//get full node path of closest skeleton to player
-	nodeArr * resultArr = getFullNodePath(main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y,
+	nodeArr * resultArr = getFullNodePath(main_test_field, testPlayer, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y,
 			testGroupContainer->enemies->individuals[4]->playerCharacter->x, testGroupContainer->enemies->individuals[4]->playerCharacter->y);
 
 	assert(resultArr->nodeArray[0]->x == 2 && resultArr->nodeArray[0]->y == 0);
