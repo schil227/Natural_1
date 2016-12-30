@@ -77,7 +77,7 @@ node ** getNewActiveNodes(node * parentNode, node ** allNodes, int targetX, int 
 	return newActiveNodes;
 }
 
-cordArr * getUniquePassableCordsSurroundingCord(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField, cord * thisCord, cordArr * totalCords){
+cordArr * getUniquePassableCordsSurroundingCord(individual * thisIndividual, field * thisField, cord * thisCord, cordArr * totalCords, int nonAlliesPassable){
 	int dx,dy, newX, newY;
 	cordArr * toReturn = initCordArr();
 
@@ -92,7 +92,7 @@ cordArr * getUniquePassableCordsSurroundingCord(individual * thisIndividual, gro
 
 			space * tmpSpace = getSpaceFromField(thisField, newX, newY);
 
-			if(tmpSpace != NULL && tmpSpace->isPassable && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual))){
+			if(tmpSpace != NULL && tmpSpace->isPassable && (nonAlliesPassable || (thisIndividual == NULL || tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual)))){
 				cord * newCord = malloc(sizeof(cord));
 				newCord->x = newX;
 				newCord->y = newY;
@@ -596,6 +596,70 @@ individual * acquireTarget(individual * enemy, individual * player, groupContain
 	return NULL;
 }
 
+individual * getClosestEnemyInLoS(individual * thisIndividual, field * thisField){
+	int i,j,k;
+	cord * startingCord = malloc(sizeof(cord));
+	startingCord->x = thisIndividual->playerCharacter->x;
+	startingCord->y = thisIndividual->playerCharacter->y;
+
+	cordArr * activeCords = initCordArr();
+	cordArr * totalCords = initCordArr();
+
+	addCordIfUnique(activeCords, startingCord);
+	addCordIfUnique(totalCords, startingCord);
+
+	individualGroup * foundEnemies = initGroup();
+
+	for(i = 0; i < 10; i++){
+		cordArr * newActiveCords = initCordArr();
+		cordArr * newCords;
+
+		for(j = 0; j < activeCords->numCords; j++){
+			int foundIndividual = 0;
+			newCords = getUniquePassableCordsSurroundingCord(thisIndividual, thisField, activeCords->cords[j], totalCords, 1);
+
+			for(k = 0; k < newCords->numCords; k++){
+				addCordIfUnique(totalCords, newCords->cords[k]);
+				addCordIfUnique(newActiveCords, newCords->cords[k]);
+				individual * tmpIndividual = getIndividualFromField(thisField, newCords->cords[k]->x, newCords->cords[k]->y);
+
+				if(tmpIndividual != NULL && !isAlly(thisIndividual, tmpIndividual) && isInLineOfSight(thisIndividual,tmpIndividual, thisField)){
+					addIndividualToGroup(foundEnemies, tmpIndividual);
+					foundIndividual = 1;
+				}
+			}
+
+			free(newCords);
+
+			if(foundIndividual){
+				int index = rand() % foundEnemies->numIndividuals;
+				individual * toReturn = foundEnemies->individuals[index];
+
+				free(activeCords);
+				free(newActiveCords);
+				free(foundEnemies);
+				destroyCordArr(totalCords);
+
+				return toReturn;
+			}
+		}
+
+		activeCords->numCords = 0;
+
+		for(j = 0; j < newActiveCords->numCords; j++){
+			addCordIfUnique(activeCords, newActiveCords->cords[j]);
+		}
+
+		free(newActiveCords);
+	}
+
+	free(foundEnemies);
+	free(activeCords);
+	destroyCordArr(totalCords);
+
+	return NULL;
+}
+
 int checkForTargets(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField){
 	if(enemy->targetedIndividual != NULL){
 		if(enemy->targetedIndividual->hp <= 0 || getIndividualFromField(thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y) == NULL){
@@ -622,7 +686,7 @@ int checkForTargets(individual * enemy, individual * player, groupContainer * th
 	}
 
 	if(enemy->targetedIndividual == NULL){
-		enemy->targetedIndividual = acquireTarget(enemy, player, thisGroupContainer, thisField);
+		enemy->targetedIndividual = getClosestEnemyInLoS(enemy, thisField);//acquireTarget(enemy, player, thisGroupContainer, thisField);
 	}
 
 	if(enemy->targetedIndividual == NULL){
@@ -839,7 +903,7 @@ int cordHasRangeAdvantage(individual* thisIndividual, int x, int y){
 
 }
 
-cord * getCordOutsideTargetRange(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField){
+cord * getCordOutsideTargetRange(individual * thisIndividual, field * thisField){
 	cord * startingCord = malloc(sizeof(cord));
 	startingCord->x = thisIndividual->playerCharacter->x;
 	startingCord->y = thisIndividual->playerCharacter->y;
@@ -865,7 +929,7 @@ cord * getCordOutsideTargetRange(individual * thisIndividual, groupContainer * t
 
 		for(j = 0; j < activeCords->numCords; j++){
 			int cordFound = 0;
-			newCords = getUniquePassableCordsSurroundingCord(thisIndividual, thisGroupContainer, thisField, activeCords->cords[j], totalCords);
+			newCords = getUniquePassableCordsSurroundingCord(thisIndividual, thisField, activeCords->cords[j], totalCords, 0);
 
 			for(k = 0; k < newCords->numCords; k++){
 				addCordIfUnique(totalCords, newCords->cords[k]);
@@ -911,7 +975,7 @@ cord * getCordOutsideTargetRange(individual * thisIndividual, groupContainer * t
 	return toReturn;
 }
 
-cord * getCordWithTargetInRange(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField){
+cord * getCordWithTargetInRange(individual * thisIndividual, field * thisField){
 	cord * startingCord = malloc(sizeof(cord));
 	startingCord->x = thisIndividual->playerCharacter->x;
 	startingCord->y = thisIndividual->playerCharacter->y;
@@ -937,7 +1001,7 @@ cord * getCordWithTargetInRange(individual * thisIndividual, groupContainer * th
 
 		for(j = 0; j < activeCords->numCords; j++){
 			int cordFound = 0;
-			newCords = getUniquePassableCordsSurroundingCord(thisIndividual, thisGroupContainer, thisField, activeCords->cords[j], totalCords);
+			newCords = getUniquePassableCordsSurroundingCord(thisIndividual, thisField, activeCords->cords[j], totalCords, 0);
 
 			for(k = 0; k < newCords->numCords; k++){
 				addCordIfUnique(totalCords, newCords->cords[k]);
@@ -1020,9 +1084,9 @@ int moveToSelectedLocation(individual * thisIndividual, field * thisField,  move
 	return 1;
 }
 
-int moveToGetOutOfTargetsRange(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
+int moveToGetOutOfTargetsRange(individual * thisIndividual, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
 	int x, y;
-	cord * targetSpace = getCordOutsideTargetRange(thisIndividual, thisGroupContainer, thisField);
+	cord * targetSpace = getCordOutsideTargetRange(thisIndividual, thisField);
 
 	x = targetSpace->x;
 	y = targetSpace->y;
@@ -1032,9 +1096,9 @@ int moveToGetOutOfTargetsRange(individual * thisIndividual, groupContainer * thi
 	return moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, x, y);
 }
 
-int moveToGetTargetInRange(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
+int moveToGetTargetInRange(individual * thisIndividual, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
 	int x, y;
-	cord * targetSpace = getCordWithTargetInRange(thisIndividual, thisGroupContainer, thisField);
+	cord * targetSpace = getCordWithTargetInRange(thisIndividual, thisField);
 	x = targetSpace->x;
 	y = targetSpace->y;
 
@@ -1240,7 +1304,7 @@ int attackModule(individual * enemy, individual * player, groupContainer * thisG
 	if(enemy->thisBehavior->isTactical && getAttributeSum(enemy, "range") > getAttributeSum(enemy->targetedIndividual,"range")  && individualWithinRange(enemy->targetedIndividual, enemy)){
 		 //&& isGreaterThanPercentage(rand() % 100, 100, 50)
 		int x, y;
-		cord * rangedCord = getCordWithTargetInRange(enemy, thisGroupContainer,thisField);
+		cord * rangedCord = getCordWithTargetInRange(enemy, thisField);
 		x = rangedCord->x;
 		y = rangedCord->y;
 
@@ -1264,7 +1328,15 @@ int attackModule(individual * enemy, individual * player, groupContainer * thisG
 		if(enemy->thisBehavior->isTactical){
 			return tacticalModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
 		}else{
-			return moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
+			int toReturn = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
+
+			//cannot reach target and target out of range, get new closer target
+			if(!toReturn){
+				enemy->targetedIndividual = NULL;
+				enemy->targetedDuration = 0;
+			}
+
+			return toReturn;
 		}
 
 	}
@@ -1275,7 +1347,7 @@ int tacticalModule(individual * enemy, individual * player, groupContainer * thi
 
 		if(!individualWithinRange(enemy, enemy->targetedIndividual)){
 			//move in attack range
-			return moveToGetTargetInRange(enemy, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return moveToGetTargetInRange(enemy, thisField, thisMoveNodeMeta);
 		}
 	}else{
 		individualGroup * allies = getAlliesInRange(enemy, thisField,4);
@@ -1292,7 +1364,7 @@ int tacticalModule(individual * enemy, individual * player, groupContainer * thi
 
 		//Move out of attack range
 		if(individualWithinRange(enemy->targetedIndividual, enemy)){
-			return moveToGetTargetInRange(enemy, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return moveToGetOutOfTargetsRange(enemy, thisField, thisMoveNodeMeta);
 		}
 	}
 
@@ -1450,6 +1522,11 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 						if(moving){
 							return moving;
+						}else{
+							//cannot reach target and target out of range, get new closer target
+							enemy->targetedIndividual = NULL;
+							enemy->targetedDuration = 0;
+							enemy->activeAbilities->selectedAbility = NULL;
 						}
 					}
 				}else{
@@ -1465,6 +1542,11 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 						if(moving){
 							return moving;
+						}else{
+							//cannot reach target and target out of range, get new closer target
+							enemy->allyIndividual = NULL;
+							enemy->targetedDuration = 0;
+							enemy->activeAbilities->selectedAbility = NULL;
 						}
 					}
 				}else{
@@ -1543,7 +1625,16 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 				int abilityRange = offensiveAbility->range->effectAndManaArray[offensiveAbility->range->selectedIndex]->effectMagnitude;
 
 				if(abilityRange < range){//dont remove selected ability - it's now on deck
-					return moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
+					int toReturn = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
+
+					if(!toReturn){
+						//cannot reach target and target out of range, get new closer target
+						enemy->targetedIndividual = NULL;
+						enemy->targetedDuration = 0;
+						enemy->activeAbilities->selectedAbility = NULL;
+					}
+
+					return toReturn;
 				}else{
 					cwrite("CASE 3\n");
 					return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
@@ -1592,6 +1683,11 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 					if(moving){
 						return moving;
+					}else{
+						//cannot reach target and target out of range, get new closer target
+						enemy->allyIndividual = NULL;
+						enemy->targetedDuration = 0;
+						enemy->activeAbilities->selectedAbility = NULL;
 					}
 				}
 			}
@@ -1624,6 +1720,11 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 			if(moving){
 				return moving;
+			}else{
+				//cannot reach target and target out of range, get new closer target
+				enemy->allyIndividual = NULL;
+				enemy->targetedDuration = 0;
+				enemy->activeAbilities->selectedAbility = NULL;
 			}
 		}
 
@@ -1693,6 +1794,11 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 						if(moving){
 							return moving;
+						}else{
+							//cannot reach target and target out of range, get new closer target
+							guard->targetedIndividual = NULL;
+							guard->targetedDuration = 0;
+							guard->activeAbilities->selectedAbility = NULL;
 						}
 					}
 				}else{
@@ -1708,6 +1814,11 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 						if(moving){
 							return moving;
+						}else{
+							//cannot reach target and target out of range, get new closer target
+							guard->allyIndividual = NULL;
+							guard->targetedDuration = 0;
+							guard->activeAbilities->selectedAbility = NULL;
 						}
 					}
 				}else{
@@ -1786,7 +1897,16 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 				int abilityRange = offensiveAbility->range->effectAndManaArray[offensiveAbility->range->selectedIndex]->effectMagnitude;
 
 				if(abilityRange < range){//dont remove selected ability - it's now on deck
-					return moveCloserToTarget(guard, guard->targetedIndividual, thisField, thisMoveNodeMeta);
+					int toReturn = moveCloserToTarget(guard, guard->targetedIndividual, thisField, thisMoveNodeMeta);
+
+					if(!toReturn){
+						//cannot reach target and target out of range, get new closer target
+						guard->targetedIndividual = NULL;
+						guard->targetedDuration = 0;
+						guard->activeAbilities->selectedAbility = NULL;
+					}
+
+					return toReturn;
 				}else{
 					cwrite("CASE 3\n");
 					return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->targetedIndividual->playerCharacter->x, guard->targetedIndividual->playerCharacter->y);
@@ -1835,6 +1955,11 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 					if(moving){
 						return moving;
+					}else{
+						//cannot reach target and target out of range, get new closer target
+						guard->allyIndividual = NULL;
+						guard->targetedDuration = 0;
+						guard->activeAbilities->selectedAbility = NULL;
 					}
 				}
 			}
@@ -1867,6 +1992,11 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 			if(moving){
 				return moving;
+			}else{
+				//cannot reach target and target out of range, get new closer target
+				guard->allyIndividual = NULL;
+				guard->targetedDuration = 0;
+				guard->activeAbilities->selectedAbility = NULL;
 			}
 		}
 
@@ -1957,7 +2087,7 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 				|| isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual)
 				|| (friendlyIndividual->targetedIndividual->isPlayer && !friendlyIndividual->thisBehavior->isHostileToPlayer)
 				|| maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
-			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
+			friendlyIndividual->targetedIndividual = getClosestEnemyInLoS(friendlyIndividual, thisField);// getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
 			if(friendlyIndividual->targetedIndividual != NULL){
 				friendlyIndividual->targetedDuration = (rand() % 4) + 6;
@@ -1971,7 +2101,7 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 		friendlyIndividual->targetedDuration--;
 
 		if(friendlyIndividual->targetedDuration == 0){
-			friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
+			friendlyIndividual->targetedIndividual = getClosestEnemyInLoS(friendlyIndividual, thisField); //getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
 			if(friendlyIndividual->targetedIndividual != NULL){
 				friendlyIndividual->targetedDuration = (rand() % 4) + 6;
@@ -1987,7 +2117,7 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 			friendlyIndividual->targetedDuration = 0;
 		}
 
-		friendlyIndividual->targetedIndividual = getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
+		friendlyIndividual->targetedIndividual = getClosestEnemyInLoS(friendlyIndividual,thisField);//getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
 		if(friendlyIndividual->targetedIndividual != NULL){
 			friendlyIndividual->targetedDuration = (rand() % 4) + 6;
