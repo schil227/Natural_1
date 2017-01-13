@@ -510,28 +510,26 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 //				printf("current selected x:%d y:%d\n",(*currentNode)->x,(*currentNode)->y);
 
-				space ** tmpSpace = (space **)getSpaceAddressFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
-				if ( tmpSpace != NULL && ((*tmpSpace)->currentIndividual == NULL || (*tmpSpace)->currentIndividual == thisIndividual) && (*tmpSpace)->isPassable) {
-
-
+				space * tmpSpace = getSpaceFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
+				if ( tmpSpace != NULL && tmpSpace->isPassable && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual))) {
 					moveNode ** oldNode = (moveNode **)alreadyContainsNode(thisMoveNodeMeta->rootMoveNode,(*currentNode)->x + dx, (*currentNode)->y + dy );
 
 					if(oldNode == NULL){
-					if (thisMoveNodeMeta->pathLength < getAttributeSum(thisIndividual, "mvmt")) {
+						if (thisMoveNodeMeta->pathLength < getAttributeSum(thisIndividual, "mvmt")) {
 
 
-						moveNode * nextNode = malloc(sizeof(moveNode));
-						nextNode->x = (*currentNode)->x + dx;
-						nextNode->y = (*currentNode)->y + dy;
-						nextNode->nextMoveNode = NULL;
-						nextNode->hasTraversed = 0;
-						(*currentNode)->nextMoveNode = (moveNode *)nextNode;
+							moveNode * nextNode = malloc(sizeof(moveNode));
+							nextNode->x = (*currentNode)->x + dx;
+							nextNode->y = (*currentNode)->y + dy;
+							nextNode->nextMoveNode = NULL;
+							nextNode->hasTraversed = 0;
+							(*currentNode)->nextMoveNode = (moveNode *)nextNode;
 
-						thisMoveNodeMeta->pathLength = thisMoveNodeMeta->pathLength + 1;
+							thisMoveNodeMeta->pathLength = thisMoveNodeMeta->pathLength + 1;
 
-						tryUpdateXShift(viewShift, nextNode->x);
-						tryUpdateYShift(viewShift, nextNode->y);
-					}
+							tryUpdateXShift(viewShift, nextNode->x);
+							tryUpdateYShift(viewShift, nextNode->y);
+						}
 					}else{ //node already exists
 						int removedNodes = freeUpMovePath((moveNode *)(*oldNode)->nextMoveNode);
 						(*oldNode)->nextMoveNode = NULL;
@@ -539,11 +537,9 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 						tryUpdateXShift(viewShift, (*oldNode)->x);
 						tryUpdateYShift(viewShift, (*oldNode)->y);
 					}
-
 				}
-
-//				free(currentNode);
 			}
+
 			break;
 		case 0x1B: //escape
 			*moveMode = 0;
@@ -552,14 +548,22 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 			break;
 		case 0x0D: //enter
 		{
-			*moveMode = 0;
-			if(thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
-				*postMoveMode = 1;
-				getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y)->currentIndividual = NULL;
-				viewShift->xShift = viewShift->xShiftOld;
-				viewShift->yShift = viewShift->yShiftOld;
+			moveNode * tmpMoveNode = thisMoveNodeMeta->rootMoveNode;
+			while(tmpMoveNode->nextMoveNode != NULL){
+				tmpMoveNode = tmpMoveNode->nextMoveNode;
 			}
 
+			individual * tmpIndividual = getIndividualFromField(thisField, tmpMoveNode->x, tmpMoveNode->y);
+
+			if(tmpIndividual == NULL || tmpIndividual == thisIndividual){
+				*moveMode = 0;
+				if(thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
+					*postMoveMode = 1;
+					getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y)->currentIndividual = NULL;
+					viewShift->xShift = viewShift->xShiftOld;
+					viewShift->yShift = viewShift->yShiftOld;
+				}
+			}
 		}
 			break;
 		}

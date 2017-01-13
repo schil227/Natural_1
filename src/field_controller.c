@@ -436,7 +436,7 @@ void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shi
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->guards, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->beasts, viewShift);
 
-	//draw animated enemy/npc over others
+	//draw animated individual over others
 	if(thisGroupContainer->enemies->currentIndividualIndex != -1){
 		drawIndividual(hdc, hdcBuffer, thisGroupContainer->enemies->individuals[thisGroupContainer->enemies->currentIndividualIndex], viewShift);
 	}
@@ -463,7 +463,11 @@ void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, sh
 
 		if(tmp != NULL){
 			individualsPassed++;
-			drawIndividual(hdc, hdcBuffer, thisGroup->individuals[index], viewShift);
+
+			//dont draw the current individual yet, do it after
+			if(index != thisGroup->currentIndividualIndex){
+				drawIndividual(hdc, hdcBuffer, thisGroup->individuals[index], viewShift);
+			}
 
 			if(individualsPassed == thisGroup->numIndividuals){
 				break;

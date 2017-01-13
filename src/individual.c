@@ -1436,19 +1436,19 @@ int animationFrameTickUpdate(character * thisCharacter){
 }
 
 void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftData * viewShift){
-		thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
+	thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
 
-		if(animationDelayUpdate(thisIndividual->playerCharacter)){
-			updateEquiptItemsToDelayedAnimationState(thisIndividual);
-		}
+	if(animationDelayUpdate(thisIndividual->playerCharacter)){
+		updateEquiptItemsToDelayedAnimationState(thisIndividual);
+	}
 
-		if(animationFrameTickUpdate(thisIndividual->playerCharacter)){
-			returnEquiptItemsToIdle(thisIndividual);
-		}
+	if(animationFrameTickUpdate(thisIndividual->playerCharacter)){
+		returnEquiptItemsToIdle(thisIndividual);
+	}
 
-		drawCharacterAnimation(hdc, hdcBuffer, thisIndividual->playerCharacter, viewShift, 0);
+	drawCharacterAnimation(hdc, hdcBuffer, thisIndividual->playerCharacter, viewShift, 0);
 
-		drawEquiptItems(hdc, hdcBuffer, thisIndividual, viewShift);
+	drawEquiptItems(hdc, hdcBuffer, thisIndividual, viewShift);
 }
 
 void returnEquiptItemsToIdle(individual * thisIndividual){

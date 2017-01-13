@@ -596,7 +596,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}
-
 }
 
 int triggerEvent(int eventID){
