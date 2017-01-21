@@ -26,6 +26,215 @@ static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit
 //field* main_test_field;
 //shiftData* testShiftData;
 
+actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field* testField){
+	individualGroup * testEnemies = testGroupContainer->enemies;
+	individualGroup * testGuards = testGroupContainer->guards;
+
+	//Only individual remaining after tests
+	individual * testEnemy = testEnemies->individuals[4];
+	int tmpX = testEnemy->playerCharacter->x;
+	int tmpY = testEnemy->playerCharacter->y;
+
+	assert(!isLowOnMana(testEnemy));
+
+	testEnemy->mana = 0;
+
+	assert(isLowOnMana(testEnemy));
+
+	channelMana(testEnemy);
+	assert(testEnemy->mana == 2);
+
+	assert(!isLowOnHP(testEnemy));
+
+	//raise base by significant magnitute, hp looks low
+	testEnemy->baseHP = 10;
+	assert(isLowOnHP(testEnemy));
+
+	ability * randHealAbility = getRandomHPRestoringAbility(testEnemy->mana, testEnemy->abilities);
+	assert(strcmp(randHealAbility->name, "Heal Target") == 0);
+
+	ability * randOffensiveAbility = getRandomOffensiveAbility(testEnemy);
+	assert(strcmp(randOffensiveAbility->name, "Fireball") == 0);
+
+	ability * randBuffAbility = getRandomBuffAbility(testEnemy);
+	assert(strcmp(randBuffAbility->name, "Focus") == 0);
+
+	item * randHealingItem = getRandomHPRestoringItem(testEnemy->backpack);
+	assert(strcmp(randHealingItem->name, "Herb") == 0);
+
+	//uses healing ability, not item
+	rand();
+	rand();
+	tryHeal(testEnemy,testPlayer, testGroupContainer, testField);
+	assert(testEnemy->hp == 7);
+
+	assert(isGreaterThanPercentage(5,10,2));
+	assert(!isGreaterThanPercentage(2,10,25));
+
+	assert(!abilityIsOffensive(randHealAbility));
+	assert(abilityIsOffensive(randOffensiveAbility));
+
+	assert(atDesiredLocation(testEnemy));
+
+	testEnemy->playerCharacter->x = 25;
+	testEnemy->playerCharacter->y = 25;
+	assert(!atDesiredLocation(testEnemy));
+
+	testEnemy->playerCharacter->x = tmpX;
+	testEnemy->playerCharacter->y = tmpY;
+
+	//move to 4,1 4,3 (between trees) and test LoS
+	assert(removeIndividualFromField(testField, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y));
+	assert(removeIndividualFromField(testField, testEnemy->playerCharacter->x, testEnemy->playerCharacter->y));
+
+	assert(moveIndividualSpace(testField, testPlayer, 4,1));
+	assert(!moveIndividualSpace(testField, testEnemy, 4,1));
+	assert(moveIndividualSpace(testField, testEnemy, 4,3));
+
+	/*  P
+	 * TTT
+	 *  E
+	 */
+
+	//RAND: 1/10 chance they wont notice (greater if sneaking)
+	assert(!isInLineOfSight(testEnemy, testPlayer, testField));
+
+	assert(removeIndividualFromField(testField, testEnemy->playerCharacter->x, testEnemy->playerCharacter->y));
+	assert(moveIndividualSpace(testField, testEnemy, 0,1));
+
+	/* E   P
+	 *    TTT
+	 */
+	assert(isInLineOfSight(testEnemy, testPlayer, testField));
+
+	assert(removeIndividualFromField(testField, testEnemy->playerCharacter->x, testEnemy->playerCharacter->y));
+	assert(moveIndividualSpace(testField, testEnemy, 2,2));
+
+	/*     P
+	 *   ETTT
+	 */
+	assert(!isInLineOfSight(testEnemy, testPlayer, testField));
+
+	assert(removeIndividualFromField(testField, testEnemy->playerCharacter->x, testEnemy->playerCharacter->y));
+	assert(moveIndividualSpace(testField, testEnemy, 1,2));
+
+	/*     P		Edge case, passes through {[1,2],[2,2],[3,2]!,[3,1],[4,1]}
+	 *  E TTT
+	 */
+	assert(!isInLineOfSight(testEnemy, testPlayer, testField));
+
+	assert(removeIndividualFromField(testField, testEnemy->playerCharacter->x, testEnemy->playerCharacter->y));
+	assert(moveIndividualSpace(testField, testEnemy, 0,2));
+
+	/*     P
+	 * E  TTT
+	 */
+	assert(isInLineOfSight(testEnemy, testPlayer, testField));
+
+	assert(strcmp(((individual *)getClosestEnemyInLoS(testEnemy, testField))->name, testPlayer->name) == 0);
+	checkForTargets(testEnemy, testPlayer, testGroupContainer, testField);
+
+	assert(strcmp(testEnemy->targetedIndividual->name, testPlayer->name) == 0);
+
+	//Used for cowardly actions, range is radius + 1
+	assert(!noEnemiesInRange(testEnemy, testGroupContainer, testField, 2));
+	assert(noEnemiesInRange(testEnemy, testGroupContainer, testField, 1));
+
+	assert(!abilityInRangeOfIndividual(randOffensiveAbility, testEnemy, testPlayer));
+
+	assert(removeIndividualFromField(testField, testEnemy->playerCharacter->x, testEnemy->playerCharacter->y));
+	assert(moveIndividualSpace(testField, testEnemy, 1,2));
+
+	assert(abilityInRangeOfIndividual(randOffensiveAbility, testEnemy, testPlayer));
+
+	testEnemy->activeAbilities->selectedAbility = randOffensiveAbility;
+
+	assert(testPlayer->hp == 15);
+
+	//Fireball player on their space
+	useAbilityOnTargetedSpace(testEnemy, testPlayer, testGroupContainer, testField, 4,1);
+
+	assert(testPlayer->hp == 14);
+
+	testEnemy->targetedIndividual = testPlayer;
+	testEnemy->targetedDuration = 3;
+	moveNodeMeta * thisMoveNodeMeta;
+	assert(moveCloserToTarget(testEnemy, testPlayer, testField, &thisMoveNodeMeta));
+
+	//As a side effect of moveCloserToTarget, the individuals is removed from the field
+	//returning individual to field:
+	assert(moveIndividualSpace(testField, testEnemy, 1,2));
+
+	assert(thisMoveNodeMeta->pathLength == 2);
+
+	moveNode * tmpMoveNode = thisMoveNodeMeta->rootMoveNode;
+	assert(tmpMoveNode->x == 2 && tmpMoveNode->y == 1);
+
+	tmpMoveNode = tmpMoveNode->nextMoveNode;
+	assert(tmpMoveNode->x == 3 && tmpMoveNode->y == 0);
+
+	freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
+	thisMoveNodeMeta->pathLength = 0;
+
+	// For some odd reason, running normally and running with debug causes the retreat space to differ;
+	// reinitializing the random seed causes consistant results; either form are correct since this method
+	// has a large set of acceptable outcomes.
+	srand(0);
+	cord * targetSpace = findRetreatSpace(testEnemy, testGroupContainer, testField, testEnemy->targetedIndividual->playerCharacter->x, testEnemy->targetedIndividual->playerCharacter->y);
+	printf("[%d,%d], %s\n", targetSpace->x, targetSpace->y, testEnemy->targetedIndividual->name);
+
+	assert(targetSpace->x == 0 && targetSpace->y == 0);
+
+	assert(selectHealingAbility(testEnemy));
+
+	assert(strcmp(testEnemy->activeAbilities->selectedAbility->name,randHealAbility->name) == 0);
+
+	individual * testGuard = testGuards->individuals[0];
+
+	assert(removeIndividualFromField(testField, testGuard->playerCharacter->x, testGuard->playerCharacter->y));
+	assert(moveIndividualSpace(testField, testGuard, 0,0));
+
+	findDangerousIndividualNearBy(testGuard, testPlayer,testGroupContainer, testField, 10);
+
+	assert(testGuard->targetedIndividual->ID == testEnemy->ID);
+
+	individualGroup * guardAllies = getAlliesInRange(testGuard, testField, 10);
+
+	assert(guardAllies->numIndividuals == 2);
+
+	testPlayer->hp = 1;
+
+	assert(((individual*)allyRequiringHealing(testGuard, guardAllies))->ID == testPlayer->ID);
+
+	testPlayer->hp = 20;
+
+	assert(allyRequiringHealing(testGuard, guardAllies) == NULL);
+
+	free(guardAllies);
+
+	assert(testEnemy->thisBehavior->isOffensive == 0);
+	assert(testEnemy->thisBehavior->isTactical == 0);
+	assert(testEnemy->thisBehavior->isCowardly == 0);
+	assert(testEnemy->thisBehavior->hasAbilityAffinity == 0);
+
+	rerollBehavior(testEnemy);
+
+	assert(testEnemy->thisBehavior->isOffensive == 1);
+	assert(testEnemy->thisBehavior->isTactical == 1);
+	assert(testEnemy->thisBehavior->isCowardly == 0);
+	assert(testEnemy->thisBehavior->hasAbilityAffinity == 0);
+
+	assert(getCurrentBounty(testPlayer) == 0);
+
+	addActiveCrime(testPlayer, CRIME_ASSULT, 40, 0, 0, 0);
+
+	assert(getCurrentBounty(testPlayer) == 0);
+
+	reportActiveCrimes(testPlayer);
+
+	assert(getCurrentBounty(testPlayer) == 40);
+}
+
 int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field* main_test_field, shiftData * testShiftData) {
 	//setup
 
@@ -416,6 +625,8 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	//it is now the enemies turn
 	assert(testGroupContainer->groupActionMode);
 	assert(testGroupContainer->initGroupActionMode);
+
+	actionAITest(testPlayer,testGroupContainer, main_test_field);
 
 	return 0;
 }

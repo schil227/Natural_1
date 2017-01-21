@@ -2107,11 +2107,11 @@ cordArr * cordsBetweenTwoIndividuals(individual * thisIndividual, individual * t
 		cord * nextCord = malloc(sizeof(cord));
 
 		if(wrtY){
-			nextCord->x = i + startingX;
-			nextCord->y = slope*i + startingY;
+			nextCord->x = floor(i + startingX + 0.5);
+			nextCord->y = floor(slope*i + startingY + 0.5);
 		}else{
-			nextCord->y = i + startingX;
-			nextCord->x = slope*i + startingY;
+			nextCord->y = floor(i + startingX + 0.5);
+			nextCord->x = floor(slope*i + startingY + 0.5);
 		}
 
 		if(!addCordIfUnique(thisCordArr, nextCord)){

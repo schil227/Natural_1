@@ -109,8 +109,6 @@ void changeAbilityTemplate(int shift){
 	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
 }
 
-
-
 void drawManaCost(HDC hdcBuffer, ability * thisAbility, RECT * manaRect){
 	char * manaCost[16];
 

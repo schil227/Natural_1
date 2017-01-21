@@ -404,6 +404,8 @@ void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr
 	moveNode * ptrToCurrentNode[1];
 	ptrToCurrentNode[0] = NULL;
 
+	thisMoveNodeMeta->pathLength = thisNodeArr->size;
+
 	for (i = 0; i < thisNodeArr->size; i++) {
 		moveNode * tmpMoveNode = malloc(sizeof(moveNode));
 		tmpMoveNode->hasTraversed = 0;
