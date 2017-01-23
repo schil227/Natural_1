@@ -2233,34 +2233,6 @@ void addActiveCrime(individual * player, crimeType crime, int bounty, int victim
 	addActiveCrimeFromEntry(player, thisCrime);
 }
 
-/*
-void removeActiveCrimesWitnessOnly(individual * player, int individualID){
-	int i, crimesPassed = 0;
-
-	if(player->thisActiveCrimes->numActiveCrimes == 0){
-		return;
-	}
-
-	for(i = 0; i < player->thisActiveCrimes->MAX_ACTIVE_CRIMES; i++){
-		if(player->thisActiveCrimes->activeCrimeList[i] != NULL){
-
-			if(player->thisActiveCrimes->activeCrimeList[i]->witnessID == individualID){
-				free(player->thisActiveCrimes->activeCrimeList[i]);
-				player->thisActiveCrimes->activeCrimeList[i] = NULL;
-				player->thisActiveCrimes->numActiveCrimes--;
-				crimesPassed--;
-			}
-
-			crimesPassed++;
-			if(crimesPassed == player->thisActiveCrimes->numActiveCrimes){
-				break;
-			}
-		}
-	}
-
-}
-*/
-
 void removeActiveCrimesFromIndividual(individual * player, int individualID){
 	int i, crimesPassed = 0;
 

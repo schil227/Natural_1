@@ -33,6 +33,9 @@ int postMoveMode = 0;
 
 int enemyTurn = 0;
 
+int freeTimer = 0;
+int inActionMode = 0;
+
 individual* player;
 
 static groupContainer * thisGroupContainer;
@@ -115,6 +118,111 @@ void tryUpdateYShift(shiftData * viewShift, int newY){
 	}
 }
 
+int shouldEnableActionMode(){
+	int i, individualsPassed = 0;
+	int bounty = getCurrentBounty(player);
+	individual * tmpIndividual;
+
+	if(thisGroupContainer->enemies->numIndividuals > 0){
+		for(i = 0; i < thisGroupContainer->enemies; i++){
+			tmpIndividual = thisGroupContainer->enemies->individuals[i];
+
+			if(tmpIndividual != NULL){
+				individualsPassed++;
+
+				if(checkForTargets(tmpIndividual, player, thisGroupContainer, main_field)){
+					return 1;
+				}
+
+				if(individualsPassed == thisGroupContainer->enemies->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+			}
+		}
+
+		individualsPassed = 0;
+	}
+
+
+	if(thisGroupContainer->beasts->numIndividuals > 0){
+		for(i = 0; i < thisGroupContainer->beasts; i++){
+			tmpIndividual = thisGroupContainer->beasts->individuals[i];
+
+			if(tmpIndividual != NULL){
+				individualsPassed++;
+
+				if(checkForTargets(tmpIndividual, player, thisGroupContainer, main_field)){
+					return 1;
+				}
+
+				if(individualsPassed == thisGroupContainer->beasts->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+			}
+		}
+
+		individualsPassed = 0;
+	}
+
+	if(thisGroupContainer->guards->numIndividuals > 0){
+		for(i = 0; i < thisGroupContainer->guards; i++){
+			tmpIndividual = thisGroupContainer->guards->individuals[i];
+
+			if(tmpIndividual != NULL){
+				individualsPassed++;
+
+				findDangerousIndividualNearBy(tmpIndividual, player, thisGroupContainer, main_field, 8);
+
+				if(tmpIndividual->targetedIndividual != NULL){
+					return 1;
+				}
+
+				//TODO: make sure guard can move towards player
+				if(bounty > 0 && isInLineOfSight(tmpIndividual, player, main_field)){
+					return 1;
+				}
+
+				if(individualsPassed == thisGroupContainer->guards->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+			}
+		}
+
+		individualsPassed = 0;
+	}
+
+
+	if(thisGroupContainer->npcs->numIndividuals > 0){
+		for(i = 0; i < thisGroupContainer->npcs; i++){
+			tmpIndividual = thisGroupContainer->npcs->individuals[i];
+
+			if(tmpIndividual != NULL){
+				individualsPassed++;
+
+				findDangerousIndividualNearBy(tmpIndividual, player, thisGroupContainer, main_field, 8);
+
+				if(tmpIndividual->targetedIndividual != NULL){
+					return 1;
+				}
+
+
+
+				if(individualsPassed == thisGroupContainer->npcs->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+			}
+		}
+
+		individualsPassed = 0;
+	}
+
+	return 0;
+}
+
 void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
@@ -123,6 +231,7 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawField(hdc, hdcBuffer, main_field, viewShift);
 	drawItemsFromField(hdc, hdcBuffer, main_field->thisFieldInventory, viewShift);
+
 	if (player->hp > 0) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}
@@ -140,17 +249,15 @@ void drawAll(HDC hdc, RECT* prc) {
 	if (moveMode){
 		moveNode * tmp = thisMoveNodeMeta->rootMoveNode;
 		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
+
 		while(tmp->nextMoveNode != NULL){
 			tmp = (moveNode*)tmp->nextMoveNode;
 			drawUnboundShadowAnimation(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, viewShift, 0);
-
 		}
 
 		if(tmp->x != player->playerCharacter->x && tmp->y != player->playerCharacter->y){
 			drawUnboundShadowAnimation(hdc, hdcBuffer, tmp->x,tmp->y, tmpCharacter, viewShift, 0);
 		}
-
-
 	}
 
 	if(inInventoryViewMode()){
@@ -176,8 +283,6 @@ void drawAll(HDC hdc, RECT* prc) {
 	if(shouldDrawDialogBox()){
 		drawDialogBox(hdc, hdcBuffer,prc);
 	}
-
-//	DrawText(hdcBuffer, intro, -1, Rectangle(NULL, 50, 550, 150, 600) , DT_SINGLELINE );
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
@@ -291,6 +396,18 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		drawAll(hdc, &rect);
 
 		ReleaseDC(hwnd, hdc);
+
+		freeTimer++;
+
+		if(freeTimer > 30){
+			inActionMode = shouldEnableActionMode();
+			char outLog[12];
+			sprintf(outLog, "ding: %d", inActionMode);
+			cwrite(outLog);
+
+			freeTimer = 0;
+		}
+
 	}
 		break;
 	case WM_CLOSE:
@@ -383,7 +500,57 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			decreaseTurns(player, thisGroupContainer, 1);
 
 			break;
+		case 0x34: //left
+		case 0x64:
+		case 0x36: //right
+		case 0x66:
+		case 0x38: //up
+		case 0x68:
+		case 0x32: //down
+		case 0x62:
+		case 0x31: //down left
+		case 0x61:
+		case 0x37: //up left
+		case 0x67:
+		case 0x39: //up right
+		case 0x69:
+		case 0x33: //down right
+		case 0x63:
+			{
+				if(!inActionMode){
+					int dx = xMoveChange(LOWORD(wParam) % 16);
+					int dy = yMoveChange(LOWORD(wParam) % 16);
+
+					space * tmpSpace = getSpaceFromField(main_field, player->playerCharacter->x + dx, player->playerCharacter->y + dy);
+					if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL) {
+						thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
+						thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
+						thisMoveNodeMeta->sum = 0;
+						thisMoveNodeMeta->pathLength = 0;
+						thisMoveNodeMeta->shadowCharacter = NULL; //not needed
+
+						thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
+						thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
+						thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
+
+						moveNode * nextNode = malloc(sizeof(moveNode));
+						nextNode->x = player->playerCharacter->x + dx;
+						nextNode->y = player->playerCharacter->y + dy;
+						nextNode->nextMoveNode = NULL;
+						nextNode->hasTraversed = 0;
+
+						thisMoveNodeMeta->rootMoveNode->nextMoveNode = nextNode;
+
+						removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
+
+						postMoveMode = 1;
+					}else{
+						printf("not passable, slick.");
+					}
+				}
+			}
 		}
+
 
 	}
 		break;

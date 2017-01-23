@@ -1752,7 +1752,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 	//Do checkForTargets, if null walk about, else go to target.
 
-	findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField);
+	findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField, 8);
 
 	if(guard->targetedIndividual == NULL){
 
