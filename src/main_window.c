@@ -27,6 +27,9 @@ static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit
 int mainWindowWidth = 640;
 int mainWindowHeight = 820;
 
+LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
+LARGE_INTEGER Frequency;
+
 int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
@@ -643,8 +646,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
 	} else if(postMoveMode){
-//		printf("looping in moveMode\n");
 		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,3,&postMoveMode, viewShift, 1);
+
 		if (!postMoveMode) {
 
 			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
@@ -676,52 +679,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->postGroupActionMode = 1;
 		}
 	}else if(thisGroupContainer->groupActionMode){
-		if(thisGroupContainer->selectedGroup->numIndividuals == 0){
-			thisGroupContainer->groupActionMode = 0;
-			thisGroupContainer->initGroupActionMode = 0;
-
-			if(!setNextActiveGroup(thisGroupContainer)){
-				if(startTurn(player)){
-
-				}
-
-				//If player's out of actions, start enemy turn again
-				if(player->remainingActions < 0){
-					endTurn(player);
-					thisGroupContainer->groupActionMode = 1;
-					thisGroupContainer->initGroupActionMode = 1;
-					setNextActiveGroup(thisGroupContainer);
-				}
-			}else{
-				thisGroupContainer->groupActionMode = 1;
-				thisGroupContainer->initGroupActionMode = 1;
-			}
-		} else {
-			if (thisGroupContainer->initGroupActionMode) {
-				thisGroupContainer->initGroupActionMode = 0;
-
-				//note:the address of the pointer to thisMoveNodeMeta is passed in because it is malloc'd inside the method
-				if(initializeEnemyTurn(thisGroupContainer->selectedGroup, player, main_field, &thisMoveNodeMeta)){
-					thisGroupContainer->groupActionMode = 0;
-					thisGroupContainer->postGroupActionMode = 1;
-					return 0;
-				}
-
-				if(!thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
-					thisGroupContainer->groupActionMode = 0;
-					thisGroupContainer->postGroupActionMode = 1;
-					return 0;
-				}
-			}
-			thisGroupContainer->groupActionMode = 0;
-
-			//If not moving
-			if(!performAction(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex], player, thisGroupContainer, main_field, &thisMoveNodeMeta)){
-				thisGroupContainer->postGroupActionMode = 1;
-			}else{
-				thisGroupContainer->groupMoveMode = 1;
-			}
-		}
+		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, thisMoveNodeMeta, inActionMode);
 
 	}else if(thisGroupContainer->postGroupActionMode){
 		thisGroupContainer->postGroupActionMode = 0;
@@ -787,6 +745,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	int consoleWindowHeight = 175;
 	int sidebarWindowWidth = 175;
 	int sidebarWindowHeight = 655;
+
+	QueryPerformanceFrequency(&Frequency);
 
 	//run the tests!
 	//init rand for tests

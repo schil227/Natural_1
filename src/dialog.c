@@ -417,10 +417,13 @@ int setCurrentMessageByMessageID(int messageID){
 
 int removeSpecialDialog(int individualID){
 	int i = 0;
+	individualDialog * tmpDialog;
 
 	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
-		if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID ){
-			thisDialogInstance->individualDialogRegistry[i]->specialID = 0;
+		tmpDialog = thisDialogInstance->individualDialogRegistry[i];
+
+		if(tmpDialog != NULL && tmpDialog->individualID == individualID ){
+			tmpDialog->specialID = 0;
 			return 1;
 		}
 	}
@@ -430,10 +433,13 @@ int removeSpecialDialog(int individualID){
 
 int setSpecialDialogId(int individualID, int specialID){
 	int i = 0;
+	individualDialog * tmpDialog;
 
 	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
-		if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID ){
-			thisDialogInstance->individualDialogRegistry[i]->specialID = specialID;
+		tmpDialog = thisDialogInstance->individualDialogRegistry[i];
+
+		if(tmpDialog != NULL && tmpDialog->individualID == individualID ){
+			tmpDialog->specialID = specialID;
 			return 1;
 		}
 	}

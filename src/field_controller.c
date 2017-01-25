@@ -406,7 +406,6 @@ int setNextActiveGroup(groupContainer * thisGroupContainer){
 	}
 }
 
-
 void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContainer, int numTurns){
 
 	if(thisIndividual->activeAbilities->selectedAbility != NULL && thisIndividual->activeAbilities->selectedAbility->type == 'i'){

@@ -590,6 +590,74 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 	return 0;
 }
 
+void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
+		individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta * thisMoveNodeMeta, int inActionMode){
+	switch (msg) {
+		case WM_TIMER:
+		{
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+			ReleaseDC(hwnd, hdc);
+		}
+		break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+	}
+
+	if(thisGroupContainer->selectedGroup->numIndividuals == 0){
+		thisGroupContainer->groupActionMode = 0;
+		thisGroupContainer->initGroupActionMode = 0;
+
+		if(!setNextActiveGroup(thisGroupContainer)){
+			if(startTurn(player)){
+
+			}
+
+			//If player's out of actions, start enemy turn again
+			if(player->remainingActions < 0){
+				endTurn(player);
+				thisGroupContainer->groupActionMode = 1;
+				thisGroupContainer->initGroupActionMode = 1;
+				setNextActiveGroup(thisGroupContainer);
+			}
+		}else{
+			thisGroupContainer->groupActionMode = 1;
+			thisGroupContainer->initGroupActionMode = 1;
+		}
+	} else {
+		if (thisGroupContainer->initGroupActionMode) {
+			thisGroupContainer->initGroupActionMode = 0;
+
+			//note:the address of the pointer to thisMoveNodeMeta is passed in because it is malloc'd inside the method
+			if(initializeEnemyTurn(thisGroupContainer->selectedGroup, player, thisField, &thisMoveNodeMeta)){
+				thisGroupContainer->groupActionMode = 0;
+				thisGroupContainer->postGroupActionMode = 1;
+				return;
+			}
+
+			if(!thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
+				thisGroupContainer->groupActionMode = 0;
+				thisGroupContainer->postGroupActionMode = 1;
+				return;
+			}
+		}
+		thisGroupContainer->groupActionMode = 0;
+
+		//If not moving
+		if(!performAction(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex], player, thisGroupContainer, thisField, &thisMoveNodeMeta, inActionMode)){
+			thisGroupContainer->postGroupActionMode = 1;
+		}else{
+			thisGroupContainer->groupMoveMode = 1;
+		}
+	}
+}
+
 void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
 		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed,
 		int * postMoveMode, shiftData * viewShift, int updateViewShift){
@@ -603,7 +671,7 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 		thisMoveNodeMeta->sum = thisMoveNodeMeta->sum +1;
 		ReleaseDC(hwnd, hdc);
 
-		if(thisMoveNodeMeta->sum > speed){
+		if(thisMoveNodeMeta->sum >= speed){
 			thisMoveNodeMeta->sum = 0;
 			moveNode ** tmpMoveNode = &(thisMoveNodeMeta->rootMoveNode);
 

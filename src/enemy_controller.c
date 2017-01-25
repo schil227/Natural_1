@@ -1082,7 +1082,6 @@ int moveToSelectedLocation(individual * thisIndividual, field * thisField,  move
 
 	destroyNodeArr(enemyNodeArr);
 
-
 	return 1;
 }
 
@@ -1288,8 +1287,7 @@ int moveCloserToTarget(individual * enemy, individual * targetIndividual, field 
 	}
 
 	//Gonna move, remove them from the field and update the moveNodeMeta
-	getSpaceFromField(thisField, enemy->playerCharacter->x,
-			enemy->playerCharacter->y)->currentIndividual = NULL;
+	removeIndividualFromField(thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
 
 	(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
 	(*thisMoveNodeMeta)->sum = 0;
@@ -1469,23 +1467,23 @@ int useAbilityOnTargetedSpace(individual * enemy, individual * player, groupCont
 	return 0;
 }
 
-int performAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int performAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
 	switch(thisIndividual->currentGroupType){
 		case GROUP_ENEMIES:
-			return enemyAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return enemyAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 		case GROUP_NPCS:
-			return npcAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return npcAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 		case GROUP_BEASTS:
 			thisIndividual->remainingActions = 0;
 			return 0;
 		case GROUP_GUARDS:
-			return guardAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return guardAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 		default:
 			return 0;
 	}
 }
 
-int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
 
 	//Restore Mana
 	if(isLowOnMana(enemy)){
@@ -1734,7 +1732,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 	}
 }
 
-int guardAction(individual * guard, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int guardAction(individual * guard, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
 
 	//Restore Mana
 	if(isLowOnMana(guard)){
@@ -2084,6 +2082,11 @@ individual * getDangerousIndividualNearByInLoS(individual * friendlyIndividual, 
 }
 
 void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
+	LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
+	LARGE_INTEGER Frequency;
+	QueryPerformanceFrequency(&Frequency);
+	QueryPerformanceCounter(&StartingTime);
+
 	if(friendlyIndividual->targetedIndividual != NULL){
 		if(friendlyIndividual->targetedIndividual->hp <= 0
 				|| isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual)
@@ -2096,6 +2099,22 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 			}else{
 				friendlyIndividual->thisBehavior->isSurrounded = 0;
 			}
+
+
+
+
+			QueryPerformanceCounter(&EndingTime);
+			ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+
+			ElapsedMicroseconds.QuadPart *= 1000000;
+			ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+
+			char outLog[256];
+			sprintf(outLog, "Ind:%s find dangerous time 1: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
+			cwrite(outLog);
+
+
+
 
 			return;
 		}
@@ -2110,6 +2129,20 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 			}else{
 				friendlyIndividual->thisBehavior->isSurrounded = 0;
 			}
+
+
+
+			QueryPerformanceCounter(&EndingTime);
+			ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+
+			ElapsedMicroseconds.QuadPart *= 1000000;
+			ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+
+			char outLog[256];
+			sprintf(outLog, "Ind:%s find dangerous time2: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
+			cwrite(outLog);
+
+
 
 			return;
 		}
@@ -2127,11 +2160,25 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 			friendlyIndividual->thisBehavior->isSurrounded = 0;
 		}
 
+
+
+		QueryPerformanceCounter(&EndingTime);
+		ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+
+		ElapsedMicroseconds.QuadPart *= 1000000;
+		ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+
+		char outLog[256];
+		sprintf(outLog, "Ind:%s find dangerous time3: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
+		cwrite(outLog);
+
+
+
 		return;
 	}
 }
 
-int npcAction(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int npcAction(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
 	//Restore Mana
 	if(isLowOnMana(npc)){
 		if(tryRestoreMana(npc)){
@@ -2179,10 +2226,30 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 
 	}else{
 		if(!atDesiredLocation(npc)){
-			return moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, npc->desiredLocation->x, npc->desiredLocation->y);
+			int moveResult = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, npc->desiredLocation->x, npc->desiredLocation->y);
+
+			//Only moving one space, avoid animateMoveLoop and just do it here
+			if(moveResult && !inActionMode){
+				moveNode * targetSpace = (*thisMoveNodeMeta)->rootMoveNode;
+
+				if(targetSpace != NULL){
+					space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
+
+					if(tmpSpace != NULL && tmpSpace->currentIndividual ){
+						//individual is already removed from field
+						moveIndividualSpace(thisField,npc, targetSpace->x, targetSpace->y);
+					}
+
+				}
+
+				npc->remainingActions = 0;
+				return 0;
+			}
+
+			return moveResult;
 		}
 
-		npc->remainingActions--;
+		npc->remainingActions = 0;
 		return 0;
 	}
 

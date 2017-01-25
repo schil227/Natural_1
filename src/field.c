@@ -80,8 +80,10 @@ space* getSpaceAddressFromField(field* thisField, int x, int y){
 
 
 int removeIndividualFromField(field * thisField, int x, int y){
-	if((thisField->grid[x][y])->currentIndividual != NULL){
-		(thisField->grid[x][y])->currentIndividual = NULL;
+	space * tmpSpace = thisField->grid[x][y];
+
+	if(tmpSpace->currentIndividual != NULL){
+		tmpSpace->currentIndividual = NULL;
 		return 1;
 	}
 
