@@ -679,8 +679,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->postGroupActionMode = 1;
 		}
 	}else if(thisGroupContainer->groupActionMode){
-		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, thisMoveNodeMeta, inActionMode);
-
+		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &thisMoveNodeMeta, &inActionMode);
 	}else if(thisGroupContainer->postGroupActionMode){
 		thisGroupContainer->postGroupActionMode = 0;
 

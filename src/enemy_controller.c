@@ -2226,7 +2226,13 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 
 	}else{
 		if(!atDesiredLocation(npc)){
+			//prevent generating a path through individuals
+			int tmpFaction = npc->faction;
+			npc->faction = -1;
+
 			int moveResult = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, npc->desiredLocation->x, npc->desiredLocation->y);
+
+			npc->faction = tmpFaction;
 
 			//Only moving one space, avoid animateMoveLoop and just do it here
 			if(moveResult && !inActionMode){
@@ -2235,12 +2241,17 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 				if(targetSpace != NULL){
 					space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
 
-					if(tmpSpace != NULL && tmpSpace->currentIndividual ){
+					if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
 						//individual is already removed from field
 						moveIndividualSpace(thisField,npc, targetSpace->x, targetSpace->y);
+						npc->remainingActions = 0;
+						return 0;
 					}
 
 				}
+
+				//put npc back on space they started
+				moveIndividualSpace(thisField,npc, npc->playerCharacter->x, npc->playerCharacter->y);
 
 				npc->remainingActions = 0;
 				return 0;

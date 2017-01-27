@@ -591,7 +591,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 }
 
 void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
-		individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta * thisMoveNodeMeta, int inActionMode){
+		individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int * inActionMode){
 	switch (msg) {
 		case WM_TIMER:
 		{
@@ -609,6 +609,11 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			PostQuitMessage(0);
 			break;
 	}
+
+	*inActionMode = shouldEnableActionMode();
+	char outLog[12];
+	sprintf(outLog, "turnStart: %d", *inActionMode);
+	cwrite(outLog);
 
 	if(thisGroupContainer->selectedGroup->numIndividuals == 0){
 		thisGroupContainer->groupActionMode = 0;
@@ -635,7 +640,7 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			thisGroupContainer->initGroupActionMode = 0;
 
 			//note:the address of the pointer to thisMoveNodeMeta is passed in because it is malloc'd inside the method
-			if(initializeEnemyTurn(thisGroupContainer->selectedGroup, player, thisField, &thisMoveNodeMeta)){
+			if(initializeEnemyTurn(thisGroupContainer->selectedGroup, player, thisField, thisMoveNodeMeta)){
 				thisGroupContainer->groupActionMode = 0;
 				thisGroupContainer->postGroupActionMode = 1;
 				return;
@@ -650,7 +655,7 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		thisGroupContainer->groupActionMode = 0;
 
 		//If not moving
-		if(!performAction(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex], player, thisGroupContainer, thisField, &thisMoveNodeMeta, inActionMode)){
+		if(!performAction(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex], player, thisGroupContainer, thisField, thisMoveNodeMeta, *inActionMode)){
 			thisGroupContainer->postGroupActionMode = 1;
 		}else{
 			thisGroupContainer->groupMoveMode = 1;
