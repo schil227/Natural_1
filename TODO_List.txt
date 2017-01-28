@@ -1,12 +1,15 @@
 ===================
 ==== TODO LIST ====
 ===================
-- (11/12/16) Implement Crimes (IN PROGRESS)
-
-- (11/12/16) Update path finding algorithm (and consequently tests) to 
-
--(11/28/16) Update images to be 2x long. At 30 fps the animations are the right tempo, too jittery at 60
--(11/28/16) When skelly attack, there appears to be another image drawn behind them
+- (11/27/16) Update images to be 2x long. At 30 fps the animations are the right tempo, too jittery at 60
+- (12/22/16) Crime: implement order (lose money/go to jail)
+- (12/22/16) Fix slowness with NPC action
+- (12/29/16) Differentiate between isPassable and CanAttackThrough for spaces, algorithms obtaining targetIndividuals
+- (1/10/17) Fog of War
+- (1/21/17) Fix Viewshift to be consistant between changing locations
+- (1/21/17) Implement non-combat mode
+- (1/27/17) Implement remaining statuses
+- (1/27/17) Disallow statuses from stacking
 
 ==BUGS==
 - (11/25/16) player enters/exits shop, skeletons occupy the same space as him when pathfinding
@@ -16,3 +19,12 @@
 - (11/12/16) for some reason, there's a lot of slowdown when drawing a rotated image mask, so I had to make a separate function just to draw the image without the mask (which works as intended). Not sure if this is something I'll ever have to fix, but for awareness.
 - (11/12/16) Add more enemies to the field
 - (11/12/16) Add casting animations
+- (1/1/17) Put dialog box/speaker image over console output
+
+==FINISHED==
+- (11/12/16 - 10/22/16) Implement Crimes (DONE)
+- (11/28/16 - 10/23/16) After making the npc an enemy then an npc again, they'll still retreat from the player - del target (DONE-could not replicate, looks correct)
+- (11/12/16 - 12/29/16) Update path finding algorithm (and consequently tests) to allow ally passthrough only (DONE)
+- (11/28/16 - 12/29/16) Update the enemy acquireTarget function - go for closest enemy in sight or player (DONE)
+- (11/27/16 - 1/?/17) When skelly attack, there appears to be another image drawn behind them (DONE)
+- (12/22/16) Unit Test individual actions and crime (DONE)

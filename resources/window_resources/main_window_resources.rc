@@ -69,6 +69,17 @@ END
 
 1508 BITMAP DISCARDABLE "../images/cursor.bmp" //2004
 
+1509 BITMAP DISCARDABLE "../images/action_mode.bmp"
+1510 BITMAP DISCARDABLE "../images/poisoned_mode.bmp"
+1511 BITMAP DISCARDABLE "../images/burning_mode.bmp"
+1512 BITMAP DISCARDABLE "../images/berzerk_mode.bmp"
+1513 BITMAP DISCARDABLE "../images/paralyzed_mode.bmp"
+1514 BITMAP DISCARDABLE "../images/bleeding_mode.bmp"
+1515 BITMAP DISCARDABLE "../images/confused_mode.bmp"
+1516 BITMAP DISCARDABLE "../images/silenced_mode.bmp"
+1517 BITMAP DISCARDABLE "../images/sleeping_mode.bmp"
+1518 BITMAP DISCARDABLE "../images/sneaking_mode.bmp"
+
 //Base character images 2000 - 2500
 2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001
 2002 BITMAP DISCARDABLE "../images/human_attack_slash.bmp"

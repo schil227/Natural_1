@@ -271,6 +271,9 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawThisSideBar(hdc, hdcBuffer, prc, player);
 
+	drawHudNotifications(hdc, hdcBuffer, prc, player, inActionMode);
+
+	//popups
 	if(inAbilityViewMode()){
 		drawThisAbilityView(hdc, hdcBuffer, prc);
 	}
@@ -315,6 +318,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 		initSpecialDrawInstance();
 		initEventHandlers();
+		initHudInstance();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt", "onPickupTriggerMap.txt");
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
