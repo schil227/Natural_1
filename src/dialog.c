@@ -310,7 +310,7 @@ void insertIntoMessage(char * sourceString, char * insertValue){
 	free(rest);
 }
 
-void advanceDialog(){
+int advanceDialog(){
 	if(thisDialogInstance->currentMessage->nextMessage != NULL || thisDialogInstance->currentMessage->numDialogDecisionsParsed > 0){
 		if(thisDialogInstance->currentMessage->nextMessage != NULL){
 			thisDialogInstance->speakMode = 1;
@@ -328,11 +328,14 @@ void advanceDialog(){
 		if (thisDialogInstance->currentMessage->dialogCheckpoint) {
 			setIndividualDialog(thisDialogInstance->currentMessage->messageID);
 		}
+
+		return 1;
 	}else{ //no more messages, stop drawing
 		thisDialogInstance->currentMessage->nextMessage = NULL;
 //		thisDialogInstance->currentMessage->eventID = 0;
 		thisDialogInstance->speakingIndividualID = 0;
 		toggleDrawDialogBox();
+		return 0;
 	}
 }
 

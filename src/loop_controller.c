@@ -8,7 +8,7 @@
 #include "./headers/cursor_pub_methods.h"
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
-		field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift) {
+		field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -52,6 +52,12 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
 					decreaseTurns(player, thisGroupContainer, 1);
+
+					*inActionMode = shouldEnableActionMode();
+					char outLog[12];
+					sprintf(outLog, "AM attacked: %d", *inActionMode);
+					cwrite(outLog);
+
 					toggleInCursorMode();
 				}
 
@@ -77,6 +83,12 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					viewShift->yShift = viewShift->yShiftOld;
 
 					decreaseTurns(player, thisGroupContainer, numActions);
+
+					*inActionMode = shouldEnableActionMode();
+					char outLog[12];
+					sprintf(outLog, "AM ability: %d", *inActionMode);
+					cwrite(outLog);
+
 					toggleInCursorMode();
 				}
 			}else if(getCursorMode() == CURSOR_PICKPOCKET){
@@ -86,6 +98,12 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 				viewShift->xShift = viewShift->xShiftOld;
 				viewShift->yShift = viewShift->yShiftOld;
+
+				*inActionMode = shouldEnableActionMode();
+				char outLog[12];
+				sprintf(outLog, "AM pickpocket: %d", *inActionMode);
+				cwrite(outLog);
+
 				toggleInCursorMode();
 			}
 
@@ -326,7 +344,7 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 	return 0;
 }
 
-int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, groupContainer * thisGroupContainer, field * thisField){
+int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode){
 	switch(msg){
 	case WM_KEYDOWN:{
 		switch (LOWORD(wParam)) {
@@ -342,7 +360,12 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 					processEvent(eventID, player, thisGroupContainer, thisField);
 				}
 
-				advanceDialog();
+				if(!advanceDialog()){
+					*inActionMode = shouldEnableActionMode();
+					char outLog[12];
+					sprintf(outLog, "speak: %d", *inActionMode);
+					cwrite(outLog);
+				}
 
 				break;
 			}
@@ -669,39 +692,37 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 	switch (msg) {
 
 		case WM_TIMER: {
-		RECT rect;
-		HDC hdc = GetDC(hwnd);
-		GetClientRect(hwnd, &rect);
-		drawAll(hdc, &rect);
-		thisMoveNodeMeta->sum = thisMoveNodeMeta->sum +1;
-		ReleaseDC(hwnd, hdc);
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+			thisMoveNodeMeta->sum = thisMoveNodeMeta->sum +1;
+			ReleaseDC(hwnd, hdc);
 
-		if(thisMoveNodeMeta->sum >= speed){
-			thisMoveNodeMeta->sum = 0;
-			moveNode ** tmpMoveNode = &(thisMoveNodeMeta->rootMoveNode);
+			if(thisMoveNodeMeta->sum >= speed){
+				thisMoveNodeMeta->sum = 0;
+				moveNode ** tmpMoveNode = &(thisMoveNodeMeta->rootMoveNode);
 
-			while((*tmpMoveNode)->hasTraversed){
-				moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
-				tmpMoveNode = &nextTmpMoveNode;
+				while((*tmpMoveNode)->hasTraversed){
+					moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
+					tmpMoveNode = &nextTmpMoveNode;
+				}
+
+				(*tmpMoveNode)->hasTraversed = 1;
+
+				thisIndividual->playerCharacter->x = (*tmpMoveNode)->x;
+				thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
+
+				if(updateViewShift){
+					tryUpdateXShift(viewShift, (*tmpMoveNode)->x);
+					tryUpdateYShift(viewShift, (*tmpMoveNode)->y);
+				}
+
+				if((*tmpMoveNode)->nextMoveNode == NULL){
+					setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
+					*postMoveMode = 0;
+				}
 			}
-
-			(*tmpMoveNode)->hasTraversed = 1;
-
-			thisIndividual->playerCharacter->x = (*tmpMoveNode)->x;
-			thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
-
-			if(updateViewShift){
-				tryUpdateXShift(viewShift, (*tmpMoveNode)->x);
-				tryUpdateYShift(viewShift, (*tmpMoveNode)->y);
-			}
-
-			if((*tmpMoveNode)->nextMoveNode == NULL){
-				setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
-				*postMoveMode = 0;
-			}
-		}
-
-
 		}
 		break;
 		default: {

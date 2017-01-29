@@ -42,20 +42,8 @@ void initHudInstance(){
 	thisHudInstance->isSleeping = 0;
 }
 
-void drawActionModeImage(HDC hdc, HDC hdcBuffer, RECT * prc){
-	int x = prc->right - 185 - thisHudInstance->actionModeCharacter->fixedWidth;
-	int y = prc->bottom - 200 - thisHudInstance->actionModeCharacter->fixedHeight;
-
-	HDC hdcMem = CreateCompatibleDC(hdc);
-
-	SelectObject(hdcMem, thisHudInstance->actionModeCharacter->fixedImage);
-
-	BitBlt(hdcBuffer, x, y, thisHudInstance->actionModeCharacter->fixedWidth, thisHudInstance->actionModeCharacter->fixedHeight, hdcMem, 0, 0, SRCCOPY);
-	DeleteDC(hdcMem);
-}
-
 void updateStatus(individual * player){
-	int i, toReturn = 0;
+	int i;
 
 	thisHudInstance->isPoisoned = 0;
 	thisHudInstance->isBurning = 0;

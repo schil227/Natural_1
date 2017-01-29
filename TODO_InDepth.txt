@@ -1,0 +1,90 @@
+== TODO ==
+-Implement FreeMode:
+	-allow free movement (DONE)
+	-actions dont decrease
+	-Individuals dont start their turns (maybe start their turns anyway, just implement wandering a bit?)
+	-other individuals may wander, speak, idle AI, etc. every second (or every few) on check
+	-Player can do other actions
+	-status are checked on second mark
+	-CHANGE the pathfinding function to completely avoid individuals on pathing back (kinda done)
+
+problem: player cant move when others are moving; therefore, the action system needs to stay
+e.g.: there are 30 individuals all moving around sequentially, takes 1 second for them all to move
+ -> must be done sequentially because individuals could exist on the same space
+ -> must only move one space because multiple could exist on same space
+	--> Idea: let them move instantaneously, no root to next node wait, (would still eat commands)
+
+
+	
+== Things to test ==
+getBuffItem (eh)
+
+
+==tested==
+isLowOnMana (DONE)
+tryRestoreMana (DONE)
+isLowOnHP (DONE)
+tryHeal (DONE)
+getRandomHPRestoringAbility (DONE)
+getRandomHPRestoringItem (DONE)
+isGreaterThanPercentage (DONE)
+abilityIsOffensive (DONE)
+atDesiredLocation (DONE)
+channelMana (DONE)
+getRandomOffensiveAbility (DONE)
+getRandomBuffAbility (DONE)
+checkForTargets (DONE)
+isInLineOfSight (DONE)
+noEnemiesInRange (DONE)
+abilityInRangeOfIndividual (DONE)
+useAbilityOnTargetedSpace (DONE)
+moveCloserToTarget (DONE)
+retreatFromTarget (DONE)
+selectHealingAbility (DONE)
+findDangerousIndividualNearBy (DONE)
+getAlliesInRange (DONE)
+allyRequiringHealing (DONE)
+rerollBehavior (DONE)
+getCurrentBounty (DONE)
+
+== DONE STUFF == 
+-Add ownedBy, isStolen to item (DONE)
+-trigger stolen event when player picks up an owned item (dont trigger if player has already stole it) (DONE)
+-when reporting crimes, the witness is dropped (DONE)
+-if a player already has a reported crime with a specific composite id, they cannot gain it again either by reporting or active (DONE)
+-If an individual is hostile with the player, their special dialog is changed [follow up can check for crimes] (DONE)
+-if the victim of a crime forgives the player, witnesses should as well. (DONE)
+-be able to actually rob individuals (DONE)
+-Add a =cannot yield== flag to npc that gets cleared when they leave the area. (DONE)
+-Decrease player turn on failed pickpocket attempt and on inventory view close (DONE)
+-When pickpocket and intimidating, there are still crimes being reported - make sure remove all crimes accounts for those. (DONE)
+-Rob and beat to death -> crimes still reported (DONE)
+-Pickpocketing - item is in double jepordy when it shouldn't be (DONE)
+-on report active crimes,  check if the witness exists - if not, dont add it (DONE)
+-Guard will talk to player after they commit a crime, if theyre in range (DONE)
+-Guard should pursue player (and talk to them) if they have an outstanding bounty (DONE)
+-Fix tryTalk to not be stupid (DONE)
+-After surrendering, the guard still attacked for a few more turns - probably because player was still the targeted individual; check if player is still target and hostile (DONE)
+-moveIndividual (function, field.c, line ~153) should it be updated so that the player can move through allies, just not rest on their spaces? Shadowing would have to change, maybe (DONE)
+-Fix the tests! (DONE)
+-[Action Mode] popup when it starts (ONE)
+
+==DEFERRED==
+-Pickpocked individual 3 times, only caught on the last, shouldn't have had crimes activated (DONE: could not replicate/may be sneak bug)
+-Guard wants to keep talking after player rejects surrender - should be immediately hostile (DONE: this is because the player is sneaking, and the guard cant see the player to make them targeted - should be fleshed out when updating sneak)
+
+
+
+== NOTES == 
+Implement double jepordy check for crimes (e.g. cant get assault or murder twice)
+Cant steal the same item twice (e.g. drop pickup drop pickup)
+	- murder: the victim  can only be claimed once
+	- assault: the victim will likely be assaulted several times - once per victim & witness (e.g. multiple people can witness the crime, only once)
+	- pickpocket: once per victim per item per witness
+	-stolen: once per item per witness - once stolen, it is owned, BUT can be taken back, so it needs the stolen flag.
+
+
+	
+	
+	
+	

@@ -380,6 +380,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		viewShift = initShiftData();
 
+		inActionMode = shouldEnableActionMode();
+		char outLog[12];
+		sprintf(outLog, "AM start: %d", inActionMode);
+		cwrite(outLog);
 	}
 		break;
 	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
@@ -594,7 +598,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(isSpecialDrawModeEnabled()){
 		return specialDrawLoop(hwnd, msg, wParam, lParam);
 	}else if(shouldDrawDialogBox()){
-		return dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field);
+		return dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
 	}else if(inNameBoxMode()){
 		return nameLoop(hwnd, msg, wParam, lParam, player);
 	} else if(inAbilityCreateMode()){
@@ -616,7 +620,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 		return 0;
 	}else if (inCursorMode()) {
-		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift);
+		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
