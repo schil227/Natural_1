@@ -102,6 +102,8 @@ typedef struct{
 	int isFocusedOnPlayer;
 	int isSurrounded;
 	int isThreatened;
+	int wasRecentlyAttacked;
+	int alertDuration;
 }behavior;
 
 typedef struct{

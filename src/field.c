@@ -363,6 +363,8 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 					if(thisIndividual->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility)){
 						triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
 
+						tmp->thisBehavior->wasRecentlyAttacked = 1;
+
 						if(thisIndividual->isPlayer){
 							thisIndividual->targetedIndividual = tmp;
 						}
@@ -377,6 +379,8 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 					}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 						if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
 							triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
+
+							tmp->thisBehavior->wasRecentlyAttacked = 1;
 
 							if(thisIndividual->isPlayer){
 								thisIndividual->targetedIndividual = tmp;

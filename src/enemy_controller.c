@@ -438,6 +438,23 @@ int isLessThanPercentage(int numerator, int devisor, int percentToBeat){
 	}
 }
 
+/* getWeightedIndex:
+ * This particular method takes in a int, such as the size of an index, and returns a random number
+ * which is weighted to be more likely to select an index towards the end of the array.
+ *
+ * It matches the graph x^2 in terms of likelyness to select a number (e.g. more likely
+ * as the size of the number increases)
+ *
+ * For uniform randomness, the square of the index must have a max size of 2,147,483,648 (32 bit / 4 byte).
+ */
+int getWeightedIndex(int endIndex){
+	long power = pow(endIndex,2);
+	long bigRand = rand();
+	bigRand = (bigRand << 16) | rand();
+
+	return ceil(sqrt(bigRand % power));
+}
+
 int isLowOnMana(individual * thisIndividual){
 	int baseMana = getAttributeSum(thisIndividual, "baseMana");
 
@@ -565,37 +582,6 @@ int isInLineOfSight(individual * thisIndividual, individual * targetIndividual, 
 	destroyCordArr(thisCordArr);
 
 	return toReturn;
-}
-
-//TODO: dont go in order for choosing targets, get closest (or something)
-individual * acquireTarget(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField){
-	int i, individualsPassed = 0, playerInLineOfSight = isInLineOfSight(enemy, player, thisField);
-
-	if(player->hp > 0 && playerInLineOfSight && (isGreaterThanPercentage(rand() % 100, 100, 50) || enemy->thisBehavior->isFocusedOnPlayer)){
-		return player;
-	}
-
-	// for each npc, guards, enemy-npcs etc.
-	if(thisGroupContainer->enemies->numIndividuals > 0){
-		for(i = 0; i < thisGroupContainer->enemies->MAX_INDIVIDUALS; i++){
-			if(thisGroupContainer->enemies->individuals[i] != NULL){
-				if((thisGroupContainer->enemies->individuals[i]->faction == -1 || thisGroupContainer->enemies->individuals[i]->faction != enemy->faction) && isInLineOfSight(enemy, thisGroupContainer->enemies->individuals[i], thisField)){
-					return thisGroupContainer->enemies->individuals[i];
-				}
-				individualsPassed++;
-			}
-
-			if(individualsPassed == thisGroupContainer->enemies->numIndividuals){
-				break;
-			}
-		}
-	}
-
-	if(playerInLineOfSight){
-		return player;
-	}
-
-	return NULL;
 }
 
 individual * getClosestEnemyInLoS(individual * thisIndividual, field * thisField){
@@ -1059,6 +1045,69 @@ cord * getCordWithTargetInRange(individual * thisIndividual, field * thisField){
 	return toReturn;
 }
 
+cord * findRandomSpaceInMoveRange(individual * thisIndividual, field * thisField){
+	int i,j,k;
+	cord * toReturn = NULL;
+	cord * startingCord = malloc(sizeof(cord));
+	startingCord->x = thisIndividual->playerCharacter->x;
+	startingCord->y = thisIndividual->playerCharacter->y;
+
+	cordArr * totalCords = initCordArr();
+	cordArr * activeCords = initCordArr();
+	cordArr * endCords = initCordArr();
+
+	addCordIfUnique(totalCords,startingCord);
+	addCordIfUnique(activeCords,startingCord);
+
+	for(i = getAttributeSum(thisIndividual, "mvmt"); i > 0; i--){
+		cordArr * newActiveCords = initCordArr();
+		cordArr * newCords;
+
+		for(j = 0; j < activeCords->numCords; j++){
+			int cordFound = 0;
+			newCords = getUniquePassableCordsSurroundingCord(thisIndividual, thisField, activeCords->cords[j], totalCords, 0);
+
+			for(k = 0; k < newCords->numCords; k++){
+				addCordIfUnique(totalCords, newCords->cords[k]);
+				addCordIfUnique(newActiveCords, newCords->cords[k]);
+				individual * tmpIndividual = getIndividualFromField(thisField, newCords->cords[k]->x, newCords->cords[k]->y);
+
+				if(tmpIndividual == NULL){
+					addCordIfUnique(endCords,newCords->cords[k]);
+				}
+			}
+
+			free(newCords);
+		}
+
+		activeCords->numCords = 0;
+
+		for(j = 0; j < newActiveCords->numCords; j++){
+			addCordIfUnique(activeCords, newActiveCords->cords[j]);
+		}
+
+		free(newActiveCords);
+	}
+
+	free(activeCords);
+
+	if(endCords->numCords > 0){
+		int index = getWeightedIndex(endCords->numCords);
+
+		if(index == endCords->numCords){
+			index--;
+		}
+
+		toReturn = malloc(sizeof(cord));
+		toReturn->x = endCords->cords[index]->x;
+		toReturn->y = endCords->cords[index]->y;
+	}
+
+	free(endCords);
+	destroyCordArr(totalCords);
+	return toReturn;
+}
+
 int moveToSelectedLocation(individual * thisIndividual, field * thisField,  moveNodeMeta ** thisMoveNodeMeta, int x, int y){
 	nodeArr * enemyNodeArr = getSpaceClosestToSpace(thisField, thisIndividual, x, y);
 
@@ -1117,6 +1166,41 @@ int retreatFromTarget(individual * thisIndividual, groupContainer * thisGroupCon
 	free(targetSpace);
 
 	return moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, x, y);
+}
+
+int returnToDesiredLocation(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	//prevent generating a path through individuals
+	int tmpFaction = thisIndividual->faction;
+	thisIndividual->faction = -1;
+
+	int moveResult = moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, thisIndividual->desiredLocation->x, thisIndividual->desiredLocation->y);
+
+	thisIndividual->faction = tmpFaction;
+
+	//Only moving one space, avoid animateMoveLoop and just do it here
+	if(moveResult && !inActionMode){
+		moveNode * targetSpace = (*thisMoveNodeMeta)->rootMoveNode;
+
+		if(targetSpace != NULL){
+			space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
+
+			if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
+				//individual is already removed from field
+				moveIndividualSpace(thisField, thisIndividual, targetSpace->x, targetSpace->y);
+				thisIndividual->remainingActions = 0;
+				return 0;
+			}
+
+		}
+
+		//put npc back on space they started
+		moveIndividualSpace(thisField, thisIndividual, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+
+		thisIndividual->remainingActions = 0;
+		return 0;
+	}
+
+	return moveResult;
 }
 
 int noEnemiesInRange(individual * enemy, groupContainer * thisGroupContainer, field * thisField, int range){
@@ -1501,6 +1585,37 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 	//Do checkForTargets, if null walk about, else go to target.
 	if(!checkForTargets(enemy, player, thisGroupContainer, thisField)){
+		//Attacked by some unknown individual, move away for a bit and try to find them
+		if(enemy->thisBehavior->wasRecentlyAttacked){
+			//move every time they've been attacked and cannot find the attacker
+			enemy->thisBehavior->wasRecentlyAttacked = 0;
+			enemy->thisBehavior->alertDuration = 2 + rand() % 6;
+
+			cord * tmpCord = findRandomSpaceInMoveRange(enemy, thisField);
+
+			if(tmpCord == NULL){
+				//cant go anywhere
+				enemy->thisBehavior->alertDuration = 0;
+				enemy->remainingActions = 0;
+				return 0;
+			}
+
+			int toReturn = moveToSelectedLocation(enemy, thisField, thisMoveNodeMeta, tmpCord->x, tmpCord->y);
+
+			free(tmpCord);
+			return toReturn;
+		}
+
+		if(enemy->thisBehavior->alertDuration > 0){
+			enemy->thisBehavior->alertDuration--;
+			enemy->remainingActions--;
+			return 0;
+		}
+
+		if(!atDesiredLocation(enemy)){
+			return returnToDesiredLocation(enemy, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		}
+
 		enemy->remainingActions = 0;
 		if(isGreaterThanPercentage(rand(), 100, 50)){//wander a bit.
 			return 0;
@@ -1769,8 +1884,35 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 			}
 		}
 
+		//Attacked by some unknown individual, move away for a bit and try to find them
+		if(guard->thisBehavior->wasRecentlyAttacked){
+			//move every time they've been attacked and cannot find the attacker
+			guard->thisBehavior->wasRecentlyAttacked = 0;
+			guard->thisBehavior->alertDuration = 2 + rand() % 6;
+
+			cord * tmpCord = findRandomSpaceInMoveRange(guard, thisField);
+
+			if(tmpCord == NULL){
+				//cant go anywhere
+				guard->thisBehavior->alertDuration = 0;
+				guard->remainingActions = 0;
+				return 0;
+			}
+
+			int toReturn = moveToSelectedLocation(guard, thisField, thisMoveNodeMeta, tmpCord->x, tmpCord->y);
+
+			free(tmpCord);
+			return toReturn;
+		}
+
+		if(guard->thisBehavior->alertDuration > 0){
+			guard->thisBehavior->alertDuration--;
+			guard->remainingActions--;
+			return 0;
+		}
+
 		if(!atDesiredLocation(guard)){
-			return moveToSelectedLocation(guard, thisField, thisMoveNodeMeta, guard->desiredLocation->x, guard->desiredLocation->y);
+			return returnToDesiredLocation(guard, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 		}
 
 		guard->remainingActions = 0;
@@ -2197,6 +2339,9 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 	findDangerousIndividualNearBy(npc, player, thisGroupContainer, thisField, 8);
 
 	if(npc->targetedIndividual != NULL){
+		npc->thisBehavior->alertDuration = 0;
+		npc->thisBehavior->wasRecentlyAttacked = 0;
+
 		cord * targetSpace = findRetreatSpace(npc, thisGroupContainer, thisField, npc->targetedIndividual->playerCharacter->x, npc->targetedIndividual->playerCharacter->y);
 		int x = targetSpace->x;
 		int y = targetSpace->y;
@@ -2225,45 +2370,40 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 		}
 
 	}else{
-		if(!atDesiredLocation(npc)){
-			//prevent generating a path through individuals
-			int tmpFaction = npc->faction;
-			npc->faction = -1;
+		//Attacked by some unknown individual, move away for a bit and try to find them
+		if(npc->thisBehavior->wasRecentlyAttacked){
+			//move every time they've been attacked and cannot find the attacker
+			npc->thisBehavior->wasRecentlyAttacked = 0;
+			npc->thisBehavior->alertDuration = 2 + rand() % 6;
 
-			int moveResult = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, npc->desiredLocation->x, npc->desiredLocation->y);
+			cord * tmpCord = findRandomSpaceInMoveRange(npc, thisField);
 
-			npc->faction = tmpFaction;
-
-			//Only moving one space, avoid animateMoveLoop and just do it here
-			if(moveResult && !inActionMode){
-				moveNode * targetSpace = (*thisMoveNodeMeta)->rootMoveNode;
-
-				if(targetSpace != NULL){
-					space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
-
-					if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
-						//individual is already removed from field
-						moveIndividualSpace(thisField,npc, targetSpace->x, targetSpace->y);
-						npc->remainingActions = 0;
-						return 0;
-					}
-
-				}
-
-				//put npc back on space they started
-				moveIndividualSpace(thisField,npc, npc->playerCharacter->x, npc->playerCharacter->y);
-
+			if(tmpCord == NULL){
+				//cant go anywhere
+				npc->thisBehavior->alertDuration = 0;
 				npc->remainingActions = 0;
 				return 0;
 			}
 
-			return moveResult;
+			int toReturn = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, tmpCord->x, tmpCord->y);
+
+			free(tmpCord);
+			return toReturn;
+		}
+
+		if(npc->thisBehavior->alertDuration > 0){
+			npc->thisBehavior->alertDuration--;
+			npc->remainingActions--;
+			return 0;
+		}
+
+		if(!atDesiredLocation(npc)){
+			return returnToDesiredLocation(npc, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 		}
 
 		npc->remainingActions = 0;
 		return 0;
 	}
-
 }
 
 int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField, moveNodeMeta ** thisMoveNodeMeta){

@@ -602,7 +602,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if(inNameBoxMode()){
 		return nameLoop(hwnd, msg, wParam, lParam, player);
 	} else if(inAbilityCreateMode()){
-
 		if(inAbilityWaitForNameMode()){//Name loop finished, check for name
 			toggleAbilityWaitForNameMode();
 			if(!nameEmpty()){

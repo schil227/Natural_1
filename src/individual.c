@@ -75,6 +75,8 @@ individual *initIndividual(){
 	toReturn->thisBehavior->isThreatened = 0;
 	toReturn->thisBehavior->isSurrounded = 0;
 	toReturn->thisBehavior->hasAlreadyYieldedToPlayer = 0;
+	toReturn->thisBehavior->wasRecentlyAttacked = 0;
+	toReturn->thisBehavior->alertDuration = 0;
 
 	toReturn->specialDialog = NULL;
 
@@ -268,6 +270,8 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	item * tmpItem;
 
 	triggerEventOnAttack(targetIndividual->ID, thisIndividual->isPlayer);
+
+	targetIndividual->thisBehavior->wasRecentlyAttacked = 1;
 
 	if(thisIndividual->isPlayer){
 		thisIndividual->targetedIndividual = targetIndividual;
