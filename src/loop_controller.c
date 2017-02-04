@@ -31,8 +31,11 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		{
 			int direction;
 			direction = LOWORD(wParam) % 16;
+
+			RECT rect;
+			GetClientRect(hwnd, &rect);
 			if(canMoveCursor(player)){
-				moveCursor(main_field,direction, viewShift);
+				moveCursor(main_field,direction, viewShift, &rect);
 			}
 			break;
 		}
@@ -520,6 +523,8 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 		case 0x39:
 		case 0x69:
 			{
+				RECT rect;
+				GetClientRect(hwnd, &rect);
 
 				int dx = xMoveChange(LOWORD(wParam) % 16);
 				int dy = yMoveChange(LOWORD(wParam) % 16);
@@ -550,15 +555,15 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 							thisMoveNodeMeta->pathLength = thisMoveNodeMeta->pathLength + 1;
 
-							tryUpdateXShift(viewShift, nextNode->x);
-							tryUpdateYShift(viewShift, nextNode->y);
+							tryUpdateXShift(viewShift, nextNode->x, getGameFieldAreaX(&rect));
+							tryUpdateYShift(viewShift, nextNode->y, getGameFieldAreaY(&rect));
 						}
 					}else{ //node already exists
 						int removedNodes = freeUpMovePath((moveNode *)(*oldNode)->nextMoveNode);
 						(*oldNode)->nextMoveNode = NULL;
 						thisMoveNodeMeta->pathLength =  thisMoveNodeMeta->pathLength - removedNodes;
-						tryUpdateXShift(viewShift, (*oldNode)->x);
-						tryUpdateYShift(viewShift, (*oldNode)->y);
+						tryUpdateXShift(viewShift, (*oldNode)->x, getGameFieldAreaX(&rect));
+						tryUpdateYShift(viewShift, (*oldNode)->y, getGameFieldAreaY(&rect));
 					}
 				}
 			}
@@ -714,8 +719,8 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 				thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
 
 				if(updateViewShift){
-					tryUpdateXShift(viewShift, (*tmpMoveNode)->x);
-					tryUpdateYShift(viewShift, (*tmpMoveNode)->y);
+					tryUpdateXShift(viewShift, (*tmpMoveNode)->x, getGameFieldAreaX(&rect));
+					tryUpdateYShift(viewShift, (*tmpMoveNode)->y, getGameFieldAreaY(&rect));
 				}
 
 				if((*tmpMoveNode)->nextMoveNode == NULL){

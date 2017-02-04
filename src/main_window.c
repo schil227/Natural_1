@@ -105,20 +105,50 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 	return TRUE;
 }
 
-void tryUpdateXShift(shiftData * viewShift, int newX){
-	if(newX - viewShift->xShift < 3 && viewShift->xShift > 0){
-		viewShift->xShift = viewShift->xShift - 1;
-	}else if(newX - viewShift->xShift > 9){
-		viewShift->xShift = viewShift->xShift + 1;
-	}
+int getGameFieldAreaX(RECT * rect){
+	return rect->right - rect->left - getSidebarWidth();
 }
 
-void tryUpdateYShift(shiftData * viewShift, int newY){
-	if(newY - viewShift->yShift < 3 && viewShift->yShift > 0){
-		viewShift->yShift = viewShift->yShift - 1;
-	}else if(newY - viewShift->yShift > 7){
-		viewShift->yShift = viewShift->yShift + 1;
+int getGameFieldAreaY(RECT * rect){
+	return rect->bottom - rect->top - getConsoleHeight();
+}
+
+void tryUpdateXShift(shiftData * viewShift, int newX, int gameFieldAreaX){
+	int adjustedX = (newX - viewShift->xShift) * 50;
+
+	//adjustedX less than 25% of gameField?
+	if(isGreaterThanPercentage(25, gameFieldAreaX, adjustedX) && viewShift->xShift > 0){
+		viewShift->xShift--;
+	}else if(isGreaterThanPercentage(adjustedX, gameFieldAreaX, 75)){
+		viewShift->xShift++;
 	}
+//
+//
+//
+//	if(newX - viewShift->xShift < 3 && viewShift->xShift > 0){
+//		viewShift->xShift = viewShift->xShift - 1;
+//	}else if(newX - viewShift->xShift > 6){ //9?
+//		viewShift->xShift = viewShift->xShift + 1;
+//	}
+}
+
+void tryUpdateYShift(shiftData * viewShift, int newY, int gameFieldAreaY){
+	int adjustedY = (newY - viewShift->yShift) * 50;
+
+	//adjustedX less than 25% of gameField?
+	if(isGreaterThanPercentage(25, gameFieldAreaY, adjustedY) && viewShift->yShift > 0){
+		viewShift->yShift--;
+	}else if(isGreaterThanPercentage(adjustedY, gameFieldAreaY, 75)){
+		viewShift->yShift++;
+	}
+//
+//
+//
+//	if(newY - viewShift->yShift < 3 && viewShift->yShift > 0){
+//		viewShift->yShift = viewShift->yShift - 1;
+//	}else if(newY - viewShift->yShift > 6){ // 7?
+//		viewShift->yShift = viewShift->yShift + 1;
+//	}
 }
 
 int shouldEnableActionMode(){

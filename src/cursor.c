@@ -73,13 +73,13 @@ int canMoveCursor(individual * thisIndividual){
 	return 1;
 }
 
-int moveCursor(field *thisField, int direction, shiftData * viewShift){
+int moveCursor(field *thisField, int direction, shiftData * viewShift, RECT * rect){
 	int newX = thisCursorInstance->cursorCharacter->x + xMoveChange(direction);
 	int newY = thisCursorInstance->cursorCharacter->y + yMoveChange(direction);
 	if(newX >= 0 && newX < thisField->totalX && newY >=0 && newY < thisField->totalY){
 		setCursorCoords(newX, newY);
-		tryUpdateXShift(viewShift, newX);
-		tryUpdateYShift(viewShift, newY);
+		tryUpdateXShift(viewShift, newX, getGameFieldAreaX(rect));
+		tryUpdateYShift(viewShift, newY, getGameFieldAreaY(rect));
 		return 1;
 	}else{
 		return 0;

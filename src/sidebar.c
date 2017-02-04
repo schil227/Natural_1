@@ -137,3 +137,7 @@ void printStat(HDC hdcBuffer, RECT * box, char * stat, char * statText, individu
 	box->left -= boxShift;
 	box->top += textYStep;
 }
+
+int getSidebarWidth(){
+	return thisSidebarInstance->thisCharacter->fixedWidth;
+}

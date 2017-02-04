@@ -134,6 +134,10 @@ void drawThisConsole(HDC hdc, HDC hdcBuffer, RECT * prc){
 	drawConsoleText(hdcBuffer, &textBoxRect, thisConsole->currentMessageNode, thisConsole->numRows, thisConsole->rowLength);
 }
 
+int getConsoleHeight(){
+	return thisConsole->consoleCharacter->fixedHeight;
+}
+
 int calcNumIndexes(char currentMessage[256], int lineLength, HDC hdcBuffer, int leftIndent){
 	SIZE size;
 	int result=2, rowLengthCounter=0, spaceIndex = 0, i;
