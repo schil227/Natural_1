@@ -113,6 +113,17 @@ int getGameFieldAreaY(RECT * rect){
 	return rect->bottom - rect->top - getConsoleHeight();
 }
 
+
+void transitViewShift(shiftData * viewShift, individual * player, field * thisField, RECT * rect){
+	int xShift = floor(((player->playerCharacter->x * 50) - (getGameFieldAreaX(rect) / 2))/50);
+	int yShift = floor(((player->playerCharacter->y * 50) - (getGameFieldAreaY(rect) / 2))/50);
+
+	viewShift->xShift = max(xShift, 0);
+
+	viewShift->yShift = max(yShift, 0);
+}
+
+
 void tryUpdateXShift(shiftData * viewShift, int newX, int gameFieldAreaX){
 	int adjustedX = (newX - viewShift->xShift) * 50;
 
@@ -122,14 +133,6 @@ void tryUpdateXShift(shiftData * viewShift, int newX, int gameFieldAreaX){
 	}else if(isGreaterThanPercentage(adjustedX, gameFieldAreaX, 75)){
 		viewShift->xShift++;
 	}
-//
-//
-//
-//	if(newX - viewShift->xShift < 3 && viewShift->xShift > 0){
-//		viewShift->xShift = viewShift->xShift - 1;
-//	}else if(newX - viewShift->xShift > 6){ //9?
-//		viewShift->xShift = viewShift->xShift + 1;
-//	}
 }
 
 void tryUpdateYShift(shiftData * viewShift, int newY, int gameFieldAreaY){
@@ -141,14 +144,6 @@ void tryUpdateYShift(shiftData * viewShift, int newY, int gameFieldAreaY){
 	}else if(isGreaterThanPercentage(adjustedY, gameFieldAreaY, 75)){
 		viewShift->yShift++;
 	}
-//
-//
-//
-//	if(newY - viewShift->yShift < 3 && viewShift->yShift > 0){
-//		viewShift->yShift = viewShift->yShift - 1;
-//	}else if(newY - viewShift->yShift > 6){ // 7?
-//		viewShift->yShift = viewShift->yShift + 1;
-//	}
 }
 
 int shouldEnableActionMode(){
@@ -481,7 +476,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x45: //e key (enter area)
 			{
-				attemptToTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory);
+				if(attemptToTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory)){
+					RECT rect;
+					GetClientRect(hwnd, &rect);
+
+					transitViewShift(viewShift, player, main_field, &rect);
+				}
 			}
 			break;
 		case 0x46: //f key

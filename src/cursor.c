@@ -20,12 +20,6 @@ void initThisCursor(int imageID) {
 
 void drawCursor(HDC hdc, HDC hdcBuffer, shiftData * viewData){
 	drawCharacterAnimation(hdc, hdcBuffer, thisCursorInstance->cursorCharacter, viewData, 0);
-//	HDC hdcMem = CreateCompatibleDC(hdc);
-//	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->imageMask);
-//	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCAND);
-//	SelectObject(hdcMem, thisCursorInstance->cursorCharacter->image);
-//	BitBlt(hdcBuffer, thisCursorInstance->cursorCharacter->x*40 - (viewData->xShift)*40, thisCursorInstance->cursorCharacter->y*40 - (viewData->yShift)*40, thisCursorInstance->cursorCharacter->width, thisCursorInstance->cursorCharacter->height, hdcMem, 0, 0, SRCPAINT);
-//	DeleteDC(hdcMem);
 }
 
 void toggleInCursorMode(){
@@ -63,7 +57,6 @@ void setCursorCoords(int x, int y){
 }
 
 int canMoveCursor(individual * thisIndividual){
-
 	//If it's a self-duration ability, dont move cursor from player position
 	if(thisCursorInstance->thisMode == CURSOR_ABILITY && thisIndividual->activeAbilities->selectedAbility != NULL
 			&&  thisIndividual->activeAbilities->selectedAbility->type == 'd'){
@@ -84,7 +77,6 @@ int moveCursor(field *thisField, int direction, shiftData * viewShift, RECT * re
 	}else{
 		return 0;
 	}
-
 }
 
 void destroyThisCursor(){
@@ -93,6 +85,3 @@ void destroyThisCursor(){
 	}
 	free(thisCursorInstance);
 }
-
-
-
