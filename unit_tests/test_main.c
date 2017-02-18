@@ -50,7 +50,7 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	testEnemy->baseHP = 10;
 	assert(isLowOnHP(testEnemy));
 
-	ability * randHealAbility = getRandomHPRestoringAbility(testEnemy->mana, testEnemy->abilities);
+	ability * randHealAbility = getRandomHPRestoringAbility(testEnemy);
 	assert(strcmp(randHealAbility->name, "Heal Target") == 0);
 
 	ability * randOffensiveAbility = getRandomOffensiveAbility(testEnemy);

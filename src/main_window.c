@@ -138,7 +138,7 @@ void tryUpdateXShift(shiftData * viewShift, int newX, int gameFieldAreaX){
 void tryUpdateYShift(shiftData * viewShift, int newY, int gameFieldAreaY){
 	int adjustedY = (newY - viewShift->yShift) * 50;
 
-	//adjustedX less than 25% of gameField?
+	//adjustedY less than 25% of gameField?
 	if(isGreaterThanPercentage(25, gameFieldAreaY, adjustedY) && viewShift->yShift > 0){
 		viewShift->yShift--;
 	}else if(isGreaterThanPercentage(adjustedY, gameFieldAreaY, 75)){
@@ -529,8 +529,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x52://r key (ability view)
 			{
-				toggleAbilityViewMode();
-				refreshAbilityView(player->abilities->numAbilities, player->abilities->abilitiesList);
+				if(!hasActiveStatusEffect(player, STATUS_SILENCED)){
+					toggleAbilityViewMode();
+					refreshAbilityView(player->abilities->numAbilities, player->abilities->abilitiesList);
+				}
 			}
 			break;
 		case 0x51: //q key (toggle sneak)

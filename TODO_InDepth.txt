@@ -1,13 +1,37 @@
-== TODO ==
--Implement FreeMode:
-	-allow free movement (DONE)
-	-actions dont decrease
-	-Individuals dont start their turns (maybe start their turns anyway, just implement wandering a bit?)
-	-other individuals may wander, speak, idle AI, etc. every second (or every few) on check
-	-Player can do other actions
-	-status are checked on second mark
-	-CHANGE the pathfinding function to completely avoid individuals on pathing back (kinda done)
 
+== TODO ==
+
+Implementing Statuses:
+	-Poison (DONE)
+	-Paralysis (DONE)
+	-Burning (DONE)
+	-Bleeding (DONE)
+	-Confusion - target anyone, including themselves
+	-Sleeping (DONE)
+	-Berzerk - attack boost, DR loss, still attack enemies, albeit randomly
+	-Silence - cant use abilities (or speak?) (DONE - excluding speak)
+
+	-Confusion for player:
+		-The selected individual doesn't matter, be it for using an ability, attack, talking, etc.
+		-if trying to use an item, chance that they may not succeed (item not lost)
+		
+	-Confusion for AI:
+		-targeted individual/targeted ally are whomever's in range; if poor choice is made,target is rerolled. all targets last significantly shorter 
+		-if trying to use an item, chance that they may not succeed (item not lost)
+				
+				
+				
+-Issue with guards: not going into alert mode (wasRecentlyAttacked) because blocked by trying to find individual
+
+-Implementing async FreeMode
+	-HARD PART: performing this asynchronously means that the player cant be blocked by other indiviuals 
+		- need to share moveNodeMeta resources (unless just immediately moving player, need to slow it down however)
+		- need to listen to ALL types of keyinputs on processAction loop
+	-(player) actions dont decrease
+	-other individuals may wander, speak, idle AI, etc. every second (or every few) on check
+	-active status/abilities are checked on second mark
+	
+	
 problem: player cant move when others are moving; therefore, the action system needs to stay
 e.g.: there are 30 individuals all moving around sequentially, takes 1 second for them all to move
  -> must be done sequentially because individuals could exist on the same space

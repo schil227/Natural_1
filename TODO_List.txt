@@ -1,18 +1,23 @@
+george town cupcakes - strawberry lava
+
 ===================
 ==== TODO LIST ====
 ===================
 - (12/22/16) Crime: implement order (lose money/go to jail)
 - (12/29/16) Differentiate between isPassable and CanAttackThrough for spaces, algorithms obtaining targetIndividuals
 - (1/10/17) Fog of War
-- (1/21/17) Fix Viewshift to be consistant between changing locations
-- (1/21/17) Implement non-combat mode
 - (1/27/17) Implement remaining statuses
 - (1/27/17) Disallow statuses from stacking
+- (2/13/17) Make the ability creator more intuitive, change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
+- (2/15/17) implement ally group
+
 
 ==BUGS==
 - (11/25/16) player enters/exits shop, skeletons occupy the same space as him when pathfinding
-   -also viewshift sucks - related somehow? probably not
-
+   -also viewshift sucks - related somehow? probably not (DONE)
+- (2/18/17) When someone uses a status on someone else, it says that the attacked person uses the status
+- (2/18/17) Sometimes Berzerking/Confused individuals cause the game to crash, may have something to do with being removed from the group prematurely
+   
 ==BACK BURNER==
 - (11/12/16) for some reason, there's a lot of slowdown when drawing a rotated image mask, so I had to make a separate function just to draw the image without the mask (which works as intended). Not sure if this is something I'll ever have to fix, but for awareness.
 - (11/12/16) Add more enemies to the field
@@ -28,3 +33,6 @@
 - (12/22/16) Unit Test individual actions and crime (DONE)
 - (11/27/16 - 1/26/17) Update images to be 2x long. At 30 fps the animations are the right tempo, too jittery at 60 (DONE - fixed with processing individual action in timing look)
 - (12/22/16 - 1/26/17) Fix slowness with NPC action (DONE - fixed with processing individual action in timing look)
+- (1/28/17 - 2/2/17) When Individual is attacked, and the attacker cannot be seen, have them move around (DONE)
+- (1/21/17 - 2/6/17) Fix Viewshift to be consistant between changing locations (DONE)
+- (1/21/17 - 2/1/17) Implement non-combat mode (DONE)

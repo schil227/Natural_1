@@ -532,14 +532,14 @@ item * getRandomHPRestoringItem(inventory * backpack){
 }
 
 
-ability * getRandomHPRestoringAbility(int availableMana, abilityList * thisAbilityList){
+ability * getRandomHPRestoringAbility(individual * thisIndividual){
 	int i, numAbilities = 0, randIndex;
 	abilityList healingAbilities;
 	ability * tmpAbility;
 
-	for(i = 0; i < thisAbilityList->numAbilities; i++){
-		tmpAbility = thisAbilityList->abilitiesList[i];
-		if(tmpAbility != NULL && tmpAbility->totalManaCost <= availableMana ){
+	for(i = 0; i < thisIndividual->abilities->numAbilities; i++){
+		tmpAbility = thisIndividual->abilities->abilitiesList[i];
+		if(tmpAbility != NULL && tmpAbility->totalManaCost <= thisIndividual->mana ){
 			if(tmpAbility->diceHPEnabled && tmpAbility->diceHP->effectAndManaArray[tmpAbility->diceHP->selectedIndex]->effectMagnitude > 0){
 				healingAbilities.abilitiesList[numAbilities] = tmpAbility;
 				numAbilities++;
@@ -550,7 +550,7 @@ ability * getRandomHPRestoringAbility(int availableMana, abilityList * thisAbili
 		}
 	}
 
-	if(numAbilities == 0){
+	if(numAbilities == 0 || hasActiveStatusEffect(thisIndividual, STATUS_SILENCED)){
 		return NULL;
 	}else{
 		randIndex = rand() % numAbilities;
@@ -690,7 +690,7 @@ int hasOffensiveAbilityInRange(individual * thisIndividual){
 	inRangeOffensiveAbilities.numAbilities = 0;
 	inRangeOffensiveAbilities.MAX_ABILITIES = 64;
 
-	if(thisIndividual->targetedIndividual == NULL || thisIndividual->abilities->numAbilities == 0){
+	if(thisIndividual->targetedIndividual == NULL || thisIndividual->abilities->numAbilities == 0 || hasActiveStatusEffect(thisIndividual, STATUS_SILENCED)){
 		return 0;
 	}
 
@@ -1235,11 +1235,16 @@ item * getBuffItem(inventory * thisInventory){
 }
 
 ability * getRandomBuffAbility(individual * thisIndividual){
-	abilityList * buffAbilities = malloc(sizeof(abilityList));
-	buffAbilities->numAbilities = 0;
-
-	ability * selectedAbility;
 	int i;
+	abilityList * buffAbilities;
+	ability * selectedAbility;
+
+	if(hasActiveStatusEffect(thisIndividual, STATUS_SILENCED)){
+		return NULL;
+	}
+
+	buffAbilities = malloc(sizeof(abilityList));
+	buffAbilities->numAbilities = 0;
 
 	for(i = 0; i < thisIndividual->abilities->numAbilities; i++){
 		if(thisIndividual->abilities->abilitiesList[i] != NULL && thisIndividual->abilities->abilitiesList[i]->totalManaCost <= thisIndividual->mana && abilityIsBuffing(thisIndividual->abilities->abilitiesList[i])){
@@ -1261,7 +1266,13 @@ ability * getRandomBuffAbility(individual * thisIndividual){
 
 ability * getRandomOffensiveAbility(individual * thisIndividual){
 	ability * selectedAbility;
-	abilityList * offensiveAbilities = malloc(sizeof(abilityList));
+	abilityList * offensiveAbilities;
+
+	if(hasActiveStatusEffect(thisIndividual, STATUS_SILENCED)){
+		return NULL;
+	}
+
+	offensiveAbilities = malloc(sizeof(abilityList));
 	offensiveAbilities->numAbilities = 0;
 	int i;
 
@@ -1287,15 +1298,22 @@ ability * getRandomOffensiveAbility(individual * thisIndividual){
 
 int selectHealingAbility(individual * thisIndividual){
 	int i;
+	abilityList * healingAbilities;
 
-	abilityList * healingAbilities = malloc(sizeof(abilityList));
+	if(hasActiveStatusEffect(thisIndividual, STATUS_SILENCED)){
+		return NULL;
+	}
+
+	healingAbilities = malloc(sizeof(abilityList));
 	healingAbilities->numAbilities = 0;
 	healingAbilities->MAX_ABILITIES = 64;
 
 	for(i = 0; i < thisIndividual->abilities->numAbilities; i++){
-		if(healingAbilities->numAbilities < healingAbilities->MAX_ABILITIES && thisIndividual->abilities->abilitiesList[i] != NULL
+		if(healingAbilities->numAbilities < healingAbilities->MAX_ABILITIES
+				&& thisIndividual->abilities->abilitiesList[i] != NULL
+				&& thisIndividual->mana >= thisIndividual->abilities->abilitiesList[i]->totalManaCost
 				&& (thisIndividual->abilities->abilitiesList[i]->hpEnabled
-				&& thisIndividual->abilities->abilitiesList[i]->hp->effectAndManaArray[thisIndividual->abilities->abilitiesList[i]->hp->selectedIndex]->effectMagnitude > 0)
+						&& thisIndividual->abilities->abilitiesList[i]->hp->effectAndManaArray[thisIndividual->abilities->abilitiesList[i]->hp->selectedIndex]->effectMagnitude > 0)
 				||  (thisIndividual->abilities->abilitiesList[i]->diceHPEnabled
 						&& thisIndividual->abilities->abilitiesList[i]->diceHP->effectAndManaArray[thisIndividual->abilities->abilitiesList[i]->diceHP->selectedIndex]->effectMagnitude > 0)){
 			healingAbilities->abilitiesList[healingAbilities->numAbilities] = thisIndividual->abilities->abilitiesList[i];
@@ -1384,40 +1402,40 @@ int moveCloserToTarget(individual * enemy, individual * targetIndividual, field 
 	return 1;
 }
 
-int attackModule(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
-	if(enemy->thisBehavior->isTactical && getAttributeSum(enemy, "range") > getAttributeSum(enemy->targetedIndividual,"range")  && individualWithinRange(enemy->targetedIndividual, enemy)){
+int attackModule(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+	if(thisIndividual->thisBehavior->isTactical && !hasActiveStatusEffect(thisIndividual, STATUS_BERZERK) && getAttributeSum(thisIndividual, "range") > getAttributeSum(thisIndividual->targetedIndividual,"range")  && individualWithinRange(thisIndividual->targetedIndividual, thisIndividual)){
 		 //&& isGreaterThanPercentage(rand() % 100, 100, 50)
 		int x, y;
-		cord * rangedCord = getCordWithTargetInRange(enemy, thisField);
+		cord * rangedCord = getCordWithTargetInRange(thisIndividual, thisField);
 		x = rangedCord->x;
 		y = rangedCord->y;
 
 		free(rangedCord);
 
-		if(cordHasRangeAdvantage(enemy, x, y) == 2){
-			return moveToSelectedLocation(enemy, thisField, thisMoveNodeMeta, x, y);
+		if(cordHasRangeAdvantage(thisIndividual, x, y) == 2){
+			return moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, x, y);
 		}
 	}
 
-	if (individualWithinRange(enemy, enemy->targetedIndividual)) {
-		if (attackIndividual(enemy, enemy->targetedIndividual)) {
-			deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, enemy->targetedIndividual), enemy->targetedIndividual);
+	if (individualWithinRange(thisIndividual, thisIndividual->targetedIndividual)) {
+		if (attackIndividual(thisIndividual, thisIndividual->targetedIndividual)) {
+			deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, thisIndividual->targetedIndividual), thisIndividual->targetedIndividual);
 			removeIndividualFromField(thisField,
-					enemy->targetedIndividual->playerCharacter->x,
-					enemy->targetedIndividual->playerCharacter->y);
+					thisIndividual->targetedIndividual->playerCharacter->x,
+					thisIndividual->targetedIndividual->playerCharacter->y);
 		}
-		enemy->remainingActions--;
+		thisIndividual->remainingActions--;
 		return 0;
 	} else {
-		if(enemy->thisBehavior->isTactical){
-			return tacticalModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		if(thisIndividual->thisBehavior->isTactical && !hasActiveStatusEffect(thisIndividual, STATUS_BERZERK)){
+			return tacticalModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
 		}else{
-			int toReturn = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
+			int toReturn = moveCloserToTarget(thisIndividual, thisIndividual->targetedIndividual, thisField, thisMoveNodeMeta);
 
 			//cannot reach target and target out of range, get new closer target
 			if(!toReturn){
-				enemy->targetedIndividual = NULL;
-				enemy->targetedDuration = 0;
+				thisIndividual->targetedIndividual = NULL;
+				thisIndividual->targetedDuration = 0;
 			}
 
 			return toReturn;
@@ -1479,7 +1497,7 @@ int tryRestoreMana(individual * thisIndividual){
 }
 
 int tryHeal(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField){
-	ability * hpRestoringAbility = getRandomHPRestoringAbility(thisIndividual->mana, thisIndividual->abilities);
+	ability * hpRestoringAbility = getRandomHPRestoringAbility(thisIndividual);
 	item * hpRestoringItem = getRandomHPRestoringItem(thisIndividual->backpack);
 	int selectedHealingMethod = 0;
 
@@ -1567,7 +1585,141 @@ int performAction(individual * thisIndividual, individual * player, groupContain
 	}
 }
 
+individual * getIndiscriminateIndividualInRange(individual * thisIndividual, field * thisField, int range){
+	int i, j;
+	individualGroup * inRangeGroup = initGroup();
+	individual * selectedIndividual;
+	individual * tmpIndividual;
+	addIndividualToGroup(inRangeGroup, thisIndividual);
+
+	for(i = max(thisIndividual->playerCharacter->x - range, 0); i < thisIndividual->playerCharacter->x + range; i++){
+		for(j = max(thisIndividual->playerCharacter->y - range, 0); j < thisIndividual->playerCharacter->y + range; j++){
+			tmpIndividual = getIndividualFromField(thisField,i,j);
+
+			if(tmpIndividual != NULL){
+				addIndividualToGroup(inRangeGroup, tmpIndividual);
+			}
+		}
+	}
+
+	selectedIndividual = inRangeGroup->individuals[(rand() % inRangeGroup->numIndividuals)];
+
+	free(inRangeGroup);
+
+	return selectedIndividual;
+}
+
+int berzerkIndividualAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	char logStr[128];
+	sprintf(logStr, "%s is berzerking!", thisIndividual->name);
+	cwrite(logStr);
+
+	// TODO: Add Allies
+	if(thisIndividual->currentGroupType == GROUP_ENEMIES || thisIndividual->currentGroupType == GROUP_BEASTS){
+		if(checkForTargets(thisIndividual, player, thisGroupContainer, thisField)){
+			thisIndividual->targetedDuration = 0;
+			return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+	}else if(thisIndividual->currentGroupType == GROUP_GUARDS || thisIndividual->currentGroupType == GROUP_NPCS){
+		findDangerousIndividualNearBy(thisIndividual, player, thisGroupContainer, thisField, 8);
+
+		if(thisIndividual->targetedIndividual != NULL){
+			thisIndividual->targetedDuration = 0;
+			return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+	}
+
+	thisIndividual->remainingActions--;
+	return 0;
+}
+
+int confusedIndividualAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	char logStr[128];
+	sprintf(logStr, "%s is confused!", thisIndividual->name);
+	cwrite(logStr);
+
+	rerollBehavior(thisIndividual);
+
+	thisIndividual->targetedIndividual = getIndiscriminateIndividualInRange(thisIndividual, thisField, getAttributeSum(thisIndividual, "range"));
+	thisIndividual->allyIndividual = getIndiscriminateIndividualInRange(thisIndividual, thisField, getAttributeSum(thisIndividual, "range"));
+	thisIndividual->targetedDuration = 0;
+
+	thisIndividual->activeAbilities->selectedAbility = NULL;
+
+	if(thisIndividual->targetedIndividual == NULL){
+		thisIndividual->remainingActions--;
+		return 0; //do soemthing else
+	}
+
+	if(hasActiveStatusEffect(thisIndividual, STATUS_BERZERK)){
+		logStr[0] = '\0';
+		sprintf(logStr, "%s is berzerking!", thisIndividual->name);
+		cwrite(logStr);
+		// Berzerk/confused is over powered if there's no one near by; limit self attacks
+		if(thisIndividual == thisIndividual->targetedIndividual && isGreaterThanPercentage(rand() % 100, 100, 50)){
+			thisIndividual->remainingActions--;
+			return 0;
+		}
+
+		return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+	}
+
+	if(thisIndividual->thisBehavior->isOffensive){
+		ability * offensiveAbility = getRandomOffensiveAbility(thisIndividual);
+
+		if(isGreaterThanPercentage(thisIndividual->thisBehavior->abilityAffinity, 100, rand() % 100)
+				&& !hasActiveStatusEffect(thisIndividual, STATUS_SILENCED)
+				&& offensiveAbility != NULL
+				&& abilityInRangeOfIndividual(offensiveAbility, thisIndividual, thisIndividual->targetedIndividual)){
+			thisIndividual->activeAbilities->selectedAbility = offensiveAbility;
+			return useAbilityOnTargetedSpace(thisIndividual, player, thisGroupContainer, thisField, thisIndividual->targetedIndividual->playerCharacter->x, thisIndividual->targetedIndividual->playerCharacter->y);
+		}else{
+			return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+	}else{
+		int abilityRange = 0;
+
+		if(selectHealingAbility(thisIndividual)){
+			abilityRange = thisIndividual->activeAbilities->selectedAbility->range->effectAndManaArray[thisIndividual->activeAbilities->selectedAbility->range->selectedIndex]->effectMagnitude;
+
+			thisIndividual->allyIndividual = getIndiscriminateIndividualInRange(thisIndividual, thisField, abilityRange);
+
+			if(thisIndividual->allyIndividual != NULL &&
+				!isGreaterThanPercentage(thisIndividual->allyIndividual->hp, getTotalHP(thisIndividual->allyIndividual), 80) &&
+				abilityInRangeOfIndividual(thisIndividual->activeAbilities->selectedAbility, thisIndividual, thisIndividual->allyIndividual)){
+					return useAbilityOnTargetedSpace(thisIndividual, player, thisGroupContainer, thisField,  thisIndividual->allyIndividual->playerCharacter->x, thisIndividual->allyIndividual->playerCharacter->y);
+			}
+		}
+
+		thisIndividual->activeAbilities->selectedAbility = getRandomBuffAbility(thisIndividual);
+
+		if(thisIndividual->activeAbilities->selectedAbility != NULL){
+			if(thisIndividual->activeAbilities->selectedAbility->type == 'd' || thisIndividual->activeAbilities->selectedAbility->type == 'i'){
+				return useAbilityOnTargetedSpace(thisIndividual, player, thisGroupContainer, thisField,  thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+			}
+
+			abilityRange = thisIndividual->activeAbilities->selectedAbility->range->effectAndManaArray[thisIndividual->activeAbilities->selectedAbility->range->selectedIndex]->effectMagnitude;
+
+			thisIndividual->allyIndividual = getIndiscriminateIndividualInRange(thisIndividual, thisField, abilityRange);
+
+			if(thisIndividual->allyIndividual != NULL &&
+				abilityInRangeOfIndividual(thisIndividual->activeAbilities->selectedAbility, thisIndividual, thisIndividual->allyIndividual)){
+					return useAbilityOnTargetedSpace(thisIndividual, player, thisGroupContainer, thisField,  thisIndividual->allyIndividual->playerCharacter->x, thisIndividual->allyIndividual->playerCharacter->y);
+			}
+		}
+
+		return 0;
+	}
+}
+
 int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	if(hasActiveStatusEffect(enemy, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 33)){
+		return confusedIndividualAction(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
+
+	if(hasActiveStatusEffect(enemy, STATUS_BERZERK)){
+		return berzerkIndividualAction(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
 
 	//Restore Mana
 	if(isLowOnMana(enemy)){
@@ -1768,7 +1920,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 	else{
 		cwrite("Being supportive~~ :3");
 
-		if(enemy->abilities->numAbilities == 0){
+		if(enemy->abilities->numAbilities == 0 || hasActiveStatusEffect(enemy, STATUS_SILENCED)){
 			return attackModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
 		}
 
@@ -1848,6 +2000,13 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 }
 
 int guardAction(individual * guard, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	if(hasActiveStatusEffect(guard, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
+		return confusedIndividualAction(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
+
+	if(hasActiveStatusEffect(guard, STATUS_BERZERK)){
+		return berzerkIndividualAction(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
 
 	//Restore Mana
 	if(isLowOnMana(guard)){
@@ -2067,7 +2226,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 	else{
 		cwrite("Being supportive~~ :3");
 
-		if(guard->abilities->numAbilities == 0){
+		if(guard->abilities->numAbilities == 0 || hasActiveStatusEffect(guard, STATUS_SILENCED)){
 			return attackModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
 		}
 
@@ -2314,13 +2473,19 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 		sprintf(outLog, "Ind:%s find dangerous time3: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
 		cwrite(outLog);
 
-
-
 		return;
 	}
 }
 
 int npcAction(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	if(hasActiveStatusEffect(npc, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
+		return confusedIndividualAction(npc, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
+
+	if(hasActiveStatusEffect(npc, STATUS_BERZERK)){
+		return berzerkIndividualAction(npc, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
+
 	//Restore Mana
 	if(isLowOnMana(npc)){
 		if(tryRestoreMana(npc)){

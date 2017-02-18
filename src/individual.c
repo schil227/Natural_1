@@ -262,15 +262,7 @@ void setAttackAnimation(individual * thisIndividual){
 	}
 }
 
-int attackIndividual(individual *thisIndividual, individual *targetIndividual){
-	int d20 = rand() % 20 + 1;
-	int totalAttack = d20 + getAttributeSum(thisIndividual, "attack");
-	int totalAC = getAttributeSum(targetIndividual,"ac") + getAttributeSum(thisIndividual, "DEX");
-	int i;
-	item * tmpItem;
-
-	triggerEventOnAttack(targetIndividual->ID, thisIndividual->isPlayer);
-
+void onAttackedChecks(individual *thisIndividual, individual *targetIndividual){
 	targetIndividual->thisBehavior->wasRecentlyAttacked = 1;
 
 	if(thisIndividual->isPlayer){
@@ -280,6 +272,19 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual){
 	if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
 		processCrimeEvent(CRIME_ASSULT, 40, targetIndividual->ID, 0);
 	}
+
+	disableSleepStatusOnAttack(targetIndividual);
+}
+
+int attackIndividual(individual *thisIndividual, individual *targetIndividual){
+	int d20 = rand() % 20 + 1;
+	int totalAttack = d20 + getAttributeSum(thisIndividual, "attack");
+	int totalAC = getAttributeSum(targetIndividual,"ac") + getAttributeSum(thisIndividual, "DEX");
+	int i;
+	item * tmpItem;
+
+	triggerEventOnAttack(targetIndividual->ID, thisIndividual->isPlayer);
+	onAttackedChecks(thisIndividual, targetIndividual);
 
 	enableSpecialDrawMode();
 	setDurationInTimerTicks(20);
@@ -1140,9 +1145,19 @@ void processStatus(individual * thisIndividual, status * thisStatus){
 			break;
 		}
 		case STATUS_PARALYZED:{
-			thisIndividual->remainingActions -= thisIndividual->totalActions;
+			thisIndividual->remainingActions = 0;
 			break;
 		}
+		case STATUS_SLEEPING:{
+			if(thisStatus->turnsRemaining == 0 && (rand() % 3) != 0){
+				thisStatus->turnsRemaining++;
+			}
+
+			thisIndividual->remainingActions = 0;
+
+			break;
+		}
+
 	}
 }
 
@@ -1163,6 +1178,8 @@ statusEffect lookUpStatusType(char * statusType[16]){
 		return STATUS_BERZERK;
 	}else if(strcmp(statusType, "Silence") == 0){
 		return STATUS_SILENCED;
+	}else if(strcmp(statusType, "Sleep") == 0){
+		return STATUS_SLEEPING;
 	}
 
 	char * tmpStr[64];
@@ -1240,6 +1257,50 @@ char * lookUpStatusEffectName(statusEffect effect){
 	}
 
 	return "!! STATUS NOT FOUND !!";
+}
+
+int hasActiveStatusEffect(individual * thisIndividual, statusEffect effect){
+	int i, statusesPassed = 0;
+
+	if(thisIndividual->activeStatuses->numStatuses > 0){
+		for(i = 0; i < thisIndividual->activeStatuses->MAX_STATUSES; i++){
+			status * tmpStatus = thisIndividual->activeStatuses->statuses[i];
+
+			if(tmpStatus != NULL){
+				if(tmpStatus->effect == effect){
+					return 1;
+				}
+
+				if(statusesPassed == thisIndividual->activeStatuses->numStatuses){
+					break;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+void disableSleepStatusOnAttack(individual * attackedIndividual){
+	int i, statusesPassed = 0;
+
+	if(attackedIndividual->activeStatuses->numStatuses > 0){
+		for(i = 0; i < attackedIndividual->activeStatuses->MAX_STATUSES; i++){
+			status * tmpStatus = attackedIndividual->activeStatuses->statuses[i];
+
+			if(tmpStatus != NULL){
+				if(tmpStatus->effect == STATUS_SLEEPING){
+					attackedIndividual->activeStatuses->statuses[i] = NULL;
+					attackedIndividual->activeStatuses->numStatuses--;
+					statusesPassed--;
+				}
+
+				if(statusesPassed == attackedIndividual->activeStatuses->numStatuses){
+					break;
+				}
+			}
+		}
+	}
 }
 
 void useActiveAbility(individual * thisIndividual, ability * thisAbility){
@@ -3077,8 +3138,21 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 	}
 }
 
+int getAttributeFromActiveStatus(status * thisStatus, char * attribute){
+	if(thisStatus->effect == STATUS_BERZERK){
+		if(strcmp("attack",attribute) == 0){
+			return -2;
+		}else if(strcmp("baseDam",attribute) == 0 ){
+			return 2;
+		}
+	}
+
+	return 0;
+}
+
+
 int getAttributeSum(individual * thisIndividual, char * attribute){
-	int toReturn = 0, i, itemTotal = 0, activeItemTotal = 0, abilitiesPassed = 0;
+	int toReturn = 0, i, itemTotal = 0, activeItemTotal = 0, abilitiesPassed = 0, statusesPassed = 0;
 
 	toReturn += getAttributeFromIndividual(thisIndividual, attribute);
 
@@ -3102,16 +3176,31 @@ int getAttributeSum(individual * thisIndividual, char * attribute){
 
 	}
 
-	for(i = 0; i < thisIndividual->activeAbilities->MAX_ABILITIES; i++){
-		if(thisIndividual->activeAbilities->abilitiesList[i] != NULL){
-			abilitiesPassed++;
-			toReturn += getAttributeFromActiveAbility(thisIndividual->activeAbilities->abilitiesList[i]->thisAbility, attribute);
+	if(thisIndividual->activeAbilities->numAbilities > 0){
+		for(i = 0; i < thisIndividual->activeAbilities->MAX_ABILITIES; i++){
+			if(thisIndividual->activeAbilities->abilitiesList[i] != NULL){
+				abilitiesPassed++;
+				toReturn += getAttributeFromActiveAbility(thisIndividual->activeAbilities->abilitiesList[i]->thisAbility, attribute);
 
-		if(abilitiesPassed >= thisIndividual->activeAbilities->numAbilities){
-			break;
-		}
+				if(abilitiesPassed >= thisIndividual->activeAbilities->numAbilities){
+					break;
+				}
+			}
 		}
 	}
 
+	if(thisIndividual->activeStatuses->numStatuses){
+		for(i = 0; i < thisIndividual->activeStatuses->MAX_STATUSES; i++){
+			if(thisIndividual->activeStatuses->statuses[i] != NULL){
+				statusesPassed++;
+
+				toReturn += getAttributeFromActiveStatus(thisIndividual->activeStatuses->statuses[i], attribute);
+
+				if(statusesPassed == thisIndividual->activeStatuses->numStatuses){
+					break;
+				}
+			}
+		}
+	}
 	return toReturn;
 }
