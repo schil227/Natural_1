@@ -19,6 +19,19 @@
 #include"./headers/dialog_pub_methods.h"
 #include"./headers/sound_pub_methods.h"
 
+//
+// 	 	 	//Timer Example:
+//
+//			QueryPerformanceCounter(&EndingTime);
+//			ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+//
+//			ElapsedMicroseconds.QuadPart *= 1000000;
+//			ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+//
+//			char outLog[256];
+//			sprintf(outLog, "Ind:%s find dangerous time2: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
+//			cwrite(outLog);
+
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
 const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";//".\\resources\\maps\\";//
@@ -384,7 +397,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		playerDialog->afraidOfPlayer = 0;
 		playerDialog->playerIsMarkedForDeath = 0;
 
-		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 4, 13, 3, 4, 1, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -406,9 +419,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		viewShift = initShiftData();
 
 		inActionMode = shouldEnableActionMode();
-		char outLog[12];
-		sprintf(outLog, "AM start: %d", inActionMode);
-		cwrite(outLog);
+//		char outLog[12];
+//		sprintf(outLog, "AM start: %d", inActionMode);
+//		cwrite(outLog);
 	}
 		break;
 	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
@@ -437,9 +450,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		if(freeTimer > 30){
 			inActionMode = shouldEnableActionMode();
-			char outLog[12];
-			sprintf(outLog, "ding: %d", inActionMode);
-			cwrite(outLog);
+//			char outLog[12];
+//			sprintf(outLog, "ding: %d", inActionMode);
+//			cwrite(outLog);
 
 			freeTimer = 0;
 		}
@@ -507,6 +520,26 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				enableInventoryViewMode(player->backpack);
 //				initInventoryMode = 1;
 //				inventoryMode = 1;
+			}
+			break;
+		case 0x4B://k key (inventory)
+			{
+				healIndividual(player, 1);
+			}
+			break;
+		case 0x4C://l key (inventory)
+			{
+				player->hp--;
+			}
+			break;
+		case 0x4F://o key (inventory)
+			{
+				restoreMana(player, 1);
+			}
+			break;
+		case 0x50://p key (inventory)
+			{
+				player->mana--;
 			}
 			break;
 		case 0x54://t key (talk)
@@ -732,8 +765,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
-		//determine if need to go back into enemyActionMode
+		//determine if need to go back into this group's action mode
 		nextAvailableIndividualIndex(thisGroupContainer->selectedGroup);
+
 		if(thisGroupContainer->selectedGroup->currentIndividualIndex > -1){
 			thisGroupContainer->groupActionMode = 1;
 			thisGroupContainer->initGroupActionMode = 1;
@@ -744,7 +778,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 
 				//If player's out of actions, start enemy turn again
-				if(player->remainingActions < 0){
+				if(player->remainingActions <= 0){
 					endTurn(player);
 					thisGroupContainer->groupActionMode = 1;
 					thisGroupContainer->initGroupActionMode = 1;

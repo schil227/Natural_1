@@ -220,10 +220,9 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 int tryAttackIndividual(groupContainer * thisGroupContainer, individual * player, field * thisField, int x, int y){
 	individual * tmpIndividual = getIndividualFromField(thisField, x, y);
 	int i, numTimesToAttack = 1;
-
 	numTimesToAttack += calcExtraTimesToAttack(player);
 
-	if(tmpIndividual != NULL && tmpIndividual != player && individualWithinRange(player, tmpIndividual)){
+	if(tmpIndividual != NULL && (tmpIndividual != player || player->thisBehavior->gotConfused) && individualWithinRange(player, tmpIndividual)){
 		for(i = 0; i < numTimesToAttack; i++){
 
 			if(tmpIndividual->hp > 0){
@@ -275,6 +274,18 @@ int tryAttackEnemies(individualGroup * enemies, individual * player, field * thi
 	}
 
 	return 0;
+}
+
+int getSelectedAbilityRange(individual * thisIndividual){
+	int range = 0;
+
+	ability * targetAbility = thisIndividual->activeAbilities->selectedAbility;
+
+	if(targetAbility->rangeEnabled){
+		range += targetAbility->range->effectAndManaArray[targetAbility->range->selectedIndex]->effectMagnitude;
+	}
+
+	return range;
 }
 
 int cursorWithinAbilityRange(individual * player, int x, int y){
@@ -362,16 +373,7 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 						tmp->playerCharacter->y <= maxY ){
 					if(thisIndividual->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility)){
 						triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
-
-						tmp->thisBehavior->wasRecentlyAttacked = 1;
-
-						if(thisIndividual->isPlayer){
-							thisIndividual->targetedIndividual = tmp;
-						}
-
-						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
-							processCrimeEvent(CRIME_ASSULT, 40, tmp->ID, 0);
-						}
+						onAttackedChecks(thisIndividual, tmp);
 
 						if(!individualInGroup(tmp, thisGroup)){
 							individualsPassed--;
@@ -379,16 +381,7 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 					}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 						if(abilityIsHarmful(thisIndividual->activeAbilities->selectedAbility)){
 							triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
-
-							tmp->thisBehavior->wasRecentlyAttacked = 1;
-
-							if(thisIndividual->isPlayer){
-								thisIndividual->targetedIndividual = tmp;
-							}
-
-							if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
-								processCrimeEvent(CRIME_ASSULT, 40, tmp->ID, 0);
-							}
+							onAttackedChecks(thisIndividual, tmp);
 
 							if(!individualInGroup(tmp, thisGroup)){
 								individualsPassed--;

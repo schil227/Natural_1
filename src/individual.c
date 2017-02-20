@@ -77,6 +77,7 @@ individual *initIndividual(){
 	toReturn->thisBehavior->hasAlreadyYieldedToPlayer = 0;
 	toReturn->thisBehavior->wasRecentlyAttacked = 0;
 	toReturn->thisBehavior->alertDuration = 0;
+	toReturn->thisBehavior->gotConfused = 0;
 
 	toReturn->specialDialog = NULL;
 
@@ -265,12 +266,12 @@ void setAttackAnimation(individual * thisIndividual){
 void onAttackedChecks(individual *thisIndividual, individual *targetIndividual){
 	targetIndividual->thisBehavior->wasRecentlyAttacked = 1;
 
-	if(thisIndividual->isPlayer){
+	if(thisIndividual->isPlayer && !thisIndividual->thisBehavior->gotConfused){
 		thisIndividual->targetedIndividual = targetIndividual;
-	}
 
-	if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
-		processCrimeEvent(CRIME_ASSULT, 40, targetIndividual->ID, 0);
+		if((targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
+			processCrimeEvent(CRIME_ASSULT, 40, targetIndividual->ID, 0);
+		}
 	}
 
 	disableSleepStatusOnAttack(targetIndividual);
@@ -1501,6 +1502,10 @@ int animationFrameTickUpdate(character * thisCharacter){
 }
 
 void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftData * viewShift){
+	if(thisIndividual == NULL){
+		return;
+	}
+
 	thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
 
 	if(animationDelayUpdate(thisIndividual->playerCharacter)){

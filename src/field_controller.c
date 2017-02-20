@@ -456,20 +456,22 @@ void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shi
 void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, shiftData * viewShift){
 	int index;
 
-	for(index = 0; index < thisGroup->MAX_INDIVIDUALS; index++){
-		int individualsPassed = 0;
-		individual * tmp = thisGroup->individuals[index];
+	if(thisGroup->numIndividuals > 0){
+		for(index = 0; index < thisGroup->MAX_INDIVIDUALS; index++){
+			int individualsPassed = 0;
+			individual * tmp = thisGroup->individuals[index];
 
-		if(tmp != NULL){
-			individualsPassed++;
+			if(tmp != NULL){
+				individualsPassed++;
 
-			//dont draw the current individual yet, do it after
-			if(index != thisGroup->currentIndividualIndex){
-				drawIndividual(hdc, hdcBuffer, thisGroup->individuals[index], viewShift);
-			}
+				//dont draw the current individual yet, do it after
+				if(index != thisGroup->currentIndividualIndex){
+					drawIndividual(hdc, hdcBuffer, thisGroup->individuals[index], viewShift);
+				}
 
-			if(individualsPassed == thisGroup->numIndividuals){
-				break;
+				if(individualsPassed == thisGroup->numIndividuals){
+					break;
+				}
 			}
 		}
 	}

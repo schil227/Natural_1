@@ -104,6 +104,7 @@ typedef struct{
 	int isThreatened;
 	int wasRecentlyAttacked;
 	int alertDuration;
+	int gotConfused;
 }behavior;
 
 typedef struct{

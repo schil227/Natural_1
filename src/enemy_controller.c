@@ -1713,6 +1713,13 @@ int confusedIndividualAction(individual * thisIndividual, individual * player, g
 }
 
 int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	if(hasActiveStatusEffect(enemy, STATUS_SLEEPING)){
+		char logOut[128];
+		sprintf(logOut, "%s is sleeping!", enemy->name);
+		cwrite(logOut);
+		return 0;
+	}
+
 	if(hasActiveStatusEffect(enemy, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 33)){
 		return confusedIndividualAction(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 	}
@@ -2000,6 +2007,13 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 }
 
 int guardAction(individual * guard, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	if(hasActiveStatusEffect(guard, STATUS_SLEEPING)){
+		char logOut[128];
+		sprintf(logOut, "%s is sleeping!", guard->name);
+		cwrite(logOut);
+		return 0;
+	}
+
 	if(hasActiveStatusEffect(guard, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
 		return confusedIndividualAction(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 	}
@@ -2401,22 +2415,6 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 				friendlyIndividual->thisBehavior->isSurrounded = 0;
 			}
 
-
-
-
-			QueryPerformanceCounter(&EndingTime);
-			ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
-
-			ElapsedMicroseconds.QuadPart *= 1000000;
-			ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-
-			char outLog[256];
-			sprintf(outLog, "Ind:%s find dangerous time 1: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
-			cwrite(outLog);
-
-
-
-
 			return;
 		}
 
@@ -2430,20 +2428,6 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 			}else{
 				friendlyIndividual->thisBehavior->isSurrounded = 0;
 			}
-
-
-
-			QueryPerformanceCounter(&EndingTime);
-			ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
-
-			ElapsedMicroseconds.QuadPart *= 1000000;
-			ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-
-			char outLog[256];
-			sprintf(outLog, "Ind:%s find dangerous time2: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
-			cwrite(outLog);
-
-
 
 			return;
 		}
@@ -2461,23 +2445,18 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 			friendlyIndividual->thisBehavior->isSurrounded = 0;
 		}
 
-
-
-		QueryPerformanceCounter(&EndingTime);
-		ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
-
-		ElapsedMicroseconds.QuadPart *= 1000000;
-		ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-
-		char outLog[256];
-		sprintf(outLog, "Ind:%s find dangerous time3: %llu",friendlyIndividual->name,ElapsedMicroseconds.QuadPart);
-		cwrite(outLog);
-
 		return;
 	}
 }
 
 int npcAction(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	if(hasActiveStatusEffect(npc, STATUS_SLEEPING)){
+		char logOut[128];
+		sprintf(logOut, "%s is sleeping!", npc->name);
+		cwrite(logOut);
+		return 0;
+	}
+
 	if(hasActiveStatusEffect(npc, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
 		return confusedIndividualAction(npc, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 	}
@@ -2572,7 +2551,6 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 }
 
 int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
-
 	if (enemies->numIndividuals == 0) {
 		return 1;
 	}

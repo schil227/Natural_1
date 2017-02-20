@@ -43,6 +43,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			if (getCursorMode() == CURSOR_ABILITY){
 				player->activeAbilities->selectedAbility = NULL;
 			}
+
 			toggleInCursorMode();
 			viewShift->xShift = viewShift->xShiftOld;
 			viewShift->yShift = viewShift->yShiftOld;
@@ -50,20 +51,49 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		case 0x0D: //enter
 		{
 			if (getCursorMode() == CURSOR_ATTACK) {//attack the individual
-				if(tryAttackIndividual(thisGroupContainer, player, main_field, getCursorX(), getCursorY())){
+
+				if(getIndividualFromField(main_field, getCursorX(), getCursorY()) == NULL || !cordWithinRange(player, getCursorX(), getCursorY())){
+					break;
+				}
+
+				if(hasActiveStatusEffect(player, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
+					player->thisBehavior->gotConfused = 1;
+
+					char logOut[128];
+					sprintf(logOut, "%s is confused!", player->name);
+					cwrite(logOut);
+
+					individual * target = getIndiscriminateIndividualInRange(player, main_field, getAttributeSum(player, "range"));
+
+					// player potentially harms self only 25% of the time
+					if(target == NULL || (target->isPlayer && isGreaterThanPercentage(rand() % 100, 100, 75))){
+						decreaseTurns(player, thisGroupContainer, 1);
+						viewShift->xShift = viewShift->xShiftOld;
+						viewShift->yShift = viewShift->yShiftOld;
+
+						toggleInCursorMode();
+						player->thisBehavior->gotConfused = 0;
+						break;
+					}
+
+					setCursorCoords(target->playerCharacter->x, target->playerCharacter->y);
+				}
+
+				if(tryAttackIndividual(thisGroupContainer, player, main_field, getCursorX(), getCursorY()) || player->thisBehavior->gotConfused){
 
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
 					decreaseTurns(player, thisGroupContainer, 1);
 
+					player->thisBehavior->gotConfused = 0;
+
 					*inActionMode = shouldEnableActionMode();
-					char outLog[12];
-					sprintf(outLog, "AM attacked: %d", *inActionMode);
-					cwrite(outLog);
+//					char outLog[12];
+//					sprintf(outLog, "AM attacked: %d", *inActionMode);
+//					cwrite(outLog);
 
 					toggleInCursorMode();
 				}
-
 			}else if(getCursorMode() == CURSOR_TALK){ //talk to the individual
 				if(tryTalkIndividualFromField(player, main_field, getCursorX(), getCursorY())){
 					viewShift->xShift = viewShift->xShiftOld;
@@ -73,27 +103,57 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				}
 
 			}else if (getCursorMode() == CURSOR_ABILITY){
-				if(cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
-					int numActions = 1;
-					useAbilityOnIndividualsInAOERange(player, player, thisGroupContainer, main_field, getCursorX(), getCursorY());
+				if(!cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
+					break;
+				}
 
-					if(player->activeAbilities->selectedAbility->actionsEnabled){
-						numActions += player->activeAbilities->selectedAbility->actions->effectAndManaArray[player->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+				if(hasActiveStatusEffect(player, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
+					player->thisBehavior->gotConfused = 1;
+
+					char logOut[128];
+					sprintf(logOut, "%s is confused!", player->name);
+					cwrite(logOut);
+
+					individual * target = getIndiscriminateIndividualInRange(player, main_field, getSelectedAbilityRange(player));
+
+					// player successfully cast ability on self 75% of the time
+					if(target == NULL || (target->isPlayer && isGreaterThanPercentage(rand() % 100, 100, 75))){
+						player->activeAbilities->selectedAbility = NULL;
+						decreaseTurns(player, thisGroupContainer, 1);
+						viewShift->xShift = viewShift->xShiftOld;
+						viewShift->yShift = viewShift->yShiftOld;
+
+						toggleInCursorMode();
+						player->thisBehavior->gotConfused = 0;
+						break;
 					}
 
-					player->activeAbilities->selectedAbility = NULL;
-					viewShift->xShift = viewShift->xShiftOld;
-					viewShift->yShift = viewShift->yShiftOld;
-
-					decreaseTurns(player, thisGroupContainer, numActions);
-
-					*inActionMode = shouldEnableActionMode();
-					char outLog[12];
-					sprintf(outLog, "AM ability: %d", *inActionMode);
-					cwrite(outLog);
-
-					toggleInCursorMode();
+					setCursorCoords(target->playerCharacter->x, target->playerCharacter->y);
 				}
+
+				int numActions = 1;
+
+				useAbilityOnIndividualsInAOERange(player, player, thisGroupContainer, main_field, getCursorX(), getCursorY());
+
+				if(player->activeAbilities->selectedAbility->actionsEnabled){
+					numActions += player->activeAbilities->selectedAbility->actions->effectAndManaArray[player->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+				}
+
+				player->activeAbilities->selectedAbility = NULL;
+				viewShift->xShift = viewShift->xShiftOld;
+				viewShift->yShift = viewShift->yShiftOld;
+
+				decreaseTurns(player, thisGroupContainer, numActions);
+
+				player->thisBehavior->gotConfused = 0;
+
+				*inActionMode = shouldEnableActionMode();
+//				char outLog[12];
+//				sprintf(outLog, "AM ability: %d", *inActionMode);
+//				cwrite(outLog);
+
+				toggleInCursorMode();
+
 			}else if(getCursorMode() == CURSOR_PICKPOCKET){
 				if(tryPickPocketIndividualFromField(player, main_field, getCursorX(), getCursorY()) == 0){
 					decreaseTurns(player, thisGroupContainer, 1);
@@ -103,9 +163,9 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				viewShift->yShift = viewShift->yShiftOld;
 
 				*inActionMode = shouldEnableActionMode();
-				char outLog[12];
-				sprintf(outLog, "AM pickpocket: %d", *inActionMode);
-				cwrite(outLog);
+//				char outLog[12];
+//				sprintf(outLog, "AM pickpocket: %d", *inActionMode);
+//				cwrite(outLog);
 
 				toggleInCursorMode();
 			}
@@ -365,9 +425,9 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 
 				if(!advanceDialog()){
 					*inActionMode = shouldEnableActionMode();
-					char outLog[12];
-					sprintf(outLog, "speak: %d", *inActionMode);
-					cwrite(outLog);
+//					char outLog[12];
+//					sprintf(outLog, "speak: %d", *inActionMode);
+//					cwrite(outLog);
 				}
 
 				break;
@@ -639,9 +699,9 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 	}
 
 	*inActionMode = shouldEnableActionMode();
-	char outLog[12];
-	sprintf(outLog, "turnStart: %d", *inActionMode);
-	cwrite(outLog);
+//	char outLog[12];
+//	sprintf(outLog, "turnStart: %d", *inActionMode);
+//	cwrite(outLog);
 
 	if(thisGroupContainer->selectedGroup->numIndividuals == 0){
 		thisGroupContainer->groupActionMode = 0;
