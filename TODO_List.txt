@@ -10,6 +10,7 @@ george town cupcakes - strawberry lava
 - (1/27/17) Disallow statuses from stacking
 - (2/13/17) Make the ability creator more intuitive, change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
 - (2/15/17) implement ally group
+- (2/20/17) remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell)
 
 
 ==BUGS==

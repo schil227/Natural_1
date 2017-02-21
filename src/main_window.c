@@ -46,8 +46,8 @@ LARGE_INTEGER Frequency;
 int moveMode = 0;
 int initMoveMode = 0;
 int postMoveMode = 0;
-
-int enemyTurn = 0;
+int playerControlMode = 0;
+int postPlayerControlMode = 0;
 
 int freeTimer = 0;
 int inActionMode = 0;
@@ -397,7 +397,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		playerDialog->afraidOfPlayer = 0;
 		playerDialog->playerIsMarkedForDeath = 0;
 
-		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -684,7 +684,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 		return 0;
 	}else if (inCursorMode()) {
-		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
+		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode);
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
@@ -713,7 +713,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			viewShift->xShiftOld = viewShift->xShift;
 			viewShift->yShiftOld = viewShift->yShift;
-
 		}
 
 		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
@@ -751,7 +750,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->postGroupActionMode = 1;
 		}
 	}else if(thisGroupContainer->groupActionMode){
-		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &thisMoveNodeMeta, &inActionMode);
+		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &thisMoveNodeMeta, &inActionMode, &playerControlMode);
 	}else if(thisGroupContainer->postGroupActionMode){
 		thisGroupContainer->postGroupActionMode = 0;
 
@@ -783,11 +782,30 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					thisGroupContainer->groupActionMode = 1;
 					thisGroupContainer->initGroupActionMode = 1;
 					setNextActiveGroup(thisGroupContainer);
+				}else if(hasActiveStatusEffect(player, STATUS_BERZERK) || hasActiveStatusEffect(player, STATUS_SLEEPING)){
+					playerControlMode = 1;
 				}
 			}else{
 				thisGroupContainer->groupActionMode = 1;
 				thisGroupContainer->initGroupActionMode = 1;
 			}
+		}
+
+	}else if(playerControlMode){
+		return processPlayerControlledLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &thisMoveNodeMeta,
+				&inActionMode, &postMoveMode, &playerControlMode, &postPlayerControlMode);
+	}else if(postPlayerControlMode){
+		postPlayerControlMode = 0;
+
+		if(player->remainingActions > 0 && (hasActiveStatusEffect(player, STATUS_BERZERK) || hasActiveStatusEffect(player, STATUS_SLEEPING))){
+			playerControlMode = 1;
+		}
+
+		if(player->remainingActions <= 0){
+			endTurn(player);
+			thisGroupContainer->groupActionMode = 1;
+			thisGroupContainer->initGroupActionMode = 1;
+			setNextActiveGroup(thisGroupContainer);
 		}
 
 	}else {
@@ -876,7 +894,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	playerDialog->afraidOfPlayer = 0;
 	playerDialog->playerIsMarkedForDeath = 0;
 
-	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);

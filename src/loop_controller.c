@@ -8,7 +8,7 @@
 #include "./headers/cursor_pub_methods.h"
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
-		field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode) {
+		field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode, int * playerControlMode) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
@@ -146,6 +146,10 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				decreaseTurns(player, thisGroupContainer, numActions);
 
 				player->thisBehavior->gotConfused = 0;
+
+				if(hasActiveStatusEffect(player, STATUS_BERZERK)){
+					*playerControlMode = 1;
+				}
 
 				*inActionMode = shouldEnableActionMode();
 //				char outLog[12];
@@ -678,8 +682,36 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 	return 0;
 }
 
+void processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
+		individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int * inActionMode, int * postMoveMode, int * playerControlMode, int * postPlayerControlMode){
+	switch (msg) {
+		case WM_TIMER:
+		{
+			RECT rect;
+			HDC hdc = GetDC(hwnd);
+			GetClientRect(hwnd, &rect);
+			drawAll(hdc, &rect);
+			ReleaseDC(hwnd, hdc);
+		}
+		break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+	}
+
+	if(controlledPlayerAction(player, thisGroupContainer, thisField, thisMoveNodeMeta, *inActionMode)){
+		*postMoveMode = 1;
+	}
+
+	*playerControlMode = 0;
+	*postPlayerControlMode = 1;
+}
+
 void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
-		individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int * inActionMode){
+		individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int * inActionMode, int * playerControlMode){
 	switch (msg) {
 		case WM_TIMER:
 		{
@@ -718,6 +750,8 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				thisGroupContainer->groupActionMode = 1;
 				thisGroupContainer->initGroupActionMode = 1;
 				setNextActiveGroup(thisGroupContainer);
+			}else if (hasActiveStatusEffect(player, STATUS_BERZERK) || hasActiveStatusEffect(player, STATUS_SLEEPING)){
+				*playerControlMode = 1;
 			}
 		}else{
 			thisGroupContainer->groupActionMode = 1;

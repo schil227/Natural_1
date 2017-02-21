@@ -765,6 +765,10 @@ void rerollBehavior(individual * thisIndividual){
 }
 
 int isAlly(individual * thisIndividual, individual * possibleAlly){
+	if(thisIndividual->isPlayer && possibleAlly->isPlayer){
+		return 1;
+	}
+
 	if(thisIndividual->faction == -1 || possibleAlly->faction == -1){
 		return 0;
 	}
@@ -1609,6 +1613,38 @@ individual * getIndiscriminateIndividualInRange(individual * thisIndividual, fie
 	return selectedIndividual;
 }
 
+int controlledPlayerAction(individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	char outLog[128];
+
+	if(hasActiveStatusEffect(player, STATUS_SLEEPING)){
+		if(isGreaterThanPercentage(rand() % 20, 19, 95)){
+			sprintf(outLog, "%s has woken up! ", player->name);
+			cwrite(outLog);
+
+			disableSleepStatusOnAttack(player);
+		}else{
+			sprintf(outLog, "%s is sleeping! ", player->name);
+			cwrite(outLog);
+		}
+
+		return 0;
+	}
+
+	if(hasActiveStatusEffect(player, STATUS_BERZERK)){
+
+		findDangerousIndividualNearBy(player, player, thisGroupContainer, thisField, 8);
+
+		if(player->targetedIndividual != NULL){
+			player->targetedDuration = 0;
+			return attackModule(player, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}else{
+			player->remainingActions--;
+		}
+	}
+
+	return 0;
+}
+
 int berzerkIndividualAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
 	char logStr[128];
 	sprintf(logStr, "%s is berzerking!", thisIndividual->name);
@@ -2406,6 +2442,7 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 		if(friendlyIndividual->targetedIndividual->hp <= 0
 				|| isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual)
 				|| (friendlyIndividual->targetedIndividual->isPlayer && !friendlyIndividual->thisBehavior->isHostileToPlayer)
+				|| (friendlyIndividual->isPlayer && friendlyIndividual->targetedIndividual->isPlayer)
 				|| maxDistance < max(abs(friendlyIndividual->playerCharacter->x - friendlyIndividual->targetedIndividual->playerCharacter->x) , abs(friendlyIndividual->playerCharacter->y - friendlyIndividual->targetedIndividual->playerCharacter->y))){
 			friendlyIndividual->targetedIndividual = getClosestEnemyInLoS(friendlyIndividual, thisField);// getDangerousIndividualNearByInLoS(friendlyIndividual, player, thisGroupContainer, thisField);
 
