@@ -66,7 +66,7 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	rand();
 	rand();
 	tryHeal(testEnemy,testPlayer, testGroupContainer, testField);
-	assert(testEnemy->hp == 7);
+	assert(testEnemy->hp == 4);
 
 	assert(isGreaterThanPercentage(5,10,2));
 	assert(!isGreaterThanPercentage(2,10,25));
@@ -149,7 +149,7 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	testEnemy->activeAbilities->selectedAbility = randOffensiveAbility;
 
-	assert(testPlayer->hp == 15);
+	assert(testPlayer->hp == 18);
 
 	//Fireball player on their space
 	useAbilityOnTargetedSpace(testEnemy, testPlayer, testGroupContainer, testField, 4,1);
@@ -352,16 +352,18 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	testPlayer->hp -= 8;
 	assert(testPlayer->hp ==  14);
 
+	srand(1);
+
 	//consume herb as active duration item
 	modifyItem(testPlayer->backpack->inventoryArr[0], testPlayer);
 
 	//herb heals the player for two
-	assert(testPlayer->hp ==  16);
+	assert(testPlayer->hp == 16);
 
 	startTurn(testPlayer);
-	assert(testPlayer->hp ==  18);
+	assert(testPlayer->hp == 18);
 	startTurn(testPlayer);
-	assert(testPlayer->hp ==  20);
+	assert(testPlayer->hp == 20);
 	startTurn(testPlayer);
 	assert(testPlayer->hp ==  22);
 	startTurn(testPlayer);
@@ -385,6 +387,13 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	}
 
+	// eat some rands to make the skellys attack the player
+	for(i = 0; i < 24; i++){
+		printf("%d, ", rand() % 20);
+	}
+
+	fflush(stdout);
+
 	individualsPassed = 0;
 	for(i = 0; i < testGroupContainer->enemies->MAX_INDIVIDUALS; i++){
 
@@ -404,19 +413,23 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	tmpIndividual = testGroupContainer->enemies->individuals[4];
 	assert(tmpIndividual->playerCharacter->x == 3 && tmpIndividual->playerCharacter->y == 1 );
 
-	//after being attacked 3 times, player health is 17
-	assert(testPlayer->hp == 16);
+	//after being attacked 2 (missed once), player health is 17
+	assert(testPlayer->hp == 19);
+
+	srand(2);
 
 	//skeleton0 cannot attack the player, vis versa
-	assert(!individualWithinRange(testGroupContainer->enemies->individuals[0],testPlayer));
-	assert(!individualWithinRange(testPlayer,testGroupContainer->enemies->individuals[0]));
+	assert(!isInAttackRange(testGroupContainer->enemies->individuals[0],testPlayer, main_test_field));
+	assert(!isInAttackRange(testPlayer,testGroupContainer->enemies->individuals[0], main_test_field));
 
 	//skeleton5 cannot reach the player, but the player can attack
-	assert(!individualWithinRange(testGroupContainer->enemies->individuals[4],testPlayer));
-	assert(individualWithinRange(testPlayer,testGroupContainer->enemies->individuals[4]));
+	assert(!isInAttackRange(testGroupContainer->enemies->individuals[4],testPlayer, main_test_field));
+	assert(isInAttackRange(testPlayer,testGroupContainer->enemies->individuals[4], main_test_field));
 
 	//player attacks skeleton5, skeleton5 dies
 	assert(attackIndividual(testPlayer,testGroupContainer->enemies->individuals[4]));
+
+	srand(3);
 
 	//warping player next to doorway
 	moveIndividualSpace(main_test_field,testPlayer,6,9);
@@ -440,6 +453,8 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	//player is back at map1 doorway
 	assert(testPlayer->playerCharacter->x == 6 && testPlayer->playerCharacter->y == 8);
+
+	srand(4);
 
 	//try talking to npc, too far away
 	assert(!tryTalkIndividualFromField(testPlayer,main_test_field,0,2));
@@ -487,6 +502,8 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	 *   npc becomes enemy
 	 */
 
+	srand(5);
+
 	//update ability view
 	refreshAbilityView(testPlayer->abilities->numAbilities, testPlayer->abilities->abilitiesList);
 
@@ -503,7 +520,12 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(cursorWithinAbilityRange(testPlayer, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y));
 
 	//user's hp before poison affects it
-	assert(testPlayer->hp == 16);
+	assert(testPlayer->hp == 19);
+
+	// eat rand to make poison last 1 turn
+	rand();
+	rand();
+	rand();
 
 	//use duration ability on everyone within range
 	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
@@ -516,7 +538,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(individualInGroup(tmpNPC, testGroupContainer->enemies));
 
 	//After spell cast hp check
-	assert(testPlayer->hp == 14);
+	assert(testPlayer->hp == 16);
 
 	//player and the NPC are poisoned
 	assert(testPlayer->activeStatuses->statuses[0]->effect == STATUS_POISONED);
@@ -530,8 +552,9 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	//after new turn, poison has fewer turns, damages individual
 	startTurn(testPlayer);
 	assert(testPlayer->activeStatuses->statuses[0]->turnsRemaining == 0);
-	assert(testPlayer->hp == 12);
+	assert(testPlayer->hp == 14);
 
+	srand(6);
 	/*
 	 * use targeted ability on enemy
 	 */
@@ -564,10 +587,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	//skelly is in good health
 	assert(tmpIndividual->hp == 8);
 
-	//consume some rand() to get a better roll
-	for(i = 0; i < 7; i++){
-		rand();
-	}
+	srand(7);
 
 	//use ability on selected space,  harming skelly4
 	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
@@ -592,24 +612,22 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(testPlayer->remainingActions == 2);
 
 	//verify player health before dice heal
-	assert(testPlayer->hp == 12);
+	assert(testPlayer->hp == 14);
 
 	//assert the player is not killed by the instant action
 	assert(!useAbility(testPlayer, getAbilityToActivate()));
 
 	//player healed from diceHP
-	assert(testPlayer->hp == 15);
+	assert(testPlayer->hp == 18);
 
+	srand(8);
 	//consume more rand() to get better throws
-	rand();
-	rand();
-	rand();
 
 	//verify tmpNPC was killed by the multiple attacks
 	assert(tryAttackEnemies(testGroupContainer->enemies, testPlayer, main_test_field, tmpNPC->playerCharacter->x, tmpNPC->playerCharacter->y));
 
-	//tmpNPC has -5 hp after barrage of attacks
-	assert(tmpNPC->hp == -6);
+	//tmpNPC has -7 hp after barrage of attacks
+	assert(tmpNPC->hp == -7);
 
 	//after decreasing the turns, the ability is no longer selected, player has action debt
 	testGroupContainer->groupActionMode = 0;

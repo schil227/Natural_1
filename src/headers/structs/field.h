@@ -25,6 +25,7 @@ typedef struct {
 	int numCharacters;
 	int isPassable;
 	int canSeeThrough;
+	int canAttackThrough;
 	character* background;
 	individual* currentIndividual;
 	transitInfo* thisTransitInfo;

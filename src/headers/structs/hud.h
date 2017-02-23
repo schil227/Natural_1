@@ -22,6 +22,8 @@ typedef struct{
 	fixedCharacter * sleepCharacter;
 	fixedCharacter * sneakingCharacter;
 
+	character * attackSpaceMarker;
+
 	int isPoisoned;
 	int isBurning;
 	int isBerzerking;
@@ -30,6 +32,9 @@ typedef struct{
 	int isBleeding;
 	int isSilenced;
 	int isSleeping;
+
+	int drawAttackSpaces;
+	cordArr * attackSpaces;
 
 }hudInstance;
 

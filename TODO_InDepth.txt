@@ -6,10 +6,10 @@ Implementing Statuses:
 	-Paralysis (DONE)
 	-Burning (DONE)
 	-Bleeding (DONE)
-	-Confusion - target anyone, including themselves
+	-Confusion (DONE)
 	-Sleeping (DONE)
-	-Berzerk - attack boost, DR loss, still attack enemies, albeit randomly
-	-Silence - cant use abilities (or speak?) (DONE - excluding speak)
+	-Berzerk - attack loss, AC loss, still attack enemies, albeit randomly (DONE)
+	-Silence - cant use abilities (DONE)
 
 	-Confusion for player:
 		-The selected individual doesn't matter, be it for using an ability, attack, talking, etc.

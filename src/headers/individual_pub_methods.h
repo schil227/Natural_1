@@ -21,6 +21,7 @@ char * lookUpStatusEffectName(statusEffect effect);
 statusEffect lookUpStatusType(char * statusType[16]);
 status * createStatusFromAbility(ability * thisAbility);
 char getIndividualAttackType(individual * thisIndividual, item * weapon);
+double calcSlope(int x1, int y1, int x2, int y2);
 
 int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam, char critType[3],

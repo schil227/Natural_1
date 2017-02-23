@@ -1354,16 +1354,6 @@ int cordWithinRange(individual * thisIndividual, int x, int y){
 	return 0;
 }
 
-int individualWithinRange(individual * thisIndividual, individual * target){
-	int range = getAttributeSum(thisIndividual, "range");
-
-	if(abs(thisIndividual->playerCharacter->x - target->playerCharacter->x) <= range
-	&& abs(thisIndividual->playerCharacter->y - target->playerCharacter->y) <= range){
-		return 1;
-	}
-	return 0;
-}
-
 int individualWithinTalkingRange(individual * thisIndividual, individual * target, int talkingRange){
 	if(abs(thisIndividual->playerCharacter->x - target->playerCharacter->x) <= talkingRange
 	&& abs(thisIndividual->playerCharacter->y - target->playerCharacter->y) <= talkingRange){
@@ -1382,15 +1372,6 @@ int calcExtraTimesToAttack(individual * thisIndividual){
 	}
 
 	return 0;
-}
-
-int attackIfInRange(individual *thisIndividual, individual *targetIndividual){
-	if(individualWithinRange(thisIndividual, targetIndividual)){
-		attackIndividual(thisIndividual, targetIndividual);
-		return 1;
-	}else{
-		return 0;
-	}
 }
 
 char getIndividualAttackType(individual * thisIndividual, item * weapon){
@@ -1885,8 +1866,20 @@ cordArr* initCordArr(){
 	thisCordArr->MAX_CORDS = 300;
 }
 
+cord * makeCord(int x, int y){
+	cord * thisCord = malloc(sizeof(cord));
+	thisCord->x = x;
+	thisCord->y = y;
+
+	return thisCord;
+}
+
 void destroyCordArr(cordArr * thisCordArr){
 	int i;
+
+	if(thisCordArr == NULL){
+		return;
+	}
 
 	for(i = 0; i < thisCordArr->numCords; i++){
 		free(thisCordArr->cords[i]);
@@ -1896,7 +1889,11 @@ void destroyCordArr(cordArr * thisCordArr){
 }
 
 double calcSlope(int x1, int y1, int x2, int y2){
-	return (double) ((y2 * 0.1) - (y1 * 0.1)) / ((x2 * 0.1) - (x1 * 0.1));
+	double slope;
+
+	slope = (((y2 * 0.1) - (y1 * 0.1)) / ((x2 * 0.1) - (x1 * 0.1)));
+
+	return slope;
 }
 
 int containsCord(cordArr * thisCordArr, cord * thisCord){
@@ -2180,8 +2177,8 @@ cordArr * cordsBetweenTwoIndividuals(individual * thisIndividual, individual * t
 			nextCord->x = floor(i + startingX + 0.5);
 			nextCord->y = floor(slope*i + startingY + 0.5);
 		}else{
-			nextCord->y = floor(i + startingX + 0.5);
-			nextCord->x = floor(slope*i + startingY + 0.5);
+			nextCord->x = floor(slope*i + startingX + 0.5);
+			nextCord->y = floor(i + startingY + 0.5);
 		}
 
 		if(!addCordIfUnique(thisCordArr, nextCord)){

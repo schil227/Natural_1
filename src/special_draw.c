@@ -96,8 +96,7 @@ void drawSpecial(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 	}
 
 	for(i = 0; i < specialDrawInstance->numImagesToDraw; i++){
-//		drawUnboundCharacter(hdc, hdcBuffer,specialDrawInstance->imagesToDraw[i]->x, specialDrawInstance->imagesToDraw[i]->y, specialDrawInstance->imagesToDraw[i]->image, viewShift);
-		drawUnboundAnimation(hdc, hdcBuffer, specialDrawInstance->imagesToDraw[i]->x, specialDrawInstance->imagesToDraw[i]->y, specialDrawInstance->imagesToDraw[i]->image, viewShift);
+		drawUnboundAnimation(hdc, hdcBuffer, specialDrawInstance->imagesToDraw[i]->x, specialDrawInstance->imagesToDraw[i]->y, specialDrawInstance->imagesToDraw[i]->image, viewShift,0);
 	}
 }
 

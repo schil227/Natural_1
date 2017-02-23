@@ -217,12 +217,21 @@ int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int 
 
 }
 
+int attackIfInRange(individual *thisIndividual, individual *targetIndividual, field * thisField){
+	if(isInAttackRange(thisIndividual, targetIndividual, thisField)){
+		attackIndividual(thisIndividual, targetIndividual);
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
 int tryAttackIndividual(groupContainer * thisGroupContainer, individual * player, field * thisField, int x, int y){
 	individual * tmpIndividual = getIndividualFromField(thisField, x, y);
 	int i, numTimesToAttack = 1;
 	numTimesToAttack += calcExtraTimesToAttack(player);
 
-	if(tmpIndividual != NULL && (tmpIndividual != player || player->thisBehavior->gotConfused) && individualWithinRange(player, tmpIndividual)){
+	if(tmpIndividual != NULL && (tmpIndividual != player || player->thisBehavior->gotConfused) && isInAttackRange(player, tmpIndividual, thisField)){
 		for(i = 0; i < numTimesToAttack; i++){
 
 			if(tmpIndividual->hp > 0){
@@ -251,7 +260,7 @@ int tryAttackEnemies(individualGroup * enemies, individual * player, field * thi
 
 		if(tmpEnemy != NULL){
 			enemiesPassed++;
-			if (tmpEnemy->playerCharacter->x == x && tmpEnemy->playerCharacter->y == y && individualWithinRange(player, tmpEnemy)) {
+			if (tmpEnemy->playerCharacter->x == x && tmpEnemy->playerCharacter->y == y && isInAttackRange(player, tmpEnemy, thisField)) {
 
 				for(j = 0; j < numTimesToAttack; j++){
 
@@ -772,8 +781,10 @@ field* initField(char* fieldFileName){
 
 			if(currentChar == 't' || currentChar == 's' ||  currentChar == 'x'){
 				newSpace->canSeeThrough = 0;
+				newSpace->canAttackThrough = 0;
 			}else{
 				newSpace->canSeeThrough = 1;
+				newSpace->canAttackThrough = 1;
 			}
 
 			currentChar = line[xIndex+1];

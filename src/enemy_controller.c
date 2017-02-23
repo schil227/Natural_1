@@ -396,7 +396,7 @@ void testEnemyAction( individual * enemy, field * thisField, individual * player
 
 	printf("\n");
 
-	attackIfInRange(enemy,player);
+	attackIfInRange(enemy, player, thisField);
 }
 
 void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr){
@@ -556,6 +556,138 @@ ability * getRandomHPRestoringAbility(individual * thisIndividual){
 		randIndex = rand() % numAbilities;
 		return healingAbilities.abilitiesList[randIndex];
 	}
+}
+
+cordArr * getAttackableCordsInRay(int startingX, int startingY, cord *endCord, int range, field * thisField){
+	double slope;
+	int wrtY = 1, startingGreaterThanEnding = 0;
+
+	cordArr * thisCordArr = initCordArr();
+
+	if(startingX == endCord->x && startingY == endCord->y){
+		return NULL;
+	}else if(startingX == endCord->x){ // n/0
+		slope = 0;
+		wrtY = 0;
+	}else{
+		slope = calcSlope(startingX, startingY, endCord->x, endCord->y);
+
+		if(fabs(slope) > 1){ // calc with respect to
+			slope = calcSlope(startingY, startingX, endCord->y, endCord->x);
+			wrtY = 0;
+		}
+	}
+
+	if(wrtY){
+		if(startingX > endCord->x){
+			startingGreaterThanEnding = 1;
+		}
+	}else{
+		if(startingY > endCord->y){
+			startingGreaterThanEnding = 1;
+		}
+	}
+
+	double i, step = 0.25;
+
+	if(startingGreaterThanEnding){
+		step = step * -1;
+	}
+
+	for(i = 0; abs(i) < range; i+= step){
+		cord * nextCord = malloc(sizeof(cord));
+
+		if(wrtY){
+			nextCord->x = floor(i + startingX + 0.5);
+			nextCord->y = floor(slope*i + startingY + 0.5);
+		}else{
+			nextCord->x = floor(slope*i + startingX + 0.5);
+			nextCord->y = floor(i + startingY + 0.5);
+		}
+
+		space * tmpSpace = getSpaceFromField(thisField, nextCord->x, nextCord->y);
+
+		if(!tmpSpace->canAttackThrough){
+			break;
+		}
+
+		if(!addCordIfUnique(thisCordArr, nextCord)){
+			free(nextCord);
+		}else if((nextCord->x == endCord->x && nextCord->y == endCord->y)){
+			break;
+		}
+	}
+
+	return thisCordArr;
+}
+
+cordArr * generateAttackSpaces(individual * thisIndividual, field * thisField){
+	int i, j, minX, minY, maxX, maxY, startingX, startingY;
+	int range = getAttributeSum(thisIndividual, "range");
+
+	cordArr * perimeterCords = initCordArr();
+	cordArr * attackableCords = initCordArr();
+
+	startingX = thisIndividual->playerCharacter->x;
+	startingY = thisIndividual->playerCharacter->y;
+
+	minX = max(0, startingX - range);
+	minY = max(0, startingY - range);
+	maxX = min(startingX + range, thisField->totalX);
+	maxY = min(startingY + range, thisField->totalY);
+
+	for(i = minX; i <= maxX; i++){
+		addCordIfUnique(perimeterCords, makeCord(i,minY));
+		addCordIfUnique(perimeterCords, makeCord(i,maxY));
+	}
+
+	for(i = minY+1; i < maxY; i++){
+		addCordIfUnique(perimeterCords, makeCord(minX,i));
+		addCordIfUnique(perimeterCords, makeCord(maxX,i));
+	}
+
+	for(i = 0; i < perimeterCords->numCords; i++){
+		cordArr * accessableCords = getAttackableCordsInRay(startingX, startingY, perimeterCords->cords[i], range, thisField);
+
+		if(accessableCords == NULL){
+			continue;
+		}
+
+		for(j = 0; j < accessableCords->numCords; j++){
+			if(!addCordIfUnique(attackableCords, accessableCords->cords[j])){
+				free(accessableCords->cords[j]);
+			}
+		}
+
+		free(accessableCords);
+	}
+
+	destroyCordArr(perimeterCords);
+
+	return attackableCords;
+}
+
+int isInAttackRange(individual * thisIndividual, individual * targetIndividual, field * thisField){
+	int i, toReturn = 1;
+	int weightedRand = (rand() % 100);
+
+	cordArr * thisCordArr = cordsBetweenTwoIndividuals(thisIndividual, targetIndividual, getAttributeSum(thisIndividual, "range"));
+
+	if(thisCordArr == NULL){
+		return 0;
+	}
+
+	for(i = 0; i < thisCordArr->numCords; i++){
+		space * tmpSpace = getSpaceFromField(thisField,thisCordArr->cords[i]->x + thisIndividual->playerCharacter->x, thisCordArr->cords[i]->y + thisIndividual->playerCharacter->y);
+		if( tmpSpace == NULL || !tmpSpace->canAttackThrough ){
+			toReturn = 0;
+			break;
+		}
+	}
+
+	destroyCordArr(thisCordArr);
+
+	return toReturn;
 }
 
 int isInLineOfSight(individual * thisIndividual, individual * targetIndividual, field * thisField){
@@ -1407,7 +1539,7 @@ int moveCloserToTarget(individual * enemy, individual * targetIndividual, field 
 }
 
 int attackModule(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
-	if(thisIndividual->thisBehavior->isTactical && !hasActiveStatusEffect(thisIndividual, STATUS_BERZERK) && getAttributeSum(thisIndividual, "range") > getAttributeSum(thisIndividual->targetedIndividual,"range")  && individualWithinRange(thisIndividual->targetedIndividual, thisIndividual)){
+	if(thisIndividual->thisBehavior->isTactical && !hasActiveStatusEffect(thisIndividual, STATUS_BERZERK) && getAttributeSum(thisIndividual, "range") > getAttributeSum(thisIndividual->targetedIndividual,"range")  && isInAttackRange(thisIndividual->targetedIndividual, thisIndividual, thisField)){
 		 //&& isGreaterThanPercentage(rand() % 100, 100, 50)
 		int x, y;
 		cord * rangedCord = getCordWithTargetInRange(thisIndividual, thisField);
@@ -1421,7 +1553,7 @@ int attackModule(individual * thisIndividual, individual * player, groupContaine
 		}
 	}
 
-	if (individualWithinRange(thisIndividual, thisIndividual->targetedIndividual)) {
+	if (isInAttackRange(thisIndividual, thisIndividual->targetedIndividual, thisField)) {
 		if (attackIndividual(thisIndividual, thisIndividual->targetedIndividual)) {
 			deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, thisIndividual->targetedIndividual), thisIndividual->targetedIndividual);
 			removeIndividualFromField(thisField,
@@ -1451,7 +1583,7 @@ int attackModule(individual * thisIndividual, individual * player, groupContaine
 int tacticalModule(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
 	if(enemy->thisBehavior->isOffensive){
 
-		if(!individualWithinRange(enemy, enemy->targetedIndividual)){
+		if(!isInAttackRange(enemy, enemy->targetedIndividual, thisField)){
 			//move in attack range
 			return moveToGetTargetInRange(enemy, thisField, thisMoveNodeMeta);
 		}
@@ -1469,7 +1601,7 @@ int tacticalModule(individual * enemy, individual * player, groupContainer * thi
 		free(allies);
 
 		//Move out of attack range
-		if(individualWithinRange(enemy->targetedIndividual, enemy)){
+		if(isInAttackRange(enemy->targetedIndividual, enemy, thisField)){
 			return moveToGetOutOfTargetsRange(enemy, thisField, thisMoveNodeMeta);
 		}
 	}
@@ -2610,10 +2742,6 @@ int initializeEnemyTurn(individualGroup * enemies, individual * player, field * 
 	}
 
 	return 0;
-}
-
-void enemyAttackAction(individual * enemy, individual * player){
-	attackIfInRange(enemy,player);
 }
 
 void destroyNodeArr(nodeArr * thisNodeArr){

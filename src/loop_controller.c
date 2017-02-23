@@ -45,12 +45,14 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			}
 
 			toggleInCursorMode();
+			disableHUDAttackSpaces();
+
 			viewShift->xShift = viewShift->xShiftOld;
 			viewShift->yShift = viewShift->yShiftOld;
 			break;
 		case 0x0D: //enter
 		{
-			if (getCursorMode() == CURSOR_ATTACK) {//attack the individual
+			if (getCursorMode() == CURSOR_ATTACK) {
 
 				if(getIndividualFromField(main_field, getCursorX(), getCursorY()) == NULL || !cordWithinRange(player, getCursorX(), getCursorY())){
 					break;
@@ -73,6 +75,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 						toggleInCursorMode();
 						player->thisBehavior->gotConfused = 0;
+
+						disableHUDAttackSpaces();
 						break;
 					}
 
@@ -91,6 +95,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 //					char outLog[12];
 //					sprintf(outLog, "AM attacked: %d", *inActionMode);
 //					cwrite(outLog);
+
+					disableHUDAttackSpaces();
 
 					toggleInCursorMode();
 				}

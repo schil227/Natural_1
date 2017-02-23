@@ -16,6 +16,7 @@
 #define SILENCED_MODE_IMAGE_ID 1516
 #define SLEEPING_MODE_IMAGE_ID 1517
 #define SNEAKING_MODE_IMAGE_ID 1518
+#define ATTACK_SPACE_MARKER_IMAGE_ID 10000
 
 static hudInstance * thisHudInstance;
 
@@ -31,6 +32,7 @@ void initHudInstance(){
 	thisHudInstance->confusedCharacter = createCharacter(CONFUSED_MODE_IMAGE_ID, RGB(255,0,255), 0, 0);
 	thisHudInstance->silencedCharacter = createCharacter(SILENCED_MODE_IMAGE_ID, RGB(255,0,255), 0, 0);
 	thisHudInstance->sleepCharacter = createCharacter(SLEEPING_MODE_IMAGE_ID, RGB(255,0,255), 0, 0);
+	thisHudInstance->attackSpaceMarker = createCharacterFromAnimation(cloneAnimationFromRegistry(ATTACK_SPACE_MARKER_IMAGE_ID));
 
 	thisHudInstance->isPoisoned = 0;
 	thisHudInstance->isBurning = 0;
@@ -40,6 +42,9 @@ void initHudInstance(){
 	thisHudInstance->isBleeding = 0;
 	thisHudInstance->isSilenced = 0;
 	thisHudInstance->isSleeping = 0;
+
+	thisHudInstance->drawAttackSpaces = 0;
+	thisHudInstance->attackSpaces = NULL;
 }
 
 void updateStatus(individual * player){
@@ -164,3 +169,38 @@ void drawHudNotifications(HDC hdc, HDC hdcBuffer, RECT * prc, individual * playe
 	DeleteDC(hdcMem);
 }
 
+void enableHUDAttackSpaces(cordArr * arr){
+	if(arr != NULL){
+		thisHudInstance->attackSpaces = arr;
+	}
+
+	thisHudInstance->drawAttackSpaces = 1;
+}
+
+void disableHUDAttackSpaces(){
+	int i;
+
+	thisHudInstance->drawAttackSpaces = 0;
+
+	if(thisHudInstance->attackSpaces == NULL){
+		return;
+	}
+
+	destroyCordArr(thisHudInstance->attackSpaces);
+
+	thisHudInstance->attackSpaces = NULL;
+}
+
+void drawHUDAttackSpaces(HDC hdc, HDC hdcBuffer, RECT * prc, shiftData * viewShift){
+	int i;
+
+	if(!thisHudInstance->drawAttackSpaces ||thisHudInstance->attackSpaces == NULL){
+		return;
+	}
+
+	for(i = 0; i < thisHudInstance->attackSpaces->numCords; i++){
+		if(thisHudInstance->attackSpaces->cords[i] != NULL){
+			drawUnboundAnimation(hdc, hdcBuffer, thisHudInstance->attackSpaces->cords[i]->x, thisHudInstance->attackSpaces->cords[i]->y, thisHudInstance->attackSpaceMarker, viewShift, 0);
+		}
+	}
+}

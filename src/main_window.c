@@ -287,6 +287,8 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawCursor(hdc, hdcBuffer, viewShift);
 	}
 
+	drawHUDAttackSpaces(hdc, hdcBuffer, prc);
+
 	if (moveMode){
 		moveNode * tmp = thisMoveNodeMeta->rootMoveNode;
 		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
@@ -356,7 +358,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 		initSpecialDrawInstance();
 		initEventHandlers();
-		initHudInstance();
 		loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt", "onPickupTriggerMap.txt");
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
@@ -364,6 +365,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
 		loadDialog("dialog.txt", mapDirectory);
 
+		initHudInstance();
 		initThisCursor(1508);
 
 		enableSound();
@@ -482,6 +484,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			refreshCursor(CURSOR_ATTACK, player->playerCharacter->x, player->playerCharacter->y);
 			viewShift->xShiftOld = viewShift->xShift;
 			viewShift->yShiftOld = viewShift->yShift;
+
+			enableHUDAttackSpaces(generateAttackSpaces(player, main_field));
 			break;
 		case 0x53: //s key (move)
 			moveMode = 1;
