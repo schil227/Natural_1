@@ -16,7 +16,7 @@
 #define SILENCED_MODE_IMAGE_ID 1516
 #define SLEEPING_MODE_IMAGE_ID 1517
 #define SNEAKING_MODE_IMAGE_ID 1518
-#define ATTACK_SPACE_MARKER_IMAGE_ID 10000
+#define ATTACK_SPACE_MARKER_IMAGE_ID 10002
 
 static hudInstance * thisHudInstance;
 
@@ -200,7 +200,7 @@ void drawHUDAttackSpaces(HDC hdc, HDC hdcBuffer, RECT * prc, shiftData * viewShi
 
 	for(i = 0; i < thisHudInstance->attackSpaces->numCords; i++){
 		if(thisHudInstance->attackSpaces->cords[i] != NULL){
-			drawUnboundAnimation(hdc, hdcBuffer, thisHudInstance->attackSpaces->cords[i]->x, thisHudInstance->attackSpaces->cords[i]->y, thisHudInstance->attackSpaceMarker, viewShift, 0);
+			drawOverlappingAnimation(hdc, hdcBuffer, thisHudInstance->attackSpaces->cords[i]->x, thisHudInstance->attackSpaces->cords[i]->y, thisHudInstance->attackSpaceMarker, viewShift, 0);
 		}
 	}
 }

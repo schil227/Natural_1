@@ -242,7 +242,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
-	dialogID = loadOrAddIndividualDialog(ID,dialogID);
+	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
 	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, offensiveness, abilityAffinity, tacticalness, cowardness,
 			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
@@ -294,6 +294,7 @@ void loadGroup(individualGroup * group, groupType thisGroupType, char * fileName
 			if(newIndividual != NULL){
 				if (doesExist(newIndividual->ID)) {
 					newIndividual->currentGroupType = thisGroupType;
+					newIndividual->defaultGroupType = thisGroupType;
 					addIndividualToGroup(group, newIndividual);
 				}
 			}else{
@@ -353,7 +354,6 @@ groupContainer * initGroupContainer(individualGroup * enemies, individualGroup* 
 }
 
 individualGroup * getGroupFromIndividual(groupContainer * thisGroupContainer, individual * thisIndividual){
-
 	if(thisIndividual == NULL){
 		cwrite("!! NULL INDIVIDUAL: CANNOT OBTAIN GROUP FROM INDIVIDUAL !!");
 		return NULL;
@@ -374,7 +374,29 @@ individualGroup * getGroupFromIndividual(groupContainer * thisGroupContainer, in
 		cwrite("!! INDIVIDUAL GROUP TYPE NOT FOUND !! ");
 		return NULL;
 	}
+}
 
+individualGroup * getDefaultGroupFromIndividual(groupContainer * thisGroupContainer, individual * thisIndividual){
+	if(thisIndividual == NULL){
+		cwrite("!! NULL INDIVIDUAL: CANNOT OBTAIN GROUP FROM INDIVIDUAL !!");
+		return NULL;
+	}
+
+	switch(thisIndividual->defaultGroupType){
+	case GROUP_ALLIES:
+		return thisGroupContainer->allies;
+	case GROUP_BEASTS:
+		return thisGroupContainer->beasts;
+	case GROUP_ENEMIES:
+		return thisGroupContainer->enemies;
+	case GROUP_GUARDS:
+		return thisGroupContainer->guards;
+	case GROUP_NPCS:
+		return thisGroupContainer->npcs;
+	default:
+		cwrite("!! INDIVIDUAL GROUP TYPE NOT FOUND !! ");
+		return NULL;
+	}
 }
 
 int setNextActiveGroup(groupContainer * thisGroupContainer){
@@ -434,6 +456,7 @@ void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shi
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->enemies, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->guards, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->beasts, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->allies, viewShift);
 
 	//draw animated individual over others
 	if(thisGroupContainer->enemies->currentIndividualIndex != -1){
@@ -451,6 +474,10 @@ void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shi
 	if(thisGroupContainer->guards->currentIndividualIndex != -1){
 		drawIndividual(hdc, hdcBuffer, thisGroupContainer->guards->individuals[thisGroupContainer->guards->currentIndividualIndex], viewShift);
 	}
+
+	if(thisGroupContainer->allies->currentIndividualIndex != -1){
+			drawIndividual(hdc, hdcBuffer, thisGroupContainer->allies->individuals[thisGroupContainer->allies->currentIndividualIndex], viewShift);
+		}
 }
 
 void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, shiftData * viewShift){

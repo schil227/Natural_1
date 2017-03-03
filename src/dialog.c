@@ -450,7 +450,7 @@ int setSpecialDialogId(int individualID, int specialID){
 	return 0;
 }
 
-int loadOrAddIndividualDialog(int individualID, int dialogID){
+int loadOrAddIndividualDialog(int individualID, int dialogID, int overrideValue){
 	int i;
 
 	if(dialogID == 0 ){
@@ -471,6 +471,11 @@ int loadOrAddIndividualDialog(int individualID, int dialogID){
 
 			return dialogID;
 		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){ //entry already exists
+			if(overrideValue){
+				thisDialogInstance->individualDialogRegistry[i]->dialogID = dialogID;
+				return dialogID;
+			}
+
 			if(thisDialogInstance->individualDialogRegistry[i]->specialID != 0){
 				return thisDialogInstance->individualDialogRegistry[i]->specialID;
 			}

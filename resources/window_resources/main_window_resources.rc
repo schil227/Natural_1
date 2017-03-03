@@ -180,7 +180,7 @@ END
 //Misc. Images 10000+
 10000 BITMAP DISCARDABLE "../images/hit.bmp" //4000
 10001 BITMAP DISCARDABLE "../images/miss.bmp" //4001
-
+10002 BITMAP DISCARDABLE "../images/reddish_space.bmp"
 
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

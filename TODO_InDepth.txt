@@ -1,24 +1,8 @@
-
 == TODO ==
+Determining if individual can attack, or if blocked 
+made isInAttackRange()
 
-Implementing Statuses:
-	-Poison (DONE)
-	-Paralysis (DONE)
-	-Burning (DONE)
-	-Bleeding (DONE)
-	-Confusion (DONE)
-	-Sleeping (DONE)
-	-Berzerk - attack loss, AC loss, still attack enemies, albeit randomly (DONE)
-	-Silence - cant use abilities (DONE)
 
-	-Confusion for player:
-		-The selected individual doesn't matter, be it for using an ability, attack, talking, etc.
-		-if trying to use an item, chance that they may not succeed (item not lost)
-		
-	-Confusion for AI:
-		-targeted individual/targeted ally are whomever's in range; if poor choice is made,target is rerolled. all targets last significantly shorter 
-		-if trying to use an item, chance that they may not succeed (item not lost)
-				
 				
 				
 -Issue with guards: not going into alert mode (wasRecentlyAttacked) because blocked by trying to find individual

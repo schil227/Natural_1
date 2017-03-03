@@ -249,8 +249,6 @@ int shouldEnableActionMode(){
 					return 1;
 				}
 
-
-
 				if(individualsPassed == thisGroupContainer->npcs->numIndividuals){
 					individualsPassed = 0;
 					break;
@@ -271,6 +269,9 @@ void drawAll(HDC hdc, RECT* prc) {
 	int index;
 
 	drawField(hdc, hdcBuffer, main_field, viewShift);
+
+	drawHUDAttackSpaces(hdc, hdcBuffer, prc);
+
 	drawItemsFromField(hdc, hdcBuffer, main_field->thisFieldInventory, viewShift);
 
 	if (player->hp > 0) {
@@ -286,8 +287,6 @@ void drawAll(HDC hdc, RECT* prc) {
 	if (inCursorMode()) {
 		drawCursor(hdc, hdcBuffer, viewShift);
 	}
-
-	drawHUDAttackSpaces(hdc, hdcBuffer, prc);
 
 	if (moveMode){
 		moveNode * tmp = thisMoveNodeMeta->rootMoveNode;

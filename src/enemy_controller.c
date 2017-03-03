@@ -1716,6 +1716,8 @@ int performAction(individual * thisIndividual, individual * player, groupContain
 			return 0;
 		case GROUP_GUARDS:
 			return guardAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		case GROUP_ALLIES:
+			return allyAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
 		default:
 			return 0;
 	}
@@ -2616,6 +2618,42 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 
 		return;
 	}
+}
+
+int allyAction(individual * ally, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+	if(hasActiveStatusEffect(ally, STATUS_SLEEPING)){
+		char logOut[128];
+		sprintf(logOut, "%s is sleeping!", ally->name);
+		cwrite(logOut);
+		return 0;
+	}
+
+	if(hasActiveStatusEffect(ally, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
+		return confusedIndividualAction(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
+
+	if(hasActiveStatusEffect(ally, STATUS_BERZERK)){
+		return berzerkIndividualAction(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+	}
+
+	//Restore Mana
+	if(isLowOnMana(ally)){
+		if(tryRestoreMana(ally)){
+			return 0;
+		}
+	}
+
+	//Restore HP
+	if(isLowOnHP(ally)){
+		if(tryHeal(ally, player, thisGroupContainer, thisField)){
+			return 0;
+		}
+	}
+
+	//if distance between ally and player is greater than 5, and not hunting enemies, return to player
+
+	ally->remainingActions = 0;
+	return 0;
 }
 
 int npcAction(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){

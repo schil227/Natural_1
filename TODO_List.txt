@@ -2,14 +2,10 @@
 ==== TODO LIST ====
 ===================
 - (12/22/16) Crime: implement order (lose money/go to jail)
-- (12/29/16) Differentiate between isPassable and CanAttackThrough for spaces, algorithms obtaining targetIndividuals
 - (1/10/17) Fog of War
-
-- (1/27/17) Disallow statuses from stacking
-- (2/13/17) Make the ability creator more intuitive, change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
+- (1/27/17) Disallow statuses from stacking (no?)
+- (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (2/15/17) implement ally group
-- (2/20/17) remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell)
-
 
 ==BUGS==
 - (11/25/16) player enters/exits shop, skeletons occupy the same space as him when pathfinding
@@ -22,6 +18,7 @@
 - (11/12/16) Add more enemies to the field
 - (11/12/16) Add casting animations
 - (1/1/17) Put dialog box/speaker image over console output
+- (2/21/17) Abilities: change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
 
 ==FINISHED==
 - (11/12/16 - 10/22/16) Implement Crimes (DONE)
@@ -36,3 +33,4 @@
 - (1/21/17 - 2/6/17) Fix Viewshift to be consistant between changing locations (DONE)
 - (1/21/17 - 2/1/17) Implement non-combat mode (DONE)
 - (1/27/17 - 2/21/17) Implement remaining statuses (DONE)
+- (12/29/16 - 2/23/17) Differentiate between isPassable and CanAttackThrough for spaces, algorithms obtaining targetIndividuals (DONE)

@@ -414,6 +414,44 @@ void drawUnboundAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, characte
 	DeleteDC(hdcMem);
 }
 
+void drawOverlappingAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	HBITMAP image, imageMask;
+
+	int shitfX;
+	if(useSecondaryAnimationContainer){
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
+		image = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->image;
+		imageMask = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->imageMask;
+	} else{
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
+		image = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
+		imageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
+	}
+
+	SelectObject(hdcMem, imageMask);
+
+	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			100,100,
+			hdcMem,
+			shitfX,
+			0,
+			SRCAND);
+
+	SelectObject(hdcMem, image);
+
+	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
+//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
+			100,100,
+			hdcMem,
+			shitfX,
+			0,
+			SRCPAINT);
+	DeleteDC(hdcMem);
+}
+
+
 void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	HBITMAP imageMask = NULL;

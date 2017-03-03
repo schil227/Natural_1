@@ -207,6 +207,7 @@ struct individual{
 	reportedCrimes * thisReportedCrimes;
 	activeCrimes * thisActiveCrimes;
 	groupType currentGroupType;
+	groupType defaultGroupType;
 };
 
 struct individual;

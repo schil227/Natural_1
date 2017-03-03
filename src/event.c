@@ -698,6 +698,59 @@ int tryRobIndividual(individual * player, event * thisEvent, int individualID){
 	return 0;
 }
 
+int addIndividualToAllyGroup(groupContainer * thisGroupContainer, int individualID, int newDialogId){
+	if(thisGroupContainer->allies->numIndividuals >= thisGroupContainer->allies->MAX_INDIVIDUALS){
+		return 0;
+	}
+
+	individual * ally = getIndividualFromRegistry(individualID);
+
+	if(ally == NULL){
+		return 0;
+	}
+
+	individualGroup * formerGroup = getGroupFromIndividual(thisGroupContainer, ally);
+
+	if(formerGroup == NULL){
+		return 0;
+	}
+
+	deleteIndividiaulFromGroup(formerGroup, ally);
+	addIndividualToGroup(thisGroupContainer->allies, ally);
+	ally->currentGroupType = GROUP_ALLIES;
+
+	if(newDialogId > 0){
+		loadOrAddIndividualDialog(individualID, newDialogId, 1);
+	}
+
+	return 1;
+}
+
+int returnIndividualToDefaultGroup(groupContainer * thisGroupContainer, int individualID, int newDialogId){
+	individual * thisIndividual = getIndividualFromRegistry(individualID);
+
+	if(thisIndividual == NULL){
+		return 0;
+	}
+
+	individualGroup * currentGroup = getGroupFromIndividual(thisGroupContainer, thisIndividual);
+	individualGroup * defaultGroup = getDefaultGroupFromIndividual(thisGroupContainer, thisIndividual);
+
+	if(defaultGroup == NULL || currentGroup == NULL || defaultGroup->numIndividuals >= defaultGroup->MAX_INDIVIDUALS){
+		return 0;
+	}
+
+	thisIndividual->currentGroupType = thisIndividual->defaultGroupType;
+	deleteIndividiaulFromGroup(currentGroup, thisIndividual);
+	addIndividualToGroup(defaultGroup, thisIndividual);
+
+	if(newDialogId > 0){
+		loadOrAddIndividualDialog(individualID, newDialogId, 1);
+	}
+
+	return 1;
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
 
 	event * thisEvent = getEventFromRegistry(eventID);
@@ -739,6 +792,10 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return tryRobIndividual(player, thisEvent, getSpeakingIndividualID());
 		case 18: //make player hostile to friendlies
 			return changePlayerDispositionForFriendlyGroups(thisGroupContainer->guards, thisGroupContainer->npcs, getSpeakingIndividualID(), thisEvent->intA);
+		case 19:
+			return addIndividualToAllyGroup(thisGroupContainer, thisEvent->individualID, thisEvent->intA);
+		case 20:
+			return returnIndividualToDefaultGroup(thisGroupContainer, thisEvent->individualID, thisEvent->intA);
 	}
 	
 	return 0;
