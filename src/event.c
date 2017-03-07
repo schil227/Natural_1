@@ -752,7 +752,6 @@ int returnIndividualToDefaultGroup(groupContainer * thisGroupContainer, int indi
 }
 
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
-
 	event * thisEvent = getEventFromRegistry(eventID);
 
 	switch(thisEvent->eventType){
@@ -821,7 +820,12 @@ char * processContextKey(char * contextKey, individual * player, groupContainer 
 
 	if(strcmp(contextKey, "TARGET_NAME") == 0){
 		char * toReturn = malloc(sizeof(char) * 32);
-		strcpy(toReturn, "TARGET_NAME");
+
+		individual * speakingIndividual = getIndividualFromRegistry(getSpeakingIndividualID());
+		if(speakingIndividual != NULL){
+			strcpy(toReturn, speakingIndividual->name);
+		}
+
 		return toReturn;
 	}
 

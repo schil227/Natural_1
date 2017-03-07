@@ -71,6 +71,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	abilityList loadedAbilities;
 	loadedAbilities.MAX_ABILITIES = 64;
 	loadedAbilities.numAbilities = 0;
+	groupType type = 0;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	ID = atoi(value);
@@ -189,6 +190,9 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	faction = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	type = (groupType)(atoi(value));
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	offensiveness = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -244,7 +248,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
 	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, offensiveness, abilityAffinity, tacticalness, cowardness,
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
 			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
@@ -292,7 +296,7 @@ void loadGroup(individualGroup * group, groupType thisGroupType, char * fileName
 			individual * newIndividual = getIndividualFromRegistry(id);
 
 			if(newIndividual != NULL){
-				if (doesExist(newIndividual->ID)) {
+				if (doesExist(newIndividual->ID) && newIndividual->currentGroupType == thisGroupType){
 					newIndividual->currentGroupType = thisGroupType;
 					newIndividual->defaultGroupType = thisGroupType;
 					addIndividualToGroup(group, newIndividual);
@@ -786,6 +790,58 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 	return NULL;
 }
 
+void removeAlliesFromField(individualGroup * allies, field * thisField){
+	int i, individualsPassed = 0;
+
+	if(allies->numIndividuals == 0){
+		return;
+	}
+
+	for(i = 0; i < allies->MAX_INDIVIDUALS; i++){
+		individual * tmpAlly = allies->individuals[i];
+		if(tmpAlly != NULL){
+			individualsPassed++;
+
+			removeIndividualFromField(thisField, tmpAlly->playerCharacter->x, tmpAlly->playerCharacter->y);
+
+			if(individualsPassed == allies->numIndividuals){
+				break;
+			}
+		}
+	}
+}
+
+void setAlliesToField(individual * player, individualGroup * allies, field * thisField){
+	int i, individualsPassed = 0;
+	individual * tmpAlly;
+
+	if(allies->numIndividuals == 0){
+		return;
+	}
+
+	for(i = 0; i < allies->MAX_INDIVIDUALS; i++){
+		tmpAlly = allies->individuals[i];
+
+		if(tmpAlly != NULL){
+			individualsPassed++;
+
+			cord * freeSpace = selectRandomSpaceWeightedToStart(player, thisField, 5);
+
+			setIndividualSpace(thisField, tmpAlly, freeSpace->x, freeSpace->y);
+
+			getSpaceFromField(thisField, freeSpace->x, freeSpace->y)->currentIndividual = tmpAlly;
+			tmpAlly->playerCharacter->x = freeSpace->x;
+			tmpAlly->playerCharacter->y = freeSpace->y;
+
+
+			if(individualsPassed == allies->numIndividuals){
+				break;
+			}
+		}
+	}
+
+}
+
 int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory){
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
@@ -810,11 +866,15 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			clearGroup(thisGroupContainer->beasts);
 			clearGroup(thisGroupContainer->guards);
 
+			removeAlliesFromField(thisGroupContainer->allies, *thisField);
+
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
 			if(player->thisReportedCrimes->numReportedCrimes > 0){
 				setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
 			}
+
+			setAlliesToField(player, thisGroupContainer->allies, *thisField);
 
 			return 1;
 		}
@@ -875,13 +935,16 @@ int tryTalkIndividualFromField(individual * player, field * thisField, int curso
 	}
 
 	if(individualWithinTalkingRange(player, tmpIndividual, 2)){
+		// Speaking individual is used for processing messages. Needs to be done here before the setCurrentMessage call.
+		setSpeakingIndividualID(tmpIndividual->ID);
+
 		if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)), tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer)){
-			setSpeakingIndividualID(tmpIndividual->ID);
 			toggleDrawDialogBox();
 			return 1;
 		}
 	}
 
+	setSpeakingIndividualID(0);
 	return 0;
 }
 

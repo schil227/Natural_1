@@ -438,8 +438,8 @@ int isLessThanPercentage(int numerator, int devisor, int percentToBeat){
 	}
 }
 
-/* getWeightedIndex:
- * This particular method takes in a int, such as the size of an index, and returns a random number
+/* getEndWeightedIndex:
+ * This particular method takes in the size of an array, and returns a random number
  * which is weighted to be more likely to select an index towards the end of the array.
  *
  * It matches the graph x^2 in terms of likelyness to select a number (e.g. more likely
@@ -447,12 +447,20 @@ int isLessThanPercentage(int numerator, int devisor, int percentToBeat){
  *
  * For uniform randomness, the square of the index must have a max size of 2,147,483,648 (32 bit / 4 byte).
  */
-int getWeightedIndex(int endIndex){
+int getEndWeightedIndex(int endIndex){
 	long power = pow(endIndex,2);
 	long bigRand = rand();
 	bigRand = (bigRand << 16) | rand();
 
 	return ceil(sqrt(bigRand % power));
+}
+
+int getStartWeightedIndex(int endIndex){
+	long power = pow(endIndex,2);
+	long bigRand = rand();
+	bigRand = (bigRand << 16) | rand();
+
+	return (endIndex - ceil(sqrt(bigRand % power)));
 }
 
 int isLowOnMana(individual * thisIndividual){
@@ -1181,9 +1189,8 @@ cord * getCordWithTargetInRange(individual * thisIndividual, field * thisField){
 	return toReturn;
 }
 
-cord * findRandomSpaceInMoveRange(individual * thisIndividual, field * thisField){
+cordArr * findRandomSpaceNearBy(individual * thisIndividual, field * thisField, int range){
 	int i,j,k;
-	cord * toReturn = NULL;
 	cord * startingCord = malloc(sizeof(cord));
 	startingCord->x = thisIndividual->playerCharacter->x;
 	startingCord->y = thisIndividual->playerCharacter->y;
@@ -1191,11 +1198,12 @@ cord * findRandomSpaceInMoveRange(individual * thisIndividual, field * thisField
 	cordArr * totalCords = initCordArr();
 	cordArr * activeCords = initCordArr();
 	cordArr * endCords = initCordArr();
+	cordArr * returnCords = initCordArr();
 
 	addCordIfUnique(totalCords,startingCord);
 	addCordIfUnique(activeCords,startingCord);
 
-	for(i = getAttributeSum(thisIndividual, "mvmt"); i > 0; i--){
+	for(i = range; i > 0; i--){
 		cordArr * newActiveCords = initCordArr();
 		cordArr * newCords;
 
@@ -1227,20 +1235,55 @@ cord * findRandomSpaceInMoveRange(individual * thisIndividual, field * thisField
 
 	free(activeCords);
 
-	if(endCords->numCords > 0){
-		int index = getWeightedIndex(endCords->numCords);
-
-		if(index == endCords->numCords){
-			index--;
-		}
-
-		toReturn = malloc(sizeof(cord));
-		toReturn->x = endCords->cords[index]->x;
-		toReturn->y = endCords->cords[index]->y;
+	for(i = 0; i < endCords->numCords; i++){
+		addCordIfUnique(returnCords, makeCord(endCords->cords[i]->x, endCords->cords[i]->y));
 	}
 
 	free(endCords);
 	destroyCordArr(totalCords);
+
+	return returnCords;
+}
+
+cord * selectRandomSpaceWeightedToStart(individual * thisIndividual, field * thisField, int range){
+	cord * toReturn = NULL;
+
+	cordArr * possibleCords = findRandomSpaceNearBy(thisIndividual, thisField, range);
+
+	if(possibleCords->numCords > 0){
+		int index = getStartWeightedIndex(possibleCords->numCords);
+
+		if(index == possibleCords->numCords){
+			index--;
+		}
+
+		toReturn = malloc(sizeof(cord));
+		toReturn->x = possibleCords->cords[index]->x;
+		toReturn->y = possibleCords->cords[index]->y;
+	}
+
+	destroyCordArr(possibleCords);
+	return toReturn;
+}
+
+cord * selectRandomSpaceWeightedToEnd(individual * thisIndividual, field * thisField, int range){
+	cord * toReturn = NULL;
+
+	cordArr * possibleCords = findRandomSpaceNearBy(thisIndividual, thisField, range);
+
+	if(possibleCords->numCords > 0){
+		int index = getEndWeightedIndex(possibleCords->numCords);
+
+		if(index == possibleCords->numCords){
+			index--;
+		}
+
+		toReturn = malloc(sizeof(cord));
+		toReturn->x = possibleCords->cords[index]->x;
+		toReturn->y = possibleCords->cords[index]->y;
+	}
+
+	destroyCordArr(possibleCords);
 	return toReturn;
 }
 
@@ -1920,7 +1963,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			enemy->thisBehavior->wasRecentlyAttacked = 0;
 			enemy->thisBehavior->alertDuration = 2 + rand() % 6;
 
-			cord * tmpCord = findRandomSpaceInMoveRange(enemy, thisField);
+			cord * tmpCord = selectRandomSpaceWeightedToEnd(enemy, thisField, getAttributeSum(enemy, "range"));
 
 			if(tmpCord == NULL){
 				//cant go anywhere
@@ -2215,12 +2258,16 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 		//talk to player if they have a bounty
 		if(getCurrentBounty(player) > 0){
 			if(individualWithinTalkingRange(guard, player, 2)){
-				setCurrentMessageByIndividualID(guard->ID, (guard->thisBehavior->isHostileToPlayer && (guard->currentGroupType == GROUP_NPCS || guard->currentGroupType == GROUP_GUARDS)), guard->thisBehavior->hasAlreadyYieldedToPlayer);
-
 				setSpeakingIndividualID(guard->ID);
-				toggleDrawDialogBox();
-				guard->remainingActions--;
-				return 0;
+
+				if(setCurrentMessageByIndividualID(guard->ID, (guard->thisBehavior->isHostileToPlayer && (guard->currentGroupType == GROUP_NPCS || guard->currentGroupType == GROUP_GUARDS)), guard->thisBehavior->hasAlreadyYieldedToPlayer)){
+					toggleDrawDialogBox();
+					guard->remainingActions--;
+					return 0;
+				}
+
+				setSpeakingIndividualID(0);
+
 
 			}else{
 				return moveCloserToTarget(guard, player, thisField, thisMoveNodeMeta);
@@ -2233,7 +2280,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 			guard->thisBehavior->wasRecentlyAttacked = 0;
 			guard->thisBehavior->alertDuration = 2 + rand() % 6;
 
-			cord * tmpCord = findRandomSpaceInMoveRange(guard, thisField);
+			cord * tmpCord = selectRandomSpaceWeightedToEnd(guard, thisField, getAttributeSum(guard, "range"));
 
 			if(tmpCord == NULL){
 				//cant go anywhere
@@ -2727,7 +2774,7 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 			npc->thisBehavior->wasRecentlyAttacked = 0;
 			npc->thisBehavior->alertDuration = 2 + rand() % 6;
 
-			cord * tmpCord = findRandomSpaceInMoveRange(npc, thisField);
+			cord * tmpCord = selectRandomSpaceWeightedToEnd(npc, thisField, getAttributeSum(npc, "range"));
 
 			if(tmpCord == NULL){
 				//cant go anywhere
