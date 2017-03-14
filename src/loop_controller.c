@@ -69,7 +69,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 					// player potentially harms self only 25% of the time
 					if(target == NULL || (target->isPlayer && isGreaterThanPercentage(rand() % 100, 100, 75))){
-						decreaseTurns(player, thisGroupContainer, 1);
+						decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 						viewShift->xShift = viewShift->xShiftOld;
 						viewShift->yShift = viewShift->yShiftOld;
 
@@ -87,7 +87,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
-					decreaseTurns(player, thisGroupContainer, 1);
+					decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 
 					player->thisBehavior->gotConfused = 0;
 
@@ -104,7 +104,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				if(tryTalkIndividualFromField(player, main_field, getCursorX(), getCursorY())){
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
-					decreaseTurns(player, thisGroupContainer, 1);
+					decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 					toggleInCursorMode();
 				}
 
@@ -125,7 +125,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					// player successfully cast ability on self 75% of the time
 					if(target == NULL || (target->isPlayer && isGreaterThanPercentage(rand() % 100, 100, 75))){
 						player->activeAbilities->selectedAbility = NULL;
-						decreaseTurns(player, thisGroupContainer, 1);
+						decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 						viewShift->xShift = viewShift->xShiftOld;
 						viewShift->yShift = viewShift->yShiftOld;
 
@@ -149,7 +149,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				viewShift->xShift = viewShift->xShiftOld;
 				viewShift->yShift = viewShift->yShiftOld;
 
-				decreaseTurns(player, thisGroupContainer, numActions);
+				decreaseTurns(player, thisGroupContainer, numActions, *inActionMode);
 
 				player->thisBehavior->gotConfused = 0;
 
@@ -166,7 +166,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 			}else if(getCursorMode() == CURSOR_PICKPOCKET){
 				if(tryPickPocketIndividualFromField(player, main_field, getCursorX(), getCursorY()) == 0){
-					decreaseTurns(player, thisGroupContainer, 1);
+					decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 				}
 
 				viewShift->xShift = viewShift->xShiftOld;
@@ -477,7 +477,7 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 	return 0;
 }
 
-int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift) {
+int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode) {
 	switch (msg) {
 	case WM_KEYDOWN: {
 
@@ -503,7 +503,7 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 
 			if(inPickPocketMode()){
 				disableInventoryPickPocketMode();
-				decreaseTurns(player, thisGroupContainer, 1);
+				decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 			}
 
 			break;
@@ -525,7 +525,7 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 						disableInventoryPickPocketMode();
 						disableInventoryViewMode();
 
-						decreaseTurns(player, thisGroupContainer, 1);
+						decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 					}
 				} else {
 					modifyItem(tmpItem, player);
@@ -614,8 +614,6 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
 
 					if(oldNode == NULL){
 						if (thisMoveNodeMeta->pathLength < getAttributeSum(thisIndividual, "mvmt")) {
-
-
 							moveNode * nextNode = malloc(sizeof(moveNode));
 							nextNode->x = (*currentNode)->x + dx;
 							nextNode->y = (*currentNode)->y + dy;
@@ -753,9 +751,15 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			//If player's out of actions, start enemy turn again
 			if(player->remainingActions < 0){
 				endTurn(player);
-				thisGroupContainer->groupActionMode = 1;
-				thisGroupContainer->initGroupActionMode = 1;
-				setNextActiveGroup(thisGroupContainer);
+
+				if(!(*inActionMode)){
+					player->remainingActions = player->totalActions;
+				}else{
+					thisGroupContainer->groupActionMode = 1;
+					thisGroupContainer->initGroupActionMode = 1;
+					setNextActiveGroup(thisGroupContainer);
+				}
+
 			}else if (hasActiveStatusEffect(player, STATUS_BERZERK) || hasActiveStatusEffect(player, STATUS_SLEEPING)){
 				*playerControlMode = 1;
 			}

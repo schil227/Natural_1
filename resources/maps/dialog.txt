@@ -37,6 +37,12 @@
 1040;Then onward.;0;0;0;0;0;0
 1041;Very well - till we meet again, @.;0;0;0;30;1;NAME
 
+1008;I Surrender.;1014;0;0;0;0
+1008;I Surrender, although I do not have enough money.;1015;0;0;0;0
+1008;Never!;0;0;28;0;0
+1016;[STR/CON to intimidate];0;9;5;0;0
+1016;[INT/WLL to confuse them];0;10;6;0;0
+1016;[Return stolen items: <@>];0;0;11;1;STOLEN_ITEMS_WITNESSED
 1016;[Do nothing];0;0;0;0;0
 1001;Yes - they are quite flattering, fit for a wealthy noble;1002;0;0;0;0
 1001;No - they look rather dingy;1003;0;0;0;0

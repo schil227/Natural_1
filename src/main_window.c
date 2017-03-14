@@ -51,6 +51,8 @@ int postPlayerControlMode = 0;
 
 int freeTimer = 0;
 int inActionMode = 0;
+int actionModeTimer = 0;
+int actionModeTimerTrigger = 5;
 
 individual* player;
 
@@ -448,14 +450,15 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		ReleaseDC(hwnd, hdc);
 
 		freeTimer++;
-
 		if(freeTimer > 30){
 			inActionMode = shouldEnableActionMode();
-//			char outLog[12];
-//			sprintf(outLog, "ding: %d", inActionMode);
-//			cwrite(outLog);
-
 			freeTimer = 0;
+
+			if(!inActionMode){
+				thisGroupContainer->initGroupActionMode = 1;
+				thisGroupContainer->groupActionMode = 1;
+				setNextActiveGroup(thisGroupContainer);
+			}
 		}
 
 	}
@@ -576,7 +579,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			break;
 		case 0x57: //w key (wait)
-			decreaseTurns(player, thisGroupContainer, 1);
+			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
 
 			break;
 		case 0x34: //left
@@ -726,7 +729,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
 
-			decreaseTurns(player, thisGroupContainer, 1);
+			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
 
 			free(thisMoveNodeMeta->rootMoveNode);
 			destroyCharacter(thisMoveNodeMeta->shadowCharacter);
@@ -735,7 +738,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		return 0;
 	} else if(inInventoryViewMode()){
-		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift);
+		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
 	}else if(thisGroupContainer->groupMoveMode){
 		animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
 				(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]),
@@ -779,8 +782,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				}
 
-				//If player's out of actions, start enemy turn again
-				if(player->remainingActions <= 0){
+				//If not in action mode, give player actions back, dont start AI turn
+				if(!inActionMode){
+					player->remainingActions = player->totalActions;
+				}else if(player->remainingActions <= 0){
 					endTurn(player);
 					thisGroupContainer->groupActionMode = 1;
 					thisGroupContainer->initGroupActionMode = 1;
@@ -804,7 +809,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			playerControlMode = 1;
 		}
 
-		if(player->remainingActions <= 0){
+		if(!inActionMode){
+			player->remainingActions = player->totalActions;
+		}else if(player->remainingActions <= 0){
 			endTurn(player);
 			thisGroupContainer->groupActionMode = 1;
 			thisGroupContainer->initGroupActionMode = 1;

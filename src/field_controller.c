@@ -432,7 +432,7 @@ int setNextActiveGroup(groupContainer * thisGroupContainer){
 	}
 }
 
-void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContainer, int numTurns){
+void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContainer, int numTurns, int inActionMode){
 
 	if(thisIndividual->activeAbilities->selectedAbility != NULL && thisIndividual->activeAbilities->selectedAbility->type == 'i'){
 
@@ -449,9 +449,12 @@ void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContai
 
 	if (thisIndividual->remainingActions <= 0) {
 		endTurn(thisIndividual);
-		thisGroupContainer->groupActionMode = 1;
-		thisGroupContainer->initGroupActionMode = 1;
-		setNextActiveGroup(thisGroupContainer);
+
+		if(inActionMode && thisIndividual->isPlayer){
+			thisGroupContainer->groupActionMode = 1;
+			thisGroupContainer->initGroupActionMode = 1;
+			setNextActiveGroup(thisGroupContainer);
+		}
 	}
 }
 
@@ -859,14 +862,13 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			}
 
 			groupTransitUpdate(thisGroupContainer);
+			removeAlliesFromField(thisGroupContainer->allies, *thisField);
 
 			destroyField(*thisField, player);
 			clearGroup(thisGroupContainer->enemies);
 			clearGroup(thisGroupContainer->npcs);
 			clearGroup(thisGroupContainer->beasts);
 			clearGroup(thisGroupContainer->guards);
-
-			removeAlliesFromField(thisGroupContainer->allies, *thisField);
 
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 

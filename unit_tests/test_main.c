@@ -27,6 +27,7 @@ static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit
 //shiftData* testShiftData;
 
 actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field* testField){
+	int i;
 	individualGroup * testEnemies = testGroupContainer->enemies;
 	individualGroup * testGuards = testGroupContainer->guards;
 
@@ -217,7 +218,7 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(testEnemy->thisBehavior->isCowardly == 0);
 	assert(testEnemy->thisBehavior->hasAbilityAffinity == 0);
 
-	rerollBehavior(testEnemy);
+		rerollBehavior(testEnemy);
 
 	assert(testEnemy->thisBehavior->isOffensive == 1);
 	assert(testEnemy->thisBehavior->isTactical == 1);
@@ -632,7 +633,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	//after decreasing the turns, the ability is no longer selected, player has action debt
 	testGroupContainer->groupActionMode = 0;
 	testGroupContainer->initGroupActionMode = 0;
-	decreaseTurns(testPlayer, testGroupContainer, 1);
+	decreaseTurns(testPlayer, testGroupContainer, 1, 1);
 
 	//player loses 4 actions, gets 2 replenished on endTurn() call (net: 0 actions for next turn)
 	assert(testPlayer->remainingActions == 0);

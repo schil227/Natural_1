@@ -615,6 +615,10 @@ cordArr * getAttackableCordsInRay(int startingX, int startingY, cord *endCord, i
 
 		space * tmpSpace = getSpaceFromField(thisField, nextCord->x, nextCord->y);
 
+		if(tmpSpace == NULL){
+			break;
+		}
+
 		if(!tmpSpace->canAttackThrough){
 			break;
 		}
@@ -1480,7 +1484,7 @@ int selectHealingAbility(individual * thisIndividual){
 	abilityList * healingAbilities;
 
 	if(hasActiveStatusEffect(thisIndividual, STATUS_SILENCED)){
-		return NULL;
+		return 0;
 	}
 
 	healingAbilities = malloc(sizeof(abilityList));
@@ -1506,6 +1510,8 @@ int selectHealingAbility(individual * thisIndividual){
 	}
 
 	thisIndividual->activeAbilities->selectedAbility = healingAbilities->abilitiesList[(rand() % healingAbilities->numAbilities)];
+
+	free(healingAbilities);
 	return 1;
 }
 
@@ -2548,6 +2554,28 @@ int atDesiredLocation(individual * thisIndividual){
 	return 0;
 }
 
+int isNearIndividual(individual * thisIndividual, individual * targetIndividual){
+	int xOffset = thisIndividual->playerCharacter->x - targetIndividual->playerCharacter->x;
+	int yOffset = thisIndividual->playerCharacter->y - targetIndividual->playerCharacter->y;
+
+	if(xOffset >= -1 && xOffset <= 1 && yOffset >= -1 && yOffset <= 1){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int isFarFromIndividual(individual * thisIndividual, individual * targetIndividual, int threshold){
+	int xOffset = thisIndividual->playerCharacter->x - targetIndividual->playerCharacter->x;
+	int yOffset = thisIndividual->playerCharacter->y - targetIndividual->playerCharacter->y;
+
+	if(xOffset < -1*threshold && xOffset > threshold && yOffset < -1*threshold && yOffset > threshold){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
 void addIndividualsInLineOfSight(individual * thisIndividual, individualGroup * thisGroup, individualGroup * targetGroup, field * thisField){
 	int i, numIndividualsPassed = 0;
 
@@ -2611,6 +2639,86 @@ individual * getDangerousIndividualNearByInLoS(individual * friendlyIndividual, 
 	free(dangerousIndividuals);
 
 	return toReturn;
+}
+
+void addIndividualsTargetingAllyOrPlayer(individual * thisAlly, individual * player, individualGroup * thisGroup, individualGroup * individualsTargetingAlly, individualGroup * individualsTargetingPlayer){
+	int i, individualsPassed = 0;
+
+	if(thisGroup->numIndividuals == 0){
+		return;
+	}
+
+	individual * tmpIndividual;
+
+	for(i = 0; i < thisGroup->numIndividuals; i++){
+		tmpIndividual = thisGroup->individuals[i];
+
+		if(tmpIndividual != NULL){
+			individualsPassed++;
+
+			if(tmpIndividual->targetedIndividual != NULL){
+				if(tmpIndividual->targetedIndividual->ID == thisAlly->ID){
+					addIndividualToGroup(individualsTargetingAlly, tmpIndividual);
+				}else if(tmpIndividual->targetedIndividual->isPlayer){
+					addIndividualToGroup(individualsTargetingPlayer, tmpIndividual);
+				}
+			}
+
+			if(individualsPassed == thisGroup->numIndividuals){
+				break;
+			}
+		}
+	}
+}
+
+void setupAllyTarget(individual * thisAlly, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
+	int index = 0;
+	individualGroup * individualsTargetingAlly = initGroup();
+	individualGroup * individualsTargetingPlayer = initGroup();
+
+	addIndividualsTargetingAllyOrPlayer(thisAlly, player, thisGroupContainer->enemies, individualsTargetingAlly, individualsTargetingPlayer);
+	addIndividualsTargetingAllyOrPlayer(thisAlly, player, thisGroupContainer->beasts, individualsTargetingAlly, individualsTargetingPlayer);
+	addIndividualsTargetingAllyOrPlayer(thisAlly, player, thisGroupContainer->guards, individualsTargetingAlly, individualsTargetingPlayer);
+	addIndividualsTargetingAllyOrPlayer(thisAlly, player, thisGroupContainer->npcs, individualsTargetingAlly, individualsTargetingPlayer);
+
+	if(individualsTargetingAlly->numIndividuals > 0){
+		index = rand() % individualsTargetingAlly->numIndividuals;
+		thisAlly->targetedIndividual = individualsTargetingAlly->individuals[index];
+	}else if(individualsTargetingPlayer->numIndividuals > 0){
+		index = rand() % individualsTargetingPlayer->numIndividuals;
+		thisAlly->targetedIndividual = individualsTargetingPlayer->individuals[index];
+	}
+
+	if(thisAlly->targetedIndividual != NULL){
+		thisAlly->targetedDuration = (rand() % 4) + 6;
+	}
+
+	free(individualsTargetingAlly);
+	free(individualsTargetingPlayer);
+
+	return;
+}
+
+void findTargetIndividualForAlly(individual * thisAlly, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
+	if(thisAlly->targetedIndividual != NULL){
+		if(thisAlly->targetedIndividual->hp <= 0
+				|| isAlly(thisAlly, thisAlly->targetedIndividual)
+				||  maxDistance < max(abs(thisAlly->playerCharacter->x - thisAlly->targetedIndividual->playerCharacter->x) , abs(thisAlly->playerCharacter->y - thisAlly->targetedIndividual->playerCharacter->y))){
+			thisAlly->targetedIndividual = NULL;
+
+			setupAllyTarget(thisAlly, player, thisGroupContainer, thisField, maxDistance);
+			return;
+		}
+
+		thisAlly->targetedDuration--;
+
+		if(thisAlly->targetedDuration == 0){
+			setupAllyTarget(thisAlly, player, thisGroupContainer, thisField, maxDistance);
+		}
+		return;
+	}
+
+	setupAllyTarget(thisAlly, player, thisGroupContainer, thisField, maxDistance);
 }
 
 void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
@@ -2697,7 +2805,269 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 		}
 	}
 
-	//if distance between ally and player is greater than 5, and not hunting enemies, return to player
+	findTargetIndividualForAlly(ally, player, thisGroupContainer, thisField, 8);
+
+	if(ally->targetedIndividual == NULL){
+		ally->activeAbilities->selectedAbility = NULL;
+//		//Attacked by some unknown individual, move away for a bit and try to find them
+//		if(ally->thisBehavior->wasRecentlyAttacked){
+//			//move every time they've been attacked and cannot find the attacker
+//			ally->thisBehavior->wasRecentlyAttacked = 0;
+//			ally->thisBehavior->alertDuration = 2 + rand() % 6;
+//
+//			cord * tmpCord = selectRandomSpaceWeightedToEnd(ally, thisField, getAttributeSum(ally, "range"));
+//
+//			if(tmpCord == NULL){
+//				//cant go anywhere
+//				ally->thisBehavior->alertDuration = 0;
+//				ally->remainingActions = 0;
+//				return 0;
+//			}
+//
+//			int toReturn = moveToSelectedLocation(ally, thisField, thisMoveNodeMeta, tmpCord->x, tmpCord->y);
+//
+//			free(tmpCord);
+//			return toReturn;
+//		}
+//
+//		if(ally->thisBehavior->alertDuration > 0){
+//			ally->thisBehavior->alertDuration--;
+//			ally->remainingActions--;
+//			return 0;
+//		}
+
+		if(!isNearIndividual(ally, player)){
+			if(inActionMode){
+				return moveCloserToTarget(ally, player, thisField, thisMoveNodeMeta);
+			}
+			else{
+				int tmpFaction = ally->faction;
+				ally->faction = -1;
+
+				int moveResult = moveToSelectedLocation(ally, thisField, thisMoveNodeMeta, player->playerCharacter->x, player->playerCharacter->y);
+
+				ally->faction = tmpFaction;
+
+				if(moveResult){
+					moveNode * targetSpace = (*thisMoveNodeMeta)->rootMoveNode;
+
+					if(targetSpace != NULL){
+						space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
+
+						if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
+							//individual is already removed from field
+							moveIndividualSpace(thisField, ally, targetSpace->x, targetSpace->y);
+							ally->remainingActions = 0;
+							return 0;
+						}
+					}
+
+					//put npc back on space they started
+					moveIndividualSpace(thisField, ally, ally->playerCharacter->x, ally->playerCharacter->y);
+
+					ally->remainingActions = 0;
+					return 0;
+				}
+			}
+		}
+
+		ally->remainingActions = 0;
+		return 0;
+	}
+
+	//On Deck Ability
+	if(ally->activeAbilities->selectedAbility != NULL){
+		if(ally->mana >= ally->activeAbilities->selectedAbility->totalManaCost){
+			if(abilityIsOffensive(ally->activeAbilities->selectedAbility)){
+				if(ally->targetedIndividual != NULL){
+					if(abilityInRangeOfIndividual(ally->activeAbilities->selectedAbility, ally, ally->targetedIndividual)){
+						cwrite("CASE 1\n");
+						return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField, ally->targetedIndividual->playerCharacter->x, ally->targetedIndividual->playerCharacter->y);
+					}else{
+						int moving = moveCloserToTarget(ally, ally->targetedIndividual, thisField, thisMoveNodeMeta);
+
+						if(moving){
+							return moving;
+						}else{
+							//cannot reach target and target out of range, get new closer target
+							ally->targetedIndividual = NULL;
+							ally->targetedDuration = 0;
+							ally->activeAbilities->selectedAbility = NULL;
+						}
+					}
+				}else{
+					ally->activeAbilities->selectedAbility = NULL;
+				}
+			}else{//is buff ability
+				if(ally->allyIndividual != NULL){
+					if(abilityInRangeOfIndividual(ally->activeAbilities->selectedAbility, ally, ally->allyIndividual)){
+						cwrite("CASE 2\n");
+						return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField, ally->allyIndividual->playerCharacter->x, ally->allyIndividual->playerCharacter->y);
+					}else{
+						int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField, thisMoveNodeMeta);
+
+						if(moving){
+							return moving;
+						}else{
+							//cannot reach target and target out of range, get new closer target
+							ally->allyIndividual = NULL;
+							ally->targetedDuration = 0;
+							ally->activeAbilities->selectedAbility = NULL;
+						}
+					}
+				}else{
+					ally->activeAbilities->selectedAbility = NULL;
+				}
+			}
+		}else{
+			ally->activeAbilities->selectedAbility = NULL;
+		}
+	}
+
+	//Update behavior
+	rerollBehavior(ally);
+
+	//Offensive
+	if (ally->thisBehavior->isOffensive) {
+
+		if(ally->thisBehavior->isTactical && ally->backpack->inventorySize > 0 && isGreaterThanPercentage(rand()%100,100,67)){
+			item * randomBuffItem = getBuffItem(ally->backpack);
+
+			if(randomBuffItem != NULL){
+				modifyItem(randomBuffItem, ally);
+				ally->remainingActions--;
+				return 0;
+			}
+		}
+
+		//has attack ability to use?
+		if (isGreaterThanPercentage(ally->thisBehavior->abilityAffinity, 100, rand() % 100) && hasOffensiveAbilityInRange(ally)) {
+
+			ability * buffAbility = getRandomBuffAbility(ally);
+			ability * offensiveAbility = getRandomOffensiveAbility(ally);
+
+			if(offensiveAbility == NULL && buffAbility == NULL){
+				return attackModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			}else if(offensiveAbility != NULL && buffAbility != NULL){
+				if(rand() % 2){
+					offensiveAbility = NULL;
+				} else{
+					buffAbility = NULL;
+				}
+			}
+
+			if(offensiveAbility != NULL){
+				ally->activeAbilities->selectedAbility = offensiveAbility;
+
+				int range = max(abs(ally->playerCharacter->x - ally->targetedIndividual->playerCharacter->x) , abs(ally->playerCharacter->y - ally->targetedIndividual->playerCharacter->y));
+				int abilityRange = offensiveAbility->range->effectAndManaArray[offensiveAbility->range->selectedIndex]->effectMagnitude;
+
+				if(abilityRange < range){//dont remove selected ability - it's now on deck
+					int toReturn = moveCloserToTarget(ally, ally->targetedIndividual, thisField, thisMoveNodeMeta);
+
+					if(!toReturn){
+						//cannot reach target and target out of range, get new closer target
+						ally->targetedIndividual = NULL;
+						ally->targetedDuration = 0;
+						ally->activeAbilities->selectedAbility = NULL;
+					}
+
+					return toReturn;
+				}else{
+					cwrite("CASE 3\n");
+					return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField, ally->targetedIndividual->playerCharacter->x, ally->targetedIndividual->playerCharacter->y);
+				}
+			}else{
+				ally->activeAbilities->selectedAbility = buffAbility;
+				cwrite("CASE 4\n");
+				return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField, ally->playerCharacter->x, ally->playerCharacter->y);
+			}
+		}else{
+			return attackModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+	}
+
+	//Supportive
+	else{
+		cwrite("Being supportive~~ :3");
+
+		if(ally->abilities->numAbilities == 0 || hasActiveStatusEffect(ally, STATUS_SILENCED)){
+			return attackModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+
+		if(ally->thisBehavior->isTactical && isGreaterThanPercentage(rand() % 100, 100, 30)){
+			return tacticalModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		}
+
+		if(((ally->mana < (getTotalMana(ally)/2)) && isGreaterThanPercentage(rand() % 100, 100, 30)) || !canUseAnyAbilities(ally)){
+			channelMana(ally);
+			return 0;
+		}
+
+		individualGroup * alliesInRange = getAlliesInRange(ally, thisField, 8);
+
+		if(selectHealingAbility(ally)){
+			individual * allyToHeal  = allyRequiringHealing(ally, alliesInRange);
+
+			if(allyToHeal != NULL){
+				free(alliesInRange);
+				ally->allyIndividual = allyToHeal;
+
+				if(abilityInRangeOfIndividual(ally->activeAbilities->selectedAbility, ally, ally->allyIndividual)){
+					cwrite("CASE 5\n");
+					return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField,  ally->allyIndividual->playerCharacter->x, ally->allyIndividual->playerCharacter->y);
+				}else{
+					int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField, thisMoveNodeMeta);
+
+					if(moving){
+						return moving;
+					}else{
+						//cannot reach target and target out of range, get new closer target
+						ally->allyIndividual = NULL;
+						ally->targetedDuration = 0;
+						ally->activeAbilities->selectedAbility = NULL;
+					}
+				}
+			}
+		}
+
+		ability * randomBuffAbility = getRandomBuffAbility(ally);
+
+		if(randomBuffAbility == NULL){
+			channelMana(ally);
+			return 0;
+		}
+
+		ally->activeAbilities->selectedAbility = randomBuffAbility;
+
+		if(randomBuffAbility->type == 'd' || randomBuffAbility->type == 'i'){
+			free(alliesInRange);
+			cwrite("CASE 6\n");
+			return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField,  ally->playerCharacter->x, ally->playerCharacter->y);
+		}
+
+		ally->allyIndividual = alliesInRange->individuals[rand() % alliesInRange->numIndividuals];
+
+		free(alliesInRange);
+
+		if(abilityInRangeOfIndividual(ally->activeAbilities->selectedAbility, ally, ally->allyIndividual)){
+			cwrite("CASE 7\n");
+			return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField,  ally->allyIndividual->playerCharacter->x, ally->allyIndividual->playerCharacter->y);
+		}else{
+			int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField, thisMoveNodeMeta);
+
+			if(moving){
+				return moving;
+			}else{
+				//cannot reach target and target out of range, get new closer target
+				ally->allyIndividual = NULL;
+				ally->targetedDuration = 0;
+				ally->activeAbilities->selectedAbility = NULL;
+			}
+		}
+
+		return 0;
+	}
 
 	ally->remainingActions = 0;
 	return 0;
