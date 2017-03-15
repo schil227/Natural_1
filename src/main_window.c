@@ -19,8 +19,20 @@
 #include"./headers/dialog_pub_methods.h"
 #include"./headers/sound_pub_methods.h"
 
+//Debug timing data
+LARGE_INTEGER StartingTime, EndingTime;
+LARGE_INTEGER Frequency;
+
 //
 // 	 	 	//Timer Example:
+//
+//			LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
+//			LARGE_INTEGER Frequency;
+//
+//			QueryPerformanceFrequency(&Frequency);
+//			QueryPerformanceCounter(&StartingTime);
+//
+//			//Activity to time
 //
 //			QueryPerformanceCounter(&EndingTime);
 //			ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
@@ -167,7 +179,7 @@ int shouldEnableActionMode(){
 	individual * tmpIndividual;
 
 	if(thisGroupContainer->enemies->numIndividuals > 0){
-		for(i = 0; i < thisGroupContainer->enemies; i++){
+		for(i = 0; i < thisGroupContainer->enemies->MAX_INDIVIDUALS; i++){
 			tmpIndividual = thisGroupContainer->enemies->individuals[i];
 
 			if(tmpIndividual != NULL){
@@ -189,7 +201,7 @@ int shouldEnableActionMode(){
 
 
 	if(thisGroupContainer->beasts->numIndividuals > 0){
-		for(i = 0; i < thisGroupContainer->beasts; i++){
+		for(i = 0; i < thisGroupContainer->beasts->MAX_INDIVIDUALS; i++){
 			tmpIndividual = thisGroupContainer->beasts->individuals[i];
 
 			if(tmpIndividual != NULL){
@@ -210,7 +222,7 @@ int shouldEnableActionMode(){
 	}
 
 	if(thisGroupContainer->guards->numIndividuals > 0){
-		for(i = 0; i < thisGroupContainer->guards; i++){
+		for(i = 0; i < thisGroupContainer->guards->MAX_INDIVIDUALS; i++){
 			tmpIndividual = thisGroupContainer->guards->individuals[i];
 
 			if(tmpIndividual != NULL){
@@ -239,7 +251,7 @@ int shouldEnableActionMode(){
 
 
 	if(thisGroupContainer->npcs->numIndividuals > 0){
-		for(i = 0; i < thisGroupContainer->npcs; i++){
+		for(i = 0; i < thisGroupContainer->npcs->MAX_INDIVIDUALS; i++){
 			tmpIndividual = thisGroupContainer->npcs->individuals[i];
 
 			if(tmpIndividual != NULL){
@@ -252,6 +264,29 @@ int shouldEnableActionMode(){
 				}
 
 				if(individualsPassed == thisGroupContainer->npcs->numIndividuals){
+					individualsPassed = 0;
+					break;
+				}
+			}
+		}
+
+		individualsPassed = 0;
+	}
+
+	if(thisGroupContainer->allies->numIndividuals > 0){
+		for(i = 0; i < thisGroupContainer->allies->MAX_INDIVIDUALS; i++){
+			tmpIndividual = thisGroupContainer->allies->individuals[i];
+
+			if(tmpIndividual != NULL){
+				individualsPassed++;
+
+				findTargetIndividualForAlly(tmpIndividual, player, thisGroupContainer, main_field, 8);
+
+				if(tmpIndividual->targetedIndividual != NULL){
+					return 1;
+				}
+
+				if(individualsPassed == thisGroupContainer->allies->numIndividuals){
 					individualsPassed = 0;
 					break;
 				}
@@ -427,6 +462,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //		cwrite(outLog);
 	}
 		break;
+	case WM_MOUSEMOVE:
+	{
+		break;
+	}
 	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
 	{			   //SPAWN MORE MESSAGES!
 
@@ -455,9 +494,13 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			freeTimer = 0;
 
 			if(!inActionMode){
+				QueryPerformanceFrequency(&Frequency);
+				QueryPerformanceCounter(&StartingTime);
+
 				thisGroupContainer->initGroupActionMode = 1;
 				thisGroupContainer->groupActionMode = 1;
 				setNextActiveGroup(thisGroupContainer);
+				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 			}
 		}
 
@@ -723,6 +766,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
 	} else if(postMoveMode){
+		//player only
 		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,3,&postMoveMode, viewShift, 1);
 
 		if (!postMoveMode) {
@@ -740,9 +784,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	} else if(inInventoryViewMode()){
 		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
 	}else if(thisGroupContainer->groupMoveMode){
+		int speed = 5;
+
+		if(!inActionMode){
+			speed = 1;
+		}
+
 		animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
 				(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]),
-				thisMoveNodeMeta, 5, &thisGroupContainer->groupMoveMode, viewShift, 0);
+				thisMoveNodeMeta, speed, &thisGroupContainer->groupMoveMode, viewShift, 0);
 
 		//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
 		if (!thisGroupContainer->groupMoveMode) {
@@ -755,8 +805,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			thisGroupContainer->postGroupActionMode = 1;
 		}
+
 	}else if(thisGroupContainer->groupActionMode){
 		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &thisMoveNodeMeta, &inActionMode, &playerControlMode);
+		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 	}else if(thisGroupContainer->postGroupActionMode){
 		thisGroupContainer->postGroupActionMode = 0;
 
@@ -764,6 +816,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			if(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
 				thisGroupContainer->groupActionMode = 1;
+				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 				return 1;
 			} else {
 				endTurn(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
@@ -776,8 +829,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		if(thisGroupContainer->selectedGroup->currentIndividualIndex > -1){
 			thisGroupContainer->groupActionMode = 1;
 			thisGroupContainer->initGroupActionMode = 1;
+			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		}else{
 			if(!setNextActiveGroup(thisGroupContainer)){
+
+				QueryPerformanceCounter(&EndingTime);
+				ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+
+				ElapsedMicroseconds.QuadPart *= 1000000;
+				ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+
+				char outLog[256];
+				sprintf(outLog, "End group process: %llu",ElapsedMicroseconds.QuadPart);
+				cwrite(outLog);
+
 				if(startTurn(player)){
 
 				}
@@ -790,12 +855,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					thisGroupContainer->groupActionMode = 1;
 					thisGroupContainer->initGroupActionMode = 1;
 					setNextActiveGroup(thisGroupContainer);
+					PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 				}else if(hasActiveStatusEffect(player, STATUS_BERZERK) || hasActiveStatusEffect(player, STATUS_SLEEPING)){
 					playerControlMode = 1;
 				}
 			}else{
 				thisGroupContainer->groupActionMode = 1;
 				thisGroupContainer->initGroupActionMode = 1;
+				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 			}
 		}
 
@@ -816,6 +883,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->groupActionMode = 1;
 			thisGroupContainer->initGroupActionMode = 1;
 			setNextActiveGroup(thisGroupContainer);
+			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		}
 
 	}else {
@@ -881,13 +949,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;
-
-//	char line[] = "2,60,60,-1";
-//	loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
-//	char line2[] = "7,1000,1000,1000,1000,1000,1000,1000,3,7";
-//	loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
-//	char line3[] = "13,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,-1";
-//	loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
 
 	addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2001));
 	addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2002));
@@ -972,15 +1033,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	UpdateWindow(hwnd); //redraw
 	SetActiveWindow(hwnd);
 
-
-
 	/*
 	 * GetMessage gets a message from the queue, e.g. when the user moves
 	 * the mouse or types a key, clicks, etc.
 	 *
 	 * If there is no message, it BLOCKS, meaning it waits for a message
 	 */
-	while (GetMessage(&Msg, NULL, 0, 0) > 0) {
+	while (GetMessage(&Msg, NULL, 0, 0) > 0) { //GetMessage
 		/*
 		 * TranslateMessage does additional processing on keyboard events,
 		 * like generating WM_CHAR message to go along with WM_KEYDOWN
@@ -993,7 +1052,4 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	return Msg.wParam;
-
 }
-
-

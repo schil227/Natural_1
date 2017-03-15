@@ -1962,7 +1962,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 	}
 
 	//Do checkForTargets, if null walk about, else go to target.
-	if(!checkForTargets(enemy, player, thisGroupContainer, thisField)){
+	if(!inActionMode || !checkForTargets(enemy, player, thisGroupContainer, thisField)){
 		//Attacked by some unknown individual, move away for a bit and try to find them
 		if(enemy->thisBehavior->wasRecentlyAttacked){
 			//move every time they've been attacked and cannot find the attacker
@@ -2255,9 +2255,9 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 		}
 	}
 
-	//Do checkForTargets, if null walk about, else go to target.
-
-	findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField, 8);
+	if(inActionMode){
+		findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField, 8);
+	}
 
 	if(guard->targetedIndividual == NULL){
 
@@ -2805,7 +2805,9 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 		}
 	}
 
-	findTargetIndividualForAlly(ally, player, thisGroupContainer, thisField, 8);
+	if(inActionMode){
+		findTargetIndividualForAlly(ally, player, thisGroupContainer, thisField, 8);
+	}
 
 	if(ally->targetedIndividual == NULL){
 		ally->activeAbilities->selectedAbility = NULL;
@@ -3103,8 +3105,10 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 		}
 	}
 
-	//set target to nearby enemy in line of sight, if not disable isSurrounded
-	findDangerousIndividualNearBy(npc, player, thisGroupContainer, thisField, 8);
+	if(inActionMode){
+		//set target to nearby enemy in line of sight, if not disable isSurrounded
+		findDangerousIndividualNearBy(npc, player, thisGroupContainer, thisField, 8);
+	}
 
 	if(npc->targetedIndividual != NULL){
 		npc->thisBehavior->alertDuration = 0;

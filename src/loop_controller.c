@@ -735,9 +735,6 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 	}
 
 	*inActionMode = shouldEnableActionMode();
-//	char outLog[12];
-//	sprintf(outLog, "turnStart: %d", *inActionMode);
-//	cwrite(outLog);
 
 	if(thisGroupContainer->selectedGroup->numIndividuals == 0){
 		thisGroupContainer->groupActionMode = 0;
