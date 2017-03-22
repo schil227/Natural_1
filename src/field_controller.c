@@ -282,6 +282,41 @@ void loadAbilitiesToList(abilityList * abilities, char * line, int abilityTempla
 	}
 }
 
+void loadGroups(groupContainer * thisGroupContainer, mapInfo * thisMap, field * thisField){
+	int i;
+
+	individual * tmpIndividual;
+
+	//thisMap->individuals is self balancing
+	for(i = 0; i < thisMap->numIndividuals; i++){
+		tmpIndividual = getIndividualFromRegistry(thisMap->individuals[i]);
+
+		if(tmpIndividual == NULL || tmpIndividual->hp <= 0){
+			continue;
+		}
+
+		moveIndividualSpace(thisField,tmpIndividual,tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+
+		switch(tmpIndividual->currentGroupType){
+		case GROUP_ENEMIES:
+			addIndividualToGroup(thisGroupContainer->enemies, tmpIndividual);
+			break;
+		case GROUP_NPCS:
+			addIndividualToGroup(thisGroupContainer->npcs, tmpIndividual);
+					break;
+		case GROUP_GUARDS:
+			addIndividualToGroup(thisGroupContainer->guards, tmpIndividual);
+					break;
+		case GROUP_BEASTS:
+			addIndividualToGroup(thisGroupContainer->beasts, tmpIndividual);
+					break;
+		case GROUP_ALLIES:
+			addIndividualToGroup(thisGroupContainer->allies, tmpIndividual);
+					break;
+		}
+	}
+}
+
 void loadGroup(individualGroup * group, groupType thisGroupType, char * fileName, char* directory){
 	char * fullFileName = appendStrings(directory, fileName);
 	fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
@@ -716,6 +751,26 @@ item * createFieldItemFromFile(char line[1024]){
 	return newItem;
 }
 
+void addItemsToField(mapInfo * thisMapInfo, field * thisField){
+	int i;
+
+	item * tmpItem;
+
+	//thisMapInfo->numItems is self balancing
+	for(i = 0; i < thisMapInfo->numItems; i++){
+		tmpItem = getItemFromRegistry(thisMapInfo->items[i]);
+
+		if(tmpItem != NULL){
+			if (doesExist(tmpItem->ID)) {
+				addItemToField(thisField->thisFieldInventory, tmpItem);
+			}
+		}else{
+			char * errLog[128];
+			sprintf(errLog, "!! ITEM NOT FOUND : %d !!", thisMapInfo->items[i]);
+		}
+	}
+}
+
 void loadFieldItems(field * thisField, char * itemFile, char* directory){
 	char * fullEnemyFile = appendStrings(directory, itemFile);
 	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
@@ -800,12 +855,15 @@ void removeAlliesFromField(individualGroup * allies, field * thisField){
 		return;
 	}
 
+	mapInfo * thisMap = getMapInfoFromRegistry(thisField->id);
+
 	for(i = 0; i < allies->MAX_INDIVIDUALS; i++){
 		individual * tmpAlly = allies->individuals[i];
 		if(tmpAlly != NULL){
 			individualsPassed++;
 
 			removeIndividualFromField(thisField, tmpAlly->playerCharacter->x, tmpAlly->playerCharacter->y);
+			removeIndividualIdFromMapInfo(thisMap, tmpAlly->ID);
 
 			if(individualsPassed == allies->numIndividuals){
 				break;
@@ -822,6 +880,8 @@ void setAlliesToField(individual * player, individualGroup * allies, field * thi
 		return;
 	}
 
+	mapInfo * thisMap = getMapInfoFromRegistry(thisField->id);
+
 	for(i = 0; i < allies->MAX_INDIVIDUALS; i++){
 		tmpAlly = allies->individuals[i];
 
@@ -835,7 +895,7 @@ void setAlliesToField(individual * player, individualGroup * allies, field * thi
 			getSpaceFromField(thisField, freeSpace->x, freeSpace->y)->currentIndividual = tmpAlly;
 			tmpAlly->playerCharacter->x = freeSpace->x;
 			tmpAlly->playerCharacter->y = freeSpace->y;
-
+			addIndividualsToMapInfo(thisMap, tmpAlly->ID);
 
 			if(individualsPassed == allies->numIndividuals){
 				break;
@@ -1058,15 +1118,3 @@ void groupTransitUpdate(groupContainer * thisGroupContainer){
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -529,8 +529,8 @@ animation * generateBackground(char backgroundSymbol){
 }
 
 field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
-
-	char transitMap[80], enemyMap[80], beastMap[80], npcMap[80], guardMap[80], fieldItemMap[80];
+	int mapID;
+	char transitMap[80], mapIDStr[80];
 	char * fullMapName = appendStrings(directory, mapName);
 
 	FILE * fp = fopen(fullMapName, "r");
@@ -538,38 +538,22 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 	//transit map filename
 	fgets(transitMap,80,fp);
 
-	//enemy filename
-	fgets(enemyMap,80,fp);
-
-	//beasts filename
-	fgets(beastMap,80,fp);
-
-	//npc filename
-	fgets(npcMap,80,fp);
-
-	//guards filename
-	fgets(guardMap,80,fp);
-
-	//field item filename
-	fgets(fieldItemMap,80,fp);
+	fgets(mapIDStr,80,fp);
 	fclose(fp);
 
-	loadGroup(thisGroupContainer->enemies, GROUP_ENEMIES, enemyMap, directory);
-	loadGroup(thisGroupContainer->beasts, GROUP_BEASTS, beastMap, directory);
-	loadGroup(thisGroupContainer->npcs, GROUP_NPCS, npcMap, directory);
-	loadGroup(thisGroupContainer->guards, GROUP_GUARDS, guardMap, directory);
+	mapID = atoi(mapIDStr);
 
 	field* thisField = initField(fullMapName);
 
-	loadFieldItems(thisField, fieldItemMap, directory);
+	mapInfo * thisMapInfo = getMapInfoFromRegistry(mapID);
+
+	loadGroups(thisGroupContainer, thisMapInfo, thisField);
+
+	addItemsToField(thisMapInfo, thisField);
 
 	makeTransitSpaces(transitMap, directory, thisField, player);
 
 	moveIndividualSpace(thisField,player, player->playerCharacter->x, player->playerCharacter->y);
-	setGroupToField(thisField, thisGroupContainer->enemies);
-	setGroupToField(thisField, thisGroupContainer->npcs);
-	setGroupToField(thisField, thisGroupContainer->guards);
-	setGroupToField(thisField, thisGroupContainer->beasts);
 
 	free(fullMapName);
 
@@ -729,13 +713,12 @@ field* initField(char* fieldFileName){
 	char line[80];
 	int init_y = 0, init_x = 0, xIndex, i, j;
 
-	//used to get rid of the first 6 lines which are file names
+	//used to get rid of the first 2 lines
 	fgets(line,80,fp);
-	fgets(line,80,fp);
-	fgets(line,80,fp);
-	fgets(line,80,fp);
-	fgets(line,80,fp);
-	fgets(line,80,fp);
+
+	//field ID
+	fgets(line, 80, fp);
+	thisField->id = atoi(line);
 
 	//init field to null
 	for(i = 0; i < 100; i++){
@@ -993,4 +976,147 @@ void printField(field * thisField){
 			printf("[%d,%d] : %d\n",i,j, getIndividualFromField(thisField,i,j));//spaceIsAvailable(thisField,i,j));
 		}
 	}
+}
+
+mapInfo * initMapInfo(){
+	mapInfo * newMapInfo = malloc(sizeof(mapInfo));
+	newMapInfo->MAX_INDIVIDUALS = 250;
+	newMapInfo->numIndividuals = 0;
+	newMapInfo->MAX_ITEMS = 500;
+	newMapInfo->numItems = 0;
+
+	return newMapInfo;
+}
+
+void parseMapIndividualsFromLine(mapInfo * thisMapInfo, char * line){
+	char * value;
+
+	if(line == NULL){
+		return;
+	}
+
+	value = strtok(line, ",");
+
+	if(value == NULL){
+		return;
+	}
+
+	thisMapInfo->individuals[thisMapInfo->numIndividuals] = atoi(value);
+	thisMapInfo->numIndividuals++;
+
+	value = strtok(NULL, ",");
+
+	while(value != NULL){
+		if(thisMapInfo->numIndividuals >= thisMapInfo->MAX_INDIVIDUALS){
+			cwrite("!! MAX INDIVIDUALS ON FIELD !!");
+			return;
+		}
+
+		thisMapInfo->individuals[thisMapInfo->numIndividuals] = atoi(value);
+		thisMapInfo->numIndividuals++;
+
+		value = strtok(NULL, ",");
+	}
+}
+
+void parseMapItemsFromLine(mapInfo * thisMapInfo, char * line){
+	char * value;
+
+	if(line == NULL){
+		return;
+	}
+
+	value = strtok(line, ",");
+
+	if(value == NULL){
+		return;
+	}
+
+	thisMapInfo->items[thisMapInfo->numItems] = atoi(value);
+	thisMapInfo->numItems++;
+
+	value = strtok(NULL, ",");
+
+	while(value != NULL){
+		if(thisMapInfo->numItems >= thisMapInfo->MAX_ITEMS){
+			cwrite("!! MAX ITEMS ON FIELD !!");
+			return;
+		}
+
+		thisMapInfo->items[thisMapInfo->numItems] = atoi(value);
+		thisMapInfo->numItems++;
+
+		value = strtok(NULL, ",");
+	}
+}
+
+void createMapInfoFromLine(mapInfo * thisMapInfo, char * line){
+	char * strtok_save_pointer;
+	char * value = strtok_r(line,";",&strtok_save_pointer);
+	thisMapInfo->id = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	strcpy(thisMapInfo->mapName, value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	parseMapIndividualsFromLine(thisMapInfo, value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	parseMapItemsFromLine(thisMapInfo, value);
+}
+
+void removeIndividualIdFromMapInfo(mapInfo * thisMap, int individualID){
+	int i;
+
+	if(thisMap->numIndividuals > 0){
+		for(i = 0; i < thisMap->numIndividuals; i++){
+			if(thisMap->individuals[i] == individualID){
+				thisMap->individuals[i] = thisMap->individuals[thisMap->numIndividuals];
+				thisMap->individuals[thisMap->numIndividuals] = NULL;
+				thisMap->numIndividuals--;
+
+				return;
+			}
+		}
+	}
+}
+
+void removeItemIdFromMapInfo(mapInfo * thisMap, int itemID){
+	int i;
+
+	if(thisMap->numItems > 0){
+		for(i = 0; i < thisMap->numItems; i++){
+			if(thisMap->items[i] == itemID){
+				thisMap->items[i] = thisMap->items[thisMap->numItems];
+				thisMap->items[thisMap->numItems] = NULL;
+				thisMap->numItems--;
+
+				return;
+			}
+		}
+	}
+}
+
+void addIndividualsToMapInfo(mapInfo * thisMap, int individualID){
+	if(thisMap->numIndividuals < thisMap->MAX_INDIVIDUALS){
+		thisMap->individuals[thisMap->numIndividuals] = individualID;
+		thisMap->numIndividuals++;
+		return;
+	}
+
+	char logOut[128];
+	sprintf(logOut, "!! COULD NOT ADD INDIVIDUAL TO MAP INFO, FULL: %d!!", individualID);
+	cwrite(logOut);
+}
+
+void addItemToMapInfo(mapInfo * thisMap, int itemID){
+	if(thisMap->numItems < thisMap->MAX_ITEMS){
+		thisMap->items[thisMap->numItems] = itemID;
+		thisMap->numItems++;
+		return;
+	}
+
+	char logOut[128];
+	sprintf(logOut, "!! COULD NOT ADD INDIVIDUAL TO MAP INFO, FULL: %d!!", itemID);
+	cwrite(logOut);
 }

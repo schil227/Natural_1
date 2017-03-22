@@ -55,6 +55,9 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_INSTANT_ABILITIES = 100;
 	thisGlobalRegister->numInstantAbilities = 0;
+
+	thisGlobalRegister->MAX_MAPS = 1000;
+	thisGlobalRegister->numMaps = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -242,6 +245,22 @@ ability * getAbilityFromRegistryFromType(int id, int abilityType){
 	return NULL;
 }
 
+mapInfo * getMapInfoFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numMaps; i++){
+		if(thisGlobalRegister->mapInfoArr[i]->id == id){
+			return thisGlobalRegister->mapInfoArr[i];
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!MAPINFO NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
 int addIndividualToRegistry(individual * thisIndividual){
 	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
 		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
@@ -362,6 +381,17 @@ int addInstantAbilityToRegistry(ability * thisAbility){
 	return 0;
 }
 
+int addMapInfoToRegistry(mapInfo * thisMap){
+	if(thisGlobalRegister->numMaps < thisGlobalRegister->MAX_MAPS){
+		thisGlobalRegister->mapInfoArr[thisGlobalRegister->numMaps] = thisMap;
+		thisGlobalRegister->numMaps++;
+		return 1;
+	}
+
+	cwrite("!!MAX MAPS IN REGISTRY!!");
+
+	return 0;
+}
 
 /*
  * TODO: On cutover, make sure destroy individual doesn't destroy items.
@@ -382,6 +412,10 @@ void destroyTheGlobalRegister(){
 		destroyCharacter(thisGlobalRegister->animationRegistry[i]);
 	}
 
+	for(i = 0; i < thisGlobalRegister->numMaps; i++){
+		free(thisGlobalRegister->mapInfoArr[i]);
+	}
+
 //	for(i = 0; i < thisGlobalRegister->numEvents; i++){
 //		free(thisGlobalRegister->eventRegistry[i]);
 //	}
@@ -395,7 +429,7 @@ void destroyTheGlobalRegister(){
 }
 
 void loadGlobalRegister(char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
-						char * animationData, char * selfAbilitiesData, char * targetedAbilitiesData){
+						char * animationData, char * selfAbilitiesData, char * targetedAbilitiesData, char * mapInfo){
 	// Priority loading:
 	//individuals dependant on xAbilities
 	loadSelfAbilitiesToRegistry(mapDirectory, selfAbilitiesData);
@@ -406,6 +440,7 @@ void loadGlobalRegister(char * mapDirectory, char * individualsData, char * item
 	loadItemsToRegistry(mapDirectory, itemsData);
 	loadEventsToRegistry(mapDirectory, eventsData);
 	loadSoundsToRegistry(mapDirectory, soundsData);
+	loadMapDataToRegistry(mapDirectory, mapInfo);
 }
 
 void loadIndividualsToRegistry(char* directory, char * individualsFileName){
@@ -413,7 +448,6 @@ void loadIndividualsToRegistry(char* directory, char * individualsFileName){
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
 	char line[1024];
-
 
 	while(fgets(line,1024,FP) != NULL){
 		if (line[0] != '#') {
@@ -432,7 +466,6 @@ void loadItemsToRegistry(char* directory, char * itemsFileName){
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
 	char line[1024];
-
 
 	while(fgets(line,1024,FP) != NULL){
 		if (line[0] != '#') {
@@ -552,6 +585,23 @@ void loadTargetedAbilitiesToRegistry(char* directory, char* targetedAbilitiesFil
 	free(fullFileName);
 }
 
+void loadMapDataToRegistry(char * directory, char * mapData){
+	char * fullFileName = appendStrings(directory, mapData);
+	FILE * FP = fopen(fullFileName, "r");
+	char line[1024];
+
+	while(fgets(line,1024,FP) != NULL){
+		if (line[0] != '#') {
+			mapInfo * tmpMap = initMapInfo();
+			createMapInfoFromLine(tmpMap, line);
+			addMapInfoToRegistry(tmpMap);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
 int addClonedItemToRegistry(item * thisItem){
 	int i, newID = 0;
 
@@ -570,8 +620,6 @@ int addClonedItemToRegistry(item * thisItem){
 
 	return newID;
 }
-
-
 
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);

@@ -28,6 +28,7 @@ typedef struct {
 	ability * selfAbilities[100];
 	ability * targetedAbilities[100];
 	ability * instantAbilities[100];
+	mapInfo * mapInfoArr[1000];
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
@@ -62,6 +63,8 @@ typedef struct {
 	int numInstantAbilities;
 	int MAX_INSTANT_ABILITIES;
 
+	int numMaps;
+	int MAX_MAPS;
 } globalRegister;
 
 #endif /* SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_ */

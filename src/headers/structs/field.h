@@ -33,6 +33,7 @@ typedef struct {
 
 typedef struct {
 	size_t size;
+	int id;
 	int displayedWidth;
 	int displayedHeight;
 
@@ -54,7 +55,6 @@ typedef struct {
 	struct moveNode * nextMoveNode;
 } moveNode;
 
-
 typedef struct {
 	int pathLength;
 	int x;
@@ -75,5 +75,17 @@ typedef struct{
 	moveNode * rootMoveNode;
 } moveNodeMeta;
 
+typedef struct {
+	int id;
+	char mapName[64];
+	int * individuals[250];
+	int * items[500];
+
+	int MAX_INDIVIDUALS;
+	int numIndividuals;
+
+	int MAX_ITEMS;
+	int numItems;
+} mapInfo;
 
 #endif /* SRC_HEADERS_STRUCTS_FIELD_H_ */

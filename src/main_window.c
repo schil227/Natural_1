@@ -398,7 +398,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
+		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "mapInfo.txt");
 		loadDialog("dialog.txt", mapDirectory);
 
 		initHudInstance();
@@ -940,7 +940,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt", "test_onPickupTriggerMap.txt");
 
-	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt");
+	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "test_mapInfo.txt");
 
 	loadDialog("dialog.txt", mapTestDirectory);
 
