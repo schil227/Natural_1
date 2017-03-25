@@ -21,6 +21,7 @@ typedef struct {
 	int viewMode;
 	int buyMode;
 	int pickpocketMode;
+	int fieldGetMode;
 } inventoryView;
 
 #endif /* SRC_HEADERS_STRUCTS_INVENTORY_VIEW_H_ */

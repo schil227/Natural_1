@@ -483,11 +483,13 @@ item * findManaRestoringItem(inventory * backpack){
 	item * tmpItem;
 
 	manaItems.inventorySize = 0;
-	for(i = 0; i < 40; i++){
+	manaItems.MAX_ITEMS = 40;
+
+	for(i = 0; i < manaItems.MAX_ITEMS; i++){
 		manaItems.inventoryArr[i] = NULL;
 	}
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < backpack->MAX_ITEMS; i++){
 		tmpItem = backpack->inventoryArr[i];
 
 		if(tmpItem != NULL && tmpItem->type == 'i' && tmpItem->manaMod > 0){
@@ -522,7 +524,7 @@ item * getRandomHPRestoringItem(inventory * backpack){
 	item * healingItems[40];
 	item * tmpItem;
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < backpack->MAX_ITEMS; i++){
 		tmpItem = backpack->inventoryArr[i];
 
 		if(tmpItem != NULL && tmpItem->type == 'i' && tmpItem->healthMod > 0){

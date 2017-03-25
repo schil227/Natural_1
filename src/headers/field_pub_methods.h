@@ -23,7 +23,7 @@ int removeIndividualFromField(field * thisField, int x, int y);
 int moveIndividualSpace(field *thisField, individual *thisIndividual, int x, int y);
 int isSpacePassable(field* thisField, int x, int y);
 individual* getIndividualAddressFromField(field* thisField, int x, int y);
-int addItemToField(fieldInventory * thisFieldInventory, item * thisItem);
+int addItemToField(field * thisField, item * thisItem);
 moveNode * alreadyContainsNode(moveNode * rootNode, int x, int y);
 int attemptGetItemFromField(field * thisField, individual * thisIndividual);
 int calcXMod(int direction, character * backgroundCharacter, shiftData * viewShift);

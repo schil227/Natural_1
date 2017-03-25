@@ -11,6 +11,7 @@
 #include "../individual_pub_methods.h"
 
 typedef struct {
+	int MAX_ITEMS;
 	int inventorySize;
 	item * inventoryArr[1000];
 } fieldInventory;
@@ -46,6 +47,7 @@ typedef struct {
 	space* grid[100][100];
 
 	fieldInventory * thisFieldInventory;
+	inventory * currentSpaceInventory;
 } field;
 
 typedef struct {

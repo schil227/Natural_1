@@ -639,15 +639,17 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 
 }
 
-int addItemToField(fieldInventory * thisFieldInventory, item * thisItem){
+int addItemToField(field * thisField, item * thisItem){
 	int i;
-	if(thisFieldInventory->inventorySize >= 1000){
+	if(thisField->thisFieldInventory->inventorySize >= thisField->thisFieldInventory->MAX_ITEMS){
 		return 0;
 	}
-	for(i = 0; i < 1000; i++){
-		if(thisFieldInventory->inventoryArr[i] == NULL){
-			thisFieldInventory->inventoryArr[i] = thisItem;
-			thisFieldInventory->inventorySize++;
+
+	for(i = 0; i < thisField->thisFieldInventory->MAX_ITEMS; i++){
+		if(thisField->thisFieldInventory->inventoryArr[i] == NULL){
+			thisField->thisFieldInventory->inventoryArr[i] = thisItem;
+			thisField->thisFieldInventory->inventorySize++;
+
 			return 1;
 		}
 	}
@@ -655,13 +657,19 @@ int addItemToField(fieldInventory * thisFieldInventory, item * thisItem){
 	return 0;
 }
 
-void removeItemFromField(fieldInventory * thisFieldInventory, item * thisItem){
+void removeItemFromField(field * thisField, item * thisItem){
 	int i;
+	mapInfo * thisMap = getMapInfoFromRegistry(thisField->id);
 
-	for(i = 0; i < 1000; i++){
-		if(thisFieldInventory->inventoryArr[i] == thisItem){
-			removeFromExistance(thisFieldInventory->inventoryArr[i]->ID);
-			thisFieldInventory->inventoryArr[i] = NULL;
+	for(i = 0; i < thisField->thisFieldInventory->MAX_ITEMS; i++){
+		if(thisField->thisFieldInventory->inventoryArr[i] == thisItem){
+//			removeFromExistance(thisField->thisFieldInventory->inventoryArr[i]->ID);
+			thisField->thisFieldInventory->inventoryArr[i] = NULL;
+
+			if(thisMap != NULL){
+				removeItemIdFromMapInfo(thisMap, thisItem->ID);
+			}
+
 			break;
 		}
 	}
@@ -678,12 +686,12 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 		return 0;
 	}
 
-	for(i = 0; i < 1000; i++){
+	for(i = 0; i < thisField->thisFieldInventory->MAX_ITEMS; i++){
 		if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
 			theItem = thisField->thisFieldInventory->inventoryArr[i];
 
 			if(theItem->itemCharacter->x == itemX && theItem->itemCharacter->y == itemY){
-				removeItemFromField(thisField->thisFieldInventory, theItem);
+				removeItemFromField(thisField, theItem);
 				addItemToInventory(thisIndividual->backpack, theItem);
 
 				triggerEventOnPickup(theItem->ID, thisIndividual->isPlayer);
@@ -705,6 +713,35 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 		}
 	}
 	return 0;
+}
+
+void populateCurrentSpaceInventory(field * thisField, individual * thisIndividual){
+	int i, itemsPassed = 0;
+	item * tmpItem;
+
+	for(i = 0; i < thisField->currentSpaceInventory->MAX_ITEMS; i++){
+		thisField->currentSpaceInventory->inventoryArr[i] = NULL;
+	}
+	thisField->currentSpaceInventory->inventorySize = 0;
+
+	if(thisField->thisFieldInventory->inventorySize != 0){
+		for(i = 0; i < thisField->thisFieldInventory->MAX_ITEMS; i++){
+			tmpItem = thisField->thisFieldInventory->inventoryArr[i];
+
+			if(tmpItem != NULL){
+				itemsPassed++;
+
+				if(tmpItem->itemCharacter->x == thisIndividual->playerCharacter->x &&
+						tmpItem->itemCharacter->y == thisIndividual->playerCharacter->y){
+					addItemToInventory(thisField->currentSpaceInventory, tmpItem);
+				}
+
+				if(itemsPassed == thisField->thisFieldInventory->inventorySize){
+					break;
+				}
+			}
+		}
+	}
 }
 
 field* initField(char* fieldFileName){
@@ -795,9 +832,17 @@ field* initField(char* fieldFileName){
 
 	thisField->thisFieldInventory = malloc(sizeof(fieldInventory));
 	thisField->thisFieldInventory->inventorySize = 0;
+	thisField->thisFieldInventory->MAX_ITEMS = 1000;
+
+	thisField->currentSpaceInventory = malloc(sizeof(inventory));
+	thisField->currentSpaceInventory->inventorySize = 0;
+	thisField->currentSpaceInventory->MAX_ITEMS = 40;
 
 	for(i = 0; i < 1000; i++){
 		thisField->thisFieldInventory->inventoryArr[i] = NULL;
+		if(i < 40){
+			thisField->currentSpaceInventory->inventoryArr[i] = NULL;
+		}
 	}
 
 	thisField->totalX = init_x;
@@ -1071,9 +1116,9 @@ void removeIndividualIdFromMapInfo(mapInfo * thisMap, int individualID){
 	if(thisMap->numIndividuals > 0){
 		for(i = 0; i < thisMap->numIndividuals; i++){
 			if(thisMap->individuals[i] == individualID){
+				thisMap->numIndividuals--;
 				thisMap->individuals[i] = thisMap->individuals[thisMap->numIndividuals];
 				thisMap->individuals[thisMap->numIndividuals] = NULL;
-				thisMap->numIndividuals--;
 
 				return;
 			}
@@ -1087,9 +1132,9 @@ void removeItemIdFromMapInfo(mapInfo * thisMap, int itemID){
 	if(thisMap->numItems > 0){
 		for(i = 0; i < thisMap->numItems; i++){
 			if(thisMap->items[i] == itemID){
+				thisMap->numItems--;
 				thisMap->items[i] = thisMap->items[thisMap->numItems];
 				thisMap->items[thisMap->numItems] = NULL;
-				thisMap->numItems--;
 
 				return;
 			}
@@ -1117,6 +1162,6 @@ void addItemToMapInfo(mapInfo * thisMap, int itemID){
 	}
 
 	char logOut[128];
-	sprintf(logOut, "!! COULD NOT ADD INDIVIDUAL TO MAP INFO, FULL: %d!!", itemID);
+	sprintf(logOut, "!! COULD NOT ADD ITEM TO MAP INFO, FULL: %d!!", itemID);
 	cwrite(logOut);
 }

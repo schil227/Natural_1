@@ -155,9 +155,9 @@ void tryUpdateXShift(shiftData * viewShift, int newX, int gameFieldAreaX){
 	int adjustedX = (newX - viewShift->xShift) * 50;
 
 	//adjustedX less than 25% of gameField?
-	if(isGreaterThanPercentage(25, gameFieldAreaX, adjustedX) && viewShift->xShift > 0){
+	if(!isGreaterThanPercentage(adjustedX, gameFieldAreaX, 35) && viewShift->xShift > 0){
 		viewShift->xShift--;
-	}else if(isGreaterThanPercentage(adjustedX, gameFieldAreaX, 75)){
+	}else if(isGreaterThanPercentage(adjustedX, gameFieldAreaX, 65)){
 		viewShift->xShift++;
 	}
 }
@@ -166,9 +166,9 @@ void tryUpdateYShift(shiftData * viewShift, int newY, int gameFieldAreaY){
 	int adjustedY = (newY - viewShift->yShift) * 50;
 
 	//adjustedY less than 25% of gameField?
-	if(isGreaterThanPercentage(25, gameFieldAreaY, adjustedY) && viewShift->yShift > 0){
+	if(!isGreaterThanPercentage(adjustedY, gameFieldAreaY, 35) && viewShift->yShift > 0){
 		viewShift->yShift--;
-	}else if(isGreaterThanPercentage(adjustedY, gameFieldAreaY, 75)){
+	}else if(isGreaterThanPercentage(adjustedY, gameFieldAreaY, 65)){
 		viewShift->yShift++;
 	}
 }
@@ -555,7 +555,24 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x47://g key (get)
 			{
-				attemptGetItemFromField(main_field,player);
+				populateCurrentSpaceInventory(main_field, player);
+
+				if(main_field->currentSpaceInventory->inventorySize == 1){
+					item * tmpItem = main_field->currentSpaceInventory->inventoryArr[0];
+					removeItemFromField(main_field, tmpItem);
+					addItemToInventory(player->backpack, tmpItem);
+
+					triggerEventOnPickup(tmpItem->ID, player->isPlayer);
+
+					if(tmpItem->owner != 0 && tmpItem->isStolen == 0){
+						tmpItem->isStolen = 1;
+
+						processCrimeEvent(CRIME_STEALING, tmpItem->price, tmpItem->owner, tmpItem->ID);
+					}
+				}else if(main_field->currentSpaceInventory->inventorySize > 1){
+					enableItemFieldGetMode();
+					enableInventoryViewMode(main_field->currentSpaceInventory);
+				}
 			}
 			break;
 		case 0x48: //h key

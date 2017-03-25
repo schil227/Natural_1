@@ -23,6 +23,7 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView->viewMode = 0;
 	thisInventoryView->buyMode = 0;
 	thisInventoryView->pickpocketMode = 0;
+	thisInventoryView->fieldGetMode = 0;
 
 	for(i = 0; i < slotsPerScreen; i++){
 		thisInventoryView->viewedItems[i] = NULL;
@@ -73,7 +74,7 @@ void refreshInventory(inventory * playerInventory){
 
 	thisInventoryView->playerItems = playerInventory;
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < thisInventoryView->playerItems->MAX_ITEMS; i++){
 		if(j == availableSlots){
 			break;
 		}
@@ -242,7 +243,7 @@ int canScrollDown(){
 
 	tmpItem = thisInventoryView->viewedItems[index];
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < thisInventoryView->playerItems->MAX_ITEMS; i++){
 		if(nextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL){
 			return 1;
 		}
@@ -279,7 +280,7 @@ int canScrollUp(){
 int selectedIndexIsntFirstPlayerItem(){
 	int i;
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < thisInventoryView->playerItems->MAX_ITEMS; i++){
 		if(thisInventoryView->playerItems->inventoryArr[i] != NULL){
 			if( thisInventoryView->playerItems->inventoryArr[i]  ==
 					thisInventoryView->viewedItems[thisInventoryView->selectedItemIndex]){
@@ -296,7 +297,7 @@ int selectedIndexIsntFirstPlayerItem(){
 int selectedIndexIsntLastPlayerItem(){
 	int i,nextItem = 0;
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < thisInventoryView->playerItems->MAX_ITEMS; i++){
 		if(thisInventoryView->playerItems->inventoryArr[i] != NULL){
 			if(nextItem && thisInventoryView->playerItems->inventoryArr[i] != NULL){
 				return 1;
@@ -420,4 +421,16 @@ void disableInventoryBuyMode(){
 
 int inBuyMode(){
 	return thisInventoryView->buyMode;
+}
+
+void enableItemFieldGetMode(){
+	thisInventoryView->fieldGetMode = 1;
+}
+
+void disableItemFieldGetMode(){
+	thisInventoryView->fieldGetMode = 0;
+}
+
+int inFieldGetMode(){
+	return thisInventoryView->fieldGetMode;
 }

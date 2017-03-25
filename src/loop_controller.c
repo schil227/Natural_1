@@ -506,45 +506,95 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 				decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 			}
 
+			if(inFieldGetMode()){
+				disableItemFieldGetMode();
+			}
+
 			break;
 		case 0x0D: //enter
-		{
-			item * tmpItem = getSelectedItem();
+			{
+				item * tmpItem = getSelectedItem();
 
-			if (tmpItem != NULL) {
-				if (inBuyMode()) {
-					attemptToBuyItem(tmpItem, player);
-				} else if(inPickPocketMode()){
-					int isLastItem = !selectedIndexIsntLastPlayerItem();
+				if (tmpItem != NULL) {
+					if (inBuyMode()) {
+						attemptToBuyItem(tmpItem, player);
+					} else if(inPickPocketMode()){
+						int isLastItem = !selectedIndexIsntLastPlayerItem();
 
-					int pickpocketSuccess = attemptToPickPocketItem(tmpItem, player);
+						int pickpocketSuccess = attemptToPickPocketItem(tmpItem, player);
 
-					if(pickpocketSuccess && isLastItem){
-						selectPreviousItemUp();
-					}else if(!pickpocketSuccess){
-						disableInventoryPickPocketMode();
-						disableInventoryViewMode();
+						if(pickpocketSuccess && isLastItem){
+							selectPreviousItemUp();
+						}else if(!pickpocketSuccess){
+							disableInventoryPickPocketMode();
+							disableInventoryViewMode();
 
-						decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
+							decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
+						}
+					} else if (inFieldGetMode()){
+						addItemToInventory(player->backpack, tmpItem);
+						removeItemFromInventory(main_field->currentSpaceInventory, tmpItem);
+						removeItemFromField(main_field, tmpItem);
+						triggerEventOnPickup(tmpItem->ID, player->isPlayer);
+
+						if(tmpItem->owner != 0 && tmpItem->isStolen == 0){
+							tmpItem->isStolen = 1;
+
+							processCrimeEvent(CRIME_STEALING, tmpItem->price, tmpItem->owner, tmpItem->ID);
+						}
+
+						refreshInventory(main_field->currentSpaceInventory);
+					} else {
+						modifyItem(tmpItem, player);
+						refreshInventory(player->backpack);
 					}
-				} else {
-					modifyItem(tmpItem, player);
+				}
+			}
+			break;
+		case 0x44: //(d)escription
+			{
+				item * tmpItem = getSelectedItem();
+
+				if (tmpItem != NULL) {
+					toggleDrawDialogBox();
+					setSimpleDialogMessage(tmpItem->description);
+				}
+			}
+			break;
+		case 0x58: //x key, drop
+			{
+				//only drop in inventory mode
+				if(!inBuyMode() && !inPickPocketMode() && !inFieldGetMode()){
+					item * tmpItem = getSelectedItem();
+
+					populateCurrentSpaceInventory(main_field, player);
+
+					if(main_field->currentSpaceInventory->inventorySize >= 10){
+						cwrite("Can't drop, too many items.");
+						break;
+					}
+
+					if(tmpItem->isEquipt){
+						modifyItem(tmpItem, player);
+					}
+
+					tmpItem->itemCharacter->x = player->playerCharacter->x;
+					tmpItem->itemCharacter->y = player->playerCharacter->y;
+
+					if(addItemToField(main_field, tmpItem)){
+						mapInfo * thisMap = getMapInfoFromRegistry(main_field->id);
+						addItemToMapInfo(thisMap, tmpItem->ID);
+					}
+
+					removeItemFromInventory(player->backpack, tmpItem);
+					setDefaultAnimation(tmpItem->itemCharacter->thisAnimationContainer, ANIMATION_IDLE);
+
 					refreshInventory(player->backpack);
 				}
 			}
-		}
 			break;
-		case 0x44: //(d)escription
-		{
-			item * tmpItem = getSelectedItem();
+		}
 
-			if (tmpItem != NULL) {
-				toggleDrawDialogBox();
-				setSimpleDialogMessage(tmpItem->description);
-			}
-		}
-			break;
-		}
 		case WM_TIMER:
 		{
 			RECT rect;

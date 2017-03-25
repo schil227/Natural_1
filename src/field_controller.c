@@ -291,7 +291,7 @@ void loadGroups(groupContainer * thisGroupContainer, mapInfo * thisMap, field * 
 	for(i = 0; i < thisMap->numIndividuals; i++){
 		tmpIndividual = getIndividualFromRegistry(thisMap->individuals[i]);
 
-		if(tmpIndividual == NULL || tmpIndividual->hp <= 0){
+		if(tmpIndividual == NULL || !doesExist(tmpIndividual->ID) || tmpIndividual->hp <= 0){
 			continue;
 		}
 
@@ -762,40 +762,13 @@ void addItemsToField(mapInfo * thisMapInfo, field * thisField){
 
 		if(tmpItem != NULL){
 			if (doesExist(tmpItem->ID)) {
-				addItemToField(thisField->thisFieldInventory, tmpItem);
+				addItemToField(thisField, tmpItem);
 			}
 		}else{
 			char * errLog[128];
 			sprintf(errLog, "!! ITEM NOT FOUND : %d !!", thisMapInfo->items[i]);
 		}
 	}
-}
-
-void loadFieldItems(field * thisField, char * itemFile, char* directory){
-	char * fullEnemyFile = appendStrings(directory, itemFile);
-	fullEnemyFile[strlen(fullEnemyFile) - 1] = '\0'; //remove '\n' at end of line
-	FILE * itemFP = fopen(fullEnemyFile, "r");
-	char line[512];
-
-	while (fgets(line, 512, itemFP) != NULL) {
-		if (line[0] != '#') {
-			char * value = strtok(line,";");
-			int id = atoi(value);
-
-			item * newItem = getItemFromRegistry(id);//createFieldItemFromFile(line);
-			if(newItem != NULL){
-				if (doesExist(newItem->ID)) {
-					addItemToField(thisField->thisFieldInventory, newItem);
-				}
-			}else{
-				char * errLog[128];
-				sprintf(errLog, "!! ITEM NOT FOUND : %d !!", id);
-			}
-		}
-
-	}
-	fclose(itemFP);
-	free(fullEnemyFile);
 }
 
 int individualInGroup(individual * thisIndividual, individualGroup * thisIndividualGroup){

@@ -26,6 +26,7 @@ individual *initIndividual(){
 
 	toReturn->backpack = malloc(sizeof(inventory));
 	toReturn->backpack->inventorySize = 0;
+	toReturn->backpack->MAX_ITEMS = 40;
 
 	toReturn->activeItems = malloc(sizeof(activeItemList));
 	toReturn->activeItems->activeItemsTotal = 0;
@@ -222,7 +223,7 @@ item * getActiveWeapon(inventory * backpack){
 	int i;
 	item * tmpItem = NULL;
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < backpack->MAX_ITEMS; i++){
 		if(backpack->inventoryArr[i] != NULL){
 			tmpItem = backpack->inventoryArr[i];
 			if(tmpItem->type == 'w' && tmpItem->isEquipt){
@@ -1578,16 +1579,21 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 }
 
 item * removeItemFromInventory(inventory * backpack, item * thisItem){
-	int i;
+	int i, j;
 	item * removedItem;
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < backpack->MAX_ITEMS; i++){
 		if(backpack->inventoryArr[i] == thisItem){
 			removedItem = backpack->inventoryArr[i];
 			removedItem->isEquipt = 0;
 
-			backpack->inventoryArr[i] = NULL;
+			//rebalance inventory
+			for(j = i; j < backpack->inventorySize - 1; j++){
+				backpack->inventoryArr[j] = backpack->inventoryArr[j+1];
+			}
+
 			backpack->inventorySize--;
+			backpack->inventoryArr[backpack->inventorySize] = NULL;
 
 			return removedItem;
 		}
@@ -1660,7 +1666,7 @@ int tryEquipItem(inventory * backpack, item * thisItem){
 	int i;
 	item * tmpItem;
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < backpack->MAX_ITEMS; i++){
 		tmpItem = backpack->inventoryArr[i];
 		if(tmpItem != NULL && tmpItem != thisItem && tmpItem->type == thisItem->type && tmpItem->isEquipt){
 			return 0;
@@ -1698,8 +1704,8 @@ void addItemToActiveItemList(individual * thisIndividual, item * theItem){
 
 int addItemToInventory(inventory * backpack, item * newItem){
 	int i, availableSpot;
-	if(backpack->inventorySize < 40){
-		for(i = 0; i < 40; i++){
+	if(backpack->inventorySize < backpack->MAX_ITEMS){
+		for(i = 0; i < backpack->MAX_ITEMS; i++){
 			if(backpack->inventoryArr[i] == NULL){
 				backpack->inventoryArr[i] = newItem;
 				backpack->inventorySize++;
@@ -3159,7 +3165,7 @@ int getAttributeSum(individual * thisIndividual, char * attribute){
 
 	toReturn += getAttributeFromIndividual(thisIndividual, attribute);
 
-	for(i = 0; i < 40; i++){
+	for(i = 0; i < thisIndividual->backpack->MAX_ITEMS; i++){
 		activeItem * tmpActiveItem;
 		// have all items been used?
 		if(itemTotal == thisIndividual->backpack->inventorySize &&
