@@ -10,7 +10,7 @@ static console * thisConsole;
 
 console * initConsole(int imageID, int x, int y, int width, int height){
 	console *  thisNewConsole = malloc(sizeof(console));
-	thisNewConsole->consoleCharacter = malloc(sizeof(character));
+	thisNewConsole->consoleCharacter = malloc(sizeof(fixedCharacter));
 	thisNewConsole->numMessages = 0;
 
 	thisNewConsole->newestMessageNode = malloc(sizeof(messageNode));

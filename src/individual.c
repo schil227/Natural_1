@@ -119,6 +119,8 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->playerCharacter->direction = direction;
 	thisIndividual->playerCharacter->x = x;
 	thisIndividual->playerCharacter->y = y;
+	thisIndividual->playerCharacter->xOff = 0;
+	thisIndividual->playerCharacter->yOff = 0;
 
 	thisIndividual->playerCharacter->thisAnimationContainer = thisAnimationContainer;
 	thisIndividual->playerCharacter->secondaryAnimationContainer = secondaryAnimationContainer;
@@ -1484,26 +1486,6 @@ int animationFrameTickUpdate(character * thisCharacter){
 	return toReturn;
 }
 
-void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftData * viewShift){
-	if(thisIndividual == NULL){
-		return;
-	}
-
-	thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
-
-	if(animationDelayUpdate(thisIndividual->playerCharacter)){
-		updateEquiptItemsToDelayedAnimationState(thisIndividual);
-	}
-
-	if(animationFrameTickUpdate(thisIndividual->playerCharacter)){
-		returnEquiptItemsToIdle(thisIndividual);
-	}
-
-	drawCharacterAnimation(hdc, hdcBuffer, thisIndividual->playerCharacter, viewShift, 0);
-
-	drawEquiptItems(hdc, hdcBuffer, thisIndividual, viewShift);
-}
-
 void returnEquiptItemsToIdle(individual * thisIndividual){
 	if(thisIndividual->armorItem != NULL && thisIndividual->armorItem->thisAnimationContainer->animationsEnabled){
 		thisIndividual->armorItem->thisAnimationContainer->currentAnimation = thisIndividual->armorItem->thisAnimationContainer->defaultAnimation;
@@ -1533,20 +1515,45 @@ void updateEquiptItemsToDelayedAnimationState(individual * thisIndividual){
 }
 
 void drawEquiptItems(HDC hdc, HDC hdcBuffer, individual* thisIndividual,  shiftData * viewShift){
+	int x = thisIndividual->playerCharacter->x;
+	int y = thisIndividual->playerCharacter->y;
+	double xOffset = (double)thisIndividual->playerCharacter->xOff;
+	double yOffset = (double)thisIndividual->playerCharacter->yOff;
+
 	if(thisIndividual->armorItem != NULL && thisIndividual->armorItem->thisAnimationContainer->animationsEnabled){
-		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->armorItem, thisIndividual->playerCharacter->thisAnimationContainer, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, viewShift);
+		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->armorItem, thisIndividual->playerCharacter->thisAnimationContainer, x, y, xOffset, yOffset, viewShift);
 	}
 
 	if(thisIndividual->shieldItem != NULL && thisIndividual->shieldItem->thisAnimationContainer->animationsEnabled){
-		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->shieldItem, thisIndividual->playerCharacter->thisAnimationContainer, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, viewShift);
+		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->shieldItem, thisIndividual->playerCharacter->thisAnimationContainer, x, y, xOffset, yOffset, viewShift);
 	}
 
 	if(thisIndividual->weaponItem != NULL && thisIndividual->weaponItem->thisAnimationContainer->animationsEnabled){
-		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->weaponItem, thisIndividual->playerCharacter->thisAnimationContainer, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, viewShift);
+		drawLayerFromBaseAnimation(hdc, hdcBuffer, thisIndividual->weaponItem, thisIndividual->playerCharacter->thisAnimationContainer, x, y, xOffset, yOffset, viewShift);
 	}
 }
 
-void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, animationContainer * baseAnimation, int xCord, int yCord, shiftData * viewShift){
+void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftData * viewShift){
+	if(thisIndividual == NULL){
+		return;
+	}
+
+	thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
+
+	if(animationDelayUpdate(thisIndividual->playerCharacter)){
+		updateEquiptItemsToDelayedAnimationState(thisIndividual);
+	}
+
+	if(animationFrameTickUpdate(thisIndividual->playerCharacter)){
+		returnEquiptItemsToIdle(thisIndividual);
+	}
+
+	drawCharacterAnimation(hdc, hdcBuffer, thisIndividual->playerCharacter, viewShift, 0);
+
+	drawEquiptItems(hdc, hdcBuffer, thisIndividual, viewShift);
+}
+
+void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, animationContainer * baseAnimation, int xCord, int yCord, double xOffset, double yOffset, shiftData * viewShift){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	HBITMAP image, imageMask;
 
@@ -1558,7 +1565,7 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord *52 - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*52 + (int)(xOffset*52) - (viewShift->xShift)*52 - 25, yCord*52 + (int)(yOffset*52) - (viewShift->yShift)*52 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -1568,7 +1575,7 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 
 	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord *52 - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*52 + (int)(xOffset*52) - (viewShift->xShift)*52 - 25, yCord*52 + (int)(yOffset*52) - (viewShift->yShift)*52 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,

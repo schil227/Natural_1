@@ -761,6 +761,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			shadowCharacter->x = player->playerCharacter->x;
 			shadowCharacter->y = player->playerCharacter->y;
+			shadowCharacter->xOff = 0;
+			shadowCharacter->yOff = 0;
 			shadowCharacter->direction = player->playerCharacter->direction;
 
 			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
@@ -784,7 +786,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
 	} else if(postMoveMode){
 		//player only
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,3,&postMoveMode, viewShift, 1);
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode, viewShift, 1);
 
 		if (!postMoveMode) {
 

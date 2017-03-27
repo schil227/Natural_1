@@ -856,7 +856,10 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 			ReleaseDC(hwnd, hdc);
 
 			if(thisMoveNodeMeta->sum >= speed){
+				thisIndividual->playerCharacter->xOff = 0;
+				thisIndividual->playerCharacter->yOff = 0;
 				thisMoveNodeMeta->sum = 0;
+
 				moveNode ** tmpMoveNode = &(thisMoveNodeMeta->rootMoveNode);
 
 				while((*tmpMoveNode)->hasTraversed){
@@ -878,6 +881,19 @@ void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * 
 					setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
 					*postMoveMode = 0;
 				}
+			} else {
+				moveNode ** tmpMoveNode = &(thisMoveNodeMeta->rootMoveNode);
+
+				while((*tmpMoveNode)->hasTraversed){
+					moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
+					tmpMoveNode = &nextTmpMoveNode;
+				}
+
+				int xChange = (*tmpMoveNode)->x - thisIndividual->playerCharacter->x;
+				int yChange = (*tmpMoveNode)->y - thisIndividual->playerCharacter->y;
+
+				thisIndividual->playerCharacter->xOff = ((thisMoveNodeMeta->sum*1.0) / (speed*1.0)) * xChange;
+				thisIndividual->playerCharacter->yOff = ((thisMoveNodeMeta->sum*1.0) / (speed*1.0)) * yChange;
 			}
 		}
 		break;

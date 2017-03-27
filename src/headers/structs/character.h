@@ -63,6 +63,8 @@ typedef struct {
 	int direction;
 	int x;
 	int y;
+	double xOff;
+	double yOff;
 	animationContainer * thisAnimationContainer;
 	animationContainer * secondaryAnimationContainer;
 } character;

@@ -19,6 +19,8 @@ item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char
 	thisItem->itemCharacter->direction = 0;
 	thisItem->itemCharacter->x = x;
 	thisItem->itemCharacter->y = y;
+	thisItem->itemCharacter->xOff = 0;
+	thisItem->itemCharacter->yOff = 0;
 
 	thisItem->itemCharacter->thisAnimationContainer = thisAnimationContainer;
 	thisItem->itemCharacter->secondaryAnimationContainer = secondaryAnimationContainer;
@@ -89,6 +91,8 @@ item * cloneItem(item * thisItem, int keepOwner){
 	newItem->itemCharacter = malloc(sizeof(character));
 	newItem->itemCharacter->x = thisItem->itemCharacter->x;
 	newItem->itemCharacter->y = thisItem->itemCharacter->y;
+	newItem->itemCharacter->xOff = 0;
+	newItem->itemCharacter->yOff = 0;
 	newItem->itemCharacter->direction = thisItem->itemCharacter->direction;
 
 	newItem->itemCharacter->thisAnimationContainer = cloneAnimationContainer(thisItem->itemCharacter->thisAnimationContainer);

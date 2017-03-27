@@ -776,6 +776,8 @@ field* initField(char* fieldFileName){
 			character* backgroundCharacter = malloc(sizeof(character));
 			backgroundCharacter->x = init_x;
 			backgroundCharacter->y = init_y;
+			backgroundCharacter->xOff = 0;
+			backgroundCharacter->yOff = 0;
 			backgroundCharacter->thisAnimationContainer = initAnimationContainer();
 			backgroundCharacter->thisAnimationContainer->animationsEnabled = 1;
 			backgroundCharacter->thisAnimationContainer->defaultAnimation = 0;
