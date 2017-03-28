@@ -998,7 +998,6 @@ moveNode * alreadyContainsNode(moveNode * rootNode, int x, int y) {
 	//check last node
 	if (currentNode->x == x && currentNode->y == y) {
 		return &currentNode;
-
 	}
 
 	return NULL;

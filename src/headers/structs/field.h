@@ -51,13 +51,6 @@ typedef struct {
 } field;
 
 typedef struct {
-	int x;
-	int y;
-	int hasTraversed;
-	struct moveNode * nextMoveNode;
-} moveNode;
-
-typedef struct {
 	int pathLength;
 	int x;
 	int y;
@@ -69,13 +62,6 @@ typedef struct {
 	node * nodeArray[20];
 	int size;
 } nodeArr;
-
-typedef struct{
-	int sum;
-	int pathLength;
-	character * shadowCharacter;
-	moveNode * rootMoveNode;
-} moveNodeMeta;
 
 typedef struct {
 	int id;

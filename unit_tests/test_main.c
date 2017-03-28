@@ -159,23 +159,22 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	testEnemy->targetedIndividual = testPlayer;
 	testEnemy->targetedDuration = 3;
-	moveNodeMeta * thisMoveNodeMeta;
-	assert(moveCloserToTarget(testEnemy, testPlayer, testField, &thisMoveNodeMeta));
+	assert(moveCloserToTarget(testEnemy, testPlayer, testField));
 
 	//As a side effect of moveCloserToTarget, the individuals is removed from the field
 	//returning individual to field:
 	assert(moveIndividualSpace(testField, testEnemy, 1,2));
 
-	assert(thisMoveNodeMeta->pathLength == 2);
+	assert(testEnemy->thisMoveNodeMeta->pathLength == 2);
 
-	moveNode * tmpMoveNode = thisMoveNodeMeta->rootMoveNode;
+	moveNode * tmpMoveNode = testEnemy->thisMoveNodeMeta->rootMoveNode;
 	assert(tmpMoveNode->x == 2 && tmpMoveNode->y == 1);
 
 	tmpMoveNode = tmpMoveNode->nextMoveNode;
 	assert(tmpMoveNode->x == 3 && tmpMoveNode->y == 0);
 
-	freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
-	thisMoveNodeMeta->pathLength = 0;
+	freeUpMovePath(testEnemy->thisMoveNodeMeta->rootMoveNode);
+	testEnemy->thisMoveNodeMeta->pathLength = 0;
 
 	// For some odd reason, running normally and running with debug causes the retreat space to differ;
 	// reinitializing the random seed causes consistant results; either form are correct since this method

@@ -422,6 +422,74 @@ void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr
 	}
 }
 
+void handleMoveingIndividuals(groupContainer * thisGroupContainer, field * thisField, int animateMoveSpeed){
+	int i, individualsPassed = 0;
+
+	for(i = 0; i < thisGroupContainer->movingIndividuals->MAX_INDIVIDUALS; i++){
+		individual * thisIndividual = thisGroupContainer->movingIndividuals->individuals[i];
+		if(thisIndividual != NULL){
+			individualsPassed++;
+
+			thisIndividual->thisMoveNodeMeta->sum++;
+			if(thisIndividual->thisMoveNodeMeta->sum >= animateMoveSpeed){
+				thisIndividual->playerCharacter->xOff = 0;
+				thisIndividual->playerCharacter->yOff = 0;
+				thisIndividual->thisMoveNodeMeta->sum = 0;
+				thisIndividual->thisMoveNodeMeta->useDummyCords = 0;
+
+				moveNode ** tmpMoveNode = &(thisIndividual->thisMoveNodeMeta->rootMoveNode);
+
+				while((*tmpMoveNode)->hasTraversed){
+					moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
+					tmpMoveNode = &nextTmpMoveNode;
+				}
+
+				(*tmpMoveNode)->hasTraversed = 1;
+
+				thisIndividual->playerCharacter->x = (*tmpMoveNode)->x;
+				thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
+
+				if((*tmpMoveNode)->nextMoveNode == NULL){
+					setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
+					freeUpMovePath(thisIndividual->thisMoveNodeMeta->rootMoveNode);
+					thisIndividual->thisMoveNodeMeta->rootMoveNode = NULL;
+					deleteIndividiaulFromGroup(thisGroupContainer->movingIndividuals, thisIndividual);
+					individualsPassed--;
+				}
+			} else {
+				moveNode ** tmpMoveNode = &(thisIndividual->thisMoveNodeMeta->rootMoveNode);
+
+				while((*tmpMoveNode)->hasTraversed){
+					moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
+					tmpMoveNode = &nextTmpMoveNode;
+				}
+
+				int xChange;
+				int yChange;
+
+				//inverse the offsets?
+				if(thisIndividual->thisMoveNodeMeta->useDummyCords){
+					xChange = thisIndividual->thisMoveNodeMeta->dummyCord->x - (*tmpMoveNode)->x;
+					yChange = thisIndividual->thisMoveNodeMeta->dummyCord->y - (*tmpMoveNode)->y;
+
+					thisIndividual->playerCharacter->xOff = (((animateMoveSpeed*1.0) - (thisIndividual->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * xChange;
+					thisIndividual->playerCharacter->yOff = (((animateMoveSpeed*1.0) - (thisIndividual->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * yChange;
+				}else{
+					xChange = (*tmpMoveNode)->x - thisIndividual->playerCharacter->x;
+					yChange = (*tmpMoveNode)->y - thisIndividual->playerCharacter->y;
+
+					thisIndividual->playerCharacter->xOff = ((thisIndividual->thisMoveNodeMeta->sum*1.0) / (animateMoveSpeed*1.0)) * xChange;
+					thisIndividual->playerCharacter->yOff = ((thisIndividual->thisMoveNodeMeta->sum*1.0) / (animateMoveSpeed*1.0)) * yChange;
+				}
+			}
+
+			if(individualsPassed == thisGroupContainer->movingIndividuals->numIndividuals){
+				break;
+			}
+		}
+	}
+}
+
 int isGreaterThanPercentage(int numerator, int devisor, int percentToBeat){
 	if(devisor == 0){
 		return 1;
@@ -1293,7 +1361,7 @@ cord * selectRandomSpaceWeightedToEnd(individual * thisIndividual, field * thisF
 	return toReturn;
 }
 
-int moveToSelectedLocation(individual * thisIndividual, field * thisField,  moveNodeMeta ** thisMoveNodeMeta, int x, int y){
+int moveToSelectedLocation(individual * thisIndividual, field * thisField, int x, int y){
 	nodeArr * enemyNodeArr = getSpaceClosestToSpace(thisField, thisIndividual, x, y);
 
 	thisIndividual->remainingActions--;
@@ -1309,17 +1377,15 @@ int moveToSelectedLocation(individual * thisIndividual, field * thisField,  move
 	getSpaceFromField(thisField, thisIndividual->playerCharacter->x,
 			thisIndividual->playerCharacter->y)->currentIndividual = NULL;
 
-	(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
-	(*thisMoveNodeMeta)->sum = 0;
 
-	populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+	populateMoveNodeMeta(thisIndividual->thisMoveNodeMeta, enemyNodeArr);
 
 	destroyNodeArr(enemyNodeArr);
 
 	return 1;
 }
 
-int moveToGetOutOfTargetsRange(individual * thisIndividual, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
+int moveToGetOutOfTargetsRange(individual * thisIndividual, field * thisField){
 	int x, y;
 	cord * targetSpace = getCordOutsideTargetRange(thisIndividual, thisField);
 
@@ -1328,10 +1394,10 @@ int moveToGetOutOfTargetsRange(individual * thisIndividual, field * thisField,  
 
 	free(targetSpace);
 
-	return moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, x, y);
+	return moveToSelectedLocation(thisIndividual, thisField, x, y);
 }
 
-int moveToGetTargetInRange(individual * thisIndividual, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
+int moveToGetTargetInRange(individual * thisIndividual, field * thisField){
 	int x, y;
 	cord * targetSpace = getCordWithTargetInRange(thisIndividual, thisField);
 	x = targetSpace->x;
@@ -1339,10 +1405,10 @@ int moveToGetTargetInRange(individual * thisIndividual, field * thisField,  move
 
 	free(targetSpace);
 
-	return moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, x, y);
+	return moveToSelectedLocation(thisIndividual, thisField, x, y);
 }
 
-int retreatFromTarget(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField,  moveNodeMeta ** thisMoveNodeMeta){
+int retreatFromTarget(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField){
 	int x, y;
 	cord * targetSpace = findRetreatSpace(thisIndividual, thisGroupContainer, thisField, thisIndividual->targetedIndividual->playerCharacter->x, thisIndividual->targetedIndividual->playerCharacter->y);
 	x = targetSpace->x;
@@ -1350,30 +1416,38 @@ int retreatFromTarget(individual * thisIndividual, groupContainer * thisGroupCon
 
 	free(targetSpace);
 
-	return moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, x, y);
+	return moveToSelectedLocation(thisIndividual, thisField, x, y);
 }
 
-int returnToDesiredLocation(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int returnToDesiredLocation(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	//prevent generating a path through individuals
 	int tmpFaction = thisIndividual->faction;
 	thisIndividual->faction = -1;
 
-	int moveResult = moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, thisIndividual->desiredLocation->x, thisIndividual->desiredLocation->y);
+	int moveResult = moveToSelectedLocation(thisIndividual, thisField, thisIndividual->desiredLocation->x, thisIndividual->desiredLocation->y);
 
 	thisIndividual->faction = tmpFaction;
 
 	//Only moving one space, avoid animateMoveLoop and just do it here
 	if(moveResult && !inActionMode){
-		moveNode * targetSpace = (*thisMoveNodeMeta)->rootMoveNode;
+		moveNode * targetSpace = thisIndividual->thisMoveNodeMeta->rootMoveNode;
 
 		if(targetSpace != NULL){
-			space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
+			space * tmpSpace = getSpaceFromField(thisField, targetSpace->x, targetSpace->y);
 
 			if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
-				//individual is already removed from field
+				thisIndividual->thisMoveNodeMeta->useDummyCords = 1;
+				thisIndividual->thisMoveNodeMeta->dummyCord->x = thisIndividual->playerCharacter->x;
+				thisIndividual->thisMoveNodeMeta->dummyCord->y = thisIndividual->playerCharacter->y;
 				moveIndividualSpace(thisField, thisIndividual, targetSpace->x, targetSpace->y);
+
+				if(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
+					freeUpMovePath(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
+					thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode = NULL;
+				}
+
 				thisIndividual->remainingActions = 0;
-				return 0;
+				return 1;
 			}
 
 		}
@@ -1565,7 +1639,7 @@ individual * allyRequiringHealing(individual * thisIndividual, individualGroup *
 	return toReturn;
 }
 
-int moveCloserToTarget(individual * enemy, individual * targetIndividual, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int moveCloserToTarget(individual * enemy, individual * targetIndividual, field * thisField){
 	nodeArr * enemyNodeArr = getSpaceClosestToPlayer(thisField, enemy, targetIndividual);
 
 	//nowhere to go, nothing to animate
@@ -1578,10 +1652,8 @@ int moveCloserToTarget(individual * enemy, individual * targetIndividual, field 
 	//Gonna move, remove them from the field and update the moveNodeMeta
 	removeIndividualFromField(thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
 
-	(*thisMoveNodeMeta) = malloc(sizeof(moveNodeMeta));
-	(*thisMoveNodeMeta)->sum = 0;
 
-	populateMoveNodeMeta(*thisMoveNodeMeta, enemyNodeArr);
+	populateMoveNodeMeta(enemy->thisMoveNodeMeta, enemyNodeArr);
 
 	destroyNodeArr(enemyNodeArr);
 
@@ -1589,7 +1661,7 @@ int moveCloserToTarget(individual * enemy, individual * targetIndividual, field 
 	return 1;
 }
 
-int attackModule(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int attackModule(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField){
 	if(thisIndividual->thisBehavior->isTactical && !hasActiveStatusEffect(thisIndividual, STATUS_BERZERK) && getAttributeSum(thisIndividual, "range") > getAttributeSum(thisIndividual->targetedIndividual,"range")  && isInAttackRange(thisIndividual->targetedIndividual, thisIndividual, thisField)){
 		 //&& isGreaterThanPercentage(rand() % 100, 100, 50)
 		int x, y;
@@ -1600,7 +1672,7 @@ int attackModule(individual * thisIndividual, individual * player, groupContaine
 		free(rangedCord);
 
 		if(cordHasRangeAdvantage(thisIndividual, x, y) == 2){
-			return moveToSelectedLocation(thisIndividual, thisField, thisMoveNodeMeta, x, y);
+			return moveToSelectedLocation(thisIndividual, thisField, x, y);
 		}
 	}
 
@@ -1615,9 +1687,9 @@ int attackModule(individual * thisIndividual, individual * player, groupContaine
 		return 0;
 	} else {
 		if(thisIndividual->thisBehavior->isTactical && !hasActiveStatusEffect(thisIndividual, STATUS_BERZERK)){
-			return tacticalModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return tacticalModule(thisIndividual, player, thisGroupContainer, thisField);
 		}else{
-			int toReturn = moveCloserToTarget(thisIndividual, thisIndividual->targetedIndividual, thisField, thisMoveNodeMeta);
+			int toReturn = moveCloserToTarget(thisIndividual, thisIndividual->targetedIndividual, thisField);
 
 			//cannot reach target and target out of range, get new closer target
 			if(!toReturn){
@@ -1631,19 +1703,19 @@ int attackModule(individual * thisIndividual, individual * player, groupContaine
 	}
 }
 
-int tacticalModule(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int tacticalModule(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField){
 	if(enemy->thisBehavior->isOffensive){
 
 		if(!isInAttackRange(enemy, enemy->targetedIndividual, thisField)){
 			//move in attack range
-			return moveToGetTargetInRange(enemy, thisField, thisMoveNodeMeta);
+			return moveToGetTargetInRange(enemy, thisField);
 		}
 	}else{
 		individualGroup * allies = getAlliesInRange(enemy, thisField,4);
 
 		//Move closer to an ally nearby
 		if(allies->numIndividuals > 0){
-			int toReturn = moveCloserToTarget(enemy, allies->individuals[rand() % allies->numIndividuals], thisField, thisMoveNodeMeta);
+			int toReturn = moveCloserToTarget(enemy, allies->individuals[rand() % allies->numIndividuals], thisField);
 
 			free(allies);
 			return toReturn;
@@ -1653,7 +1725,7 @@ int tacticalModule(individual * enemy, individual * player, groupContainer * thi
 
 		//Move out of attack range
 		if(isInAttackRange(enemy->targetedIndividual, enemy, thisField)){
-			return moveToGetOutOfTargetsRange(enemy, thisField, thisMoveNodeMeta);
+			return moveToGetOutOfTargetsRange(enemy, thisField);
 		}
 	}
 
@@ -1756,19 +1828,19 @@ int useAbilityOnTargetedSpace(individual * enemy, individual * player, groupCont
 	return 0;
 }
 
-int performAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int performAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	switch(thisIndividual->currentGroupType){
 		case GROUP_ENEMIES:
-			return enemyAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+			return enemyAction(thisIndividual, player, thisGroupContainer, thisField, inActionMode);
 		case GROUP_NPCS:
-			return npcAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+			return npcAction(thisIndividual, player, thisGroupContainer, thisField, inActionMode);
 		case GROUP_BEASTS:
 			thisIndividual->remainingActions = 0;
 			return 0;
 		case GROUP_GUARDS:
-			return guardAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+			return guardAction(thisIndividual, player, thisGroupContainer, thisField, inActionMode);
 		case GROUP_ALLIES:
-			return allyAction(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+			return allyAction(thisIndividual, player, thisGroupContainer, thisField, inActionMode);
 		default:
 			return 0;
 	}
@@ -1798,7 +1870,7 @@ individual * getIndiscriminateIndividualInRange(individual * thisIndividual, fie
 	return selectedIndividual;
 }
 
-int controlledPlayerAction(individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int controlledPlayerAction(individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	char outLog[128];
 
 	if(hasActiveStatusEffect(player, STATUS_SLEEPING)){
@@ -1821,7 +1893,7 @@ int controlledPlayerAction(individual * player, groupContainer * thisGroupContai
 
 		if(player->targetedIndividual != NULL){
 			player->targetedDuration = 0;
-			return attackModule(player, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(player, player, thisGroupContainer, thisField);
 		}else{
 			player->remainingActions--;
 		}
@@ -1830,7 +1902,7 @@ int controlledPlayerAction(individual * player, groupContainer * thisGroupContai
 	return 0;
 }
 
-int berzerkIndividualAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int berzerkIndividualAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	char logStr[128];
 	sprintf(logStr, "%s is berzerking!", thisIndividual->name);
 	cwrite(logStr);
@@ -1839,14 +1911,14 @@ int berzerkIndividualAction(individual * thisIndividual, individual * player, gr
 	if(thisIndividual->currentGroupType == GROUP_ENEMIES || thisIndividual->currentGroupType == GROUP_BEASTS){
 		if(checkForTargets(thisIndividual, player, thisGroupContainer, thisField)){
 			thisIndividual->targetedDuration = 0;
-			return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(thisIndividual, player, thisGroupContainer, thisField);
 		}
 	}else if(thisIndividual->currentGroupType == GROUP_GUARDS || thisIndividual->currentGroupType == GROUP_NPCS){
 		findDangerousIndividualNearBy(thisIndividual, player, thisGroupContainer, thisField, 8);
 
 		if(thisIndividual->targetedIndividual != NULL){
 			thisIndividual->targetedDuration = 0;
-			return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(thisIndividual, player, thisGroupContainer, thisField);
 		}
 	}
 
@@ -1854,7 +1926,7 @@ int berzerkIndividualAction(individual * thisIndividual, individual * player, gr
 	return 0;
 }
 
-int confusedIndividualAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int confusedIndividualAction(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	char logStr[128];
 	sprintf(logStr, "%s is confused!", thisIndividual->name);
 	cwrite(logStr);
@@ -1882,7 +1954,7 @@ int confusedIndividualAction(individual * thisIndividual, individual * player, g
 			return 0;
 		}
 
-		return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+		return attackModule(thisIndividual, player, thisGroupContainer, thisField);
 	}
 
 	if(thisIndividual->thisBehavior->isOffensive){
@@ -1895,7 +1967,7 @@ int confusedIndividualAction(individual * thisIndividual, individual * player, g
 			thisIndividual->activeAbilities->selectedAbility = offensiveAbility;
 			return useAbilityOnTargetedSpace(thisIndividual, player, thisGroupContainer, thisField, thisIndividual->targetedIndividual->playerCharacter->x, thisIndividual->targetedIndividual->playerCharacter->y);
 		}else{
-			return attackModule(thisIndividual, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(thisIndividual, player, thisGroupContainer, thisField);
 		}
 	}else{
 		int abilityRange = 0;
@@ -1933,7 +2005,7 @@ int confusedIndividualAction(individual * thisIndividual, individual * player, g
 	}
 }
 
-int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int enemyAction(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	if(hasActiveStatusEffect(enemy, STATUS_SLEEPING)){
 		char logOut[128];
 		sprintf(logOut, "%s is sleeping!", enemy->name);
@@ -1942,11 +2014,11 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 	}
 
 	if(hasActiveStatusEffect(enemy, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 33)){
-		return confusedIndividualAction(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return confusedIndividualAction(enemy, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	if(hasActiveStatusEffect(enemy, STATUS_BERZERK)){
-		return berzerkIndividualAction(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return berzerkIndividualAction(enemy, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	//Restore Mana
@@ -1980,7 +2052,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 				return 0;
 			}
 
-			int toReturn = moveToSelectedLocation(enemy, thisField, thisMoveNodeMeta, tmpCord->x, tmpCord->y);
+			int toReturn = moveToSelectedLocation(enemy, thisField, tmpCord->x, tmpCord->y);
 
 			free(tmpCord);
 			return toReturn;
@@ -1993,7 +2065,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 		}
 
 		if(!atDesiredLocation(enemy)){
-			return returnToDesiredLocation(enemy, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+			return returnToDesiredLocation(enemy, thisGroupContainer, thisField, inActionMode);
 		}
 
 		enemy->remainingActions = 0;
@@ -2013,7 +2085,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 						cwrite("CASE 1\n");
 						return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->targetedIndividual->playerCharacter->x, enemy->targetedIndividual->playerCharacter->y);
 					}else{
-						int moving = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
+						int moving = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField);
 
 						if(moving){
 							return moving;
@@ -2033,7 +2105,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 						cwrite("CASE 2\n");
 						return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
 					}else{
-						int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField, thisMoveNodeMeta);
+						int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField);
 
 						if(moving){
 							return moving;
@@ -2077,7 +2149,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 				return 0;
 			}
 		} else {
-			int isMoving = retreatFromTarget(enemy, thisGroupContainer, thisField, thisMoveNodeMeta);
+			int isMoving = retreatFromTarget(enemy, thisGroupContainer, thisField);
 
 			enemy->remainingActions--;
 			return isMoving;
@@ -2104,7 +2176,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			ability * offensiveAbility = getRandomOffensiveAbility(enemy);
 
 			if(offensiveAbility == NULL && buffAbility == NULL){
-				return attackModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+				return attackModule(enemy, player, thisGroupContainer, thisField);
 			}else if(offensiveAbility != NULL && buffAbility != NULL){
 				if(rand() % 2){
 					offensiveAbility = NULL;
@@ -2120,7 +2192,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 				int abilityRange = offensiveAbility->range->effectAndManaArray[offensiveAbility->range->selectedIndex]->effectMagnitude;
 
 				if(abilityRange < range){//dont remove selected ability - it's now on deck
-					int toReturn = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField, thisMoveNodeMeta);
+					int toReturn = moveCloserToTarget(enemy, enemy->targetedIndividual, thisField);
 
 					if(!toReturn){
 						//cannot reach target and target out of range, get new closer target
@@ -2140,7 +2212,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 				return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
 			}
 		}else{
-			return attackModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(enemy, player, thisGroupContainer, thisField);
 		}
 	}
 
@@ -2149,11 +2221,11 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 		cwrite("Being supportive~~ :3");
 
 		if(enemy->abilities->numAbilities == 0 || hasActiveStatusEffect(enemy, STATUS_SILENCED)){
-			return attackModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(enemy, player, thisGroupContainer, thisField);
 		}
 
 		if(enemy->thisBehavior->isTactical && isGreaterThanPercentage(rand() % 100, 100, 30)){
-			return tacticalModule(enemy, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return tacticalModule(enemy, player, thisGroupContainer, thisField);
 		}
 
 		if(((enemy->mana < (getTotalMana(enemy)/2)) && isGreaterThanPercentage(rand() % 100, 100, 30)) || !canUseAnyAbilities(enemy)){
@@ -2174,7 +2246,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 					cwrite("CASE 5\n");
 					return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField,  enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
 				}else{
-					int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField, thisMoveNodeMeta);
+					int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField);
 
 					if(moving){
 						return moving;
@@ -2211,7 +2283,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			cwrite("CASE 7\n");
 			return useAbilityOnTargetedSpace(enemy, player, thisGroupContainer, thisField,  enemy->allyIndividual->playerCharacter->x, enemy->allyIndividual->playerCharacter->y);
 		}else{
-			int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField, thisMoveNodeMeta);
+			int moving = moveCloserToTarget(enemy, enemy->allyIndividual, thisField);
 
 			if(moving){
 				return moving;
@@ -2227,7 +2299,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 	}
 }
 
-int guardAction(individual * guard, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int guardAction(individual * guard, individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	if(hasActiveStatusEffect(guard, STATUS_SLEEPING)){
 		char logOut[128];
 		sprintf(logOut, "%s is sleeping!", guard->name);
@@ -2236,11 +2308,11 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 	}
 
 	if(hasActiveStatusEffect(guard, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
-		return confusedIndividualAction(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return confusedIndividualAction(guard, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	if(hasActiveStatusEffect(guard, STATUS_BERZERK)){
-		return berzerkIndividualAction(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return berzerkIndividualAction(guard, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	//Restore Mana
@@ -2278,7 +2350,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 
 			}else{
-				return moveCloserToTarget(guard, player, thisField, thisMoveNodeMeta);
+				return moveCloserToTarget(guard, player, thisField);
 			}
 		}
 
@@ -2297,7 +2369,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 				return 0;
 			}
 
-			int toReturn = moveToSelectedLocation(guard, thisField, thisMoveNodeMeta, tmpCord->x, tmpCord->y);
+			int toReturn = moveToSelectedLocation(guard, thisField, tmpCord->x, tmpCord->y);
 
 			free(tmpCord);
 			return toReturn;
@@ -2310,7 +2382,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 		}
 
 		if(!atDesiredLocation(guard)){
-			return returnToDesiredLocation(guard, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+			return returnToDesiredLocation(guard, thisGroupContainer, thisField, inActionMode);
 		}
 
 		guard->remainingActions = 0;
@@ -2330,7 +2402,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 						cwrite("CASE 1\n");
 						return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->targetedIndividual->playerCharacter->x, guard->targetedIndividual->playerCharacter->y);
 					}else{
-						int moving = moveCloserToTarget(guard, guard->targetedIndividual, thisField, thisMoveNodeMeta);
+						int moving = moveCloserToTarget(guard, guard->targetedIndividual, thisField);
 
 						if(moving){
 							return moving;
@@ -2350,7 +2422,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 						cwrite("CASE 2\n");
 						return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->allyIndividual->playerCharacter->x, guard->allyIndividual->playerCharacter->y);
 					}else{
-						int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField, thisMoveNodeMeta);
+						int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField);
 
 						if(moving){
 							return moving;
@@ -2394,7 +2466,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 				return 0;
 			}
 		} else {
-			int isMoving = retreatFromTarget(guard, thisGroupContainer, thisField, thisMoveNodeMeta);
+			int isMoving = retreatFromTarget(guard, thisGroupContainer, thisField);
 
 			guard->remainingActions--;
 			return isMoving;
@@ -2421,7 +2493,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 			ability * offensiveAbility = getRandomOffensiveAbility(guard);
 
 			if(offensiveAbility == NULL && buffAbility == NULL){
-				return attackModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+				return attackModule(guard, player, thisGroupContainer, thisField);
 			}else if(offensiveAbility != NULL && buffAbility != NULL){
 				if(rand() % 2){
 					offensiveAbility = NULL;
@@ -2437,7 +2509,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 				int abilityRange = offensiveAbility->range->effectAndManaArray[offensiveAbility->range->selectedIndex]->effectMagnitude;
 
 				if(abilityRange < range){//dont remove selected ability - it's now on deck
-					int toReturn = moveCloserToTarget(guard, guard->targetedIndividual, thisField, thisMoveNodeMeta);
+					int toReturn = moveCloserToTarget(guard, guard->targetedIndividual, thisField);
 
 					if(!toReturn){
 						//cannot reach target and target out of range, get new closer target
@@ -2457,7 +2529,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 				return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField, guard->playerCharacter->x, guard->playerCharacter->y);
 			}
 		}else{
-			return attackModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(guard, player, thisGroupContainer, thisField);
 		}
 	}
 
@@ -2466,11 +2538,11 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 		cwrite("Being supportive~~ :3");
 
 		if(guard->abilities->numAbilities == 0 || hasActiveStatusEffect(guard, STATUS_SILENCED)){
-			return attackModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(guard, player, thisGroupContainer, thisField);
 		}
 
 		if(guard->thisBehavior->isTactical && isGreaterThanPercentage(rand() % 100, 100, 30)){
-			return tacticalModule(guard, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return tacticalModule(guard, player, thisGroupContainer, thisField);
 		}
 
 		if(((guard->mana < (getTotalMana(guard)/2)) && isGreaterThanPercentage(rand() % 100, 100, 30)) || !canUseAnyAbilities(guard)){
@@ -2491,7 +2563,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 					cwrite("CASE 5\n");
 					return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField,  guard->allyIndividual->playerCharacter->x, guard->allyIndividual->playerCharacter->y);
 				}else{
-					int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField, thisMoveNodeMeta);
+					int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField);
 
 					if(moving){
 						return moving;
@@ -2528,7 +2600,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 			cwrite("CASE 7\n");
 			return useAbilityOnTargetedSpace(guard, player, thisGroupContainer, thisField,  guard->allyIndividual->playerCharacter->x, guard->allyIndividual->playerCharacter->y);
 		}else{
-			int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField, thisMoveNodeMeta);
+			int moving = moveCloserToTarget(guard, guard->allyIndividual, thisField);
 
 			if(moving){
 				return moving;
@@ -2724,11 +2796,6 @@ void findTargetIndividualForAlly(individual * thisAlly, individual * player, gro
 }
 
 void findDangerousIndividualNearBy(individual * friendlyIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int maxDistance){
-	LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
-	LARGE_INTEGER Frequency;
-	QueryPerformanceFrequency(&Frequency);
-	QueryPerformanceCounter(&StartingTime);
-
 	if(friendlyIndividual->targetedIndividual != NULL){
 		if(friendlyIndividual->targetedIndividual->hp <= 0
 				|| isAlly(friendlyIndividual, friendlyIndividual->targetedIndividual)
@@ -2777,7 +2844,7 @@ void findDangerousIndividualNearBy(individual * friendlyIndividual, individual *
 	}
 }
 
-int allyAction(individual * ally, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int allyAction(individual * ally, individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	if(hasActiveStatusEffect(ally, STATUS_SLEEPING)){
 		char logOut[128];
 		sprintf(logOut, "%s is sleeping!", ally->name);
@@ -2786,11 +2853,11 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 	}
 
 	if(hasActiveStatusEffect(ally, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
-		return confusedIndividualAction(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return confusedIndividualAction(ally, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	if(hasActiveStatusEffect(ally, STATUS_BERZERK)){
-		return berzerkIndividualAction(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return berzerkIndividualAction(ally, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	//Restore Mana
@@ -2842,18 +2909,18 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 
 		if(!isNearIndividual(ally, player)){
 			if(inActionMode){
-				return moveCloserToTarget(ally, player, thisField, thisMoveNodeMeta);
+				return moveCloserToTarget(ally, player, thisField);
 			}
 			else{
 				int tmpFaction = ally->faction;
 				ally->faction = -1;
 
-				int moveResult = moveToSelectedLocation(ally, thisField, thisMoveNodeMeta, player->playerCharacter->x, player->playerCharacter->y);
+				int moveResult = moveToSelectedLocation(ally, thisField, player->playerCharacter->x, player->playerCharacter->y);
 
 				ally->faction = tmpFaction;
 
 				if(moveResult){
-					moveNode * targetSpace = (*thisMoveNodeMeta)->rootMoveNode;
+					moveNode * targetSpace = ally->thisMoveNodeMeta->rootMoveNode;
 
 					if(targetSpace != NULL){
 						space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
@@ -2888,7 +2955,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 						cwrite("CASE 1\n");
 						return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField, ally->targetedIndividual->playerCharacter->x, ally->targetedIndividual->playerCharacter->y);
 					}else{
-						int moving = moveCloserToTarget(ally, ally->targetedIndividual, thisField, thisMoveNodeMeta);
+						int moving = moveCloserToTarget(ally, ally->targetedIndividual, thisField);
 
 						if(moving){
 							return moving;
@@ -2908,7 +2975,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 						cwrite("CASE 2\n");
 						return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField, ally->allyIndividual->playerCharacter->x, ally->allyIndividual->playerCharacter->y);
 					}else{
-						int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField, thisMoveNodeMeta);
+						int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField);
 
 						if(moving){
 							return moving;
@@ -2951,7 +3018,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 			ability * offensiveAbility = getRandomOffensiveAbility(ally);
 
 			if(offensiveAbility == NULL && buffAbility == NULL){
-				return attackModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+				return attackModule(ally, player, thisGroupContainer, thisField);
 			}else if(offensiveAbility != NULL && buffAbility != NULL){
 				if(rand() % 2){
 					offensiveAbility = NULL;
@@ -2967,7 +3034,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 				int abilityRange = offensiveAbility->range->effectAndManaArray[offensiveAbility->range->selectedIndex]->effectMagnitude;
 
 				if(abilityRange < range){//dont remove selected ability - it's now on deck
-					int toReturn = moveCloserToTarget(ally, ally->targetedIndividual, thisField, thisMoveNodeMeta);
+					int toReturn = moveCloserToTarget(ally, ally->targetedIndividual, thisField);
 
 					if(!toReturn){
 						//cannot reach target and target out of range, get new closer target
@@ -2987,7 +3054,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 				return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField, ally->playerCharacter->x, ally->playerCharacter->y);
 			}
 		}else{
-			return attackModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(ally, player, thisGroupContainer, thisField);
 		}
 	}
 
@@ -2996,11 +3063,11 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 		cwrite("Being supportive~~ :3");
 
 		if(ally->abilities->numAbilities == 0 || hasActiveStatusEffect(ally, STATUS_SILENCED)){
-			return attackModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return attackModule(ally, player, thisGroupContainer, thisField);
 		}
 
 		if(ally->thisBehavior->isTactical && isGreaterThanPercentage(rand() % 100, 100, 30)){
-			return tacticalModule(ally, player, thisGroupContainer, thisField, thisMoveNodeMeta);
+			return tacticalModule(ally, player, thisGroupContainer, thisField);
 		}
 
 		if(((ally->mana < (getTotalMana(ally)/2)) && isGreaterThanPercentage(rand() % 100, 100, 30)) || !canUseAnyAbilities(ally)){
@@ -3021,7 +3088,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 					cwrite("CASE 5\n");
 					return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField,  ally->allyIndividual->playerCharacter->x, ally->allyIndividual->playerCharacter->y);
 				}else{
-					int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField, thisMoveNodeMeta);
+					int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField);
 
 					if(moving){
 						return moving;
@@ -3058,7 +3125,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 			cwrite("CASE 7\n");
 			return useAbilityOnTargetedSpace(ally, player, thisGroupContainer, thisField,  ally->allyIndividual->playerCharacter->x, ally->allyIndividual->playerCharacter->y);
 		}else{
-			int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField, thisMoveNodeMeta);
+			int moving = moveCloserToTarget(ally, ally->allyIndividual, thisField);
 
 			if(moving){
 				return moving;
@@ -3077,7 +3144,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 	return 0;
 }
 
-int npcAction(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, moveNodeMeta ** thisMoveNodeMeta, int inActionMode){
+int npcAction(individual * npc, individual * player, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
 	if(hasActiveStatusEffect(npc, STATUS_SLEEPING)){
 		char logOut[128];
 		sprintf(logOut, "%s is sleeping!", npc->name);
@@ -3086,11 +3153,11 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 	}
 
 	if(hasActiveStatusEffect(npc, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
-		return confusedIndividualAction(npc, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return confusedIndividualAction(npc, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	if(hasActiveStatusEffect(npc, STATUS_BERZERK)){
-		return berzerkIndividualAction(npc, player, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+		return berzerkIndividualAction(npc, player, thisGroupContainer, thisField, inActionMode);
 	}
 
 	//Restore Mana
@@ -3123,14 +3190,14 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 		free(targetSpace);
 
 		if(!npc->thisBehavior->isSurrounded && !(abs(targetSpace->x - npc->playerCharacter->x) <= 1 && abs(targetSpace->y - npc->playerCharacter->y) <= 1)){
-			int toReturn = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, x, y);
+			int toReturn = moveToSelectedLocation(npc, thisField, x, y);
 
 			return toReturn;
 		}else{
 			//TODO: needs to be more precise: should only attack individual if in range, not to seek them out.
 			if(npc->thisBehavior->isSurrounded || withinXSpacesOfTarget(npc, npc->targetedIndividual, 5)){
 				npc->thisBehavior->isSurrounded = 1;
-				int toReturn = attackModule(npc, player, thisGroupContainer,thisField, thisMoveNodeMeta);
+				int toReturn = attackModule(npc, player, thisGroupContainer,thisField);
 
 				if(npc->targetedIndividual == NULL){
 					npc->thisBehavior->isSurrounded = 0;
@@ -3159,7 +3226,7 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 				return 0;
 			}
 
-			int toReturn = moveToSelectedLocation(npc, thisField, thisMoveNodeMeta, tmpCord->x, tmpCord->y);
+			int toReturn = moveToSelectedLocation(npc, thisField, tmpCord->x, tmpCord->y);
 
 			free(tmpCord);
 			return toReturn;
@@ -3172,7 +3239,7 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 		}
 
 		if(!atDesiredLocation(npc)){
-			return returnToDesiredLocation(npc, thisGroupContainer, thisField, thisMoveNodeMeta, inActionMode);
+			return returnToDesiredLocation(npc, thisGroupContainer, thisField, inActionMode);
 		}
 
 		npc->remainingActions = 0;
@@ -3180,7 +3247,7 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 	}
 }
 
-int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField, moveNodeMeta ** thisMoveNodeMeta){
+int initializeEnemyTurn(individualGroup * enemies, individual * player, field * thisField){
 	if (enemies->numIndividuals == 0) {
 		return 1;
 	}

@@ -128,6 +128,22 @@ typedef struct{
 	int MAX_REPORTED_CRIMES;
 } reportedCrimes;
 
+typedef struct {
+	int x;
+	int y;
+	int hasTraversed;
+	struct moveNode * nextMoveNode;
+} moveNode;
+
+typedef struct{
+	int sum;
+	int pathLength;
+	int useDummyCords;
+	character * shadowCharacter;
+	moveNode * rootMoveNode;
+	cord * dummyCord;
+} moveNodeMeta;
+
 struct individual{
 	character* playerCharacter;
 	char name[32];
@@ -209,6 +225,7 @@ struct individual{
 	activeCrimes * thisActiveCrimes;
 	groupType currentGroupType;
 	groupType defaultGroupType;
+	moveNodeMeta * thisMoveNodeMeta;
 };
 
 struct individual;

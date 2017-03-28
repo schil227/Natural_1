@@ -381,6 +381,8 @@ groupContainer * initGroupContainer(individualGroup * enemies, individualGroup* 
 		thisGroupContainer->guards = guards;
 	}
 
+	thisGroupContainer->movingIndividuals = initGroup();
+
 	thisGroupContainer->groupActionMode = 0;
 	thisGroupContainer->initGroupActionMode = 0;
 	thisGroupContainer->groupMoveMode = 0;

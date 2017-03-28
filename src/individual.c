@@ -99,6 +99,7 @@ individual *initIndividual(){
 	}
 
 	toReturn->desiredLocation = malloc(sizeof(cord));
+	toReturn->thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
 
 	return toReturn;
 }
@@ -202,6 +203,22 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 
 	thisIndividual->desiredLocation->x = x;
 	thisIndividual->desiredLocation->y = y;
+
+	character * shadowCharacter = malloc(sizeof(character));
+	shadowCharacter->thisAnimationContainer = cloneAnimationContainer(thisIndividual->playerCharacter->thisAnimationContainer);
+	shadowCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisIndividual->playerCharacter->secondaryAnimationContainer);
+
+	shadowCharacter->x = thisIndividual->playerCharacter->x;
+	shadowCharacter->y = thisIndividual->playerCharacter->y;
+	shadowCharacter->xOff = 0;
+	shadowCharacter->yOff = 0;
+	shadowCharacter->direction = thisIndividual->playerCharacter->direction;
+
+	thisIndividual->thisMoveNodeMeta->sum = 0;
+	thisIndividual->thisMoveNodeMeta->pathLength = 0;
+	thisIndividual->thisMoveNodeMeta->shadowCharacter = shadowCharacter;
+	thisIndividual->thisMoveNodeMeta->useDummyCords = 0;
+	thisIndividual->thisMoveNodeMeta->dummyCord = malloc(sizeof(cord));
 
 	return 0;
 }

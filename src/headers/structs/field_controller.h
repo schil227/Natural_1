@@ -30,6 +30,7 @@ typedef struct{
 	individualGroup * allies;
 	individualGroup * npcs;
 	individualGroup * guards;
+	individualGroup * movingIndividuals;
 
 	individualGroup * selectedGroup;
 

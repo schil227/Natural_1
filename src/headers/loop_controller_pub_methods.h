@@ -10,10 +10,9 @@
 
 int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode);
 
-int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode,
-		field * thisField, individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int * postMoveMode, shiftData * viewShift);
+int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, field * thisField, individual * thisIndividual,  groupContainer * thisGroupContainer, int * postMoveMode, shiftData * viewShift, int animateMoveSpeed);
 
 void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
-		individual * thisIndividual, moveNodeMeta * thisMoveNodeMeta, int speed,
+		individual * thisIndividual, int speed,
 		int * postMoveMode, shiftData * viewShift, int updateViewShift);
 #endif /* SRC_HEADERS_LOOP_CONTROLLER_PUB_METHODS_H_ */

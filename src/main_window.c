@@ -66,6 +66,8 @@ int inActionMode = 0;
 int actionModeTimer = 0;
 int actionModeTimerTrigger = 5;
 
+int animateMoveSpeed = 5;
+
 individual* player;
 
 static groupContainer * thisGroupContainer;
@@ -73,7 +75,6 @@ static groupContainer * thisGroupContainer;
 individualGroup* enemies;
 individualGroup* npcs;
 field* main_field;
-moveNodeMeta * thisMoveNodeMeta;
 
 shiftData * viewShift;
 
@@ -326,8 +327,8 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 
 	if (moveMode){
-		moveNode * tmp = thisMoveNodeMeta->rootMoveNode;
-		character * tmpCharacter = (thisMoveNodeMeta->shadowCharacter);
+		moveNode * tmp = player->thisMoveNodeMeta->rootMoveNode;
+		character * tmpCharacter = (player->thisMoveNodeMeta->shadowCharacter);
 
 		while(tmp->nextMoveNode != NULL){
 			tmp = (moveNode*)tmp->nextMoveNode;
@@ -444,7 +445,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		strcpy(thisMessage->message,"I am a message!\0");
 		setCurrentMessage(thisMessage);
 
-		int x, y;
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 
 		ret = SetTimer(hwnd, ID_TIMER, 32, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps, 48 - 15 fps
@@ -457,9 +457,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		viewShift = initShiftData();
 
 		inActionMode = shouldEnableActionMode();
-//		char outLog[12];
-//		sprintf(outLog, "AM start: %d", inActionMode);
-//		cwrite(outLog);
+
+		individual * tmpNPC = thisGroupContainer->npcs->individuals[0];
+		tmpNPC->desiredLocation->x = 5;
+		tmpNPC->desiredLocation->y = 9;
 	}
 		break;
 	case WM_MOUSEMOVE:
@@ -489,7 +490,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		ReleaseDC(hwnd, hdc);
 
 		freeTimer++;
-		if(freeTimer > 30){
+		if(freeTimer > animateMoveSpeed + 30){
 			inActionMode = shouldEnableActionMode();
 			freeTimer = 0;
 
@@ -502,6 +503,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				setNextActiveGroup(thisGroupContainer);
 				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 			}
+		}
+
+		if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
+			handleMoveingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
 		}
 
 	}
@@ -665,15 +670,13 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 					space * tmpSpace = getSpaceFromField(main_field, player->playerCharacter->x + dx, player->playerCharacter->y + dy);
 					if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL) {
-						thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-						thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
-						thisMoveNodeMeta->sum = 0;
-						thisMoveNodeMeta->pathLength = 0;
-						thisMoveNodeMeta->shadowCharacter = NULL; //not needed
+						player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
+						player->thisMoveNodeMeta->sum = 0;
+						player->thisMoveNodeMeta->pathLength = 0;
 
-						thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
-						thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
-						thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
+						player->thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
+						player->thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
+						player->thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
 
 						moveNode * nextNode = malloc(sizeof(moveNode));
 						nextNode->x = player->playerCharacter->x + dx;
@@ -681,7 +684,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						nextNode->nextMoveNode = NULL;
 						nextNode->hasTraversed = 0;
 
-						thisMoveNodeMeta->rootMoveNode->nextMoveNode = nextNode;
+						player->thisMoveNodeMeta->rootMoveNode->nextMoveNode = nextNode;
 
 						removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
 
@@ -750,83 +753,67 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 		return 0;
 	}else if (inCursorMode()) {
-		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode);
+		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode, animateMoveSpeed);
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
-			character * shadowCharacter = malloc(sizeof(character));
-			//createCharacter(player->playerCharacter->imageID,player->playerCharacter->rgb, player->playerCharacter->x, player->playerCharacter->y);
-			shadowCharacter->thisAnimationContainer = cloneAnimationContainer(player->playerCharacter->thisAnimationContainer);
-			shadowCharacter->secondaryAnimationContainer = cloneAnimationContainer(player->playerCharacter->secondaryAnimationContainer);
+			player->thisMoveNodeMeta->sum = 0;
+			player->thisMoveNodeMeta->pathLength = 0;
+			player->thisMoveNodeMeta->shadowCharacter->x = player->playerCharacter->x;
+			player->thisMoveNodeMeta->shadowCharacter->y = player->playerCharacter->y;
 
-			shadowCharacter->x = player->playerCharacter->x;
-			shadowCharacter->y = player->playerCharacter->y;
-			shadowCharacter->xOff = 0;
-			shadowCharacter->yOff = 0;
-			shadowCharacter->direction = player->playerCharacter->direction;
-
-			thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
-//			thisMoveNodeMeta->shadowCharacter = malloc(sizeof(character));
-			thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
-			thisMoveNodeMeta->sum = 0;
-			thisMoveNodeMeta->pathLength = 0;
-			thisMoveNodeMeta->shadowCharacter = shadowCharacter;
-
-			printf("x:%d,y:%d\n",thisMoveNodeMeta->shadowCharacter->x, thisMoveNodeMeta->shadowCharacter->y);
-
-			thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
-			thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
-			thisMoveNodeMeta->rootMoveNode->nextMoveNode = NULL;
-			thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
+			player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
+			player->thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
+			player->thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
+			player->thisMoveNodeMeta->rootMoveNode->nextMoveNode = NULL;
+			player->thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
 
 			viewShift->xShiftOld = viewShift->xShift;
 			viewShift->yShiftOld = viewShift->yShift;
 		}
 
-		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisMoveNodeMeta, &postMoveMode, viewShift);
+		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisGroupContainer, &postMoveMode, viewShift, animateMoveSpeed);
 	} else if(postMoveMode){
 		//player only
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player,thisMoveNodeMeta,5,&postMoveMode, viewShift, 1);
+		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player, animateMoveSpeed,&postMoveMode, viewShift, 1);
 
 		if (!postMoveMode) {
 
-			freeUpMovePath(thisMoveNodeMeta->rootMoveNode->nextMoveNode);
+			freeUpMovePath(player->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
 
 			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
 
-			free(thisMoveNodeMeta->rootMoveNode);
-			destroyCharacter(thisMoveNodeMeta->shadowCharacter);
-			free(thisMoveNodeMeta);
+			free(player->thisMoveNodeMeta->rootMoveNode);
 		}
 
 		return 0;
 	} else if(inInventoryViewMode()){
 		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
 	}else if(thisGroupContainer->groupMoveMode){
-		int speed = 5;
+		int speed = animateMoveSpeed;
 
 		if(!inActionMode){
 			speed = 1;
 		}
 
-		animateMoveLoop(hwnd, msg, wParam, lParam, main_field,
-				(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]),
-				thisMoveNodeMeta, speed, &thisGroupContainer->groupMoveMode, viewShift, 0);
+		individual * tmpIndividual = (thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
+
+		animateMoveLoop(hwnd, msg, wParam, lParam, main_field, tmpIndividual, animateMoveSpeed, &thisGroupContainer->groupMoveMode, viewShift, 0);
 
 		//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
 		if (!thisGroupContainer->groupMoveMode) {
 
-			if (thisMoveNodeMeta != NULL
-					&& thisMoveNodeMeta->rootMoveNode != NULL) {
-				freeUpMovePath(thisMoveNodeMeta->rootMoveNode);
+			if (tmpIndividual->thisMoveNodeMeta != NULL
+					&& tmpIndividual->thisMoveNodeMeta->rootMoveNode != NULL) {
+				freeUpMovePath(tmpIndividual->thisMoveNodeMeta->rootMoveNode);
+				tmpIndividual->thisMoveNodeMeta->rootMoveNode = NULL;
 			}
-			free(thisMoveNodeMeta);
 
 			thisGroupContainer->postGroupActionMode = 1;
 		}
 
 	}else if(thisGroupContainer->groupActionMode){
-		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &thisMoveNodeMeta, &inActionMode, &playerControlMode);
+		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode, &playerControlMode, animateMoveSpeed);
 		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 	}else if(thisGroupContainer->postGroupActionMode){
 		thisGroupContainer->postGroupActionMode = 0;
@@ -886,8 +873,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 	}else if(playerControlMode){
-		return processPlayerControlledLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &thisMoveNodeMeta,
-				&inActionMode, &postMoveMode, &playerControlMode, &postPlayerControlMode);
+		return processPlayerControlledLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field,&inActionMode, &postMoveMode, &playerControlMode, &postPlayerControlMode);
 	}else if(postPlayerControlMode){
 		postPlayerControlMode = 0;
 
