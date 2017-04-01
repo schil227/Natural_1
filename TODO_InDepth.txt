@@ -9,12 +9,6 @@
 	-active status/abilities are checked on second mark
 	
 	
-problem: player cant move when others are moving; therefore, the action system needs to stay
-e.g.: there are 30 individuals all moving around sequentially, takes 1 second for them all to move
- -> must be done sequentially because individuals could exist on the same space
- -> must only move one space because multiple could exist on same space
-	--> Idea: let them move instantaneously, no root to next node wait, (would still eat commands)
-
 
 	
 == Things to test ==

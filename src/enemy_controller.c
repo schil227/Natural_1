@@ -422,6 +422,51 @@ void populateMoveNodeMeta(moveNodeMeta * thisMoveNodeMeta, nodeArr * thisNodeArr
 	}
 }
 
+void animateMove(RECT rect, individual * thisIndividual, field * thisField, shiftData * viewShift, int * postMoveMode, int speed, int updateViewShift){
+	thisIndividual->thisMoveNodeMeta->sum++;
+
+	if(thisIndividual->thisMoveNodeMeta->sum >= speed){
+		thisIndividual->playerCharacter->xOff = 0;
+		thisIndividual->playerCharacter->yOff = 0;
+		thisIndividual->thisMoveNodeMeta->sum = 0;
+
+		moveNode ** tmpMoveNode = &(thisIndividual->thisMoveNodeMeta->rootMoveNode);
+
+		while((*tmpMoveNode)->hasTraversed){
+			moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
+			tmpMoveNode = &nextTmpMoveNode;
+		}
+
+		(*tmpMoveNode)->hasTraversed = 1;
+
+		thisIndividual->playerCharacter->x = (*tmpMoveNode)->x;
+		thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
+
+		if(updateViewShift){
+			tryUpdateXShift(viewShift, (*tmpMoveNode)->x, getGameFieldAreaX(&rect));
+			tryUpdateYShift(viewShift, (*tmpMoveNode)->y, getGameFieldAreaY(&rect));
+		}
+
+		if((*tmpMoveNode)->nextMoveNode == NULL){
+			setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
+			*postMoveMode = 0;
+		}
+	} else {
+		moveNode ** tmpMoveNode = &(thisIndividual->thisMoveNodeMeta->rootMoveNode);
+
+		while((*tmpMoveNode)->hasTraversed){
+			moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
+			tmpMoveNode = &nextTmpMoveNode;
+		}
+
+		int xChange = (*tmpMoveNode)->x - thisIndividual->playerCharacter->x;
+		int yChange = (*tmpMoveNode)->y - thisIndividual->playerCharacter->y;
+
+		thisIndividual->playerCharacter->xOff = ((thisIndividual->thisMoveNodeMeta->sum*1.0) / (speed*1.0)) * xChange;
+		thisIndividual->playerCharacter->yOff = ((thisIndividual->thisMoveNodeMeta->sum*1.0) / (speed*1.0)) * yChange;
+	}
+}
+
 void handleMoveingIndividuals(groupContainer * thisGroupContainer, field * thisField, int animateMoveSpeed){
 	int i, individualsPassed = 0;
 

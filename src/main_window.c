@@ -1,12 +1,11 @@
 /*
- * hi.c
- *
  *  Created on: Feb 12, 2015
  *      Author: Adrian
  */
-
+#define _WIN32_WINNT 0x0500
 #include<stdio.h>
 #include<windows.h>
+#include <winbase.h>
 #include<stdlib.h>
 #include<time.h>
 #include "./headers/general.h"
@@ -20,9 +19,6 @@
 #include"./headers/sound_pub_methods.h"
 
 //Debug timing data
-LARGE_INTEGER StartingTime, EndingTime;
-LARGE_INTEGER Frequency;
-
 //
 // 	 	 	//Timer Example:
 //
@@ -51,6 +47,8 @@ static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit
 
 int mainWindowWidth = 640;
 int mainWindowHeight = 820;
+HWND hwnd_global;
+HANDLE gDoneEvent;
 
 LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
 LARGE_INTEGER Frequency;
@@ -374,11 +372,94 @@ void drawAll(HDC hdc, RECT* prc) {
 	DeleteObject(hbmBuffer);
 }
 
+LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
+	HWND hwnd = hwnd_global;
+
+	RECT rect;
+	HDC hdc = GetDC(hwnd);
+	GetClientRect(hwnd, &rect);
+	drawAll(hdc, &rect);
+
+	ReleaseDC(hwnd, hdc);
+
+	if(isSpecialDrawModeEnabled()){
+		incrementSpecialDrawTimerTicks();
+		if(specialDrawDurationMet()){
+			resetSpecialDraw();
+		}
+
+		return 0;
+	}
+
+	if(shouldDrawDialogBox()){
+		shouldSpeakTickTrigger();
+		return 0;
+	}
+
+	if(postMoveMode){
+		animateMove(rect, player, main_field, viewShift, &postMoveMode, animateMoveSpeed, 1);
+		if (!postMoveMode) {
+			freeUpMovePath(player->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
+			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
+			free(player->thisMoveNodeMeta->rootMoveNode);
+		}
+
+		return 0;
+	}
+
+	if(thisGroupContainer->groupMoveMode){
+			int speed = animateMoveSpeed;
+
+			if(!inActionMode){
+				speed = 1;
+			}
+
+			individual * tmpIndividual = (thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
+
+			animateMove(rect, tmpIndividual, main_field, viewShift, &thisGroupContainer->groupMoveMode, animateMoveSpeed, 1);
+
+			//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
+			if (!thisGroupContainer->groupMoveMode) {
+				if (tmpIndividual->thisMoveNodeMeta != NULL
+						&& tmpIndividual->thisMoveNodeMeta->rootMoveNode != NULL) {
+					freeUpMovePath(tmpIndividual->thisMoveNodeMeta->rootMoveNode);
+					tmpIndividual->thisMoveNodeMeta->rootMoveNode = NULL;
+				}
+
+				thisGroupContainer->postGroupActionMode = 1;
+			}
+
+			return 0;
+		}
+
+	freeTimer++;
+	if(freeTimer > animateMoveSpeed + 30){
+		inActionMode = shouldEnableActionMode();
+		freeTimer = 0;
+
+		if(!inActionMode){
+			QueryPerformanceFrequency(&Frequency);
+			QueryPerformanceCounter(&StartingTime);
+
+			thisGroupContainer->initGroupActionMode = 1;
+			thisGroupContainer->groupActionMode = 1;
+			setNextActiveGroup(thisGroupContainer);
+//			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+		}
+	}
+
+	if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
+		handleMoveingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
+	}
+}
+
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 	case WM_CREATE: {
 		BITMAP bm;
 		UINT ret;
+		HANDLE hTimer = NULL;
+		HANDLE hTimerQueue = NULL;
 
 		player = initIndividual();
 		enemies = initGroup();
@@ -447,12 +528,32 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 
-		ret = SetTimer(hwnd, ID_TIMER, 32, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps, 48 - 15 fps
+//		ret = SetTimer(hwnd, ID_TIMER, 32, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps, 48 - 15 fps
+//
+//		if (ret == 0) {
+//			MessageBox(hwnd, "Could not SetTimer()!", "Error",
+//			MB_OK | MB_ICONEXCLAMATION);
+//		}
 
-		if (ret == 0) {
-			MessageBox(hwnd, "Could not SetTimer()!", "Error",
-			MB_OK | MB_ICONEXCLAMATION);
-		}
+	    gDoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	    if (NULL == gDoneEvent)
+	    {
+	        printf("CreateEvent failed (%d)\n", GetLastError());
+	        exit(0);
+	    }
+
+	    hTimerQueue = CreateTimerQueue();
+	    if (NULL == hTimerQueue)
+	    {
+	        printf("CreateTimerQueue failed (%d)\n", GetLastError());
+	        exit(0);
+	    }
+
+	    if (!CreateTimerQueueTimer( &hTimer, hTimerQueue, TimerProc, 123 , 32, 32, 0))
+	    {
+	        printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
+	        return 3;
+	    }
 
 		viewShift = initShiftData();
 
@@ -553,9 +654,17 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x46: //f key
 			{
-//				sendMusicInterrupt(1);
-//				triggerSoundEffect(9);
-				cwrite("BREAKPOINT LINE");
+				if(thisGroupContainer->npcs->numIndividuals > 0){
+					individual * tmpNPC = thisGroupContainer->npcs->individuals[0];
+					if(tmpNPC->desiredLocation->y == 3 && tmpNPC->desiredLocation->x == 6){
+						tmpNPC->desiredLocation->x = 5;
+						tmpNPC->desiredLocation->y = 9;
+
+					}else{
+						tmpNPC->desiredLocation->x = 6;
+						tmpNPC->desiredLocation->y = 3;
+					}
+				}
 			}
 			break;
 		case 0x47://g key (get)
@@ -823,6 +932,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
 				thisGroupContainer->groupActionMode = 1;
 				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+
+				//dont lose the timer animation
+				if(msg == WM_TIMER){
+					return mainLoop(hwnd, msg, wParam, lParam);
+				}
 				return 1;
 			} else {
 				endTurn(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
@@ -872,6 +986,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 
+		//dont lose the timer animation
+		if(msg == WM_TIMER){
+			return mainLoop(hwnd, msg, wParam, lParam);
+		}
+
 	}else if(playerControlMode){
 		return processPlayerControlledLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field,&inActionMode, &postMoveMode, &playerControlMode, &postPlayerControlMode);
 	}else if(postPlayerControlMode){
@@ -891,6 +1010,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		}
 
+		//dont lose the timer animation
+		if(msg == WM_TIMER){
+			return mainLoop(hwnd, msg, wParam, lParam);
+		}
 	}else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}
@@ -1018,12 +1141,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 //	create the window (handle)
-	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
+	hwnd_global = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
 	WS_OVERLAPPEDWINDOW,
 	CW_USEDEFAULT,
 	CW_USEDEFAULT, mainWindowWidth, mainWindowHeight,
 	NULL, NULL, hInstance,
 	NULL);
+
+	hwnd = hwnd_global;
 
 	if (hwnd == NULL) {
 		MessageBox(NULL, "Window Creation Failed!", "Error!",
