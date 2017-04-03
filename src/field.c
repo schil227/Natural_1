@@ -863,7 +863,7 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift)
 
 			character * tmpBackground = this_field->grid[x][y]->background;
 			updateAnimation(tmpBackground);
-//
+
 			if(tmpBackground->direction != 0){
 				drawRotatedBackground(hdc, hdcBuffer, tmpBackground, viewShift);
 			}else{

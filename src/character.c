@@ -374,6 +374,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 			shitfX,
 			0,
 			SRCPAINT);
+
 	DeleteDC(hdcMem);
 }
 
@@ -523,13 +524,34 @@ void drawRotatedBackgroundByPixel(HDC hdc, HDC hdcBuffer, character * thisCharac
 
 	SelectObject(hdcMem, image);
 
+	LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
+	LARGE_INTEGER Frequency;
+	///// START PERF TIMER /////
+	QueryPerformanceFrequency(&Frequency);
+	QueryPerformanceCounter(&StartingTime);
+	////////////////////////////
+
 	BitBlt(hdcBuffer,xCord, yCord,
 			100, 100,
 			hdcMem,
 			shitfX,
 			0,
-			SRCPAINT);
+			SRCPAINT);//SRCPAINT
 	DeleteDC(hdcMem);
+
+
+	///// END PERF TIMER /////
+	QueryPerformanceCounter(&EndingTime);
+	ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+
+	ElapsedMicroseconds.QuadPart *= 1000000;
+	ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+
+//	printf("draw timing: %llu\n",ElapsedMicroseconds.QuadPart);
+	char outLog[256];
+	sprintf(outLog, "End drawall field process: %llu",ElapsedMicroseconds.QuadPart);
+	cwrite(outLog);
+	/////////////////////////
 }
 
 void updateAnimation(character * thisCharacter){

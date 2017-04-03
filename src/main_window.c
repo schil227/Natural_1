@@ -63,6 +63,7 @@ int freeTimer = 0;
 int inActionMode = 0;
 int actionModeTimer = 0;
 int actionModeTimerTrigger = 5;
+int drawLock = 0;
 
 int animateMoveSpeed = 5;
 
@@ -298,7 +299,20 @@ int shouldEnableActionMode(){
 	return 0;
 }
 
+
+
 void drawAll(HDC hdc, RECT* prc) {
+	//TODO: The draw loop is too slow to handle the speed of the TimerProc, largly due to the cost of rotating images.
+	//To prevent stuttering, this issue has to be fix, however this lock prevents the worst of it:
+	//Wait for drawLock to be released
+	if(drawLock)
+	{
+		return;
+	}
+
+	//claim lock
+	drawLock = 1;
+
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
@@ -370,6 +384,9 @@ void drawAll(HDC hdc, RECT* prc) {
 	SelectObject(hdcBuffer, hbmOldBuffer);
 	DeleteDC(hdcBuffer);
 	DeleteObject(hbmBuffer);
+
+	//release lock
+	drawLock = 0;
 }
 
 LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
@@ -386,6 +403,7 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 		incrementSpecialDrawTimerTicks();
 		if(specialDrawDurationMet()){
 			resetSpecialDraw();
+			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		}
 
 		return 0;
@@ -393,6 +411,7 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 
 	if(shouldDrawDialogBox()){
 		shouldSpeakTickTrigger();
+		PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		return 0;
 	}
 
@@ -402,6 +421,7 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 			freeUpMovePath(player->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
 			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
 			free(player->thisMoveNodeMeta->rootMoveNode);
+			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		}
 
 		return 0;
@@ -427,6 +447,7 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 				}
 
 				thisGroupContainer->postGroupActionMode = 1;
+				PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 			}
 
 			return 0;
@@ -438,13 +459,13 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 		freeTimer = 0;
 
 		if(!inActionMode){
-			QueryPerformanceFrequency(&Frequency);
-			QueryPerformanceCounter(&StartingTime);
+//			QueryPerformanceFrequency(&Frequency);
+//			QueryPerformanceCounter(&StartingTime);
 
 			thisGroupContainer->initGroupActionMode = 1;
 			thisGroupContainer->groupActionMode = 1;
 			setNextActiveGroup(thisGroupContainer);
-//			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		}
 	}
 
@@ -568,52 +589,21 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	{
 		break;
 	}
-	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
-	{			   //SPAWN MORE MESSAGES!
-
-		RECT rect;
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hwnd, &ps);
-
-		GetClientRect(hwnd, &rect);
-		drawAll(hdc, &rect);
-
-		EndPaint(hwnd, &ps);
-		ReleaseDC(hwnd, hdc);
-	}
-		break;
-	case WM_TIMER: {
-		RECT rect;
-		HDC hdc = GetDC(hwnd);
-		GetClientRect(hwnd, &rect);
-		drawAll(hdc, &rect);
-
-		ReleaseDC(hwnd, hdc);
-
-		freeTimer++;
-		if(freeTimer > animateMoveSpeed + 30){
-			inActionMode = shouldEnableActionMode();
-			freeTimer = 0;
-
-			if(!inActionMode){
-				QueryPerformanceFrequency(&Frequency);
-				QueryPerformanceCounter(&StartingTime);
-
-				thisGroupContainer->initGroupActionMode = 1;
-				thisGroupContainer->groupActionMode = 1;
-				setNextActiveGroup(thisGroupContainer);
-				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
-			}
-		}
-
-		if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
-			handleMoveingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
-		}
-
-	}
+//	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
+//	{			   //SPAWN MORE MESSAGES!
+//
+//		RECT rect;
+//		PAINTSTRUCT ps;
+//		HDC hdc = BeginPaint(hwnd, &ps);
+//
+//		GetClientRect(hwnd, &rect);
+//		drawAll(hdc, &rect);
+//
+//		EndPaint(hwnd, &ps);
+//		ReleaseDC(hwnd, hdc);
+//	}
 		break;
 	case WM_CLOSE:
-		KillTimer(hwnd,ID_TIMER);
 		DestroyWindow(hwnd);
 		break;
 	case WM_DESTROY:
@@ -774,6 +764,11 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x63:
 			{
 				if(!inActionMode){
+					//already moving?
+					if(postMoveMode){
+						break;
+					}
+
 					int dx = xMoveChange(LOWORD(wParam) % 16);
 					int dy = yMoveChange(LOWORD(wParam) % 16);
 
@@ -839,11 +834,15 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(isSpecialDrawModeEnabled()){
-		return specialDrawLoop(hwnd, msg, wParam, lParam);
+		specialDrawLoop(hwnd, msg, wParam, lParam);
+		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+		return 0;
 	}else if(shouldDrawDialogBox()){
-		return dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
+		dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
+		return 0;
 	}else if(inNameBoxMode()){
-		return nameLoop(hwnd, msg, wParam, lParam, player);
+		nameLoop(hwnd, msg, wParam, lParam, player);
+		return 0;
 	} else if(inAbilityCreateMode()){
 		if(inAbilityWaitForNameMode()){//Name loop finished, check for name
 			toggleAbilityWaitForNameMode();
@@ -855,14 +854,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				cwrite("Ability created!");
 			}
+
+			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+			return 0;
 		}else{
-			return createAbilityLoop(hwnd, msg, wParam, lParam, player);
+			createAbilityLoop(hwnd, msg, wParam, lParam, player);
+			return 0;
 		}
 	}else if(inAbilityViewMode()){
 		abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 		return 0;
 	}else if (inCursorMode()) {
-		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode, animateMoveSpeed);
+		cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode, animateMoveSpeed);
+		return 0;
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
@@ -881,49 +885,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			viewShift->yShiftOld = viewShift->yShift;
 		}
 
-		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisGroupContainer, &postMoveMode, viewShift, animateMoveSpeed);
-	} else if(postMoveMode){
-		//player only
-		animateMoveLoop(hwnd,msg, wParam, lParam,main_field,player, animateMoveSpeed,&postMoveMode, viewShift, 1);
-
-		if (!postMoveMode) {
-
-			freeUpMovePath(player->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
-
-			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
-
-			free(player->thisMoveNodeMeta->rootMoveNode);
-		}
-
+		moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisGroupContainer, &postMoveMode, viewShift, animateMoveSpeed);
 		return 0;
 	} else if(inInventoryViewMode()){
 		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
+		return 0;
 	}else if(thisGroupContainer->groupMoveMode){
-		int speed = animateMoveSpeed;
-
-		if(!inActionMode){
-			speed = 1;
-		}
-
-		individual * tmpIndividual = (thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
-
-		animateMoveLoop(hwnd, msg, wParam, lParam, main_field, tmpIndividual, animateMoveSpeed, &thisGroupContainer->groupMoveMode, viewShift, 0);
-
-		//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
-		if (!thisGroupContainer->groupMoveMode) {
-
-			if (tmpIndividual->thisMoveNodeMeta != NULL
-					&& tmpIndividual->thisMoveNodeMeta->rootMoveNode != NULL) {
-				freeUpMovePath(tmpIndividual->thisMoveNodeMeta->rootMoveNode);
-				tmpIndividual->thisMoveNodeMeta->rootMoveNode = NULL;
-			}
-
-			thisGroupContainer->postGroupActionMode = 1;
-		}
-
+		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+		return 0;
 	}else if(thisGroupContainer->groupActionMode){
 		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode, &playerControlMode, animateMoveSpeed);
 		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+		return 0;
 	}else if(thisGroupContainer->postGroupActionMode){
 		thisGroupContainer->postGroupActionMode = 0;
 
@@ -932,12 +905,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
 				thisGroupContainer->groupActionMode = 1;
 				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
-
-				//dont lose the timer animation
-				if(msg == WM_TIMER){
-					return mainLoop(hwnd, msg, wParam, lParam);
-				}
-				return 1;
+				return 0;
 			} else {
 				endTurn(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
 			}
@@ -950,18 +918,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->groupActionMode = 1;
 			thisGroupContainer->initGroupActionMode = 1;
 			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+			return 0;
 		}else{
 			if(!setNextActiveGroup(thisGroupContainer)){
 
-				QueryPerformanceCounter(&EndingTime);
-				ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
-
-				ElapsedMicroseconds.QuadPart *= 1000000;
-				ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-
-				char outLog[256];
-				sprintf(outLog, "End group process: %llu",ElapsedMicroseconds.QuadPart);
-				cwrite(outLog);
+//				QueryPerformanceCounter(&EndingTime);
+//				ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+//
+//				ElapsedMicroseconds.QuadPart *= 1000000;
+//				ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+//
+//				char outLog[256];
+//				sprintf(outLog, "End group process: %llu",ElapsedMicroseconds.QuadPart);
+//				cwrite(outLog);
 
 				if(startTurn(player)){
 
@@ -976,23 +945,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					thisGroupContainer->initGroupActionMode = 1;
 					setNextActiveGroup(thisGroupContainer);
 					PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+					return 0;
 				}else if(hasActiveStatusEffect(player, STATUS_BERZERK) || hasActiveStatusEffect(player, STATUS_SLEEPING)){
 					playerControlMode = 1;
+					PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+					return 0;
 				}
 			}else{
 				thisGroupContainer->groupActionMode = 1;
 				thisGroupContainer->initGroupActionMode = 1;
 				PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+				return 0;
 			}
 		}
-
-		//dont lose the timer animation
-		if(msg == WM_TIMER){
-			return mainLoop(hwnd, msg, wParam, lParam);
-		}
-
 	}else if(playerControlMode){
-		return processPlayerControlledLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field,&inActionMode, &postMoveMode, &playerControlMode, &postPlayerControlMode);
+		processPlayerControlledLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field,&inActionMode, &postMoveMode, &playerControlMode, &postPlayerControlMode);
+		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+		return 0;
 	}else if(postPlayerControlMode){
 		postPlayerControlMode = 0;
 
@@ -1007,13 +976,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			thisGroupContainer->groupActionMode = 1;
 			thisGroupContainer->initGroupActionMode = 1;
 			setNextActiveGroup(thisGroupContainer);
-			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		}
 
-		//dont lose the timer animation
-		if(msg == WM_TIMER){
-			return mainLoop(hwnd, msg, wParam, lParam);
-		}
+		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
+		return 0;
 	}else {
 		return mainLoop(hwnd, msg, wParam, lParam);
 	}

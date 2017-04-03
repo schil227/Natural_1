@@ -183,19 +183,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		}
 			break;
 		}
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
-
-			if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
-				handleMoveingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
-			}
-		}
 		break;
+		}
 		case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -206,25 +195,11 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
-	}
 	return 0;
 }
 
 int specialDrawLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch(msg){
-	case WM_TIMER:
-	{
-		RECT rect;
-		HDC hdc = GetDC(hwnd);
-		GetClientRect(hwnd, &rect);
-		drawAll(hdc, &rect);
-		ReleaseDC(hwnd, hdc);
-		incrementSpecialDrawTimerTicks();
-		if(specialDrawDurationMet()){
-			resetSpecialDraw();
-		}
-	}
-		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -274,15 +249,8 @@ int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * pla
 				break;
 			}
 		}
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
+		break;
 		}
-			break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
@@ -291,7 +259,6 @@ int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * pla
 			break;
 		default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
 	}
 	return 0;
 }
@@ -335,15 +302,8 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 				break;
 			}
 		}
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
+		break;
 		}
-			break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
@@ -353,10 +313,8 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 		default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
-	}
 	return 0;
 }
-
 
 int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, field * thisField){
 	switch(msg){
@@ -398,15 +356,8 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 				break;
 			}
 		}
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
+		break;
 		}
-			break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
@@ -415,7 +366,6 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 			break;
 		default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
 	}
 	return 0;
 }
@@ -455,18 +405,9 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 				nextDialogDecision();
 				break;
 			}
-
 		}
-		case WM_TIMER:
-		{
-			shouldSpeakTickTrigger();
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
+		break;
 		}
-			break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
@@ -475,7 +416,6 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 			break;
 		default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
 	}
 	return 0;
 }
@@ -597,17 +537,8 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 			}
 			break;
 		}
-
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-
-			ReleaseDC(hwnd, hdc);
-		}
 		break;
+		}
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
@@ -617,7 +548,6 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 			break;
 		default:
 			return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
 	}
 	return 0;
 }
@@ -716,19 +646,8 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 		}
 			break;
 		}
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
-
-			if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
-				handleMoveingIndividuals(thisGroupContainer, thisField, animateMoveSpeed);
-			}
-		}
 		break;
+		}
 		case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -739,22 +658,12 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 		default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
-	}
 	return 0;
 }
 
 void processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode, int * postMoveMode, int * playerControlMode, int * postPlayerControlMode){
 	switch (msg) {
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
-		}
-		break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
@@ -774,15 +683,6 @@ void processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode, int * playerControlMode, int animateMoveSpeed){
 	switch (msg) {
-		case WM_TIMER:
-		{
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
-		}
-		break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
@@ -859,68 +759,6 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				tmpIndividual->playerCharacter->xOff = (((animateMoveSpeed*1.0) - (tmpIndividual->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * xChange;
 				tmpIndividual->playerCharacter->yOff = (((animateMoveSpeed*1.0) - (tmpIndividual->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * yChange;
 			}
-		}
-	}
-}
-
-void animateMoveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * thisField,
-		individual * thisIndividual, int speed,
-		int * postMoveMode, shiftData * viewShift, int updateViewShift){
-	switch (msg) {
-
-		case WM_TIMER: {
-			RECT rect;
-			HDC hdc = GetDC(hwnd);
-			GetClientRect(hwnd, &rect);
-			drawAll(hdc, &rect);
-			ReleaseDC(hwnd, hdc);
-
-			thisIndividual->thisMoveNodeMeta->sum++;
-
-			if(thisIndividual->thisMoveNodeMeta->sum >= speed){
-				thisIndividual->playerCharacter->xOff = 0;
-				thisIndividual->playerCharacter->yOff = 0;
-				thisIndividual->thisMoveNodeMeta->sum = 0;
-
-				moveNode ** tmpMoveNode = &(thisIndividual->thisMoveNodeMeta->rootMoveNode);
-
-				while((*tmpMoveNode)->hasTraversed){
-					moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
-					tmpMoveNode = &nextTmpMoveNode;
-				}
-
-				(*tmpMoveNode)->hasTraversed = 1;
-
-				thisIndividual->playerCharacter->x = (*tmpMoveNode)->x;
-				thisIndividual->playerCharacter->y = (*tmpMoveNode)->y;
-
-				if(updateViewShift){
-					tryUpdateXShift(viewShift, (*tmpMoveNode)->x, getGameFieldAreaX(&rect));
-					tryUpdateYShift(viewShift, (*tmpMoveNode)->y, getGameFieldAreaY(&rect));
-				}
-
-				if((*tmpMoveNode)->nextMoveNode == NULL){
-					setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
-					*postMoveMode = 0;
-				}
-			} else {
-				moveNode ** tmpMoveNode = &(thisIndividual->thisMoveNodeMeta->rootMoveNode);
-
-				while((*tmpMoveNode)->hasTraversed){
-					moveNode * nextTmpMoveNode = (moveNode *) (*tmpMoveNode)->nextMoveNode;
-					tmpMoveNode = &nextTmpMoveNode;
-				}
-
-				int xChange = (*tmpMoveNode)->x - thisIndividual->playerCharacter->x;
-				int yChange = (*tmpMoveNode)->y - thisIndividual->playerCharacter->y;
-
-				thisIndividual->playerCharacter->xOff = ((thisIndividual->thisMoveNodeMeta->sum*1.0) / (speed*1.0)) * xChange;
-				thisIndividual->playerCharacter->yOff = ((thisIndividual->thisMoveNodeMeta->sum*1.0) / (speed*1.0)) * yChange;
-			}
-		}
-		break;
-		default: {
-
 		}
 	}
 }
