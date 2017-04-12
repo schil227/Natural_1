@@ -767,7 +767,8 @@ field* initField(char* fieldFileName){
 	while(fgets(line,80,fp) != NULL){
 		init_x = 0;
 		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
-			char currentChar = line[xIndex];
+			char spaceType = line[xIndex];
+			char direction = line[xIndex+1];
 
 			space* newSpace = malloc(sizeof(space));
 			newSpace->currentIndividual = NULL;//malloc(sizeof(individual));
@@ -782,26 +783,22 @@ field* initField(char* fieldFileName){
 			backgroundCharacter->thisAnimationContainer->animationsEnabled = 1;
 			backgroundCharacter->thisAnimationContainer->defaultAnimation = 0;
 
-			animation * backgroundAnimation = generateBackground(currentChar);
-
-			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, backgroundAnimation);
-
-			if(currentChar == 'c'
-				|| currentChar == '-'
-				|| currentChar == '='
-				|| currentChar == 'r'
-				|| currentChar == 'u'
-				|| currentChar == 'o'
-				|| currentChar == 's'
-				|| currentChar == 'x'
-				|| currentChar == 'w'
-				|| currentChar == 't'){
+			if(spaceType == 'c'
+				|| spaceType == '-'
+				|| spaceType == '='
+				|| spaceType == 'r'
+				|| spaceType == 'u'
+				|| spaceType == 'o'
+				|| spaceType == 's'
+				|| spaceType == 'x'
+				|| spaceType == 'w'
+				|| spaceType == 't'){
 				newSpace->isPassable = 0;
 			}else{
 				newSpace->isPassable = 1;
 			}
 
-			if(currentChar == 't' || currentChar == 's' ||  currentChar == 'x'){
+			if(spaceType == 't' || spaceType == 's' ||  spaceType == 'x'){
 				newSpace->canSeeThrough = 0;
 				newSpace->canAttackThrough = 0;
 			}else{
@@ -809,16 +806,22 @@ field* initField(char* fieldFileName){
 				newSpace->canAttackThrough = 1;
 			}
 
-			currentChar = line[xIndex+1];
-			if (currentChar == '>') {
+			if (direction == '>') {
 				backgroundCharacter->direction = 3;
-			}else if (currentChar == 'v'){
+			}else if (direction == 'v'){
 				backgroundCharacter->direction = 2;
-			}else if (currentChar == '<'){
+			}else if (direction == '<'){
 				backgroundCharacter->direction = 1;
 			}else{
 				backgroundCharacter->direction = 0;
 			}
+
+			animation * backgroundAnimation = generateBackground(spaceType);
+			if(backgroundCharacter->direction != 0){
+//				rotateAnimationFrames(backgroundAnimation, backgroundCharacter->direction);
+			}
+
+			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, backgroundAnimation);
 
 			newSpace->background = backgroundCharacter;
 			thisField->grid[init_x][init_y] = newSpace;
@@ -864,11 +867,21 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift)
 			character * tmpBackground = this_field->grid[x][y]->background;
 			updateAnimation(tmpBackground);
 
-			if(tmpBackground->direction != 0){
-				drawRotatedBackground(hdc, hdcBuffer, tmpBackground, viewShift);
-			}else{
-				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
+			animation * currentAnimation = tmpBackground->thisAnimationContainer->animations[tmpBackground->thisAnimationContainer->currentAnimation];
+			if(tmpBackground->direction == 3){
+				rotateAnimationFrames(hdc, hdcBuffer, currentAnimation, 3);
+				tmpBackground->direction = 6;
 			}
+
+//			if(tmpBackground->direction == 6){
+				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
+//			}
+
+//			if(tmpBackground->direction != 0){
+//				drawRotatedBackground(hdc, hdcBuffer, tmpBackground, viewShift);
+//			}else{
+//				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
+//			}
 		}
 	}
 
@@ -890,6 +903,50 @@ void drawItemsFromField(HDC hdc, HDC hdcBuffer, fieldInventory * thisFieldInvent
 		}
 
 	}
+}
+
+void rotateAndDrawImage(HDC hdc, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){
+	animation * currentAnimation = backgroundCharacter->thisAnimationContainer->animations[backgroundCharacter->thisAnimationContainer->currentAnimation];
+	BITMAPINFO bitMapInfo = {0};
+	bitMapInfo.bmiHeader.biSize = sizeof(bitMapInfo.bmiHeader);
+
+	HBITMAP thisImage = LoadImage(GetModuleHandle(NULL), currentAnimation->imageID, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION); //GetModuleHandle(NULL)
+
+	//Fill out bitMapInfo
+	if(!GetDIBits(hdcBuffer, thisImage, 0, 0, NULL, &bitMapInfo, DIB_RGB_COLORS)){
+		printf("Couldint get the bitMapInfo.\n");
+	}
+
+	//Create pixel buffer
+	char * lpPixels = malloc(sizeof(char)*(bitMapInfo.bmiHeader.biSizeImage));
+
+//	bitMapInfo.bmiHeader.biBitCount = 32;
+	bitMapInfo.bmiHeader.biCompression = BI_RGB;
+	bitMapInfo.bmiHeader.biHeight = abs(bitMapInfo.bmiHeader.biHeight);
+
+	int result = GetDIBits(hdc, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS);
+
+	if(result == 0){
+		printf("Couldint get the bitmap.\n");
+	}
+
+	SetDIBits(hdc, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS);
+
+//	HBITMAP image = CreateBitmapIndirect(&srcImg);
+//
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	SelectObject(hdcMem, thisImage);
+//
+	BitBlt(hdcBuffer, backgroundCharacter->x*52 + (int)(backgroundCharacter->xOff*52) - (viewShift->xShift)*52 - 25, backgroundCharacter->y*52 + (int)(backgroundCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+				100, 100,
+				hdcMem,
+				0,
+				0,
+				SRCPAINT);
+	DeleteDC(hdcMem);
+
+	//delete buffer
+	free(lpPixels);
 }
 
 void drawRotatedBackground(HDC hdc, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){

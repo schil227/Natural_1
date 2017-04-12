@@ -108,7 +108,7 @@ fixedCharacter * createCharacter(int imageID, COLORREF rgb, int x, int y){
 	thisCharacter->y = y;
 	thisCharacter->rgb = rgb;
 
-	thisCharacter->fixedImage = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
+	thisCharacter->fixedImage = LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);//LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(imageID));
 
 	thisCharacter->fixedImageMask = CreateBitmapMask(thisCharacter->fixedImage, rgb);
 
@@ -202,7 +202,7 @@ animation * createAnimationFromLine(char line[512]){
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	newAnimation->imageID = atoi(value);
 
-	newAnimation->image = LoadBitmap(GetModuleHandle(NULL) , newAnimation->imageID);
+	newAnimation->image = LoadImage(GetModuleHandle(NULL), newAnimation->imageID, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);//LoadBitmap(GetModuleHandle(NULL) , newAnimation->imageID);
 
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	r = atoi(value);
@@ -779,3 +779,136 @@ void loadAnimationFromLine(animationContainer * thisContainer, animationState st
 
 	thisContainer->numAnimations++;
 }
+
+void copyPixel(int iFrom, int jFrom, int iTo, int jTo, int startingPosition, long totalWidth, char * lpPixels){
+	int toIndex = iTo*3 + startingPosition*3 + jTo*totalWidth*3;
+	int fromIndex = iFrom*3 + startingPosition*3 + jFrom*totalWidth*3;
+
+	lpPixels[toIndex] = lpPixels[fromIndex];
+	lpPixels[toIndex + 1] = lpPixels[fromIndex + 1];
+	lpPixels[toIndex + 2] = lpPixels[fromIndex + 2];
+}
+
+void rotateBitmap90Degrees(int startingPosition, int frameWidth, int frameHeight, long totalWidth, char * lpPixels){
+	int i,j,index;
+
+	int i1,j1,i2,j2,i3,j3;
+	char tmpR,tmpG,tmpB;
+
+	int yCenter = (frameHeight / 2);
+	int xCenter = ((frameWidth/ 2) + 0.5f);
+
+	//transformation is incorrect, doing a flip instead of rotation
+	for(j = 0; j < yCenter; j++){
+		for(i = 0; i < xCenter; i++){
+			index = i*3 + startingPosition*3 + j*totalWidth*3;
+
+			// Store tmp pixel
+			tmpB = lpPixels[index];
+			tmpG = lpPixels[index + 1];
+			tmpR = lpPixels[index + 2];
+
+			i1 = -1*(j) + 99;
+			j1 = i;
+
+			i2 = -1*(j1) + 99;
+			j2 = i1;
+
+			i3 = -1*(j2) + 99;
+			j3 = i2;
+
+			//make sure j is being correctly calculated
+			copyPixel(i1, j1, i, j, startingPosition, totalWidth, lpPixels);
+			copyPixel(i2, j2, i1, j1, startingPosition, totalWidth, lpPixels);
+			copyPixel(i3, j3, i2, j2, startingPosition, totalWidth, lpPixels);
+
+			lpPixels[i3*3 + startingPosition*3 + j3*totalWidth*3] = tmpB;
+			lpPixels[i3*3 + startingPosition*3 + j3*totalWidth*3 + 1] = tmpG;
+			lpPixels[i3*3 + startingPosition*3 + j3*totalWidth*3 + 2] = tmpR;
+
+			if(i == 49 && j == 49){
+				printf("asdf");
+				index++;
+			}
+		}
+	}
+}
+
+void rotateAnimationFrames(HDC hdc, HDC hdcBuffer, animation * thisAnimation, int direction){
+	int i;
+//	HDC hdc = GetModuleHandle(hwnd);
+//	HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+	BITMAPINFO bitMapInfo = {0};
+	bitMapInfo.bmiHeader.biSize = sizeof(bitMapInfo.bmiHeader);
+
+	HBITMAP thisImage = LoadImage(GetModuleHandle(NULL), thisAnimation->imageID, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+
+	//Fill out bitMapInfo
+	if(!GetDIBits(hdcBuffer, thisImage, 0, 0, NULL, &bitMapInfo, DIB_RGB_COLORS)){
+		printf("Couldint get the bitMapInfo.\n");
+		return;
+	}
+
+	//Create pixel buffer
+	char * lpPixels = malloc(sizeof(char)*(bitMapInfo.bmiHeader.biSizeImage));
+
+	bitMapInfo.bmiHeader.biCompression = BI_RGB;
+	bitMapInfo.bmiHeader.biHeight = abs(bitMapInfo.bmiHeader.biHeight);
+
+	int result = GetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS);
+
+	if(result == 0){
+		printf("Couldint get the bitmap.\n");
+		free(lpPixels);
+		return;
+	}
+
+	if(direction == 3){
+		for(i = 0; i < thisAnimation->numFrames; i++){
+			rotateBitmap90Degrees(i*thisAnimation->width, thisAnimation->width, thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
+//			int j, k, l;
+//			int width = bitMapInfo.bmiHeader.biWidth;
+
+//			for(j = 0; j < bitMapInfo.bmiHeader.biSizeImage; j+=3){
+//				if(isGreaterThanPercentage(j, bitMapInfo.bmiHeader.biSizeImage, 66)){
+//					lpPixels[j] = 255;
+//					lpPixels[j+1] = 0;
+//					lpPixels[j+2] = 0;
+//				} else if(isGreaterThanPercentage(j, bitMapInfo.bmiHeader.biSizeImage, 33)){
+//					lpPixels[j] = 255;
+//					lpPixels[j+1] = 0;
+//					lpPixels[j+2] = 0;
+//				} else{
+//					lpPixels[j] = 0;
+//					lpPixels[j+1] = 255;
+//					lpPixels[j+2] = 0;
+//				}
+//			}
+
+//			for (k = 0; k < bitMapInfo.bmiHeader.biHeight; k++){
+//				for(j = 0; j < width*3; j+=3){
+//					if(j+(k*width) >= bitMapInfo.bmiHeader.biSizeImage){
+//						printf("limit!");
+//						break;
+//					}
+//
+//					lpPixels[j+(k*width*3)] = ((j+k) % 255);
+//					lpPixels[j+1+(k*width*3)] = ((2*j+k) % 255);
+//					lpPixels[j+2+(k*width*3)] = ((j+2*k) % 255);
+//				}
+//			}
+		}
+	}
+
+	if(!SetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS)){
+		printf("Couldn't set the bitmap.\n");
+		free(lpPixels);
+		return;
+	}
+
+	thisAnimation->image = thisImage;
+	thisAnimation->imageMask = CreateBitmapMask(thisAnimation->image, RGB(255, 0, 255));
+	free(lpPixels);
+}
+

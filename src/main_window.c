@@ -77,6 +77,14 @@ field* main_field;
 
 shiftData * viewShift;
 
+HWND getGlobalHWnd(){
+	if(hwnd_global == NULL){
+		return NULL;
+	}
+
+	return hwnd_global;
+}
+
 BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 	int len = 0;
 	switch (Message) {

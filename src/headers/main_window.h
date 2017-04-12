@@ -22,4 +22,6 @@
 
 #define ID_TIMER 3001
 
+HWND getGlobalHWnd();
+
 #endif
