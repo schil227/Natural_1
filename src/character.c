@@ -789,7 +789,46 @@ void copyPixel(int iFrom, int jFrom, int iTo, int jTo, int startingPosition, lon
 	lpPixels[toIndex + 2] = lpPixels[fromIndex + 2];
 }
 
-void rotateBitmap90Degrees(int startingPosition, int frameWidth, int frameHeight, long totalWidth, char * lpPixels){
+void calcTransformation(int direction, int * iTo, int * jTo, int iFrom, int jFrom){
+	switch(direction){
+	case 1:
+		*iTo = jFrom;
+		*jTo = -1*(iFrom) + 99;
+		break;
+	case 3:
+		*iTo = -1*(jFrom) + 99;
+		*jTo = iFrom;
+		break;
+	}
+}
+
+void flipBitmap180Degrees(int startingPosition, int frameWidth, int frameHeight, long totalWidth, char * lpPixels){
+	int i,j,index,i1,j1;
+	char tmpR,tmpG,tmpB;
+	int yCenter = (frameHeight / 2);
+
+	for(j = 0; j < yCenter; j++){
+		for(i = 0; i < frameWidth; i++){
+			index = i*3 + startingPosition*3 + j*totalWidth*3;
+
+			// Store tmp pixel
+			tmpB = lpPixels[index];
+			tmpG = lpPixels[index + 1];
+			tmpR = lpPixels[index + 2];
+
+			i1 = 99 - i;
+			j1 = 99 - j;
+
+			copyPixel(i1, j1, i, j, startingPosition, totalWidth, lpPixels);
+
+			lpPixels[i1*3 + startingPosition*3 + j1*totalWidth*3] = tmpB;
+			lpPixels[i1*3 + startingPosition*3 + j1*totalWidth*3 + 1] = tmpG;
+			lpPixels[i1*3 + startingPosition*3 + j1*totalWidth*3 + 2] = tmpR;
+		}
+	}
+}
+
+void rotateBitmap90Degrees(int direction, int startingPosition, int frameWidth, int frameHeight, long totalWidth, char * lpPixels){
 	int i,j,index;
 
 	int i1,j1,i2,j2,i3,j3;
@@ -808,14 +847,9 @@ void rotateBitmap90Degrees(int startingPosition, int frameWidth, int frameHeight
 			tmpG = lpPixels[index + 1];
 			tmpR = lpPixels[index + 2];
 
-			i1 = -1*(j) + 99;
-			j1 = i;
-
-			i2 = -1*(j1) + 99;
-			j2 = i1;
-
-			i3 = -1*(j2) + 99;
-			j3 = i2;
+			calcTransformation(direction, &i1, &j1, i, j);
+			calcTransformation(direction, &i2, &j2, i1, j1);
+			calcTransformation(direction, &i3, &j3, i2, j2);
 
 			//make sure j is being correctly calculated
 			copyPixel(i1, j1, i, j, startingPosition, totalWidth, lpPixels);
@@ -825,19 +859,12 @@ void rotateBitmap90Degrees(int startingPosition, int frameWidth, int frameHeight
 			lpPixels[i3*3 + startingPosition*3 + j3*totalWidth*3] = tmpB;
 			lpPixels[i3*3 + startingPosition*3 + j3*totalWidth*3 + 1] = tmpG;
 			lpPixels[i3*3 + startingPosition*3 + j3*totalWidth*3 + 2] = tmpR;
-
-			if(i == 49 && j == 49){
-				printf("asdf");
-				index++;
-			}
 		}
 	}
 }
 
 void rotateAnimationFrames(HDC hdc, HDC hdcBuffer, animation * thisAnimation, int direction){
 	int i;
-//	HDC hdc = GetModuleHandle(hwnd);
-//	HDC hdcBuffer = CreateCompatibleDC(hdc);
 
 	BITMAPINFO bitMapInfo = {0};
 	bitMapInfo.bmiHeader.biSize = sizeof(bitMapInfo.bmiHeader);
@@ -864,40 +891,11 @@ void rotateAnimationFrames(HDC hdc, HDC hdcBuffer, animation * thisAnimation, in
 		return;
 	}
 
-	if(direction == 3){
-		for(i = 0; i < thisAnimation->numFrames; i++){
-			rotateBitmap90Degrees(i*thisAnimation->width, thisAnimation->width, thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
-//			int j, k, l;
-//			int width = bitMapInfo.bmiHeader.biWidth;
-
-//			for(j = 0; j < bitMapInfo.bmiHeader.biSizeImage; j+=3){
-//				if(isGreaterThanPercentage(j, bitMapInfo.bmiHeader.biSizeImage, 66)){
-//					lpPixels[j] = 255;
-//					lpPixels[j+1] = 0;
-//					lpPixels[j+2] = 0;
-//				} else if(isGreaterThanPercentage(j, bitMapInfo.bmiHeader.biSizeImage, 33)){
-//					lpPixels[j] = 255;
-//					lpPixels[j+1] = 0;
-//					lpPixels[j+2] = 0;
-//				} else{
-//					lpPixels[j] = 0;
-//					lpPixels[j+1] = 255;
-//					lpPixels[j+2] = 0;
-//				}
-//			}
-
-//			for (k = 0; k < bitMapInfo.bmiHeader.biHeight; k++){
-//				for(j = 0; j < width*3; j+=3){
-//					if(j+(k*width) >= bitMapInfo.bmiHeader.biSizeImage){
-//						printf("limit!");
-//						break;
-//					}
-//
-//					lpPixels[j+(k*width*3)] = ((j+k) % 255);
-//					lpPixels[j+1+(k*width*3)] = ((2*j+k) % 255);
-//					lpPixels[j+2+(k*width*3)] = ((j+2*k) % 255);
-//				}
-//			}
+	for(i = 0; i < thisAnimation->numFrames; i++){
+		if(direction == 1 || direction == 3){
+			rotateBitmap90Degrees(direction, i*thisAnimation->width, thisAnimation->width, thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
+		} else if(direction == 2){
+			flipBitmap180Degrees(i*thisAnimation->width, thisAnimation->width, thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
 		}
 	}
 

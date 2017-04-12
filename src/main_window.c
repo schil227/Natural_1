@@ -489,6 +489,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		UINT ret;
 		HANDLE hTimer = NULL;
 		HANDLE hTimerQueue = NULL;
+		HDC hdc = GetDC(hwnd);
+		HDC hdcBuffer = CreateCompatibleDC(hdc);
 
 		player = initIndividual();
 		enemies = initGroup();
@@ -556,6 +558,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		setCurrentMessage(thisMessage);
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
+		updateFieldGraphics(hdc, hdcBuffer, main_field);
 
 //		ret = SetTimer(hwnd, ID_TIMER, 32, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps, 48 - 15 fps
 //
@@ -645,7 +648,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				if(attemptToTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory)){
 					RECT rect;
 					GetClientRect(hwnd, &rect);
+					HDC hdc = GetDC(hwnd);
+					HDC hdcBuffer = CreateCompatibleDC(hdc);
 
+					updateFieldGraphics(hdc, hdcBuffer, main_field);
 					transitViewShift(viewShift, player, main_field, &rect);
 				}
 			}

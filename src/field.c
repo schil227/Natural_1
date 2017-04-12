@@ -817,10 +817,6 @@ field* initField(char* fieldFileName){
 			}
 
 			animation * backgroundAnimation = generateBackground(spaceType);
-			if(backgroundCharacter->direction != 0){
-//				rotateAnimationFrames(backgroundAnimation, backgroundCharacter->direction);
-			}
-
 			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, backgroundAnimation);
 
 			newSpace->background = backgroundCharacter;
@@ -856,36 +852,31 @@ field* initField(char* fieldFileName){
 	return thisField;
 }
 
-void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
-
-//	HDC hdcMem = CreateCompatibleDC(hdc);
+void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* this_field){
 	int x, y, i;
 
 	for (y = 0; y < this_field->totalY; y++) {
 		for (x = 0; x < this_field->totalX; x++) {
+			character * tmpBackground = this_field->grid[x][y]->background;
 
+			if(tmpBackground->direction > 0){
+				rotateAnimationFrames(hdc, hdcBuffer, tmpBackground->thisAnimationContainer->animations[tmpBackground->thisAnimationContainer->currentAnimation], tmpBackground->direction);
+			}
+		}
+	}
+}
+
+void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
+	int x, y, i;
+
+	for (y = 0; y < this_field->totalY; y++) {
+		for (x = 0; x < this_field->totalX; x++) {
 			character * tmpBackground = this_field->grid[x][y]->background;
 			updateAnimation(tmpBackground);
 
-			animation * currentAnimation = tmpBackground->thisAnimationContainer->animations[tmpBackground->thisAnimationContainer->currentAnimation];
-			if(tmpBackground->direction == 3){
-				rotateAnimationFrames(hdc, hdcBuffer, currentAnimation, 3);
-				tmpBackground->direction = 6;
-			}
-
-//			if(tmpBackground->direction == 6){
-				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
-//			}
-
-//			if(tmpBackground->direction != 0){
-//				drawRotatedBackground(hdc, hdcBuffer, tmpBackground, viewShift);
-//			}else{
-//				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
-//			}
+			drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
 		}
 	}
-
-//	DeleteDC(hdcMem);
 }
 
 void drawItemsFromField(HDC hdc, HDC hdcBuffer, fieldInventory * thisFieldInventory, shiftData * viewShift){
