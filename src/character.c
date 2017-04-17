@@ -258,31 +258,58 @@ animation * createAnimationFromLine(char line[512]){
 	return newAnimation;
 }
 
-void destroyCharacter(character* thisCharacter){
-//	if(thisCharacter != NULL){
-//		if(thisCharacter->image != NULL){
-//			DeleteObject(thisCharacter->image);
-//		}
-//
-//		if(thisCharacter->imageMask != NULL){
-//			DeleteObject(thisCharacter->imageMask);
-//		}
-//	}
+void destroyAnimation(animation * thisAnimation){
+	if(thisAnimation->image != NULL){
+		DeleteObject(thisAnimation->image);
+	}
 
-//	destroy animations/containers
+	if(thisAnimation->imageMask != NULL){
+		DeleteObject(thisAnimation->imageMask);
+	}
+
+	free(thisAnimation);
+}
+
+void destoryAnimationContainer(animationContainer * thisAnimationContainer, int destoryRotatedImages){
+	int i;
+
+	for(i = 0; i < thisAnimationContainer->numAnimations; i++){
+		if(thisAnimationContainer->animations[i] != NULL){
+			if(destoryRotatedImages){
+				destroyAnimation(thisAnimationContainer->animations[i]);
+			}else{
+				free(thisAnimationContainer->animations[i]);
+			}
+		}
+	}
+
+	free(thisAnimationContainer);
+}
+
+void destroyCharacter(character* thisCharacter){
+	if(thisCharacter != NULL){
+		if(thisCharacter->thisAnimationContainer != NULL){
+			destoryAnimationContainer(thisCharacter->thisAnimationContainer, thisCharacter->direction > 0);
+		}
+
+		if(thisCharacter->secondaryAnimationContainer != NULL){
+			destoryAnimationContainer(thisCharacter->secondaryAnimationContainer, thisCharacter->direction > 0);
+		}
+	}
+
 	free(thisCharacter);
 }
 
 void destroyFixedCharacter(fixedCharacter * thisCharacter){
-//	if(thisCharacter != NULL){
-//		if(thisCharacter->fixedImage != NULL){
-//			DeleteObject(thisCharacter->fixedImage);
-//		}
-//
-//		if(thisCharacter->fixedImageMask != NULL){
-//			DeleteObject(thisCharacter->fixedImageMask);
-//		}
-//	}
+	if(thisCharacter != NULL){
+		if(thisCharacter->fixedImage != NULL){
+			DeleteObject(thisCharacter->fixedImage);
+		}
+
+		if(thisCharacter->fixedImageMask != NULL){
+			DeleteObject(thisCharacter->fixedImageMask);
+		}
+	}
 
 	free(thisCharacter);
 }

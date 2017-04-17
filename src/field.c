@@ -563,9 +563,16 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 destroyField(field * thisField, individual * player){
 	int i,j;
 
+	while(!tryGetFieldInventoryReadLock()){}
+	while(!tryGetFieldInventoryWriteLock()){}
+
 	if(thisField->thisFieldInventory != NULL){
 		free(thisField->thisFieldInventory);
+		thisField->thisFieldInventory = NULL;
 	}
+
+	releaseFieldInventoryWriteLock();
+	releaseFieldInventoryReadLock();
 
 	for(i = 0; i < 100; i++){
 		for(j = 0; j < 100; j++){
@@ -641,7 +648,13 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 
 int addItemToField(field * thisField, item * thisItem){
 	int i;
+
+	while(!tryGetFieldInventoryReadLock()){}
+	while(!tryGetFieldInventoryWriteLock()){}
+
 	if(thisField->thisFieldInventory->inventorySize >= thisField->thisFieldInventory->MAX_ITEMS){
+		releaseFieldInventoryWriteLock();
+		releaseFieldInventoryReadLock();
 		return 0;
 	}
 
@@ -650,9 +663,14 @@ int addItemToField(field * thisField, item * thisItem){
 			thisField->thisFieldInventory->inventoryArr[i] = thisItem;
 			thisField->thisFieldInventory->inventorySize++;
 
+			releaseFieldInventoryWriteLock();
+			releaseFieldInventoryReadLock();
 			return 1;
 		}
 	}
+
+	releaseFieldInventoryWriteLock();
+	releaseFieldInventoryReadLock();
 
 	return 0;
 }
@@ -660,6 +678,9 @@ int addItemToField(field * thisField, item * thisItem){
 void removeItemFromField(field * thisField, item * thisItem){
 	int i;
 	mapInfo * thisMap = getMapInfoFromRegistry(thisField->id);
+
+	while(!tryGetFieldInventoryReadLock()){}
+	while(!tryGetFieldInventoryWriteLock()){}
 
 	for(i = 0; i < thisField->thisFieldInventory->MAX_ITEMS; i++){
 		if(thisField->thisFieldInventory->inventoryArr[i] == thisItem){
@@ -674,6 +695,8 @@ void removeItemFromField(field * thisField, item * thisItem){
 		}
 	}
 
+	releaseFieldInventoryWriteLock();
+	releaseFieldInventoryReadLock();
 }
 
 int attemptGetItemFromField(field * thisField, individual * thisIndividual){
@@ -782,6 +805,7 @@ field* initField(char* fieldFileName){
 			backgroundCharacter->thisAnimationContainer = initAnimationContainer();
 			backgroundCharacter->thisAnimationContainer->animationsEnabled = 1;
 			backgroundCharacter->thisAnimationContainer->defaultAnimation = 0;
+			backgroundCharacter->secondaryAnimationContainer = NULL;
 
 			if(spaceType == 'c'
 				|| spaceType == '-'
@@ -869,6 +893,10 @@ void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* this_field){
 void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
 	int x, y, i;
 
+	printf("WANT: draw\n"); fflush(stdout);
+	while(!tryGetFieldReadLock()){}
+	printf("GOT: draw\n");fflush(stdout);
+
 	for (y = 0; y < this_field->totalY; y++) {
 		for (x = 0; x < this_field->totalX; x++) {
 			character * tmpBackground = this_field->grid[x][y]->background;
@@ -877,23 +905,42 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift)
 			drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
 		}
 	}
+
+	releaseFieldReadLock();
+	printf("RELEASED: draw\n"); fflush(stdout);
 }
 
-void drawItemsFromField(HDC hdc, HDC hdcBuffer, fieldInventory * thisFieldInventory, shiftData * viewShift){
+void drawItemsFromField(HDC hdc, HDC hdcBuffer, field * thisField, shiftData * viewShift){
 	int i, numDrawn = 0;
+
+	printf("WANT: DRAW ITEMS\n");fflush(stdout);
+	while(!tryGetFieldReadLock()){};
+	while(!tryGetFieldInventoryReadLock()){}
+	printf("GOT: DRAW ITEMS\n");fflush(stdout);
+	if(thisField->thisFieldInventory == NULL){
+		releaseFieldInventoryReadLock();
+		releaseFieldReadLock();
+		printf("RELEASED: DRAW ITEMS\n");fflush(stdout);
+		return;
+	}
+
 	for(i = 0; i < 1000; i++){
 
-		if(thisFieldInventory->inventoryArr[i] != NULL){
-			drawCharacterAnimation(hdc, hdcBuffer, thisFieldInventory->inventoryArr[i]->itemCharacter, viewShift);
+		if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
+			drawCharacterAnimation(hdc, hdcBuffer, thisField->thisFieldInventory->inventoryArr[i]->itemCharacter, viewShift);
 			numDrawn++;
 		}
 
 		//all items drawn
-		if(numDrawn == thisFieldInventory->inventorySize){
+		if(numDrawn == thisField->thisFieldInventory->inventorySize){
 			break;
 		}
 
 	}
+
+	releaseFieldInventoryReadLock();
+	releaseFieldReadLock();
+	printf("RELEASED: DRAW ITEMS\n");fflush(stdout);
 }
 
 void rotateAndDrawImage(HDC hdc, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){

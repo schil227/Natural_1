@@ -310,17 +310,6 @@ int shouldEnableActionMode(){
 
 
 void drawAll(HDC hdc, RECT* prc) {
-	//TODO: The draw loop is too slow to handle the speed of the TimerProc, largly due to the cost of rotating images.
-	//To prevent stuttering, this issue has to be fix, however this lock prevents the worst of it:
-	//Wait for drawLock to be released
-	if(drawLock)
-	{
-		return;
-	}
-
-	//claim lock
-	drawLock = 1;
-
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
@@ -330,7 +319,7 @@ void drawAll(HDC hdc, RECT* prc) {
 
 	drawHUDAttackSpaces(hdc, hdcBuffer, prc);
 
-	drawItemsFromField(hdc, hdcBuffer, main_field->thisFieldInventory, viewShift);
+	drawItemsFromField(hdc, hdcBuffer, main_field, viewShift);
 
 	if (player->hp > 0) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
@@ -364,7 +353,9 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawInventoryView(hdc, hdcBuffer, viewShift);
 	}
 
+	while(!tryGetConsoleReadLock()){}
 	drawThisConsole(hdc,hdcBuffer,prc);
+	releaseConsoleReadLock();
 
 	drawThisSideBar(hdc, hdcBuffer, prc, player);
 
@@ -392,18 +383,38 @@ void drawAll(HDC hdc, RECT* prc) {
 	SelectObject(hdcBuffer, hbmOldBuffer);
 	DeleteDC(hdcBuffer);
 	DeleteObject(hbmBuffer);
-
-	//release lock
-	drawLock = 0;
 }
 
 LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
+	//Wait for drawLock to be released
+	if(drawLock)
+	{
+		return 0;
+	}
+
+	//claim lock
+	drawLock = 1;
+
 	HWND hwnd = hwnd_global;
 
 	RECT rect;
 	HDC hdc = GetDC(hwnd);
 	GetClientRect(hwnd, &rect);
+
+//	QueryPerformanceFrequency(&Frequency);
+//	QueryPerformanceCounter(&StartingTime);
+
 	drawAll(hdc, &rect);
+
+//	QueryPerformanceCounter(&EndingTime);
+//	ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+//
+//	ElapsedMicroseconds.QuadPart *= 1000000;
+//	ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+//
+//	char outLog[256];
+//	sprintf(outLog, "draw: %llu",ElapsedMicroseconds.QuadPart);
+//	cwrite(outLog);
 
 	ReleaseDC(hwnd, hdc);
 
@@ -414,12 +425,14 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		}
 
+		drawLock = 0;
 		return 0;
 	}
 
 	if(shouldDrawDialogBox()){
 		shouldSpeakTickTrigger();
 		PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
+		drawLock = 0;
 		return 0;
 	}
 
@@ -432,6 +445,7 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		}
 
+		drawLock = 0;
 		return 0;
 	}
 
@@ -458,15 +472,22 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 				PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 			}
 
+			drawLock = 0;
 			return 0;
 		}
 
 	freeTimer++;
 	if(freeTimer > animateMoveSpeed + 30){
-		inActionMode = shouldEnableActionMode();
 		freeTimer = 0;
 
-		if(!inActionMode){
+		printf("WANT: action\n");fflush(stdout);
+		while(!tryGetFieldReadLock()){}
+		printf("GOT: action\n");fflush(stdout);
+		inActionMode = shouldEnableActionMode();
+
+		releaseFieldReadLock();
+		printf("RELEASED: action\n");fflush(stdout);
+		if(!inActionMode && !thisGroupContainer->groupActionMode){
 //			QueryPerformanceFrequency(&Frequency);
 //			QueryPerformanceCounter(&StartingTime);
 
@@ -480,6 +501,8 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
 		handleMoveingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
 	}
+
+	drawLock = 0;
 }
 
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -496,6 +519,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		enemies = initGroup();
 		npcs = initGroup();
 		thisGroupContainer = initGroupContainer(enemies,npcs, NULL, NULL, NULL);
+		initLockAuth();
 		initalizeTheGlobalRegister();
 
 		initThisConsole(1500,0,0,300,200);
@@ -651,8 +675,16 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					HDC hdc = GetDC(hwnd);
 					HDC hdcBuffer = CreateCompatibleDC(hdc);
 
+					printf("WANT: transit\n");fflush(stdout);
+					while(!tryGetFieldReadLock()){}
+					while(!tryGetFieldWriteLock()){}
+					printf("GOT: transit\n");fflush(stdout);
 					updateFieldGraphics(hdc, hdcBuffer, main_field);
 					transitViewShift(viewShift, player, main_field, &rect);
+
+					releaseFieldWriteLock();
+					releaseFieldReadLock();
+					printf("RELEASED: transit\n");fflush(stdout);
 				}
 			}
 			break;
@@ -1041,6 +1073,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initSpecialDrawInstance();
 	initThisDialogBox(1501,10,10,RGB(255, 70, 255));
 
+	initLockAuth();
 	initalizeTheGlobalRegister();
 	initEventHandlers();
 	initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");

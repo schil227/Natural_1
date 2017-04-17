@@ -510,6 +510,10 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 				if(!inBuyMode() && !inPickPocketMode() && !inFieldGetMode()){
 					item * tmpItem = getSelectedItem();
 
+					if(tmpItem == NULL){
+						break;
+					}
+
 					populateCurrentSpaceInventory(main_field, player);
 
 					if(main_field->currentSpaceInventory->inventorySize >= 10){

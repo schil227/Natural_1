@@ -54,8 +54,8 @@ void initThisDialogBox(int imageID, int x, int y, COLORREF rgb){
 }
 
 void destroyThisDialogBox(){
-	destroyCharacter(thisDialogInstance->dialogWindow);
-	destroyCharacter(thisDialogInstance->selectArrow);
+	destroyFixedCharacter(thisDialogInstance->dialogWindow);
+	destroyFixedCharacter(thisDialogInstance->selectArrow);
 	free(thisDialogInstance);
 
 	thisDialogInstance = NULL;

@@ -170,31 +170,48 @@ void drawHudNotifications(HDC hdc, HDC hdcBuffer, RECT * prc, individual * playe
 }
 
 void enableHUDAttackSpaces(cordArr * arr){
+	while(!tryGetHudReadLock()){}
+	while(!tryGetHudWriteLock()){}
+
 	if(arr != NULL){
 		thisHudInstance->attackSpaces = arr;
 	}
 
 	thisHudInstance->drawAttackSpaces = 1;
+
+	releaseHudWriteLock();
+	releaseHudReadLock();
 }
 
 void disableHUDAttackSpaces(){
 	int i;
 
+	while(!tryGetHudReadLock()){}
+	while(!tryGetHudWriteLock()){}
+
 	thisHudInstance->drawAttackSpaces = 0;
 
 	if(thisHudInstance->attackSpaces == NULL){
+		releaseHudWriteLock();
+		releaseHudReadLock();
 		return;
 	}
 
 	destroyCordArr(thisHudInstance->attackSpaces);
 
 	thisHudInstance->attackSpaces = NULL;
+
+	releaseHudWriteLock();
+	releaseHudReadLock();
 }
 
 void drawHUDAttackSpaces(HDC hdc, HDC hdcBuffer, RECT * prc, shiftData * viewShift){
 	int i;
 
+	while(!tryGetHudReadLock()){}
+
 	if(!thisHudInstance->drawAttackSpaces ||thisHudInstance->attackSpaces == NULL){
+		releaseHudReadLock();
 		return;
 	}
 
@@ -203,4 +220,6 @@ void drawHUDAttackSpaces(HDC hdc, HDC hdcBuffer, RECT * prc, shiftData * viewShi
 			drawOverlappingAnimation(hdc, hdcBuffer, thisHudInstance->attackSpaces->cords[i]->x, thisHudInstance->attackSpaces->cords[i]->y, thisHudInstance->attackSpaceMarker, viewShift, 0);
 		}
 	}
+
+	releaseHudReadLock();
 }

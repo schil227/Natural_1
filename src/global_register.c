@@ -409,7 +409,7 @@ void destroyTheGlobalRegister(){
 	}
 
 	for(i = 0; i < thisGlobalRegister->numAnimations; i++){
-		destroyCharacter(thisGlobalRegister->animationRegistry[i]);
+		destroyAnimation(thisGlobalRegister->animationRegistry[i]);
 	}
 
 	for(i = 0; i < thisGlobalRegister->numMaps; i++){

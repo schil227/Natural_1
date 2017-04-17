@@ -24,10 +24,16 @@ individualGroup * initGroup(){
 
 int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividual){
 	int i;
+	while(!tryGetIndividualGroupReadLock()){}
+	while(!tryGetIndividualGroupWriteLock()){}
+
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		if(thisGroup->individuals[i] == NULL){
 			thisGroup->individuals[i] = thisIndividual;
 			thisGroup->numIndividuals++;
+
+			releaseIndividualGroupWriteLock();
+			releaseIndividualGroupReadLock();
 			return 1;
 		}
 	}
@@ -496,6 +502,7 @@ void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContai
 }
 
 void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shiftData * viewShift){
+	while(!tryGetIndividualGroupReadLock()){}
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->npcs, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->enemies, viewShift);
 	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->guards, viewShift);
@@ -520,8 +527,10 @@ void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shi
 	}
 
 	if(thisGroupContainer->allies->currentIndividualIndex != -1){
-			drawIndividual(hdc, hdcBuffer, thisGroupContainer->allies->individuals[thisGroupContainer->allies->currentIndividualIndex], viewShift);
-		}
+		drawIndividual(hdc, hdcBuffer, thisGroupContainer->allies->individuals[thisGroupContainer->allies->currentIndividualIndex], viewShift);
+	}
+
+	releaseIndividualGroupReadLock();
 }
 
 void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, shiftData * viewShift){
@@ -798,6 +807,9 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 		return NULL;
 	}
 
+	while(!tryGetIndividualGroupReadLock()){}
+	while(!tryGetIndividualGroupWriteLock()){}
+
 	for(index = 0; index < thisGroup->MAX_INDIVIDUALS; index++){
 
 		if(thisGroup->individuals[index] != NULL){
@@ -807,6 +819,10 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 				individual * toReturn = thisGroup->individuals[index];
 				thisGroup->individuals[index] = NULL;
 				thisGroup->numIndividuals--;
+
+				releaseIndividualGroupWriteLock();
+				releaseIndividualGroupReadLock();
+
 				return toReturn;
 			}
 
@@ -815,6 +831,9 @@ individual *  deleteIndividiaulFromGroup(individualGroup * thisGroup, individual
 			}
 		}
 	}
+
+	releaseIndividualGroupWriteLock();
+	releaseIndividualGroupReadLock();
 
 	char logOut[128];
 	sprintf(logOut, "!! COULD NOT FIND INDIVIDUAL TO REMOVE FROM GROUP: %s !!", thisIndividual->name);
@@ -889,7 +908,13 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
+			while(!tryGetConsoleReadLock()){}
+			while(!tryGetConsoleWriteLock()){}
+
 			clearMessages();
+
+			releaseConsoleWriteLock();
+			releaseConsoleReadLock();
 
 			if(reportActiveCrimes(player)){
 				cwrite("Your crimes have been reported by witnesses!");
@@ -899,6 +924,11 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			groupTransitUpdate(thisGroupContainer);
 			removeAlliesFromField(thisGroupContainer->allies, *thisField);
 
+			printf("WANT: destroy\n");fflush(stdout);
+			while(!tryGetFieldReadLock()){}
+			while(!tryGetFieldWriteLock()){}
+			printf("GOT: destroy\n");fflush(stdout);
+
 			destroyField(*thisField, player);
 			clearGroup(thisGroupContainer->enemies);
 			clearGroup(thisGroupContainer->npcs);
@@ -906,6 +936,10 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			clearGroup(thisGroupContainer->guards);
 
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
+
+			releaseFieldWriteLock();
+			releaseFieldReadLock();
+			printf("RELEASED: destroy\n");fflush(stdout);
 
 			if(player->thisReportedCrimes->numReportedCrimes > 0){
 				setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
