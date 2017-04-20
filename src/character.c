@@ -56,6 +56,55 @@ void moveCharacter(character* thisCharacter, int newX, int newY){
 	thisCharacter->x = newX;
 	thisCharacter->y = newY;
 }
+//
+//void fuseImageWithMask(animation * thisAnimation){
+//	HBITMAP fusedImage = NULL;
+//	BITMAP bm;
+//
+//	HDC hdcBuffer = CreateCompatibleDC(NULL);
+//	HDC hdcMem = CreateCompatibleDC(NULL);
+//
+//	HBITMAP hbmMask = CreateBitmapMask(thisAnimation->image, thisAnimation->rgb);
+//	GetObject(thisAnimation->image, sizeof(BITMAP), &bm);
+//
+//	if(!SelectObject(hdcBuffer, thisAnimation->image)){
+//		printf("failed selecting the new hbitmap");
+//	}
+//
+//	fusedImage = CreateCompatibleBitmap(hdcBuffer, bm.bmWidth, bm.bmHeight);//CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);
+//
+//	if(!fusedImage){
+//		printf("failed making the image");
+//	}
+//
+//	if(!SelectObject(hdcBuffer, fusedImage)){
+//		printf("failed selecting the new hbitmap");
+//	}
+//
+//	if(!SelectObject(hdcMem, hbmMask)){
+//		printf("failed selecting the mask");
+//	}
+//
+//	if(!BitBlt(hdcBuffer, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCAND)){ //SRCAND
+//		printf("bullshit.");
+//	}
+//
+//	if(!SelectObject(hdcMem, thisAnimation->image)){
+//		printf("failed selecting the source");
+//	}
+//
+//	if(!BitBlt(hdcBuffer, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCPAINT)){
+//		printf("also bullshit.");
+//	}
+//
+//	SelectObject(hdcMem, NULL);
+//	SelectObject(hdcBuffer, NULL);
+//
+//	thisAnimation->image = fusedImage;
+//
+//	DeleteDC(hdcMem);
+//	DeleteDC(hdcBuffer);
+//}
 
 HBITMAP CreateBitmapMask(HBITMAP hbmColor, COLORREF crTransparent) {
 	HDC hdcMemColor, hdcMemMask;
@@ -350,6 +399,33 @@ void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, fixedCha
 	DeleteDC(hdcMem);
 }
 
+void drawFusedAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+
+	int shitfX;
+
+	HBITMAP selectedImage;
+
+	if(useSecondaryAnimationContainer){
+		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
+		selectedImage = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->image;
+	} else {
+		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
+		selectedImage = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
+	}
+
+	SelectObject(hdcMem, selectedImage);
+
+	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+			100,100,
+			hdcMem,
+			shitfX,
+			0,
+			SRCPAINT);
+
+	DeleteDC(hdcMem);
+}
+
 void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
@@ -368,16 +444,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 	}
 	SelectObject(hdcMem, selectedImageMask);
 //
-//	BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25, thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
-////				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-//			100,100,
-//			hdcMem,
-//			shitfX,
-//			0,
-//			SRCAND);
-
 	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
-//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
 			shitfX,
@@ -386,16 +453,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 
 	SelectObject(hdcMem, selectedImage);
 
-//	BitBlt(hdcBuffer, thisCharacter->x*50 - (viewShift->xShift)*50 - 25, thisCharacter->y*50 - (viewShift->yShift)*50 - 25,
-////				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
-//			100,100,
-//			hdcMem,
-//			shitfX,
-//			100,
-//			SRCPAINT);
-
 	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
-//				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
 			shitfX,

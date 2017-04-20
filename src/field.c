@@ -886,6 +886,10 @@ void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* this_field){
 			if(tmpBackground->direction > 0){
 				rotateAnimationFrames(hdc, hdcBuffer, tmpBackground->thisAnimationContainer->animations[tmpBackground->thisAnimationContainer->currentAnimation], tmpBackground->direction);
 			}
+
+//			for(i = 0; i < tmpBackground->thisAnimationContainer->numAnimations; i++){
+//				fuseImageWithMask(tmpBackground->thisAnimationContainer->animations[i]);
+//			}
 		}
 	}
 }
@@ -903,6 +907,7 @@ void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift)
 			updateAnimation(tmpBackground);
 
 			drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
+//			drawFusedAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
 		}
 	}
 
@@ -914,7 +919,7 @@ void drawItemsFromField(HDC hdc, HDC hdcBuffer, field * thisField, shiftData * v
 	int i, numDrawn = 0;
 
 	printf("WANT: DRAW ITEMS\n");fflush(stdout);
-	while(!tryGetFieldReadLock()){};
+	while(!tryGetFieldReadLock()){}; //order matters, field then inventory
 	while(!tryGetFieldInventoryReadLock()){}
 	printf("GOT: DRAW ITEMS\n");fflush(stdout);
 	if(thisField->thisFieldInventory == NULL){
@@ -985,87 +990,6 @@ void rotateAndDrawImage(HDC hdc, HDC hdcBuffer, character * backgroundCharacter,
 
 	//delete buffer
 	free(lpPixels);
-}
-
-void drawRotatedBackground(HDC hdc, HDC hdcBuffer, character * backgroundCharacter, shiftData * viewShift){
-
-	int direction = backgroundCharacter->direction;
-	float cosine = (float) cos(direction*M_PI/2.0);
-	float sine = (float) sin(direction*M_PI/2.0);
-
-	// Compute dimensions of the resulting bitmap
-	// First get the coordinates of the 3 corners other than origin
-	int x1 = (int) (100 * sine);
-	int y1 = (int) (100 * cosine);
-	int x2 = (int) (100 * cosine + 100 * sine);
-	int y2 = (int) (100 * cosine - 100 * sine);
-	int x3 = (int) (100 * cosine);
-	int y3 = (int) (-100 * sine);
-
-	int minx = min(0, min(x1, min(x2,x3)));
-	int miny = min(0, min(y1, min(y2,y3)));
-	int maxx = max(0, max(x1, max(x2,x3)));
-	int maxy = max(0, max(y1, max(y2,y3)));
-
-	SetGraphicsMode(hdcBuffer, GM_ADVANCED);
-	XFORM xForm;
-	xForm.eM11 = cosine;
-	xForm.eM12 = -sine;
-	xForm.eM21 = sine;
-	xForm.eM22 = cosine;
-	xForm.eDx = (float) -minx;
-	xForm.eDy = (float) -miny;
-
-	if (!SetWorldTransform(hdcBuffer, &xForm)) {
-		printf("setworldtransform failed");
-	}
-
-//	SelectObject(hdcMem, backgroundCharacter->image);
-
-	int xMod = calcXMod(direction, backgroundCharacter, viewShift);
-	int yMod = calcYMod(direction, backgroundCharacter, viewShift);
-
-	drawRotatedBackgroundByPixel(hdc, hdcBuffer, backgroundCharacter, viewShift, xMod, yMod, 0);
-//drawUnboundAnimationByPixels(hdc, hdcBuffer, backgroundCharacter, viewShift, xMod, yMod, 0);
-//	BitBlt(hdcBuffer,
-//			xMod,//*(backgroundCharacter->x - (viewShift->xShift) * 40),
-//			yMod,//*(backgroundCharacter->y - (viewShift->yShift) * 40),
-//			backgroundCharacter->width, backgroundCharacter->height, hdcMem, 0,
-//			0,
-//			SRCCOPY);
-
-	//set world transform back to normal
-	xForm.eM11 = 1;
-	xForm.eM12 = 0;
-	xForm.eM21 = 0;
-	xForm.eM22 = 1;
-	xForm.eDx = 0;
-	xForm.eDy = 0;
-	if (!SetWorldTransform(hdcBuffer, &xForm)) {
-		printf("setworldtransform failed");
-	}
-
-}
-
-int calcXMod(int direction, character * backgroundCharacter, shiftData * viewShift){
-	if(direction == 1){
-		return -1*((backgroundCharacter->y*52 - viewShift->yShift*52) - 25);
-	}else if(direction == 2){
-		return -1*((backgroundCharacter->x*52-viewShift->xShift*52) - 25);
-	}
-	else{
-		return (backgroundCharacter->y*52 -viewShift->yShift*52) - 25;
-	}
-}
-
-int calcYMod(int direction, character * backgroundCharacter, shiftData * viewShift){
-	if(direction == 1){
-		return (backgroundCharacter->x*52-viewShift->xShift*52) - 25;
-	}else if(direction == 2){
-		return -1*((backgroundCharacter->y*52-viewShift->yShift*52) - 25);
-	}else{
-		return -1*((backgroundCharacter->x*52-viewShift->xShift*52) - 25);
-	}
 }
 
 moveNode * nodeAlreadyTraversed(moveNode ** nodes, int x, int y){

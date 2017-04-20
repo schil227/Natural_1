@@ -385,11 +385,20 @@ void drawAll(HDC hdc, RECT* prc) {
 	DeleteObject(hbmBuffer);
 }
 
+int sampleSpacer = 0;
+
 LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	//Wait for drawLock to be released
 	if(drawLock)
 	{
 		return 0;
+	}
+
+	sampleSpacer++;
+
+	if(sampleSpacer == 1){
+		QueryPerformanceFrequency(&Frequency);
+		QueryPerformanceCounter(&StartingTime);
 	}
 
 	//claim lock
@@ -401,20 +410,9 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	HDC hdc = GetDC(hwnd);
 	GetClientRect(hwnd, &rect);
 
-//	QueryPerformanceFrequency(&Frequency);
-//	QueryPerformanceCounter(&StartingTime);
+
 
 	drawAll(hdc, &rect);
-
-//	QueryPerformanceCounter(&EndingTime);
-//	ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
-//
-//	ElapsedMicroseconds.QuadPart *= 1000000;
-//	ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-//
-//	char outLog[256];
-//	sprintf(outLog, "draw: %llu",ElapsedMicroseconds.QuadPart);
-//	cwrite(outLog);
 
 	ReleaseDC(hwnd, hdc);
 
@@ -500,6 +498,23 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 
 	if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
 		handleMoveingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
+	}
+
+
+	if(sampleSpacer == 1){
+		QueryPerformanceCounter(&EndingTime);
+		ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
+
+		ElapsedMicroseconds.QuadPart *= 1000000;
+		ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
+
+		char outLog[256];
+		sprintf(outLog, "draw: %llu",ElapsedMicroseconds.QuadPart);
+		cwrite(outLog);
+	}
+
+	if(sampleSpacer > 10){
+		sampleSpacer = 0;
 	}
 
 	drawLock = 0;

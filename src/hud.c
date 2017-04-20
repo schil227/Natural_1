@@ -97,6 +97,8 @@ void drawHudNotifications(HDC hdc, HDC hdcBuffer, RECT * prc, individual * playe
 	int offset = 0;
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
+	while(!tryGetHudReadLock()){}
+
 	int standardImageHeight = thisHudInstance->actionModeCharacter->fixedHeight;
 	int standardImageWidth = thisHudInstance->actionModeCharacter->fixedWidth;
 	int x = prc->right - 185 - standardImageWidth;
@@ -165,6 +167,8 @@ void drawHudNotifications(HDC hdc, HDC hdcBuffer, RECT * prc, individual * playe
 			offset++;
 		}
 	}
+
+	releaseHudReadLock();
 
 	DeleteDC(hdcMem);
 }

@@ -559,10 +559,18 @@ void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, sh
 
 void clearGroup(individualGroup * thisGroup){
 	int i;
+
+	while(!tryGetIndividualGroupReadLock()){}
+	while(!tryGetIndividualGroupWriteLock()){}
+
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		thisGroup->individuals[i] = NULL;
 	}
+
 	thisGroup->numIndividuals = 0;
+
+	releaseIndividualGroupWriteLock();
+	releaseIndividualGroupReadLock();
 }
 
 void setGroupToField(field * thisField, individualGroup * thisGroup){

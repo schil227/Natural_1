@@ -6,18 +6,19 @@
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (3/30/17) Convert from setTimer to TimerQueueTimer
 - (4/2/17) Add locks to applicable drawing resources
+- (4/17/17) Larger window draws more, bigger slowdown, find optimizations
 
 ==BUGS==
 - (2/18/17) When someone uses a status on someone else, it says that the attacked person uses the status
 - (2/18/17) Sometimes Berzerking/Confused individuals cause the game to crash, may have something to do with being removed from the group prematurely
    
 ==BACK BURNER==
-- (11/12/16) for some reason, there's a lot of slowdown when drawing a rotated image mask, so I had to make a separate function just to draw the image without the mask (which works as intended). Not sure if this is something I'll ever have to fix, but for awareness.
 - (11/12/16) Add more enemies to the field
 - (11/12/16) Add casting animations
 - (1/1/17) Put dialog box/speaker image over console output
 - (2/21/17) Abilities: change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
 - (1/10/17) Fog of War
+- (4/19/17) See if win32 can implement directX
 
 ==FINISHED==
 - (11/12/16 - 10/22/16) Implement Crimes (DONE)
