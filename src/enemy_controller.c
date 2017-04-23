@@ -1494,7 +1494,6 @@ int returnToDesiredLocation(individual * thisIndividual, groupContainer * thisGr
 				thisIndividual->remainingActions = 0;
 				return 1;
 			}
-
 		}
 
 		//put npc back on space they started

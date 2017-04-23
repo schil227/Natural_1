@@ -307,8 +307,6 @@ int shouldEnableActionMode(){
 	return 0;
 }
 
-
-
 void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
@@ -409,8 +407,6 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	RECT rect;
 	HDC hdc = GetDC(hwnd);
 	GetClientRect(hwnd, &rect);
-
-
 
 	drawAll(hdc, &rect);
 
@@ -894,6 +890,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+
+	//Ignore inputs until drawing is finished.
+	if(postMoveMode){
+		return 0;
+	}
+
 	if(isSpecialDrawModeEnabled()){
 		specialDrawLoop(hwnd, msg, wParam, lParam);
 		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);

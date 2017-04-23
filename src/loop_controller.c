@@ -636,9 +636,9 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 				tmpMoveNode = tmpMoveNode->nextMoveNode;
 			}
 
-			individual * tmpIndividual = getIndividualFromField(thisField, tmpMoveNode->x, tmpMoveNode->y);
+			space * tmpSpace = getSpaceFromField(thisField, tmpMoveNode->x, tmpMoveNode->y);
 
-			if(tmpIndividual == NULL || tmpIndividual == thisIndividual){
+			if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL) {
 				*moveMode = 0;
 				if(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
 					*postMoveMode = 1;

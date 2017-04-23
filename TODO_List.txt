@@ -4,8 +4,6 @@
 - (12/22/16) Crime: implement order (lose money/go to jail)
 - (1/27/17) Disallow statuses from stacking (no?)
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
-- (3/30/17) Convert from setTimer to TimerQueueTimer
-- (4/2/17) Add locks to applicable drawing resources
 - (4/17/17) Larger window draws more, bigger slowdown, find optimizations
 
 ==BUGS==
@@ -15,10 +13,10 @@
 ==BACK BURNER==
 - (11/12/16) Add more enemies to the field
 - (11/12/16) Add casting animations
-- (1/1/17) Put dialog box/speaker image over console output
+- (1/1/17) Put dialog box/speaker image next to dialog
 - (2/21/17) Abilities: change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
 - (1/10/17) Fog of War
-- (4/19/17) See if win32 can implement directX
+- (4/19/17) See if I should convert to OpenGL (DirectX not available for C)
 
 ==FINISHED==
 - (11/12/16 - 10/22/16) Implement Crimes (DONE)
@@ -40,3 +38,5 @@
 - (3/16/17 - 3/26/17) drop item functionality (DONE)
 - (3/23/17 - 3/29/17) add simple movement animation (DONE)
 - (4/2/17 - 4/12/17) Make homemade bitmap rotating function (DONE)
+- (3/30/17 - 4/19/17) Convert from setTimer to TimerQueueTimer (DONE)
+- (4/2/17 - 4/19/17) Add locks to applicable drawing resources (DONE)
