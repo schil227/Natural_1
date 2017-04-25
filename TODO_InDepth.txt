@@ -1,16 +1,7 @@
 == TODO In Depth ==
 
--Implementing async FreeMode
-	-HARD PART: performing this asynchronously means that the player cant be blocked by other indiviuals 
-		- need to share moveNodeMeta resources (unless just immediately moving player, need to slow it down however)
-		- need to listen to ALL types of keyinputs on processAction loop
-	-(player) actions dont decrease
-	-other individuals may wander, speak, idle AI, etc. every second (or every few) on check
-	-active status/abilities are checked on second mark
-	
-	
+Drawing the image mask is costly on all those spaces - for field spaces, combine mask and image into one, and only draw that.
 
-	
 == Things to test ==
 getBuffItem (eh)
 

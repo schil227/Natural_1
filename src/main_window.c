@@ -470,6 +470,12 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 			return 0;
 		}
 
+	//prevent AI inturruption
+	if(moveMode){
+		drawLock = 0;
+		return 0;
+	}
+
 	freeTimer++;
 	if(freeTimer > animateMoveSpeed + 30){
 		freeTimer = 0;

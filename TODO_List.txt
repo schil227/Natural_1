@@ -40,3 +40,4 @@
 - (4/2/17 - 4/12/17) Make homemade bitmap rotating function (DONE)
 - (3/30/17 - 4/19/17) Convert from setTimer to TimerQueueTimer (DONE)
 - (4/2/17 - 4/19/17) Add locks to applicable drawing resources (DONE)
+- (4/2/2017 - 4/19/17) when using 's'-move, npcs will move into your space (likely that player is moving into space already claimed by npc) (DONE)
