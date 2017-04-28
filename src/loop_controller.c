@@ -729,7 +729,6 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		if (thisGroupContainer->initGroupActionMode) {
 			thisGroupContainer->initGroupActionMode = 0;
 
-			//note:the address of the pointer to thisMoveNodeMeta is passed in because it is malloc'd inside the method
 			if(initializeEnemyTurn(thisGroupContainer->selectedGroup, player, thisField)){
 				thisGroupContainer->groupActionMode = 0;
 				thisGroupContainer->postGroupActionMode = 1;
@@ -742,6 +741,7 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				return;
 			}
 		}
+
 		thisGroupContainer->groupActionMode = 0;
 
 		individual * tmpIndividual = thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex];
@@ -754,6 +754,11 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				thisGroupContainer->groupMoveMode = 1;
 			}else{
 				addIndividualToGroup(thisGroupContainer->movingIndividuals, tmpIndividual);
+
+				if(tmpIndividual->remainingActions > 0){
+					tmpIndividual->remainingActions = 0;
+				}
+
 				thisGroupContainer->postGroupActionMode = 1;
 
 				// Initialize the x/y offsets

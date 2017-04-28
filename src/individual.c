@@ -225,7 +225,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 
 void destroyIndividual(individual* thisIndividual){
 	int i, itemsPassed;
-	if(thisIndividual->playerCharacter){ //Null check
+	if(thisIndividual->playerCharacter == NULL){
 		destroyCharacter(thisIndividual->playerCharacter);
 	}
 
@@ -711,6 +711,7 @@ int abilityIsHarmful(ability * thisAbility){
 		return statusIsHarmful(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type);
 	}
 
+	return 0;
 }
 
 int statusIsHarmful(char * type){
@@ -823,12 +824,24 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	}
 }
 
-int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility){
+int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAbility, char * casterName){
 	int duration = calcAbilityDuration(thisAbility);
 	char * tmp[64];
 
 	if(thisIndividual->activeAbilities->numAbilities + 1 < thisIndividual->activeAbilities->MAX_ABILITIES){
-		sprintf(tmp, "%s used %s for %d turns.", thisIndividual->name, thisAbility->name, duration);
+		if(strcmp(casterName, thisIndividual->name) == 0){
+			sprintf(tmp, "%s used %s", thisIndividual->name, thisAbility->name);
+		}
+		else{
+			sprintf(tmp, "%s used %s on %s", casterName, thisAbility->name, thisIndividual->name);
+		}
+
+		if(duration > 0){
+			char * durationStr[32];
+			sprintf(durationStr, " for %d turns.", duration);
+			strcat(tmp, durationStr);
+		}
+
 		cwrite(tmp);
 
 		addActiveAbilityToIndividual(thisIndividual, thisAbility, duration);
@@ -839,11 +852,22 @@ int useDurationAbilityOnIndividual(individual * thisIndividual, ability * thisAb
 
 			if(thisEffect != STATUS_NONE){
 				status * newStatus = createStatusFromAbility(thisAbility);
+
+				tmp[0] = '\0';
+
+				if(strcmp(casterName, thisIndividual->name) == 0){
+					sprintf(tmp, "%s used %s for %d turns.", thisIndividual->name, thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type, newStatus->turnsRemaining);
+				}
+				else{
+					sprintf(tmp, "%s used %s on %s for %d turns.", casterName, thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type, thisIndividual->name, newStatus->turnsRemaining);
+				}
+
+				cwrite(tmp);
+
 				addStatusToIndividual(thisIndividual, newStatus);
 				processStatus(thisIndividual,newStatus);
 				newStatus->turnsRemaining--;
 			}
-
 		}
 
 	}else{
@@ -870,28 +894,17 @@ void addStatusToIndividual(individual * thisIndividual, status * newStatus){
 				break;
 			}
 		}
-
 	}
-
 }
 
 status * createStatusFromAbility(ability * thisAbility){
 	int duration = 0, diceDuration = 0;
-
 	status * thisStatus = malloc(sizeof(status));
 
 	thisStatus->effect = lookUpStatusType(thisAbility->status->typeAndManaArray[thisAbility->status->selectedIndex]->type);
-
 	thisStatus->diceDamage =  thisAbility->statusDiceDamage->effectAndManaArray[thisAbility->statusDiceDamage->selectedIndex]->effectMagnitude;
 	thisStatus->damage =  thisAbility->statusDamage->effectAndManaArray[thisAbility->statusDamage->selectedIndex]->effectMagnitude;
-	diceDuration =  thisAbility->diceStatusDuration->effectAndManaArray[thisAbility->diceStatusDuration->selectedIndex]->effectMagnitude;
-	duration =  thisAbility->statusDuration->effectAndManaArray[thisAbility->statusDuration->selectedIndex]->effectMagnitude;
-
-	if(diceDuration > 0){
-		thisStatus->turnsRemaining = (rand() % diceDuration) + 1 + duration;
-	}else{
-		thisStatus->turnsRemaining = duration;
-	}
+	thisStatus->turnsRemaining = calcStatusDuration(thisAbility);
 
 	return thisStatus;
 }

@@ -205,13 +205,17 @@ void initializeArr(node ** nodeArr, int size){
 	}
 }
 
-int spaceIsTaken(node * thisNode, field * thisField){
-	int a = spaceIsAvailable(thisField, thisNode->x, thisNode->y);
-//	printf("a:%d\n",a);
-	if(a == 0){
+int spaceIsFree(node * thisNode, field * thisField){
+	space * tmpSpace = getSpaceFromField(thisField, thisNode->x, thisNode->y);
+
+	if(tmpSpace == NULL){
 		return 0;
-	}else{
+	}
+
+	if(tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved){
 		return 1;
+	}else{
+		return 0;
 	}
 }
 
@@ -238,7 +242,7 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 	i = 0;
 
 	while(activeNodes[i] != NULL){
-		if( !spaceIsTaken(activeNodes[i], thisField)){
+		if(spaceIsFree(activeNodes[i], thisField)){
 			return activeNodes[i];
 		}
 
@@ -247,9 +251,10 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 			int j = 0;
 
 			while(tmpNodes[j] != NULL){
-				if(!spaceIsTaken(tmpNodes[j], thisField)){
+				if(spaceIsFree(tmpNodes[j], thisField)){
 					addNodeToList(tmpNodes[j], newActiveNodes);
 				}
+
 				j++;
 			}
 
@@ -258,7 +263,6 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 
 		i++;
 	}
-
 
 	if(newActiveNodes[0] == NULL){
 		if( endNode->previousNode == NULL){
@@ -361,40 +365,22 @@ nodeArr * getSpaceClosestToPlayer(field * thisField, individual * thisIndividual
 }
 
 //Only used in legacy Testing - goes toward the player, attacks if in range.
-void testEnemyAction( individual * enemy, field * thisField, individual * player){
-	printf("starting: %s\n", enemy->name);
+void testEnemyAction(individual * enemy, field * thisField, individual * player){
 	nodeArr * resultArr = getSpaceClosestToPlayer(thisField, enemy, player);
 	int i;
 	int size = resultArr->size;
-	printf("moving enemy. size: %d\n",size);
+
 	if(size > 0){
-		printf(enemy->name);
-		printf(" starting space:[%d,%d] \n", enemy->playerCharacter->x, enemy->playerCharacter->y);
 		removeIndividualFromField(thisField,enemy->playerCharacter->x, enemy->playerCharacter->y);
 	}
+
 	for(i = 0; i < size; i++){
-
 		if(i+1 == size){
-			printf(enemy->name);
-			printf(" at target space:[%d,%d] \n", resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
-			printf("space is taken:%d\n",spaceIsAvailable(thisField,resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y));
-			if(moveIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y) == 0){
-				printf("Individiual at space!");
-			}else{
-				printf(enemy->name);
-				printf(": %d,%d is at space: %p\n", enemy->playerCharacter->x,enemy->playerCharacter->y, getIndividualAddressFromField(thisField,resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y));
-				printf("space is taken:%d\n",spaceIsAvailable(thisField,resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y));
-			}
-		}else{
-			printf("moving to: [%d,%d]\n",resultArr->nodeArray[i]->x,resultArr->nodeArray[i]->y);
-//			setIndividualTmpSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
+			moveIndividualSpace(thisField,enemy, resultArr->nodeArray[i]->x, resultArr->nodeArray[i]->y);
 		}
-
 	}
 
 	destroyNodeArr(resultArr);
-
-	printf("\n");
 
 	attackIfInRange(enemy, player, thisField);
 }
@@ -448,7 +434,7 @@ void animateMove(RECT rect, individual * thisIndividual, field * thisField, shif
 		}
 
 		if((*tmpMoveNode)->nextMoveNode == NULL){
-			setIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
+			moveIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
 			*postMoveMode = 0;
 		}
 	} else {
@@ -467,7 +453,7 @@ void animateMove(RECT rect, individual * thisIndividual, field * thisField, shif
 	}
 }
 
-void handleMoveingIndividuals(groupContainer * thisGroupContainer, field * thisField, int animateMoveSpeed){
+void handleMovingIndividuals(groupContainer * thisGroupContainer, field * thisField, int animateMoveSpeed){
 	int i, individualsPassed = 0;
 
 	for(i = 0; i < thisGroupContainer->movingIndividuals->MAX_INDIVIDUALS; i++){
@@ -653,7 +639,6 @@ item * getRandomHPRestoringItem(inventory * backpack){
 		return healingItems[randIndex];
 	}
 }
-
 
 ability * getRandomHPRestoringAbility(individual * thisIndividual){
 	int i, numAbilities = 0, randIndex;
@@ -1419,9 +1404,11 @@ int moveToSelectedLocation(individual * thisIndividual, field * thisField, int x
 	}
 
 	//Gonna move, remove them from the field and update the moveNodeMeta
-	getSpaceFromField(thisField, thisIndividual->playerCharacter->x,
-			thisIndividual->playerCharacter->y)->currentIndividual = NULL;
+	removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
 
+	node * endNode = enemyNodeArr->nodeArray[enemyNodeArr->size-1];
+
+	getSpaceFromField(thisField, endNode->x, endNode->y)->spaceIsReserved = 1;
 
 	populateMoveNodeMeta(thisIndividual->thisMoveNodeMeta, enemyNodeArr);
 
@@ -1473,6 +1460,8 @@ int returnToDesiredLocation(individual * thisIndividual, groupContainer * thisGr
 
 	thisIndividual->faction = tmpFaction;
 
+	//few problems: need to change how the moving/faction system works - disable when going the full distance?.
+
 	//Only moving one space, avoid animateMoveLoop and just do it here
 	if(moveResult && !inActionMode){
 		moveNode * targetSpace = thisIndividual->thisMoveNodeMeta->rootMoveNode;
@@ -1480,10 +1469,22 @@ int returnToDesiredLocation(individual * thisIndividual, groupContainer * thisGr
 		if(targetSpace != NULL){
 			space * tmpSpace = getSpaceFromField(thisField, targetSpace->x, targetSpace->y);
 
-			if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
+			//remove space reservation
+			moveNode * tmpNode = thisIndividual->thisMoveNodeMeta->rootMoveNode;
+			while(tmpNode->nextMoveNode != NULL){
+				tmpNode = tmpNode->nextMoveNode;
+			}
+
+			getSpaceFromField(thisField, tmpNode->x, tmpNode->y)->spaceIsReserved = 0;
+
+			if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved){
+				tmpSpace->spaceIsReserved = 1;
 				thisIndividual->thisMoveNodeMeta->useDummyCords = 1;
 				thisIndividual->thisMoveNodeMeta->dummyCord->x = thisIndividual->playerCharacter->x;
 				thisIndividual->thisMoveNodeMeta->dummyCord->y = thisIndividual->playerCharacter->y;
+
+//				removeIndividualFromField(thisField, targetSpace->x, targetSpace->y);
+
 				moveIndividualSpace(thisField, thisIndividual, targetSpace->x, targetSpace->y);
 
 				if(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
@@ -1646,7 +1647,7 @@ individualGroup * getAlliesInRange(individual * thisIndividual, field * thisFiel
 		for(j = startingY; j < startingY + radius*2 + 1; j++){
 			individual * tmpIndiviudal = getIndividualFromField(thisField, i, j);
 
-			if(tmpIndiviudal != NULL && isAlly(thisIndividual, tmpIndiviudal)){
+			if(tmpIndiviudal != NULL && tmpIndiviudal->ID != -1 && isAlly(thisIndividual, tmpIndiviudal)){
 				addIndividualToGroup(alliesInRange, tmpIndiviudal);
 			}
 		}
@@ -1696,6 +1697,9 @@ int moveCloserToTarget(individual * enemy, individual * targetIndividual, field 
 	//Gonna move, remove them from the field and update the moveNodeMeta
 	removeIndividualFromField(thisField, enemy->playerCharacter->x, enemy->playerCharacter->y);
 
+	node * endNode = enemyNodeArr->nodeArray[enemyNodeArr->size-1];
+
+	getSpaceFromField(thisField, endNode->x, endNode->y)->spaceIsReserved = 1;
 
 	populateMoveNodeMeta(enemy->thisMoveNodeMeta, enemyNodeArr);
 
@@ -1887,6 +1891,14 @@ int performAction(individual * thisIndividual, individual * player, groupContain
 			return allyAction(thisIndividual, player, thisGroupContainer, thisField, inActionMode);
 		default:
 			return 0;
+	}
+}
+
+int isCurrentActiveIndividual(groupContainer * thisGroupContainer, individual * thisIndividual){
+	if(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex] == thisIndividual){
+		return 1;
+	}else{
+		return 0;
 	}
 }
 

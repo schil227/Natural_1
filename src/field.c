@@ -163,8 +163,11 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 		return 0;
 	}
 
-	if(getSpaceFromField(thisField,newX,newY)->isPassable && getSpaceFromField(thisField,newX,newY)->currentIndividual == NULL){
+	space * tmpSpace = getSpaceFromField(thisField,newX,newY);
+
+	if(tmpSpace->isPassable && tmpSpace->currentIndividual == NULL){
 		getSpaceFromField(thisField,inX,inY)->currentIndividual = NULL;
+		tmpSpace->spaceIsReserved = 0;
 		getSpaceFromField(thisField,newX,newY)->currentIndividual = thisIndividual;
 		thisIndividual->playerCharacter->x = newX;
 		thisIndividual->playerCharacter->y = newY;
@@ -181,7 +184,10 @@ int moveIndividualSpace(field *thisField, individual *thisIndividual, int x, int
 			return 0;
 	}
 
-	if(getSpaceFromField(thisField,x,y)->currentIndividual == NULL){
+	space * tmpSpace = getSpaceFromField(thisField,x,y);
+
+	if(tmpSpace->currentIndividual == NULL){
+		tmpSpace->spaceIsReserved = 0;
 		getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y)->currentIndividual = NULL;
 		getSpaceFromField(thisField, x, y)->currentIndividual = thisIndividual;
 		thisIndividual->playerCharacter->x = x;
@@ -191,30 +197,25 @@ int moveIndividualSpace(field *thisField, individual *thisIndividual, int x, int
 
 	//space occoupied
 	return 0;
-
 }
 
-/*
- * FromJump: the players old space may not exist anymore - removing logic to remove currentIndividual from old space
- */
 int setIndividualSpace(field *thisField, individual *thisIndividual, int x, int y){
-
 	//check if in bounds
 	if(!(x >= 0 && x < thisField->totalX && y >=0 && y < thisField->totalY)){
 			return 0;
 	}
 
-	if(getSpaceFromField(thisField,x,y)->currentIndividual == NULL){
-//		getSpaceFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y)->currentIndividual = NULL;
-		getSpaceFromField(thisField, x, y)->currentIndividual = thisIndividual;
+	space * tmpSpace = getSpaceFromField(thisField,x,y);
+
+	if(tmpSpace->currentIndividual == NULL){
+		tmpSpace->spaceIsReserved = 0;
+		tmpSpace->currentIndividual = thisIndividual;
 		thisIndividual->playerCharacter->x = x;
 		thisIndividual->playerCharacter->y = y;
 		return 1;
 	}
 
-	//space occoupied
 	return 0;
-
 }
 
 int attackIfInRange(individual *thisIndividual, individual *targetIndividual, field * thisField){
@@ -354,12 +355,12 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 
 		if(tmpAbility->type == 't'){
 			if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, player))
-					|| useDurationAbilityOnIndividual(player, thisIndividual->activeAbilities->selectedAbility)){
+					|| useDurationAbilityOnIndividual(player, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
 				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
 			}
 		}else if (tmpAbility->type == 'd'){
 			//add duration ability logic here
-			if(useDurationAbilityOnIndividual(player, tmpAbility)){
+			if(useDurationAbilityOnIndividual(player, tmpAbility, thisIndividual->name)){
 				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
 			}
 		}
@@ -421,7 +422,7 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 					tmp->playerCharacter->y <= maxY ){
 				if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
 					if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, tmp))
-							|| useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
+							|| useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeFromExistance(tmp->ID);
@@ -430,7 +431,7 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 					}
 				}else if (thisIndividual->activeAbilities->selectedAbility->type == 'd'){
 
-					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility)){
+					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 
 						triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
@@ -796,6 +797,7 @@ field* initField(char* fieldFileName){
 			space* newSpace = malloc(sizeof(space));
 			newSpace->currentIndividual = NULL;//malloc(sizeof(individual));
 			newSpace->thisTransitInfo = NULL;// malloc(sizeof(transitInfo));
+			newSpace->spaceIsReserved = 0;
 
 			character* backgroundCharacter = malloc(sizeof(character));
 			backgroundCharacter->x = init_x;

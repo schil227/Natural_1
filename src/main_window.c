@@ -439,69 +439,64 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		}
 
+//		drawLock = 0;
+//		return 0;
+	}
+
+	if(thisGroupContainer->groupMoveMode){
+		int speed = animateMoveSpeed;
+
+		if(!inActionMode){
+			speed = 1;
+		}
+
+		individual * tmpIndividual = (thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
+
+		animateMove(rect, tmpIndividual, main_field, viewShift, &thisGroupContainer->groupMoveMode, animateMoveSpeed, 0);
+
+		//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
+		if (!thisGroupContainer->groupMoveMode) {
+			if (tmpIndividual->thisMoveNodeMeta != NULL && tmpIndividual->thisMoveNodeMeta->rootMoveNode != NULL) {
+				freeUpMovePath(tmpIndividual->thisMoveNodeMeta->rootMoveNode);
+				tmpIndividual->thisMoveNodeMeta->rootMoveNode = NULL;
+			}
+
+			thisGroupContainer->postGroupActionMode = 1;
+			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
+		}
+
 		drawLock = 0;
 		return 0;
 	}
 
-	if(thisGroupContainer->groupMoveMode){
-			int speed = animateMoveSpeed;
-
-			if(!inActionMode){
-				speed = 1;
-			}
-
-			individual * tmpIndividual = (thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]);
-
-			animateMove(rect, tmpIndividual, main_field, viewShift, &thisGroupContainer->groupMoveMode, animateMoveSpeed, 1);
-
-			//animation is complete, destroy moveNodeMeta and enter postEnemyActionMode
-			if (!thisGroupContainer->groupMoveMode) {
-				if (tmpIndividual->thisMoveNodeMeta != NULL
-						&& tmpIndividual->thisMoveNodeMeta->rootMoveNode != NULL) {
-					freeUpMovePath(tmpIndividual->thisMoveNodeMeta->rootMoveNode);
-					tmpIndividual->thisMoveNodeMeta->rootMoveNode = NULL;
-				}
-
-				thisGroupContainer->postGroupActionMode = 1;
-				PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
-			}
-
-			drawLock = 0;
-			return 0;
-		}
+	if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
+		handleMovingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
+	}
 
 	//prevent AI inturruption
-	if(moveMode){
+	if(moveMode || postMoveMode){
 		drawLock = 0;
 		return 0;
 	}
 
 	freeTimer++;
-	if(freeTimer > animateMoveSpeed + 30){
+	if(freeTimer > animateMoveSpeed + 30 && thisGroupContainer->movingIndividuals->numIndividuals == 0){
 		freeTimer = 0;
 
-		printf("WANT: action\n");fflush(stdout);
-		while(!tryGetFieldReadLock()){}
-		printf("GOT: action\n");fflush(stdout);
-		inActionMode = shouldEnableActionMode();
-
-		releaseFieldReadLock();
-		printf("RELEASED: action\n");fflush(stdout);
-		if(!inActionMode && !thisGroupContainer->groupActionMode){
-//			QueryPerformanceFrequency(&Frequency);
-//			QueryPerformanceCounter(&StartingTime);
-
+//		printf("WANT: action\n");fflush(stdout);
+//		while(!tryGetFieldReadLock()){}
+//		printf("GOT: action\n");fflush(stdout);
+//		inActionMode = shouldEnableActionMode();
+//
+//		releaseFieldReadLock();
+//		printf("RELEASED: action\n");fflush(stdout);
+		if(!inActionMode && !thisGroupContainer->groupActionMode){ // && thisGroupContainer->movingIndividuals->numIndividuals == 0
 			thisGroupContainer->initGroupActionMode = 1;
 			thisGroupContainer->groupActionMode = 1;
 			setNextActiveGroup(thisGroupContainer);
 			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
 		}
 	}
-
-	if(thisGroupContainer->movingIndividuals->numIndividuals > 0){
-		handleMoveingIndividuals(thisGroupContainer, main_field, animateMoveSpeed);
-	}
-
 
 	if(sampleSpacer == 1){
 		QueryPerformanceCounter(&EndingTime);
@@ -515,7 +510,7 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 		cwrite(outLog);
 	}
 
-	if(sampleSpacer > 10){
+	if(sampleSpacer > 30){
 		sampleSpacer = 0;
 	}
 
@@ -698,6 +693,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					printf("GOT: transit\n");fflush(stdout);
 					updateFieldGraphics(hdc, hdcBuffer, main_field);
 					transitViewShift(viewShift, player, main_field, &rect);
+					inActionMode = shouldEnableActionMode();
 
 					releaseFieldWriteLock();
 					releaseFieldReadLock();

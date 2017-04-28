@@ -18,6 +18,24 @@ void moveRECTRight(RECT * thisRect, int distance){
 	thisRect->right = thisRect->right + distance;
 }
 
+int calcStatusDuration(ability * thisAbility){
+	int duration = 0, durationMod = 0;
+
+	if(thisAbility->statusDurationEnabled){
+		durationMod = thisAbility->statusDuration->effectAndManaArray[thisAbility->statusDuration->selectedIndex]->effectMagnitude;
+	}
+
+	if(thisAbility->diceStatusDurationEnabled){
+		duration = thisAbility->diceStatusDuration->effectAndManaArray[thisAbility->diceStatusDuration->selectedIndex]->effectMagnitude;
+	}
+
+	if(duration > 0){
+		return (rand() % duration) + 1 + durationMod;
+	}else{
+		return durationMod;
+	}
+}
+
 int calcAbilityDuration(ability * thisAbility){
 	int duration = 0, durationMod = 0;
 
