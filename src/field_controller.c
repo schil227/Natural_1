@@ -907,6 +907,56 @@ void setAlliesToField(individual * player, individualGroup * allies, field * thi
 
 }
 
+int attemptToForceTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int targetMapID, int transitID){
+	char mapName[64];
+
+	mapInfo * targetMap = getMapInfoFromRegistry(targetMapID);
+
+	strcpy(mapName, targetMap->mapName);
+	player->jumpTarget = transitID;
+
+	while(!tryGetConsoleReadLock()){}
+	while(!tryGetConsoleWriteLock()){}
+
+	clearMessages();
+
+	releaseConsoleWriteLock();
+	releaseConsoleReadLock();
+
+	if(reportActiveCrimes(player)){
+		cwrite("Your crimes have been reported by witnesses!");
+		clearCrimeSpecialDialogForGroup(thisGroupContainer->npcs);
+	}
+
+	groupTransitUpdate(thisGroupContainer);
+	removeAlliesFromField(thisGroupContainer->allies, *thisField);
+
+	printf("WANT: destroy\n");fflush(stdout);
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+	printf("GOT: destroy\n");fflush(stdout);
+
+	destroyField(*thisField, player);
+	clearGroup(thisGroupContainer->enemies);
+	clearGroup(thisGroupContainer->npcs);
+	clearGroup(thisGroupContainer->beasts);
+	clearGroup(thisGroupContainer->guards);
+
+	*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+	printf("RELEASED: destroy\n");fflush(stdout);
+
+	if(player->thisReportedCrimes->numReportedCrimes > 0){
+		setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
+	}
+
+	setAlliesToField(player, thisGroupContainer->allies, *thisField);
+
+	return 1;
+}
+
 int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory){
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 

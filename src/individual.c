@@ -2602,6 +2602,19 @@ char * getWorstCrime(individual * player){
 	}
 }
 
+void removeStolenItems(individual * player){
+	int i;
+
+	for(i = 0; i < player->backpack->inventorySize; i++){
+		item * tmpItem = player->backpack->inventoryArr[i];
+
+		if(tmpItem != NULL && tmpItem->isStolen){
+			removeItemFromInventory(player->backpack, tmpItem);
+			i--;
+		}
+	}
+}
+
 int robIndividual(individual * player, individual * targetIndividual){
 	int gold = 0;
 	int d20 = rand() %20 + 1;

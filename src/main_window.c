@@ -307,6 +307,27 @@ int shouldEnableActionMode(){
 	return 0;
 }
 
+int forcePlayerTransit(int targetMapID, int transitID){
+	if(attemptToForceTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory, targetMapID, transitID)){
+		RECT rect;
+		GetClientRect(hwnd_global, &rect);
+		HDC hdc = GetDC(hwnd_global);
+		HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+		printf("WANT: transit\n");fflush(stdout);
+		while(!tryGetFieldReadLock()){}
+		while(!tryGetFieldWriteLock()){}
+		printf("GOT: transit\n");fflush(stdout);
+		updateFieldGraphics(hdc, hdcBuffer, main_field);
+		transitViewShift(viewShift, player, main_field, &rect);
+		inActionMode = shouldEnableActionMode();
+
+		releaseFieldWriteLock();
+		releaseFieldReadLock();
+		printf("RELEASED: transit\n");fflush(stdout);
+	}
+}
+
 void drawAll(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
@@ -372,9 +393,11 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawNameBoxInstance(hdc, hdcBuffer, prc);
 	}
 
+	while(!tryGetDialogReadLock()){}
 	if(shouldDrawDialogBox()){
 		drawDialogBox(hdc, hdcBuffer,prc);
 	}
+	releaseDialogReadLock();
 
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
@@ -865,8 +888,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case ID_HELP_ABOUT: {
-			int ret =
-					DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
+			int ret = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
 			if (ret == IDOK) {
 				MessageBox(hwnd, "Dialog exited from clicking ok.", "Notice",
 				MB_OK | MB_ICONINFORMATION);
@@ -1050,8 +1072,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}
 }
 
+//Note: The returned value is significant to the calling function. Therefore, only the first event result is returned.
+//All remaining event results are ignored.
 int triggerEvent(int eventID){
-	return processEvent(eventID, player, thisGroupContainer, main_field);
+	int toReturn = processEvent(eventID, player, thisGroupContainer, main_field);
+	int nextEventID = getNextEventID(eventID);
+
+	while(nextEventID){
+		processEvent(nextEventID, player, thisGroupContainer, main_field);
+		nextEventID = getNextEventID(nextEventID);
+	}
+
+	return toReturn;
 }
 
 char * getContextData(char * contextKey){
@@ -1104,7 +1136,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	loadDialog("dialog.txt", mapTestDirectory);
 
-	initThisCursor(1508,RGB(224, 64, 192),0,0);
+	initThisCursor(1508);
 	initSoundPlayerInstance();
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();

@@ -13,6 +13,8 @@ void initThisCursor(int imageID) {
 	thisCursorInstance->cursorCharacter = createCharacterFromAnimation(cloneAnimationFromRegistry(imageID));// createCharacter(imageID, rgb, x, y);
 	thisCursorInstance->cursorCharacter->x = 0;
 	thisCursorInstance->cursorCharacter->y = 0;
+	thisCursorInstance->cursorCharacter->xOff = 0;
+	thisCursorInstance->cursorCharacter->yOff = 0;
 	thisCursorInstance->cursorCharacter->direction = 0;
 
 	thisCursorInstance->inCursorMode = 0;

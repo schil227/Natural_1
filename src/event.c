@@ -609,7 +609,7 @@ int resetSpecialDialogForSpeakingIndividualGroup(dialogType specialDialogType, i
 	int i, individualsPassed = 0;
 
 	individual * speakingIndividual = getIndividualFromRegistry(speakingIndividualID);
-	individualGroup * thisGroup = getGroupFromIndividual(thisGroupContainer, speakingIndividualID);
+	individualGroup * thisGroup = getGroupFromIndividual(thisGroupContainer, speakingIndividual);
 
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
 		if(thisGroup->individuals[i]  != NULL){
@@ -628,11 +628,12 @@ int resetSpecialDialogForSpeakingIndividualGroup(dialogType specialDialogType, i
 	return 0;
 }
 
-int clearCrimesAndSpecialDialog(individual * player, individualGroup * guards, individualGroup * npcs){
+int clearCrimesSpecialDialogStolenItems(individual * player, individualGroup * guards, individualGroup * npcs){
 	clearActiveCrimes(player);
 	clearReportedCrimes(player);
 	clearCrimeSpecialDialogForGroup(guards);
 	clearCrimeSpecialDialogForGroup(npcs);
+	removeStolenItems(player);
 
 	return 1;
 }
@@ -751,7 +752,17 @@ int returnIndividualToDefaultGroup(groupContainer * thisGroupContainer, int indi
 	return 1;
 }
 
-int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField){
+int getNextEventID(int eventID){
+	event * thisEvent = getEventFromRegistry(eventID);
+
+	if(thisEvent->nextEventID){
+		return thisEvent->nextEventID;
+	}else{
+		return 0;
+	}
+}
+
+int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, char * mapDirectory){
 	event * thisEvent = getEventFromRegistry(eventID);
 
 	switch(thisEvent->eventType){
@@ -784,7 +795,7 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 14: // reset special dialog for speaking individual group
 			return resetSpecialDialogForSpeakingIndividualGroup(thisEvent->intA, getSpeakingIndividualID(), thisGroupContainer);
 		case 15: //clear crimes and special dialogs
-			return clearCrimesAndSpecialDialog(player, thisGroupContainer->guards, thisGroupContainer->npcs);
+			return clearCrimesSpecialDialogStolenItems(player, thisGroupContainer->guards, thisGroupContainer->npcs);
 		case 16:
 			return makeSpeakingIndividualFriendlyToPlayer(getSpeakingIndividualID());
 		case 17://try rob individual
@@ -795,9 +806,14 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return addIndividualToAllyGroup(thisGroupContainer, thisEvent->individualID, thisEvent->intA);
 		case 20:
 			return returnIndividualToDefaultGroup(thisGroupContainer, thisEvent->individualID, thisEvent->intA);
+		case 21:
+			return forcePlayerTransit(thisEvent->intA, thisEvent->intB);
+		case 22:
+			return getCurrentBounty(player) <= player->gold;
+		case 23:
+			player->gold = max(0, player->gold - getCurrentBounty(player));
+			return 0;
 	}
-	
-	return 0;
 }
 
 char * processContextKey(char * contextKey, individual * player, groupContainer * thisGroupContainer, field * thisField){

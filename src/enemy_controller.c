@@ -205,14 +205,26 @@ void initializeArr(node ** nodeArr, int size){
 	}
 }
 
-int spaceIsFree(node * thisNode, field * thisField){
+int spaceIsFree(space * tmpSpace){
+	if(tmpSpace == NULL){
+		return 0;
+	}
+
+	if(tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved && tmpSpace->thisTransitInfo == NULL){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
+int spaceIsFreeCheck(node * thisNode, field * thisField){
 	space * tmpSpace = getSpaceFromField(thisField, thisNode->x, thisNode->y);
 
 	if(tmpSpace == NULL){
 		return 0;
 	}
 
-	if(tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved){
+	if(tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved && tmpSpace->thisTransitInfo == NULL){
 		return 1;
 	}else{
 		return 0;
@@ -242,7 +254,7 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 	i = 0;
 
 	while(activeNodes[i] != NULL){
-		if(spaceIsFree(activeNodes[i], thisField)){
+		if(spaceIsFreeCheck(activeNodes[i], thisField)){
 			return activeNodes[i];
 		}
 
@@ -251,7 +263,7 @@ node * findOpenNode(node * endNode, node ** activeNodes, individual * thisIndivi
 			int j = 0;
 
 			while(tmpNodes[j] != NULL){
-				if(spaceIsFree(tmpNodes[j], thisField)){
+				if(spaceIsFreeCheck(tmpNodes[j], thisField)){
 					addNodeToList(tmpNodes[j], newActiveNodes);
 				}
 
@@ -1452,59 +1464,56 @@ int retreatFromTarget(individual * thisIndividual, groupContainer * thisGroupCon
 }
 
 int returnToDesiredLocation(individual * thisIndividual, groupContainer * thisGroupContainer, field * thisField, int inActionMode){
-	//prevent generating a path through individuals
-	int tmpFaction = thisIndividual->faction;
-	thisIndividual->faction = -1;
+	if(!inActionMode){
+		//prevent generating a path through individuals
+		int tmpFaction = thisIndividual->faction;
+		thisIndividual->faction = -1;
 
-	int moveResult = moveToSelectedLocation(thisIndividual, thisField, thisIndividual->desiredLocation->x, thisIndividual->desiredLocation->y);
+		int moveResult = moveToSelectedLocation(thisIndividual, thisField, thisIndividual->desiredLocation->x, thisIndividual->desiredLocation->y);
 
-	thisIndividual->faction = tmpFaction;
+		thisIndividual->faction = tmpFaction;
 
-	//few problems: need to change how the moving/faction system works - disable when going the full distance?.
-
-	//Only moving one space, avoid animateMoveLoop and just do it here
-	if(moveResult && !inActionMode){
 		moveNode * targetSpace = thisIndividual->thisMoveNodeMeta->rootMoveNode;
 
-		if(targetSpace != NULL){
-			space * tmpSpace = getSpaceFromField(thisField, targetSpace->x, targetSpace->y);
+		if(moveResult){
+			if(targetSpace != NULL){
+				space * tmpSpace = getSpaceFromField(thisField, targetSpace->x, targetSpace->y);
 
-			//remove space reservation
-			moveNode * tmpNode = thisIndividual->thisMoveNodeMeta->rootMoveNode;
-			while(tmpNode->nextMoveNode != NULL){
-				tmpNode = tmpNode->nextMoveNode;
-			}
-
-			getSpaceFromField(thisField, tmpNode->x, tmpNode->y)->spaceIsReserved = 0;
-
-			if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved){
-				tmpSpace->spaceIsReserved = 1;
-				thisIndividual->thisMoveNodeMeta->useDummyCords = 1;
-				thisIndividual->thisMoveNodeMeta->dummyCord->x = thisIndividual->playerCharacter->x;
-				thisIndividual->thisMoveNodeMeta->dummyCord->y = thisIndividual->playerCharacter->y;
-
-//				removeIndividualFromField(thisField, targetSpace->x, targetSpace->y);
-
-				moveIndividualSpace(thisField, thisIndividual, targetSpace->x, targetSpace->y);
-
-				if(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
-					freeUpMovePath(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
-					thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode = NULL;
+				//remove space reservation
+				moveNode * tmpNode = thisIndividual->thisMoveNodeMeta->rootMoveNode;
+				while(tmpNode->nextMoveNode != NULL){
+					tmpNode = tmpNode->nextMoveNode;
 				}
 
-				thisIndividual->remainingActions = 0;
-				return 1;
+				getSpaceFromField(thisField, tmpNode->x, tmpNode->y)->spaceIsReserved = 0;
+
+				if(spaceIsFree(tmpSpace)){
+					tmpSpace->spaceIsReserved = 1;
+					thisIndividual->thisMoveNodeMeta->useDummyCords = 1;
+					thisIndividual->thisMoveNodeMeta->dummyCord->x = thisIndividual->playerCharacter->x;
+					thisIndividual->thisMoveNodeMeta->dummyCord->y = thisIndividual->playerCharacter->y;
+
+					moveIndividualSpace(thisField, thisIndividual, targetSpace->x, targetSpace->y);
+
+					if(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
+						freeUpMovePath(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
+						thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode = NULL;
+					}
+
+					thisIndividual->remainingActions = 0;
+					return 1;
+				}
 			}
+
+			//put npc back on space they started
+			moveIndividualSpace(thisField, thisIndividual, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+
+			thisIndividual->remainingActions = 0;
+			return 0;
 		}
-
-		//put npc back on space they started
-		moveIndividualSpace(thisField, thisIndividual, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
-
-		thisIndividual->remainingActions = 0;
-		return 0;
 	}
 
-	return moveResult;
+	return moveToSelectedLocation(thisIndividual, thisField, thisIndividual->desiredLocation->x, thisIndividual->desiredLocation->y);;
 }
 
 int noEnemiesInRange(individual * enemy, groupContainer * thisGroupContainer, field * thisField, int range){

@@ -23,6 +23,9 @@ typedef struct{
 
 	volatile int individualGroupReadLock;
 	volatile int individualGroupWriteLock;
+
+	volatile int dialogReadLock;
+	volatile int dialogWriteLock;
 } lockAuthority;
 
 #endif /* SRC_HEADERS_STRUCTS_ACCESS_REGISTRY_H_ */

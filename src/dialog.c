@@ -357,6 +357,10 @@ void toggleDrawDialogBox(){
 	thisDialogInstance->drawBox = (thisDialogInstance->drawBox+1)%2;
 }
 
+void disalbeDrawDialogBox(){
+	thisDialogInstance->drawBox = 0;
+}
+
 int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlayer, int alreadyYielded){
 	int i;
 

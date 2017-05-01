@@ -376,14 +376,20 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 		switch (LOWORD(wParam)) {
 			case 0x1B: //esc
 			case 0x0D: { //enter
+				while(!tryGetDialogReadLock()){}
+				while(!tryGetDialogWriteLock()){}
+
 				if(disableSpeakModeIfEnabled()){
+					releaseDialogWriteLock();
+					releaseDialogReadLock();
 					break;
 				}
 
 				int eventID = getEventFromCurrentMessage();
 
 				if(eventID != 0){
-					processEvent(eventID, player, thisGroupContainer, thisField);
+					triggerEvent(eventID);
+//					processEvent(eventID, player, thisGroupContainer, thisField);
 				}
 
 				if(!advanceDialog()){
@@ -393,6 +399,8 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 //					cwrite(outLog);
 				}
 
+				releaseDialogWriteLock();
+				releaseDialogReadLock();
 				break;
 			}
 			case 0x38:
@@ -499,8 +507,14 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 				item * tmpItem = getSelectedItem();
 
 				if (tmpItem != NULL) {
+					while(!tryGetDialogReadLock()){}
+					while(!tryGetDialogWriteLock()){}
+
 					toggleDrawDialogBox();
 					setSimpleDialogMessage(tmpItem->description);
+
+					releaseDialogWriteLock();
+					releaseDialogReadLock();
 				}
 			}
 			break;

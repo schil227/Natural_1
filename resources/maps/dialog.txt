@@ -1,7 +1,7 @@
 1008;Halt @! You are under arrest for @! Pay the fine of @ gold and surrender your stolen goods immediately! ;3;0;1;8;3;NAME,WORST_CRIME,BOUNTY
 1013;There is no future for you, hellion. En guarde.;0;0;0;0;0;0
 1014;Thank you for your cooperation. You're free to go.;0;0;0;20;0;0
-1015;Then you shal serve out the rest of your bounty in prison.;0;0;0;20;0;0
+1015;Then you shal serve out the rest of your bounty in prison.;0;0;0;32;0;0
 1024;Hail, adventurer. Beware, cursed undead wander near these woods.;0;0;0;0;0;0
 1016;[@ witnessed your crime of @];4;0;1;0;2;TARGET_NAME,WITNESSED_CRIME
 1017;[SUCCESS: They dont want any trouble];0;0;0;7;0;0
@@ -36,8 +36,9 @@
 1039;Is this where we part ways?;2;0;0;0;0;0
 1040;Then onward.;0;0;0;0;0;0
 1041;Very well - till we meet again, @.;0;0;0;30;1;NAME
+1042;You're free to come and go, but trust me, you'd rather go.;0;0;0;0;0;0
 
-1008;I Surrender.;1014;0;0;0;0
+1008;I Surrender.;1014;33;0;0;0
 1008;I Surrender, although I do not have enough money.;1015;0;0;0;0
 1008;Never!;0;0;28;0;0
 1016;[STR/CON to intimidate];0;9;5;0;0

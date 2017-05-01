@@ -1,0 +1,14 @@
+map3_transit.txt
+3
+t^t^t^t^t^t^t^t^t^t^t^t^t^
+t^t^t^t^t^t^t^t^t^t^t^t^t^
+t^t^g^g^g^rv-^-^r<t^t^t^t^
+t^\<p>p>\^r>-v-vr^t^t^t^t^
+t^p^t^g^\vp^p^p^p^p^\^t^t^
+t^p^s^s^s^s^s^s^s^s^p^t^t^
+t^p^s^s^s^s^s^s^s^s^p^t^t^
+t^p^s^s^s^s^s^s^s^s^p^t^t^
+t^p^s^s^s^s^s^s^s^s^p^t^t^
+t^p^x^x^x^x^d^x^x^x^p^t^t^
+t^p^p^p^p^p^p^p^p^p^p^t^t^
+t^t^t^t^t^t^t^p^t^t^t^t^t^

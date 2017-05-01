@@ -1,0 +1,7 @@
+map4_transit.txt
+4
+s^x^x^x^x^x^x^s
+s^f^f^f^f^f^f^s
+s^f^f^f^f^f^f^s
+s^f^f^f^f^f^f^s
+x^x^x^x^f^x^x^x
