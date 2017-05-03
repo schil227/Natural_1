@@ -7,7 +7,7 @@
 
 #ifndef SRC_HEADERS_STRUCTS_SPECIAL_DRAW_H_
 #define SRC_HEADERS_STRUCTS_SPECIAL_DRAW_H_
-#include "../individual_pub_methods.h"
+#include "../field_pub_methods.h"
 
 typedef struct{
 	int x;

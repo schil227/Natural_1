@@ -188,6 +188,7 @@ struct individual{
 	char critType[4];
 	short int mvmt;
 	short int LoS;
+	short int darkLoS;
 	short int isSneaking;
 
 	//physical damage resistance

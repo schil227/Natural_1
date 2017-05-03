@@ -67,6 +67,7 @@ typedef struct {
 	double yOff;
 	animationContainer * thisAnimationContainer;
 	animationContainer * secondaryAnimationContainer;
+	animationContainer * darkAnimationContainer;
 } character;
 
 

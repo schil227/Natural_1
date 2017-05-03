@@ -334,6 +334,21 @@ void drawAll(HDC hdc, RECT* prc) {
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
 	int index;
 
+	printf("WANT: dark\n"); fflush(stdout);
+	while(!tryGetFieldReadLock()){}
+	printf("GOT: dark\n");fflush(stdout);
+
+	if(main_field->isDark){
+		printf("in dark mode\n");
+		main_field->playerLoS = getAttributeSum(player, "darkLoS");
+		printf("got los\n");
+		main_field->playerCords->x = player->playerCharacter->x;
+		printf("got x:%d\n", player->playerCharacter->x);fflush(stdout);
+		main_field->playerCords->y = player->playerCharacter->y;
+		printf("got y:%d\n", player->playerCharacter->y);fflush(stdout);
+	}
+
+	printf("draw field\n");
 	drawField(hdc, hdcBuffer, main_field, viewShift);
 
 	drawHUDAttackSpaces(hdc, hdcBuffer, prc);
@@ -344,11 +359,14 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawIndividual(hdc, hdcBuffer, player, viewShift);
 	}
 
-	drawGroups(hdc, hdcBuffer, thisGroupContainer, viewShift);
+	drawGroups(hdc, hdcBuffer, thisGroupContainer, main_field, viewShift);
 
 	if(isSpecialDrawModeEnabled()){
-		drawSpecial(hdc, hdcBuffer, viewShift);
+		drawSpecial(hdc, hdcBuffer, main_field, viewShift);
 	}
+
+	releaseFieldReadLock();
+	printf("RELEASED: dark\n"); fflush(stdout);
 
 	if (inCursorMode()) {
 		drawCursor(hdc, hdcBuffer, viewShift);
@@ -607,7 +625,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		playerDialog->afraidOfPlayer = 0;
 		playerDialog->playerIsMarkedForDeath = 0;
 
-		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -1157,7 +1175,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	playerDialog->afraidOfPlayer = 0;
 	playerDialog->playerIsMarkedForDeath = 0;
 
-	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);

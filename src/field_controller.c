@@ -63,7 +63,7 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 }
 
 void createIndividualFromLine(individual * newIndividual, char * line){
-	int ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,isSneaking,
+	int ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
 	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
 	int offensiveness, abilityAffinity, tacticalness, cowardness;
@@ -141,6 +141,8 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	mvmt = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	los = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	darkLos = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	isSneaking = atoi(value);
 
@@ -253,7 +255,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
-	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,isSneaking,
+	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
 			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
@@ -501,39 +503,61 @@ void decreaseTurns(individual * thisIndividual, groupContainer * thisGroupContai
 	}
 }
 
-void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, shiftData * viewShift){
+void drawGroups(HDC hdc, HDC hdcBuffer, groupContainer * thisGroupContainer, field * thisField, shiftData * viewShift){
 	while(!tryGetIndividualGroupReadLock()){}
-	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->npcs, viewShift);
-	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->enemies, viewShift);
-	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->guards, viewShift);
-	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->beasts, viewShift);
-	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->allies, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->npcs, thisField, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->enemies, thisField, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->guards, thisField, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->beasts, thisField, viewShift);
+	drawIndividualGroup(hdc, hdcBuffer, thisGroupContainer->allies, thisField, viewShift);
 
 	//draw animated individual over others
+	individual * tmp;
+
 	if(thisGroupContainer->enemies->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, thisGroupContainer->enemies->individuals[thisGroupContainer->enemies->currentIndividualIndex], viewShift);
+		tmp = thisGroupContainer->enemies->individuals[thisGroupContainer->enemies->currentIndividualIndex];
+
+		if(!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - tmp->playerCharacter->x), abs(thisField->playerCords->y - tmp->playerCharacter->y))){
+			drawIndividual(hdc, hdcBuffer, tmp, viewShift);
+		}
 	}
 
 	if(thisGroupContainer->npcs->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, thisGroupContainer->npcs->individuals[thisGroupContainer->npcs->currentIndividualIndex], viewShift);
+		tmp = thisGroupContainer->npcs->individuals[thisGroupContainer->npcs->currentIndividualIndex];
+
+		if(!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - tmp->playerCharacter->x), abs(thisField->playerCords->y - tmp->playerCharacter->y))){
+			drawIndividual(hdc, hdcBuffer, tmp, viewShift);
+		}
 	}
 
 	if(thisGroupContainer->beasts->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, thisGroupContainer->beasts->individuals[thisGroupContainer->beasts->currentIndividualIndex], viewShift);
+		tmp = thisGroupContainer->beasts->individuals[thisGroupContainer->beasts->currentIndividualIndex];
+
+		if(!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - tmp->playerCharacter->x), abs(thisField->playerCords->y - tmp->playerCharacter->y))){
+			drawIndividual(hdc, hdcBuffer, tmp, viewShift);
+		}
 	}
 
 	if(thisGroupContainer->guards->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, thisGroupContainer->guards->individuals[thisGroupContainer->guards->currentIndividualIndex], viewShift);
+		tmp = thisGroupContainer->guards->individuals[thisGroupContainer->guards->currentIndividualIndex];
+
+		if(!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - tmp->playerCharacter->x), abs(thisField->playerCords->y - tmp->playerCharacter->y))){
+			drawIndividual(hdc, hdcBuffer, tmp, viewShift);
+		}
 	}
 
 	if(thisGroupContainer->allies->currentIndividualIndex != -1){
-		drawIndividual(hdc, hdcBuffer, thisGroupContainer->allies->individuals[thisGroupContainer->allies->currentIndividualIndex], viewShift);
+		tmp = thisGroupContainer->allies->individuals[thisGroupContainer->allies->currentIndividualIndex];
+
+		if(!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - tmp->playerCharacter->x), abs(thisField->playerCords->y - tmp->playerCharacter->y))){
+			drawIndividual(hdc, hdcBuffer, tmp, viewShift);
+		}
 	}
 
 	releaseIndividualGroupReadLock();
 }
 
-void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, shiftData * viewShift){
+void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, field * thisField, shiftData * viewShift){
 	int index;
 
 	if(thisGroup->numIndividuals > 0){
@@ -546,7 +570,9 @@ void drawIndividualGroup(HDC hdc, HDC hdcBuffer, individualGroup * thisGroup, sh
 
 				//dont draw the current individual yet, do it after
 				if(index != thisGroup->currentIndividualIndex){
-					drawIndividual(hdc, hdcBuffer, thisGroup->individuals[index], viewShift);
+					if(!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - tmp->playerCharacter->x), abs(thisField->playerCords->y - tmp->playerCharacter->y))){
+						drawIndividual(hdc, hdcBuffer, tmp, viewShift);
+					}
 				}
 
 				if(individualsPassed == thisGroup->numIndividuals){

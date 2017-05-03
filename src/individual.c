@@ -23,6 +23,7 @@ individual *initIndividual(){
 
 	individual* toReturn = malloc(sizeof(individual));
 	toReturn->playerCharacter = malloc(sizeof(character));
+	toReturn->playerCharacter->darkAnimationContainer = NULL;
 
 	toReturn->backpack = malloc(sizeof(inventory));
 	toReturn->backpack->inventorySize = 0;
@@ -106,7 +107,7 @@ individual *initIndividual(){
 
 int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
-		int range, int mvmt, int LoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
+		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
 		int lightiningWeakness, int dialogID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
 		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
@@ -148,6 +149,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->range = range;
 	thisIndividual->mvmt = mvmt;
 	thisIndividual->LoS = LoS;
+	thisIndividual->darkLoS = darkLoS;
 	thisIndividual->isSneaking = isSneaking;
 
 	thisIndividual->bluntDR = bluntDR;
@@ -207,6 +209,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	character * shadowCharacter = malloc(sizeof(character));
 	shadowCharacter->thisAnimationContainer = cloneAnimationContainer(thisIndividual->playerCharacter->thisAnimationContainer);
 	shadowCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisIndividual->playerCharacter->secondaryAnimationContainer);
+	shadowCharacter->darkAnimationContainer = NULL;
 
 	shadowCharacter->x = thisIndividual->playerCharacter->x;
 	shadowCharacter->y = thisIndividual->playerCharacter->y;
@@ -2797,6 +2800,10 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 		return thisIndividual->waterWeakness;
 	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
 		return thisIndividual->lightiningWeakness;
+	}else if(strcmp("LoS", attribute) == 0){
+		return thisIndividual->LoS;
+	}else if(strcmp("darkLoS", attribute) == 0){
+		return thisIndividual->darkLoS;
 	}
 
 	return toReturn;

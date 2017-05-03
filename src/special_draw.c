@@ -88,11 +88,13 @@ int addCharacterToSpecialDrawWithCoords(character * thisCharacter, int x, int y)
 	}
 }
 
-void drawSpecial(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
+void drawSpecial(HDC hdc, HDC hdcBuffer, field * thisField, shiftData * viewShift){
 	int i;
 
 	for(i = 0; i < specialDrawInstance->numSpecialIndividuals; i++){
-		drawIndividual(hdc, hdcBuffer, specialDrawInstance->specialIndividuals[i], viewShift);
+		if(!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - specialDrawInstance->specialIndividuals[i]->playerCharacter->x), abs(thisField->playerCords->y - specialDrawInstance->specialIndividuals[i]->playerCharacter->y))){
+			drawIndividual(hdc, hdcBuffer, specialDrawInstance->specialIndividuals[i], viewShift);
+		}
 	}
 
 	for(i = 0; i < specialDrawInstance->numImagesToDraw; i++){

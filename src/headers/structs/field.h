@@ -38,6 +38,8 @@ typedef struct {
 	int id;
 	int displayedWidth;
 	int displayedHeight;
+	int isDark;
+	int playerLoS;
 
 	int displayedX;
 	int displayedY;
@@ -49,6 +51,7 @@ typedef struct {
 
 	fieldInventory * thisFieldInventory;
 	inventory * currentSpaceInventory;
+	cord * playerCords;
 } field;
 
 typedef struct {
@@ -69,6 +72,7 @@ typedef struct {
 	char mapName[64];
 	int * individuals[250];
 	int * items[500];
+	int isDark;
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;

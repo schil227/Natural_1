@@ -1,4 +1,6 @@
 == TODO In Depth ==
+
+-add LoS stat to ability, items	
 	
 Drawing the image mask is costly on all those spaces - for field spaces, combine mask and image into one, and only draw that.
 

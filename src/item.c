@@ -24,6 +24,7 @@ item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char
 
 	thisItem->itemCharacter->thisAnimationContainer = thisAnimationContainer;
 	thisItem->itemCharacter->secondaryAnimationContainer = secondaryAnimationContainer;
+	thisItem->itemCharacter->darkAnimationContainer = NULL;
 
 	thisItem->npcID = npcID;
 	thisItem->ID = ID;
@@ -97,7 +98,7 @@ item * cloneItem(item * thisItem, int keepOwner){
 
 	newItem->itemCharacter->thisAnimationContainer = cloneAnimationContainer(thisItem->itemCharacter->thisAnimationContainer);
 	newItem->itemCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisItem->itemCharacter->secondaryAnimationContainer);
-
+	newItem->itemCharacter->darkAnimationContainer = NULL;
 
 	newItem->npcID = thisItem->npcID;
 	newItem->ID = 0;

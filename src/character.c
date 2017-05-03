@@ -6,6 +6,7 @@
  */
 
 #include<string.h>
+#include<stdio.h>
 #include"./headers/character_pub_methods.h"
 
 /*
@@ -426,6 +427,38 @@ void drawFusedAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, shift
 	DeleteDC(hdcMem);
 }
 
+void drawCharacterAnimationGreyscale(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+
+	int shitfX;
+
+	HBITMAP selectedImage, selectedImageMask;
+
+	shitfX = thisCharacter->darkAnimationContainer->animations[thisCharacter->darkAnimationContainer->currentAnimation]->currentFrame*100;
+	selectedImage = thisCharacter->darkAnimationContainer->animations[thisCharacter->darkAnimationContainer->currentAnimation]->image;
+	selectedImageMask = thisCharacter->darkAnimationContainer->animations[thisCharacter->darkAnimationContainer->currentAnimation]->imageMask;
+
+	SelectObject(hdcMem, selectedImageMask);
+
+	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+			100,100,
+			hdcMem,
+			shitfX,
+			0,
+			SRCAND);
+
+	SelectObject(hdcMem, selectedImage);
+
+	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+			100,100,
+			hdcMem,
+			shitfX,
+			0,
+			SRCPAINT);
+
+	DeleteDC(hdcMem);
+}
+
 void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
@@ -443,7 +476,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 		selectedImageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
 	}
 	SelectObject(hdcMem, selectedImageMask);
-//
+
 	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
 			100,100,
 			hdcMem,
@@ -946,6 +979,95 @@ void rotateBitmap90Degrees(int direction, int startingPosition, int frameWidth, 
 			lpPixels[i3*3 + startingPosition*3 + j3*totalWidth*3 + 2] = tmpR;
 		}
 	}
+}
+
+void makeImageGreyscale(int frameHeight, long totalWidth, char * lpPixels){
+	int i, j, index;
+	unsigned char tmpB, tmpG, tmpR;
+
+	double gamma = 2.2;
+	double y;
+	unsigned int L;
+
+	for(i = 0; i < totalWidth; i++){
+		for(j = 0; j < frameHeight; j++){
+			index = i*3 + j*totalWidth*3;
+
+			tmpB = lpPixels[index];
+			tmpG = lpPixels[index + 1];
+			tmpR = lpPixels[index + 2];
+
+			//skip mask color ref
+			if(tmpB == 255 && tmpG == 0 && tmpR == 255){
+				continue;
+			}
+
+			y = pow((tmpR/255.0),2.2)*0.2126 + pow((tmpG/255.0),2.2)*0.7152 + pow((tmpB/255.0),2.2)*0.0722;//pow(tmpR, gamma)*0.2126 + pow(tmpG, gamma)*0.7152 + pow(tmpB,gamma)*0.0722;
+			L = 116*pow(y,0.3333) - 16;
+
+			if(L > 255 || L < 0){
+				printf("bad L");
+				continue;
+			}
+
+			lpPixels[index] = L;
+			lpPixels[index + 1] = L;
+			lpPixels[index + 2] = L; //(int) ((tmpR + tmpG + tmpB) / 3)
+
+		}
+	}
+}
+
+void convertToGreyScale(HDC hdc, HDC hdcBuffer, animation * thisAnimation){
+	int i;
+
+	if(thisAnimation == NULL){
+		printf("NULL ANIMATION!!\n");fflush(stdout);
+		return;
+	}
+
+	printf("a\n");fflush(stdout);
+	BITMAPINFO bitMapInfo = {0};
+	bitMapInfo.bmiHeader.biSize = sizeof(bitMapInfo.bmiHeader);
+
+	printf("b\n");fflush(stdout);
+	HBITMAP thisImage = LoadImage(GetModuleHandle(NULL), thisAnimation->imageID, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+
+	printf("c\n");fflush(stdout);
+	//Fill out bitMapInfo
+	if(!GetDIBits(hdcBuffer, thisImage, 0, 0, NULL, &bitMapInfo, DIB_RGB_COLORS)){
+		printf("Couldint get the bitMapInfo.\n");
+		return;
+	}
+
+	printf("d\n");fflush(stdout);
+	//Create pixel buffer
+	char * lpPixels = malloc(sizeof(char)*(bitMapInfo.bmiHeader.biSizeImage));
+
+	printf("e\n");fflush(stdout);
+	bitMapInfo.bmiHeader.biCompression = BI_RGB;
+	bitMapInfo.bmiHeader.biHeight = abs(bitMapInfo.bmiHeader.biHeight);
+
+	printf("f\n");fflush(stdout);
+	int result = GetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS);
+
+	if(result == 0){
+		printf("Couldint get the bitmap.\n");
+		free(lpPixels);
+		return;
+	}
+
+	makeImageGreyscale(thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
+
+	if(!SetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS)){
+		printf("Couldn't set the bitmap.\n");
+		free(lpPixels);
+		return;
+	}
+
+	thisAnimation->image = thisImage;
+	thisAnimation->imageMask = CreateBitmapMask(thisAnimation->image, RGB(255, 0, 255));
+	free(lpPixels);
 }
 
 void rotateAnimationFrames(HDC hdc, HDC hdcBuffer, animation * thisAnimation, int direction){

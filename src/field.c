@@ -549,8 +549,8 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 	mapInfo * thisMapInfo = getMapInfoFromRegistry(mapID);
 
 	loadGroups(thisGroupContainer, thisMapInfo, thisField);
-
 	addItemsToField(thisMapInfo, thisField);
+	thisField->isDark = thisMapInfo->isDark;
 
 	makeTransitSpaces(transitMap, directory, thisField, player);
 
@@ -558,6 +558,7 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 
 	free(fullMapName);
 
+	printf("done loading map!");
 	return thisField;
 }
 
@@ -586,6 +587,7 @@ destroyField(field * thisField, individual * player){
 			}
 		}
 	}
+	free(thisField->playerCords);
 
 	free(thisField);
 }
@@ -807,6 +809,9 @@ field* initField(char* fieldFileName){
 			backgroundCharacter->thisAnimationContainer = initAnimationContainer();
 			backgroundCharacter->thisAnimationContainer->animationsEnabled = 1;
 			backgroundCharacter->thisAnimationContainer->defaultAnimation = 0;
+			backgroundCharacter->darkAnimationContainer = initAnimationContainer();
+			backgroundCharacter->darkAnimationContainer->animationsEnabled = 1;
+			backgroundCharacter->darkAnimationContainer->defaultAnimation = 0;
 			backgroundCharacter->secondaryAnimationContainer = NULL;
 
 			if(spaceType == 'c'
@@ -865,6 +870,10 @@ field* initField(char* fieldFileName){
 	thisField->currentSpaceInventory->inventorySize = 0;
 	thisField->currentSpaceInventory->MAX_ITEMS = 40;
 
+	thisField->playerCords = malloc(sizeof(cord));
+	thisField->playerCords->x = 0;
+	thisField->playerCords->y = 0;
+
 	for(i = 0; i < 1000; i++){
 		thisField->thisFieldInventory->inventoryArr[i] = NULL;
 		if(i < 40){
@@ -878,55 +887,64 @@ field* initField(char* fieldFileName){
 	return thisField;
 }
 
-void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* this_field){
+void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* thisField){
 	int x, y, i;
 
-	for (y = 0; y < this_field->totalY; y++) {
-		for (x = 0; x < this_field->totalX; x++) {
-			character * tmpBackground = this_field->grid[x][y]->background;
+	for (y = 0; y < thisField->totalY; y++) {
+		for (x = 0; x < thisField->totalX; x++) {
+			character * tmpBackground = thisField->grid[x][y]->background;
 
-			if(tmpBackground->direction > 0){
-				rotateAnimationFrames(hdc, hdcBuffer, tmpBackground->thisAnimationContainer->animations[tmpBackground->thisAnimationContainer->currentAnimation], tmpBackground->direction);
+			animation * defaultAnimation = tmpBackground->thisAnimationContainer->animations[tmpBackground->thisAnimationContainer->currentAnimation];
+
+			if(thisField->isDark){
+				animation * greyScaleAnimation = cloneAnimation(defaultAnimation);
+				addAnimationToContainer(tmpBackground->darkAnimationContainer, greyScaleAnimation);
 			}
 
-//			for(i = 0; i < tmpBackground->thisAnimationContainer->numAnimations; i++){
-//				fuseImageWithMask(tmpBackground->thisAnimationContainer->animations[i]);
-//			}
+			if(tmpBackground->direction > 0){
+				rotateAnimationFrames(hdc, hdcBuffer, defaultAnimation, tmpBackground->direction);
+
+				if(thisField->isDark){
+					printf("dark, rotate\n");fflush(stdout);
+					rotateAnimationFrames(hdc, hdcBuffer, tmpBackground->darkAnimationContainer->animations[tmpBackground->darkAnimationContainer->currentAnimation], tmpBackground->direction);
+				}
+			}
+
+			if(thisField->isDark){
+				printf("dark, greyscale\n");fflush(stdout);
+				animation * tmpAnimation = tmpBackground->darkAnimationContainer->animations[tmpBackground->darkAnimationContainer->defaultAnimation];
+				printf("default: %d \n", tmpBackground->darkAnimationContainer->defaultAnimation);fflush(stdout);
+				convertToGreyScale(hdc, hdcBuffer, tmpAnimation);
+			}
 		}
 	}
 }
 
-void drawField(HDC hdc, HDC hdcBuffer, field* this_field, shiftData * viewShift){
+void drawField(HDC hdc, HDC hdcBuffer, field* thisField, shiftData * viewShift){
 	int x, y, i;
 
-	printf("WANT: draw\n"); fflush(stdout);
-	while(!tryGetFieldReadLock()){}
-	printf("GOT: draw\n");fflush(stdout);
-
-	for (y = 0; y < this_field->totalY; y++) {
-		for (x = 0; x < this_field->totalX; x++) {
-			character * tmpBackground = this_field->grid[x][y]->background;
+	for (y = 0; y < thisField->totalY; y++) {
+		for (x = 0; x < thisField->totalX; x++) {
+			character * tmpBackground = thisField->grid[x][y]->background;
 			updateAnimation(tmpBackground);
 
-			drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
-//			drawFusedAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
+			if(thisField->isDark && thisField->playerLoS < max(abs(thisField->playerCords->x - x), abs(thisField->playerCords->y - y))){
+				drawCharacterAnimationGreyscale(hdc, hdcBuffer, tmpBackground, viewShift, 0);
+			}else{
+				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
+			}
 		}
 	}
-
-	releaseFieldReadLock();
-	printf("RELEASED: draw\n"); fflush(stdout);
 }
 
 void drawItemsFromField(HDC hdc, HDC hdcBuffer, field * thisField, shiftData * viewShift){
 	int i, numDrawn = 0;
 
 	printf("WANT: DRAW ITEMS\n");fflush(stdout);
-	while(!tryGetFieldReadLock()){}; //order matters, field then inventory
 	while(!tryGetFieldInventoryReadLock()){}
 	printf("GOT: DRAW ITEMS\n");fflush(stdout);
 	if(thisField->thisFieldInventory == NULL){
 		releaseFieldInventoryReadLock();
-		releaseFieldReadLock();
 		printf("RELEASED: DRAW ITEMS\n");fflush(stdout);
 		return;
 	}
@@ -934,7 +952,13 @@ void drawItemsFromField(HDC hdc, HDC hdcBuffer, field * thisField, shiftData * v
 	for(i = 0; i < 1000; i++){
 
 		if(thisField->thisFieldInventory->inventoryArr[i] != NULL){
-			drawCharacterAnimation(hdc, hdcBuffer, thisField->thisFieldInventory->inventoryArr[i]->itemCharacter, viewShift);
+
+			if(!thisField->isDark || thisField->playerLoS >= max(
+					abs(thisField->playerCords->x - thisField->thisFieldInventory->inventoryArr[i]->itemCharacter->x),
+					abs(thisField->playerCords->y - thisField->thisFieldInventory->inventoryArr[i]->itemCharacter->y))){
+				drawCharacterAnimation(hdc, hdcBuffer, thisField->thisFieldInventory->inventoryArr[i]->itemCharacter, viewShift);
+			}
+
 			numDrawn++;
 		}
 
@@ -946,7 +970,6 @@ void drawItemsFromField(HDC hdc, HDC hdcBuffer, field * thisField, shiftData * v
 	}
 
 	releaseFieldInventoryReadLock();
-	releaseFieldReadLock();
 	printf("RELEASED: DRAW ITEMS\n");fflush(stdout);
 }
 
@@ -1051,6 +1074,7 @@ mapInfo * initMapInfo(){
 	newMapInfo->numIndividuals = 0;
 	newMapInfo->MAX_ITEMS = 500;
 	newMapInfo->numItems = 0;
+	newMapInfo->isDark = 0;
 
 	return newMapInfo;
 }
@@ -1124,6 +1148,9 @@ void createMapInfoFromLine(mapInfo * thisMapInfo, char * line){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(thisMapInfo->mapName, value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisMapInfo->isDark = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	parseMapIndividualsFromLine(thisMapInfo, value);

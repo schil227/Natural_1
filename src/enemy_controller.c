@@ -821,7 +821,7 @@ int isInLineOfSight(individual * thisIndividual, individual * targetIndividual, 
 	if( (targetIndividual->isSneaking  && isGreaterThanPercentage( weightedRand  + getAttributeSum(targetIndividual, "DEX") * 10, 100, 60)) || isGreaterThanPercentage( weightedRand, 100, 90) ){
 		return 0;
 	}
-	cordArr * thisCordArr = cordsBetweenTwoIndividuals(thisIndividual, targetIndividual, thisIndividual->LoS);
+	cordArr * thisCordArr = cordsBetweenTwoIndividuals(thisIndividual, targetIndividual, thisField->isDark? getAttributeSum(thisIndividual, "darkLoS") : getAttributeSum(thisIndividual, "LoS"));
 
 	if(thisCordArr == NULL){
 		return 0;
@@ -1954,7 +1954,7 @@ int controlledPlayerAction(individual * player, groupContainer * thisGroupContai
 
 	if(hasActiveStatusEffect(player, STATUS_BERZERK)){
 
-		findDangerousIndividualNearBy(player, player, thisGroupContainer, thisField, 8);
+		findDangerousIndividualNearBy(player, player, thisGroupContainer, thisField, thisField->isDark? getAttributeSum(player, "darkLoS") : getAttributeSum(player, "LoS"));
 
 		if(player->targetedIndividual != NULL){
 			player->targetedDuration = 0;
@@ -1979,7 +1979,7 @@ int berzerkIndividualAction(individual * thisIndividual, individual * player, gr
 			return attackModule(thisIndividual, player, thisGroupContainer, thisField);
 		}
 	}else if(thisIndividual->currentGroupType == GROUP_GUARDS || thisIndividual->currentGroupType == GROUP_NPCS){
-		findDangerousIndividualNearBy(thisIndividual, player, thisGroupContainer, thisField, 8);
+		findDangerousIndividualNearBy(thisIndividual, player, thisGroupContainer, thisField, thisField->isDark? getAttributeSum(player, "darkLoS") : getAttributeSum(player, "LoS"));
 
 		if(thisIndividual->targetedIndividual != NULL){
 			thisIndividual->targetedDuration = 0;
@@ -2298,7 +2298,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 			return 0;
 		}
 
-		individualGroup * alliesInRange = getAlliesInRange(enemy, thisField, 8);
+		individualGroup * alliesInRange = getAlliesInRange(enemy, thisField, thisField->isDark? getAttributeSum(enemy, "darkLoS") : getAttributeSum(enemy, "LoS"));
 
 		if(selectHealingAbility(enemy)){
 			individual * ally  = allyRequiringHealing(enemy, alliesInRange);
@@ -2395,7 +2395,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 	}
 
 	if(inActionMode){
-		findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField, 8);
+		findDangerousIndividualNearBy(guard, player, thisGroupContainer, thisField, thisField->isDark? getAttributeSum(guard, "darkLoS") : getAttributeSum(guard, "LoS"));
 	}
 
 	if(guard->targetedIndividual == NULL){
@@ -2615,7 +2615,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 			return 0;
 		}
 
-		individualGroup * alliesInRange = getAlliesInRange(guard, thisField, 8);
+		individualGroup * alliesInRange = getAlliesInRange(guard, thisField, thisField->isDark? getAttributeSum(guard, "darkLoS") : getAttributeSum(guard, "LoS"));
 
 		if(selectHealingAbility(guard)){
 			individual * ally  = allyRequiringHealing(guard, alliesInRange);
@@ -2940,7 +2940,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 	}
 
 	if(inActionMode){
-		findTargetIndividualForAlly(ally, player, thisGroupContainer, thisField, 8);
+		findTargetIndividualForAlly(ally, player, thisGroupContainer, thisField, thisField->isDark? getAttributeSum(ally, "darkLoS") : getAttributeSum(ally, "LoS"));
 	}
 
 	if(ally->targetedIndividual == NULL){
@@ -3140,7 +3140,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 			return 0;
 		}
 
-		individualGroup * alliesInRange = getAlliesInRange(ally, thisField, 8);
+		individualGroup * alliesInRange = getAlliesInRange(ally, thisField, thisField->isDark? getAttributeSum(ally, "darkLoS") : getAttributeSum(ally, "LoS"));
 
 		if(selectHealingAbility(ally)){
 			individual * allyToHeal  = allyRequiringHealing(ally, alliesInRange);
@@ -3241,7 +3241,7 @@ int npcAction(individual * npc, individual * player, groupContainer * thisGroupC
 
 	if(inActionMode){
 		//set target to nearby enemy in line of sight, if not disable isSurrounded
-		findDangerousIndividualNearBy(npc, player, thisGroupContainer, thisField, 8);
+		findDangerousIndividualNearBy(npc, player, thisGroupContainer, thisField, thisField->isDark? getAttributeSum(npc, "darkLoS") : getAttributeSum(npc, "LoS"));
 	}
 
 	if(npc->targetedIndividual != NULL){
