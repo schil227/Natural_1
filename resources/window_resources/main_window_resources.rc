@@ -80,6 +80,8 @@ END
 1517 BITMAP DISCARDABLE "../images/sleeping_mode.bmp"
 1518 BITMAP DISCARDABLE "../images/sneaking_mode.bmp"
 
+1519  BITMAP DISCARDABLE "../images/look_background.bmp"
+1520  BITMAP DISCARDABLE "../images/view.bmp"
 //Base character images 2000 - 2500
 2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001
 2002 BITMAP DISCARDABLE "../images/human_attack_slash.bmp"

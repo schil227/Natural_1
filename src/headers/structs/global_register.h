@@ -15,6 +15,11 @@
 #include<stdio.h>
 
 typedef struct {
+	int ID;
+	char description[256];
+} descriptionMap;
+
+typedef struct {
 	unsigned int existanceArray[1000];
 	int sizeOfInt;
 
@@ -29,6 +34,7 @@ typedef struct {
 	ability * targetedAbilities[100];
 	ability * instantAbilities[100];
 	mapInfo * mapInfoArr[1000];
+	descriptionMap * descriptions[500];
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
@@ -65,6 +71,9 @@ typedef struct {
 
 	int numMaps;
 	int MAX_MAPS;
+
+	int numDescriptions;
+	int MAX_DESCRIPTIONS;
 } globalRegister;
 
 #endif /* SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_ */

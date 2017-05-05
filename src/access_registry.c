@@ -22,6 +22,8 @@ void initLockAuth(){
 	thisLockAuth->individualGroupWriteLock = 0;
 	thisLockAuth->dialogReadLock = 0;
 	thisLockAuth->dialogWriteLock = 0;
+	thisLockAuth->lookReadLock = 0;
+	thisLockAuth->lookWriteLock = 0;
 }
 
 int tryGetFieldReadLock(){
@@ -178,6 +180,32 @@ void releaseDialogReadLock(){
 
 void releaseDialogWriteLock(){
 	thisLockAuth->dialogWriteLock = 0;
+}
+
+int tryGetLookReadLock(){
+	if(thisLockAuth->lookReadLock== 0){
+		thisLockAuth->lookReadLock = 1;
+		return 1;
+	}
+
+	return 0;
+}
+
+int tryGetLookWriteLock(){
+	if(thisLockAuth->lookWriteLock == 0){
+		thisLockAuth->lookWriteLock = 1;
+		return 1;
+	}
+
+	return 0;
+}
+
+void releaseLookReadLock(){
+	thisLockAuth->lookReadLock = 0;
+}
+
+void releaseLookWriteLock(){
+	thisLockAuth->lookWriteLock = 0;
 }
 
 lockAuthority * getLockAuthDEBUG(){

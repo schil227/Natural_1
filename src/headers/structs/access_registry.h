@@ -26,6 +26,10 @@ typedef struct{
 
 	volatile int dialogReadLock;
 	volatile int dialogWriteLock;
+
+	volatile int lookReadLock;
+	volatile int lookWriteLock;
+
 } lockAuthority;
 
 #endif /* SRC_HEADERS_STRUCTS_ACCESS_REGISTRY_H_ */

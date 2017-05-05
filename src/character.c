@@ -388,7 +388,7 @@ void drawUnboundCharacterAbsolute(HDC hdc, HDC hdcBuffer, int x, int y, fixedCha
 	DeleteDC(hdcMem);
 }
 
-void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, fixedCharacter * thisCharacter, shiftData * viewShift){
+void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, fixedCharacter * thisCharacter){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCharacter->fixedImageMask);
 
@@ -596,7 +596,7 @@ void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, ch
 	DeleteDC(hdcMem);
 }
 
-void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int xCord, int yCord, int useSecondaryAnimationContainer){
+void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharacter, int xCord, int yCord, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	HBITMAP image, imageMask;
 

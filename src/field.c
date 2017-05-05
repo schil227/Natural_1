@@ -741,7 +741,7 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 	return 0;
 }
 
-void populateCurrentSpaceInventory(field * thisField, individual * thisIndividual){
+void populateCurrentSpaceInventory(field * thisField, int x, int y){
 	int i, itemsPassed = 0;
 	item * tmpItem;
 
@@ -757,8 +757,7 @@ void populateCurrentSpaceInventory(field * thisField, individual * thisIndividua
 			if(tmpItem != NULL){
 				itemsPassed++;
 
-				if(tmpItem->itemCharacter->x == thisIndividual->playerCharacter->x &&
-						tmpItem->itemCharacter->y == thisIndividual->playerCharacter->y){
+				if(tmpItem->itemCharacter->x == x && tmpItem->itemCharacter->y == y){
 					addItemToInventory(thisField->currentSpaceInventory, tmpItem);
 				}
 

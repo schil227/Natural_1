@@ -1,0 +1,232 @@
+/*
+ * look_view.c
+ *
+ *  Created on: May 3, 2017
+ *      Author: Adrian
+ */
+#include "./headers/look_view_pub_methods.h"
+
+static lookView * thisLookView;
+
+void initLookView(int imageID, int enterImageID){
+	thisLookView = malloc(sizeof(lookView));
+
+	thisLookView->inLookMode = 0;
+	thisLookView->inLookScrollMode = 0;
+	thisLookView->currentLookDataIndex = 0;
+	thisLookView->numLookData = 0;
+	thisLookView->MAX_LOOKDATA = 50;
+
+	thisLookView->mainWindow = createCharacter(imageID, RGB(255,0,255), 0, 0);
+	thisLookView->upScrollArrow = createCharacter(1505, RGB(255,0,255), 0, 0);
+	thisLookView->downScrollArrow = createCharacter(1507, RGB(255,0,255), 0, 0);
+	thisLookView->enterImage = createCharacter(enterImageID, RGB(255,0,255), 0, 0);
+	thisLookView->frame = createCharacter(1506, RGB(255,0,255), 0, 0);
+}
+
+void destroyLookView(){
+	int i;
+
+	for(i = 0; i < thisLookView->numLookData; i++){
+		free(thisLookView->thisLookData[i]);
+	}
+
+	destroyFixedCharacter(thisLookView->mainWindow);
+	destroyFixedCharacter(thisLookView->upScrollArrow);
+	destroyFixedCharacter(thisLookView->downScrollArrow);
+	destroyFixedCharacter(thisLookView->enterImage);
+	destroyFixedCharacter(thisLookView->frame);
+
+	free(thisLookView);
+}
+
+int inLookMode(){
+	return thisLookView->inLookMode;
+}
+
+void enableLookMode(){
+	thisLookView->inLookMode = 1;
+}
+
+void disableLookMode(){
+	thisLookView->inLookMode = 0;
+}
+
+int inLookViewScrollMode(){
+	return thisLookView->inLookScrollMode;
+}
+
+void enableLookScrollMode(){
+	thisLookView->inLookScrollMode = 1;
+}
+
+void disableLookScrollMode(){
+	thisLookView->inLookScrollMode = 0;
+}
+
+void moveLookIndexUp(){
+	if(thisLookView->currentLookDataIndex > 0){
+		thisLookView->currentLookDataIndex--;
+	}
+}
+
+void moveLookIndexDown(){
+	if(thisLookView->numLookData > 3 && thisLookView->currentLookDataIndex < thisLookView->numLookData - 3){
+		thisLookView->currentLookDataIndex++;
+	}
+}
+
+void drawLookData(HDC hdc, HDC hdcBuffer, RECT * rect){
+	int i;
+	int xOff = thisLookView->enterImage->fixedWidth + 5;
+	int yOff = thisLookView->enterImage->fixedHeight + 2;
+
+	RECT textBoxRect;
+
+	for(i = 0; i < min(thisLookView->numLookData, 3); i++){
+		int index = i + thisLookView->currentLookDataIndex;
+		int adjustedY = (rect->bottom - thisLookView->mainWindow->fixedHeight + (yOff + i*100 + 5));
+
+		textBoxRect.top = adjustedY + 40;
+		textBoxRect.bottom = textBoxRect.top + 30;
+		textBoxRect.left = xOff + 130;
+		textBoxRect.right = textBoxRect.left + 200;
+
+		switch(thisLookView->thisLookData[index]->thisType){
+			case LOOK_INDIVIDUAL:
+				drawUnboundCharacterByPixels(hdc, hdcBuffer,
+									xOff + 25,
+									adjustedY + 25,
+									thisLookView->frame);
+
+				drawUnboundAnimationByPixels(hdc, hdcBuffer, thisLookView->thisLookData[index]->thisCharacter, xOff, adjustedY, 0);
+				break;
+			case LOOK_ITEM:
+				drawUnboundCharacterByPixels(hdc, hdcBuffer,
+									xOff + 25,
+									adjustedY + 25,
+									thisLookView->frame);
+
+				drawUnboundAnimationByPixels(hdc, hdcBuffer, thisLookView->thisLookData[index]->thisCharacter, xOff, adjustedY, 0);
+				break;
+			case LOOK_SPACE:
+				drawUnboundAnimationByPixels(hdc, hdcBuffer, thisLookView->thisLookData[index]->thisCharacter, xOff, adjustedY, 0);
+				break;
+		}
+
+		//neatly print text next to it
+		SetTextColor(hdcBuffer, RGB(255, 200, 0));
+		SetBkMode(hdcBuffer, TRANSPARENT);
+		DrawText(hdcBuffer, thisLookView->thisLookData[index]->description, -1, &textBoxRect, DT_SINGLELINE);
+		SetTextColor(hdcBuffer, RGB(0, 0, 0));
+	}
+}
+
+void drawLookView(HDC hdc, HDC hdcBuffer, RECT * rect){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+
+	SelectObject(hdcMem, thisLookView->mainWindow->fixedImage);
+
+	StretchBlt(hdcBuffer,
+			0, rect->bottom - thisLookView->mainWindow->fixedHeight,
+			rect->right, thisLookView->mainWindow->fixedHeight,
+			hdcMem,
+			0,0, thisLookView->mainWindow->fixedWidth, thisLookView->mainWindow->fixedHeight,
+			SRCCOPY);
+
+	if(!thisLookView->inLookScrollMode){
+		SelectObject(hdcMem, thisLookView->enterImage->fixedImage);
+
+		BitBlt(hdcBuffer, 0, rect->bottom - thisLookView->mainWindow->fixedHeight,
+				thisLookView->enterImage->fixedWidth, thisLookView->enterImage->fixedHeight,
+				hdcMem, 0, 0, SRCCOPY);
+	}
+
+	//draw down arrow
+	if(thisLookView->currentLookDataIndex - thisLookView->numLookData > 0){
+		drawUnboundCharacterAbsolute(hdc, hdcBuffer,
+				thisLookView->enterImage->fixedWidth + 7,
+				rect->bottom - (thisLookView->downScrollArrow->fixedHeight + 7),
+				thisLookView->downScrollArrow);
+	}
+
+	//draw up arrow
+	if(thisLookView->currentLookDataIndex > 0){
+		drawUnboundCharacterAbsolute(hdc, hdcBuffer,
+				thisLookView->enterImage->fixedWidth + 7,
+				rect->bottom - thisLookView->mainWindow->fixedHeight + (thisLookView->downScrollArrow->fixedHeight + 7),
+				thisLookView->upScrollArrow);
+	}
+
+	DeleteDC(hdcMem);
+
+	if(thisLookView->numLookData > 0){
+		drawLookData(hdc, hdcBuffer, rect);
+	}
+}
+
+void clearLookData(){
+	int i;
+
+	for(i = 0; i < thisLookView->numLookData; i++){
+		free(thisLookView->thisLookData[i]);
+		thisLookView->thisLookData[i] = NULL;
+	}
+
+	thisLookView->numLookData = 0;
+}
+
+void addLookDataToInstance(lookType thisType, character * thisCharacter, char * description){
+	lookData * thisLookData;
+
+	if(thisLookView->numLookData >= thisLookView->MAX_LOOKDATA){
+		return;
+	}
+
+	thisLookData = malloc(sizeof(lookData));
+	thisLookData->thisType = thisType;
+	thisLookData->thisCharacter = thisCharacter;
+	strcpy(thisLookData->description, description);
+
+	thisLookView->thisLookData[thisLookView->numLookData] = thisLookData;
+	thisLookView->numLookData++;
+}
+
+void populateLookDataInstance(field * thisField, int x, int y){
+	int i;
+
+	while(!tryGetLookReadLock()){}
+	while(!tryGetLookWriteLock()){}
+
+	clearLookData();
+
+	individual * tmpIndividual = getIndividualFromField(thisField, x, y);
+	populateCurrentSpaceInventory(thisField, x, y);
+
+	if(tmpIndividual != NULL){
+		addLookDataToInstance(LOOK_INDIVIDUAL, tmpIndividual->playerCharacter, tmpIndividual->name);
+	}
+
+	item * tmpItem;
+	for(i = 0; i < thisField->currentSpaceInventory->inventorySize; i++){
+		tmpItem = thisField->currentSpaceInventory->inventoryArr[i];
+
+		if(tmpItem != NULL){
+			addLookDataToInstance(LOOK_ITEM, tmpItem->itemCharacter, tmpItem->name);
+		}
+	}
+
+	space * tmpSpace = getSpaceFromField(thisField, x, y);
+
+	if(tmpSpace != NULL){
+		int id = tmpSpace->background->thisAnimationContainer->animations[tmpSpace->background->thisAnimationContainer->defaultAnimation]->imageID;
+		char * spaceDescription = getDescriptionFromID(id);
+
+		if(spaceDescription != NULL){
+			addLookDataToInstance(LOOK_SPACE, tmpSpace->background, spaceDescription);
+		}
+	}
+
+	releaseLookWriteLock();
+	releaseLookReadLock();
+}

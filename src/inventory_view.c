@@ -108,14 +108,14 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 	RECT textBoxRect;
 		textBoxRect.bottom = thisInventoryView->inventoryBackground->fixedHeight + thisInventoryView->inventoryBackground->y;
 		textBoxRect.top =  thisInventoryView->inventoryBackground->y+60;
-		textBoxRect.right = thisInventoryView->inventoryBackground->fixedWidth + thisInventoryView->inventoryBackground->x;
-		textBoxRect.left = thisInventoryView->inventoryBackground->x + 85;
+		textBoxRect.right = thisInventoryView->inventoryBackground->fixedWidth + thisInventoryView->inventoryBackground->x + 10;
+		textBoxRect.left = thisInventoryView->inventoryBackground->x + 95;
 
 	//draw inventory view
 	drawUnboundCharacterByPixels(hdc, hdcBuffer,
 		thisInventoryView->inventoryBackground->x,
 		thisInventoryView->inventoryBackground->y,
-		thisInventoryView->inventoryBackground, viewShift);
+		thisInventoryView->inventoryBackground);
 
 	for(i = 0; i < thisInventoryView->slotsPerScreen; i++){
 		if(thisInventoryView->viewedItems[i] != NULL){
@@ -127,11 +127,11 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 
 			drawUnboundCharacterByPixels(hdc, hdcBuffer,
 					thisInventoryView->inventoryBackground->x + 40,
-					thisInventoryView->inventoryBackground->y + 50 + 50 * i,
-					thisInventoryView->itemFrame, viewShift);
+					thisInventoryView->inventoryBackground->y + 40 + 60 * i,
+					thisInventoryView->itemFrame);
 
-			drawUnboundAnimationByPixels(hdc, hdcBuffer, thisInventoryView->viewedItems[i]->itemCharacter, viewShift,
-					thisInventoryView->inventoryBackground->x+10, thisInventoryView->inventoryBackground->y + 20+50*i, 1);
+			drawUnboundAnimationByPixels(hdc, hdcBuffer, thisInventoryView->viewedItems[i]->itemCharacter,
+					thisInventoryView->inventoryBackground->x+15, thisInventoryView->inventoryBackground->y + 15 + 60*i, 1);
 
 //			//draw item frame
 //			drawUnboundCharacterByPixels(hdc, hdcBuffer,
@@ -162,15 +162,14 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 			}
 
 			SetTextColor(hdcBuffer, RGB(0, 0, 0));
-			textBoxRect.top = textBoxRect.top + 50;
+			textBoxRect.top = textBoxRect.top + 60;
 
 			//draw selection arrow
 			if(thisInventoryView->selectedItemIndex == i){
 				drawUnboundCharacterByPixels(hdc, hdcBuffer,
 					thisInventoryView->inventoryBackground->x+20,
-					thisInventoryView->inventoryBackground->y + 62+50*i,
-					thisInventoryView->selectArrow,
-					viewShift);
+					thisInventoryView->inventoryBackground->y + 62+60*i,
+					thisInventoryView->selectArrow);
 			}
 		}
 	}
@@ -179,17 +178,15 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer,
 							thisInventoryView->inventoryBackground->x+100,
 							thisInventoryView->inventoryBackground->y +
-								thisInventoryView->inventoryBackground->fixedHeight - 40,
-							thisInventoryView->scrollDownArrow,
-							viewShift);
+								thisInventoryView->inventoryBackground->fixedHeight - 30,
+							thisInventoryView->scrollDownArrow);
 	}
 
 	if(canScrollUp()){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer,
 							thisInventoryView->inventoryBackground->x+100,
-							thisInventoryView->inventoryBackground->y + 20,
-							thisInventoryView->scrollUpArrow,
-							viewShift);
+							thisInventoryView->inventoryBackground->y + 15,
+							thisInventoryView->scrollUpArrow);
 	}
 }
 

@@ -36,12 +36,18 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			GetClientRect(hwnd, &rect);
 			if(canMoveCursor(player)){
 				moveCursor(main_field,direction, viewShift, &rect);
+
+				if(getCursorMode() == CURSOR_LOOK){
+					populateLookDataInstance(main_field, getCursorX(), getCursorY());
+				}
 			}
 			break;
 		}
 		case 0x1B: //escape
 			if (getCursorMode() == CURSOR_ABILITY){
 				player->activeAbilities->selectedAbility = NULL;
+			}else if(getCursorMode() == CURSOR_LOOK){
+				disableLookMode();
 			}
 
 			toggleInCursorMode();
@@ -178,6 +184,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 //				cwrite(outLog);
 
 				toggleInCursorMode();
+			}else if(CURSOR_LOOK){
+				enableLookScrollMode();
 			}
 
 		}
@@ -428,6 +436,43 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 	return 0;
 }
 
+int lookViewScrollLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	switch(msg){
+	case WM_KEYDOWN: {
+		switch(LOWORD(wParam)){
+		case 0x38:
+		case 0x68: {
+			moveLookIndexUp();
+		}
+			break;
+
+		case 0x32:
+		case 0x62: {
+			moveLookIndexDown();
+
+		}
+			break;
+
+		case 0x1B: //escape
+		{
+			disableLookScrollMode();
+		}
+			break;
+		}
+	break;
+	}
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		destroyTheGlobalRegister();
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+}
+
 int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode) {
 	switch (msg) {
 	case WM_KEYDOWN: {
@@ -443,7 +488,6 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 			selectNextItemDown();
 
 		}
-			break;
 			break;
 		case 0x1B: //escape
 			disableInventoryViewMode();
@@ -528,7 +572,7 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 						break;
 					}
 
-					populateCurrentSpaceInventory(main_field, player);
+					populateCurrentSpaceInventory(main_field, player->playerCharacter->x, player->playerCharacter->y);
 
 					if(main_field->currentSpaceInventory->inventorySize >= 10){
 						cwrite("Can't drop, too many items.");

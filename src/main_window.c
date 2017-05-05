@@ -17,6 +17,7 @@
 #include"./headers/console_pub_methods.h"
 #include"./headers/dialog_pub_methods.h"
 #include"./headers/sound_pub_methods.h"
+#include "./headers/look_view_pub_methods.h"
 
 //Debug timing data
 //
@@ -339,13 +340,9 @@ void drawAll(HDC hdc, RECT* prc) {
 	printf("GOT: dark\n");fflush(stdout);
 
 	if(main_field->isDark){
-		printf("in dark mode\n");
 		main_field->playerLoS = getAttributeSum(player, "darkLoS");
-		printf("got los\n");
 		main_field->playerCords->x = player->playerCharacter->x;
-		printf("got x:%d\n", player->playerCharacter->x);fflush(stdout);
 		main_field->playerCords->y = player->playerCharacter->y;
-		printf("got y:%d\n", player->playerCharacter->y);fflush(stdout);
 	}
 
 	printf("draw field\n");
@@ -390,9 +387,15 @@ void drawAll(HDC hdc, RECT* prc) {
 		drawInventoryView(hdc, hdcBuffer, viewShift);
 	}
 
-	while(!tryGetConsoleReadLock()){}
-	drawThisConsole(hdc,hdcBuffer,prc);
-	releaseConsoleReadLock();
+	if(inLookMode()){
+		while(!tryGetLookReadLock()){}
+		drawLookView(hdc, hdcBuffer, prc);
+		releaseLookReadLock();
+	}else{
+		while(!tryGetConsoleReadLock()){}
+		drawThisConsole(hdc,hdcBuffer,prc);
+		releaseConsoleReadLock();
+	}
 
 	drawThisSideBar(hdc, hdcBuffer, prc, player);
 
@@ -588,11 +591,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "mapInfo.txt");
+		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "mapInfo.txt", "descriptionLookup.txt");
 		loadDialog("dialog.txt", mapDirectory);
 
 		initHudInstance();
 		initThisCursor(1508);
+		initLookView(1519, 1520);
 
 		enableSound();
 
@@ -759,7 +763,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x47://g key (get)
 			{
-				populateCurrentSpaceInventory(main_field, player);
+				populateCurrentSpaceInventory(main_field, player->playerCharacter->x, player->playerCharacter->y);
 
 				if(main_field->currentSpaceInventory->inventorySize == 1){
 					item * tmpItem = main_field->currentSpaceInventory->inventoryArr[0];
@@ -799,7 +803,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x4C://l key (inventory)
 			{
-				player->hp--;
+				toggleInCursorMode();
+				refreshCursor(CURSOR_LOOK, player->playerCharacter->x, player->playerCharacter->y);
+
+				populateLookDataInstance(main_field, player->playerCharacter->x, player->playerCharacter->y);
+
+				enableLookMode();
 			}
 			break;
 		case 0x4F://o key (inventory)
@@ -969,6 +978,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if(inAbilityViewMode()){
 		abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 		return 0;
+	}else if (inLookViewScrollMode()) {
+		return lookViewScrollLoop(hwnd, msg, wParam, lParam);
 	}else if (inCursorMode()) {
 		cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode, animateMoveSpeed);
 		return 0;
@@ -1150,12 +1161,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt", "test_onPickupTriggerMap.txt");
 
-	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "test_mapInfo.txt");
+	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "test_mapInfo.txt", "descriptionLookup.txt");
 
 	loadDialog("dialog.txt", mapTestDirectory);
 
 	initThisCursor(1508);
 	initSoundPlayerInstance();
+	initLookView(1519, 1520);
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;

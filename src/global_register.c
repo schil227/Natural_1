@@ -58,6 +58,9 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_MAPS = 1000;
 	thisGlobalRegister->numMaps = 0;
+
+	thisGlobalRegister->MAX_DESCRIPTIONS = 500;
+	thisGlobalRegister->numDescriptions = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -261,6 +264,22 @@ mapInfo * getMapInfoFromRegistry(int id){
 	return NULL;
 }
 
+char * getDescriptionFromID(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numDescriptions; i++){
+		if(thisGlobalRegister->descriptions[i]->ID == id){
+			return thisGlobalRegister->descriptions[i]->description;
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!DESCRIPTIONMAP NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
 int addIndividualToRegistry(individual * thisIndividual){
 	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
 		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
@@ -393,6 +412,18 @@ int addMapInfoToRegistry(mapInfo * thisMap){
 	return 0;
 }
 
+int addDescriptionMapToRegistry(descriptionMap * thisDescription){
+	if(thisGlobalRegister->numDescriptions < thisGlobalRegister->MAX_DESCRIPTIONS){
+		thisGlobalRegister->descriptions[thisGlobalRegister->numDescriptions] = thisDescription;
+		thisGlobalRegister->numDescriptions++;
+		return 1;
+	}
+
+	cwrite("!!MAX DESCRIPTIONMAPS IN REGISTRY!!");
+
+	return 0;
+}
+
 /*
  * TODO: On cutover, make sure destroy individual doesn't destroy items.
  * That will be handed at the registry level
@@ -416,6 +447,10 @@ void destroyTheGlobalRegister(){
 		free(thisGlobalRegister->mapInfoArr[i]);
 	}
 
+	for(i = 0; i < thisGlobalRegister->numDescriptions; i++){
+		free(thisGlobalRegister->descriptions[i]);
+	}
+
 //	for(i = 0; i < thisGlobalRegister->numEvents; i++){
 //		free(thisGlobalRegister->eventRegistry[i]);
 //	}
@@ -429,7 +464,7 @@ void destroyTheGlobalRegister(){
 }
 
 void loadGlobalRegister(char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
-						char * animationData, char * selfAbilitiesData, char * targetedAbilitiesData, char * mapInfo){
+						char * animationData, char * selfAbilitiesData, char * targetedAbilitiesData, char * mapInfo, char * descriptions){
 	// Priority loading:
 	//individuals dependant on xAbilities
 	loadSelfAbilitiesToRegistry(mapDirectory, selfAbilitiesData);
@@ -441,6 +476,7 @@ void loadGlobalRegister(char * mapDirectory, char * individualsData, char * item
 	loadEventsToRegistry(mapDirectory, eventsData);
 	loadSoundsToRegistry(mapDirectory, soundsData);
 	loadMapDataToRegistry(mapDirectory, mapInfo);
+	loadDescriptionsToRegistry(mapDirectory, descriptions);
 }
 
 void loadIndividualsToRegistry(char* directory, char * individualsFileName){
@@ -600,6 +636,37 @@ void loadMapDataToRegistry(char * directory, char * mapData){
 
 	fclose(FP);
 	free(fullFileName);
+}
+
+void loadDescriptionsToRegistry(char * directory, char * mapData){
+	char * fullFileName = appendStrings(directory, mapData);
+	FILE * FP = fopen(fullFileName, "r");
+	char line[272];
+
+	while(fgets(line,272,FP) != NULL){
+		if (line[0] != '#') {
+			descriptionMap * tmpDescription = malloc(sizeof(descriptionMap));
+			tmpDescription->ID = 0;
+			tmpDescription->description[0] = '\0';
+
+			createDescriptionMapFromLine(tmpDescription, line);
+			addDescriptionMapToRegistry(tmpDescription);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void createDescriptionMapFromLine(descriptionMap * tmpDescription, char * line){
+	char * strtok_save_pointer;
+	char * value;
+
+	value = strtok_r(line, ";", &strtok_save_pointer);
+	tmpDescription->ID = atoi(value);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	strcpy(tmpDescription->description, value);
 }
 
 int addClonedItemToRegistry(item * thisItem){
