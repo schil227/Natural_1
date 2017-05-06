@@ -14,6 +14,7 @@ typedef enum {LOOK_INDIVIDUAL, LOOK_ITEM, LOOK_SPACE} lookType;
 typedef struct{
 	lookType thisType;
 	character * thisCharacter;
+	individual * thisIndividual;
 	char description[256];
 } lookData;
 

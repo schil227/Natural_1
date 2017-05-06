@@ -399,9 +399,9 @@ void drawAll(HDC hdc, RECT* prc) {
 		releaseConsoleReadLock();
 
 		drawThisSideBar(hdc, hdcBuffer, prc, player);
-	}
 
-	drawHudNotifications(hdc, hdcBuffer, prc, player, inActionMode);
+		drawHudNotifications(hdc, hdcBuffer, prc, player, inActionMode);
+	}
 
 	//popups
 	if(inAbilityViewMode()){
@@ -808,7 +808,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				toggleInCursorMode();
 				refreshCursor(CURSOR_LOOK, player->playerCharacter->x, player->playerCharacter->y);
 
-				populateLookDataInstance(main_field, player->playerCharacter->x, player->playerCharacter->y);
+				populateLookDataInstance(main_field, player, player->playerCharacter->x, player->playerCharacter->y);
 
 				enableLookMode();
 			}

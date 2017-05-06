@@ -38,7 +38,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				moveCursor(main_field,direction, viewShift, &rect);
 
 				if(getCursorMode() == CURSOR_LOOK){
-					populateLookDataInstance(main_field, getCursorX(), getCursorY());
+					populateLookDataInstance(main_field, player, getCursorX(), getCursorY());
 				}
 			}
 			break;

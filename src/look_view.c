@@ -100,7 +100,7 @@ void drawLookData(HDC hdc, HDC hdcBuffer, RECT * rect, int top, int left){
 									adjustedY + 25,
 									thisLookView->frame);
 
-				drawUnboundAnimationByPixels(hdc, hdcBuffer, thisLookView->thisLookData[index]->thisCharacter, xOff, adjustedY, 0);
+				drawIndividualDefaultByPixels(hdc, hdcBuffer, thisLookView->thisLookData[index]->thisIndividual, xOff, adjustedY, 0);
 				break;
 			case LOOK_ITEM:
 				drawUnboundCharacterByPixels(hdc, hdcBuffer,
@@ -181,7 +181,7 @@ void clearLookData(){
 	thisLookView->currentLookDataIndex = 0;
 }
 
-void addLookDataToInstance(lookType thisType, character * thisCharacter, char * description){
+void addLookDataToInstance(lookType thisType, character * thisCharacter, individual * thisIndividual, char * description){
 	lookData * thisLookData;
 
 	if(thisLookView->numLookData >= thisLookView->MAX_LOOKDATA){
@@ -191,33 +191,40 @@ void addLookDataToInstance(lookType thisType, character * thisCharacter, char * 
 	thisLookData = malloc(sizeof(lookData));
 	thisLookData->thisType = thisType;
 	thisLookData->thisCharacter = thisCharacter;
+	thisLookData->thisIndividual = thisIndividual;
 	strcpy(thisLookData->description, description);
 
 	thisLookView->thisLookData[thisLookView->numLookData] = thisLookData;
 	thisLookView->numLookData++;
 }
 
-void populateLookDataInstance(field * thisField, int x, int y){
-	int i;
+void populateLookDataInstance(field * thisField, individual * player, int x, int y){
+	int i, darkLoS = 0;
 
 	while(!tryGetLookReadLock()){}
 	while(!tryGetLookWriteLock()){}
 
 	clearLookData();
 
+	if(thisField->isDark){
+		darkLoS = getAttributeSum(player, "darkLoS");
+	}
+
 	individual * tmpIndividual = getIndividualFromField(thisField, x, y);
 	populateCurrentSpaceInventory(thisField, x, y);
 
-	if(tmpIndividual != NULL){
-		addLookDataToInstance(LOOK_INDIVIDUAL, tmpIndividual->playerCharacter, tmpIndividual->name);
+	if(tmpIndividual != NULL && (!thisField->isDark || darkLoS >= max(abs(player->playerCharacter->x - x), abs(player->playerCharacter->y - y)))){
+		addLookDataToInstance(LOOK_INDIVIDUAL, NULL, tmpIndividual, tmpIndividual->name);
 	}
 
 	item * tmpItem;
-	for(i = 0; i < thisField->currentSpaceInventory->inventorySize; i++){
-		tmpItem = thisField->currentSpaceInventory->inventoryArr[i];
+	if(!thisField->isDark || darkLoS >= max(abs(player->playerCharacter->x - x), abs(player->playerCharacter->y - y))){
+		for(i = 0; i < thisField->currentSpaceInventory->inventorySize; i++){
+			tmpItem = thisField->currentSpaceInventory->inventoryArr[i];
 
-		if(tmpItem != NULL){
-			addLookDataToInstance(LOOK_ITEM, tmpItem->itemCharacter, tmpItem->name);
+			if(tmpItem != NULL){
+				addLookDataToInstance(LOOK_ITEM, tmpItem->itemCharacter, NULL, tmpItem->name);
+			}
 		}
 	}
 
@@ -228,7 +235,7 @@ void populateLookDataInstance(field * thisField, int x, int y){
 		char * spaceDescription = getDescriptionFromID(id);
 
 		if(spaceDescription != NULL){
-			addLookDataToInstance(LOOK_SPACE, tmpSpace->background, spaceDescription);
+			addLookDataToInstance(LOOK_SPACE, tmpSpace->background, NULL, spaceDescription);
 		}
 	}
 
