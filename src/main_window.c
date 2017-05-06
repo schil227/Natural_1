@@ -388,6 +388,8 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 
 	if(inLookMode()){
+		drawThisSideBar(hdc, hdcBuffer, prc, player);
+
 		while(!tryGetLookReadLock()){}
 		drawLookView(hdc, hdcBuffer, prc);
 		releaseLookReadLock();
@@ -395,9 +397,9 @@ void drawAll(HDC hdc, RECT* prc) {
 		while(!tryGetConsoleReadLock()){}
 		drawThisConsole(hdc,hdcBuffer,prc);
 		releaseConsoleReadLock();
-	}
 
-	drawThisSideBar(hdc, hdcBuffer, prc, player);
+		drawThisSideBar(hdc, hdcBuffer, prc, player);
+	}
 
 	drawHudNotifications(hdc, hdcBuffer, prc, player, inActionMode);
 

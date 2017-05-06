@@ -69,9 +69,6 @@ void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 	char goldOut[16];
 	sprintf(goldOut,"Gold: %d", player->gold);
 
-
-
-
 //	HFONT hfont = CreateFont(textYStep, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "Courier");
 //	HFONT oldfont = (HFONT)SelectObject(hdc, hfont);
 
@@ -113,6 +110,8 @@ void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 	rect.top += textYStep;
 //	SelectObject(hdc, oldfont);
 //	DeleteObject(hfont);
+
+	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
 

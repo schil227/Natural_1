@@ -62,6 +62,7 @@ void enableLookScrollMode(){
 
 void disableLookScrollMode(){
 	thisLookView->inLookScrollMode = 0;
+	thisLookView->currentLookDataIndex = 0;
 }
 
 void moveLookIndexUp(){
@@ -76,20 +77,20 @@ void moveLookIndexDown(){
 	}
 }
 
-void drawLookData(HDC hdc, HDC hdcBuffer, RECT * rect){
+void drawLookData(HDC hdc, HDC hdcBuffer, RECT * rect, int top, int left){
 	int i;
-	int xOff = thisLookView->enterImage->fixedWidth + 5;
+	int xOff = left + 15;
 	int yOff = thisLookView->enterImage->fixedHeight + 2;
 
 	RECT textBoxRect;
 
 	for(i = 0; i < min(thisLookView->numLookData, 3); i++){
 		int index = i + thisLookView->currentLookDataIndex;
-		int adjustedY = (rect->bottom - thisLookView->mainWindow->fixedHeight + (yOff + i*100 + 5));
+		int adjustedY = (top + (yOff + i*75 + 5));
 
 		textBoxRect.top = adjustedY + 40;
 		textBoxRect.bottom = textBoxRect.top + 30;
-		textBoxRect.left = xOff + 130;
+		textBoxRect.left = xOff + 100;
 		textBoxRect.right = textBoxRect.left + 200;
 
 		switch(thisLookView->thisLookData[index]->thisType){
@@ -123,45 +124,48 @@ void drawLookData(HDC hdc, HDC hdcBuffer, RECT * rect){
 }
 
 void drawLookView(HDC hdc, HDC hdcBuffer, RECT * rect){
+	int left = rect->right - thisLookView->mainWindow->fixedWidth;
+	int top = rect->bottom - thisLookView->mainWindow->fixedHeight;
+
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
 	SelectObject(hdcMem, thisLookView->mainWindow->fixedImage);
 
-	StretchBlt(hdcBuffer,
-			0, rect->bottom - thisLookView->mainWindow->fixedHeight,
+	BitBlt(hdcBuffer,
+			left,top,
 			rect->right, thisLookView->mainWindow->fixedHeight,
 			hdcMem,
-			0,0, thisLookView->mainWindow->fixedWidth, thisLookView->mainWindow->fixedHeight,
+			0,0,
 			SRCCOPY);
 
 	if(!thisLookView->inLookScrollMode){
 		SelectObject(hdcMem, thisLookView->enterImage->fixedImage);
 
-		BitBlt(hdcBuffer, 0, rect->bottom - thisLookView->mainWindow->fixedHeight,
+		BitBlt(hdcBuffer, left, top,
 				thisLookView->enterImage->fixedWidth, thisLookView->enterImage->fixedHeight,
 				hdcMem, 0, 0, SRCCOPY);
 	}
 
 	//draw down arrow
-	if(thisLookView->currentLookDataIndex - thisLookView->numLookData > 0){
+	if(thisLookView->currentLookDataIndex + 3 < thisLookView->numLookData){
 		drawUnboundCharacterAbsolute(hdc, hdcBuffer,
-				thisLookView->enterImage->fixedWidth + 7,
-				rect->bottom - (thisLookView->downScrollArrow->fixedHeight + 7),
+				left + 40,
+				rect->bottom - (thisLookView->downScrollArrow->fixedHeight + 10),
 				thisLookView->downScrollArrow);
 	}
 
 	//draw up arrow
 	if(thisLookView->currentLookDataIndex > 0){
 		drawUnboundCharacterAbsolute(hdc, hdcBuffer,
-				thisLookView->enterImage->fixedWidth + 7,
-				rect->bottom - thisLookView->mainWindow->fixedHeight + (thisLookView->downScrollArrow->fixedHeight + 7),
+				left + 40,
+				top + (thisLookView->upScrollArrow->fixedHeight + 7),
 				thisLookView->upScrollArrow);
 	}
 
 	DeleteDC(hdcMem);
 
 	if(thisLookView->numLookData > 0){
-		drawLookData(hdc, hdcBuffer, rect);
+		drawLookData(hdc, hdcBuffer, rect, top, left);
 	}
 }
 
@@ -174,6 +178,7 @@ void clearLookData(){
 	}
 
 	thisLookView->numLookData = 0;
+	thisLookView->currentLookDataIndex = 0;
 }
 
 void addLookDataToInstance(lookType thisType, character * thisCharacter, char * description){
