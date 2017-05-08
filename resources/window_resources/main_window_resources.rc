@@ -60,7 +60,7 @@ END
 1501 BITMAP DISCARDABLE "../images/dialog_box.bmp" //2012
 1502 BITMAP DISCARDABLE "../images/sidebar_bg.bmp" //2014
 
-	//inventory screen
+//inventory screen
 1503 BITMAP DISCARDABLE "../images/inventory_bg.bmp" //3000
 1504 BITMAP DISCARDABLE "../images/select_arrow.bmp" //3001
 1505 BITMAP DISCARDABLE "../images/scroll_up_arrow.bmp" //3002
@@ -69,6 +69,7 @@ END
 
 1508 BITMAP DISCARDABLE "../images/cursor.bmp" //2004
 
+//HUD flags
 1509 BITMAP DISCARDABLE "../images/action_mode.bmp"
 1510 BITMAP DISCARDABLE "../images/poisoned_mode.bmp"
 1511 BITMAP DISCARDABLE "../images/burning_mode.bmp"
@@ -79,12 +80,15 @@ END
 1516 BITMAP DISCARDABLE "../images/silenced_mode.bmp"
 1517 BITMAP DISCARDABLE "../images/sleeping_mode.bmp"
 1518 BITMAP DISCARDABLE "../images/sneaking_mode.bmp"
+1521 BITMAP DISCARDABLE "../images/hungry_mode.bmp"
+1522 BITMAP DISCARDABLE "../images/starving_mode.bmp"
 
+//Look view
 1519  BITMAP DISCARDABLE "../images/look_background.bmp"
 1520  BITMAP DISCARDABLE "../images/view.bmp"
 
-1521 BITMAP DISCARDABLE "../images/hungry_mode.bmp"
-1522 BITMAP DISCARDABLE "../images/starving_mode.bmp"
+//Pause view
+1523  BITMAP DISCARDABLE "../images/paused.bmp"
 
 //Base character images 2000 - 2500
 2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001

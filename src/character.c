@@ -364,30 +364,6 @@ void destroyFixedCharacter(fixedCharacter * thisCharacter){
 	free(thisCharacter);
 }
 
-//void drawUnboundCharacter(HDC hdc, HDC hdcBuffer, int x, int y, character * thisCharacter, shiftData * viewShift){
-//	HDC hdcMem = CreateCompatibleDC(hdc);
-//	SelectObject(hdcMem, thisCharacter->imageMask);
-//
-//	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width , thisCharacter->height, hdcMem, 0, 0, SRCAND);
-//
-//	SelectObject(hdcMem, thisCharacter->image);
-//
-//	BitBlt(hdcBuffer, x*40 - (viewShift->xShift)*40, y*40 - (viewShift->yShift)*40, thisCharacter->width, thisCharacter->height, hdcMem, 0, 0, SRCPAINT);
-//	DeleteDC(hdcMem);
-//}
-
-void drawUnboundCharacterAbsolute(HDC hdc, HDC hdcBuffer, int x, int y, fixedCharacter * thisCharacter){
-	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, thisCharacter->fixedImageMask);
-
-	BitBlt(hdcBuffer, x, y, thisCharacter->fixedWidth , thisCharacter->fixedHeight, hdcMem, 0, 0, SRCAND);
-
-	SelectObject(hdcMem, thisCharacter->fixedImage);
-
-	BitBlt(hdcBuffer, x, y, thisCharacter->fixedWidth, thisCharacter->fixedHeight, hdcMem, 0, 0, SRCPAINT);
-	DeleteDC(hdcMem);
-}
-
 void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, fixedCharacter * thisCharacter){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SelectObject(hdcMem, thisCharacter->fixedImageMask);
@@ -673,10 +649,15 @@ void drawRotatedBackgroundByPixel(HDC hdc, HDC hdcBuffer, character * thisCharac
 }
 
 void updateAnimation(character * thisCharacter){
-	thisCharacter->thisAnimationContainer->clockTickCount++;
+	if(!isPaused()){
+		thisCharacter->thisAnimationContainer->clockTickCount++;
+	}
 
 	if(thisCharacter->thisAnimationContainer->clockTickDelay > 0){
-		thisCharacter->thisAnimationContainer->clockTickDelay--;
+		if(!isPaused()){
+			thisCharacter->thisAnimationContainer->clockTickDelay--;
+		}
+
 		if(thisCharacter->thisAnimationContainer->clockTickDelay == 0){
 			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame = 0;
 			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->nextAnimationAfterDelay]->currentFrame = 0;

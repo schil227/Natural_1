@@ -147,6 +147,8 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	DeleteDC(hdcMem);
 
 	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, thisDialogInstance->numRows, rowLength);
+
+	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
 void updateParsedMessage(){

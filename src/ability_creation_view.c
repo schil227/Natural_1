@@ -138,7 +138,7 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	tmpLine[0] = '\0';
 
 	if(thisAbilityCreationInstance->effectCurrentIndex == -1){
-		drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect.left - 25,textRect.top,thisAbilityCreationInstance->selector);
+		drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect.left - 25,textRect.top,thisAbilityCreationInstance->selector);
 	}
 
 	moveRECTRight(&textRect, 150);
@@ -149,13 +149,13 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	//scroll up arrow
 	if(thisAbilityCreationInstance->effectStartingIndex > 0){
-		drawUnboundCharacterAbsolute(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
 				thisAbilityCreationInstance->creationWindow->y + 57, thisAbilityCreationInstance->scrollUpArrow);
 	}
 
 	//scroll down arrow
 	if(thisAbilityCreationInstance->effectEndingIndex < thisAbilityCreationInstance->abilityInsance->numEnabledEffects){
-		drawUnboundCharacterAbsolute(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
 				thisAbilityCreationInstance->creationWindow->y + 77 + 17 * thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW,
 				thisAbilityCreationInstance->scrollDownArrow);
 	}
@@ -284,8 +284,9 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->lightningDR);
 
-	DeleteDC(hdcMem);
+	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 
+	DeleteDC(hdcMem);
 }
 
 void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, effect_types type, char * fieldName, int isDR, effectAndManaMapList * mapList){
@@ -294,8 +295,8 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 			drawEffectMapList(hdcBuffer, textRect, fieldName, isDR, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				setAbilityCreationSelectedType(type);
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
+				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
+				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
 
 		}
@@ -309,8 +310,8 @@ void processTypeMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC 
 			drawTypeMapList(hdcBuffer, textRect, fieldName, isDR, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				setAbilityCreationSelectedType(type);
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
-				drawUnboundCharacterAbsolute(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
+				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
+				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
 
 		}

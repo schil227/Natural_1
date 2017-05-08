@@ -422,6 +422,10 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 	releaseDialogReadLock();
 
+	if(isPaused()){
+		drawPauseWindow(hdc, hdcBuffer, prc);
+	}
+
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 	SelectObject(hdcBuffer, hbmOldBuffer);
@@ -457,6 +461,11 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	drawAll(hdc, &rect);
 
 	ReleaseDC(hwnd, hdc);
+
+	if(isPaused()){
+		drawLock = 0;
+		return 0;
+	}
 
 	if(isSpecialDrawModeEnabled()){
 		incrementSpecialDrawTimerTicks();
@@ -616,6 +625,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initHudInstance();
 		initThisCursor(1508);
 		initLookView(1519, 1520);
+		initPauseView(1523);
 
 		enableSound();
 
@@ -837,7 +847,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x50://p key (inventory)
 			{
-				player->mana--;
+				togglePaused();
 			}
 			break;
 		case 0x54://t key (talk)
@@ -872,7 +882,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x57: //w key (wait)
 			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
-			decreaseFood(player, 0.1);
+//			decreaseFood(player, 0.1);
+			decreaseFood(player, 1000.0);
 			break;
 		case 0x34: //left
 		case 0x64:
@@ -961,6 +972,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
+
+	if(isPaused()){
+		return pausedLoop(hwnd, msg, wParam, lParam);
+	}
 	//Ignore inputs until drawing is finished.
 	if(postMoveMode){
 		return 0;
@@ -968,7 +983,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	if(isSpecialDrawModeEnabled()){
 		specialDrawLoop(hwnd, msg, wParam, lParam);
-		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		return 0;
 	}else if(shouldDrawDialogBox()){
 		dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
@@ -995,8 +1009,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return 0;
 		}
 	}else if(inAbilityViewMode()){
-		abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
-		return 0;
+		return abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 	}else if (inLookViewScrollMode()) {
 		return lookViewScrollLoop(hwnd, msg, wParam, lParam);
 	}else if (inCursorMode()) {
@@ -1187,7 +1200,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initThisCursor(1508);
 	initSoundPlayerInstance();
 	initLookView(1519, 1520);
-
+	initPauseView(1523);
 	animationContainer * playerAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;
 

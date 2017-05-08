@@ -80,6 +80,7 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 	//name
 	DrawText(hdcBuffer, thisNameBoxInstance->name, strlen(thisNameBoxInstance->name), &textNameRect, DT_SINGLELINE);
 
+	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 	DeleteDC(hdcMem);
 }
 

@@ -148,7 +148,7 @@ void drawLookView(HDC hdc, HDC hdcBuffer, RECT * rect){
 
 	//draw down arrow
 	if(thisLookView->currentLookDataIndex + 3 < thisLookView->numLookData){
-		drawUnboundCharacterAbsolute(hdc, hdcBuffer,
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,
 				left + 40,
 				rect->bottom - (thisLookView->downScrollArrow->fixedHeight + 10),
 				thisLookView->downScrollArrow);
@@ -156,7 +156,7 @@ void drawLookView(HDC hdc, HDC hdcBuffer, RECT * rect){
 
 	//draw up arrow
 	if(thisLookView->currentLookDataIndex > 0){
-		drawUnboundCharacterAbsolute(hdc, hdcBuffer,
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,
 				left + 40,
 				top + (thisLookView->upScrollArrow->fixedHeight + 7),
 				thisLookView->upScrollArrow);

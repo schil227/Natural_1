@@ -1549,7 +1549,10 @@ setIndividualDelayAnimation(individual * thisIndividual, animationState state, i
 
 int animationDelayUpdate(character * thisCharacter){
 	if(thisCharacter->thisAnimationContainer->clockTickDelay > 0){
-		thisCharacter->thisAnimationContainer->clockTickDelay--;
+		if(!isPaused()){
+			thisCharacter->thisAnimationContainer->clockTickDelay--;
+		}
+
 		if(thisCharacter->thisAnimationContainer->clockTickDelay == 0){
 			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame = 0;
 			thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->nextAnimationAfterDelay]->currentFrame = 0;
@@ -1662,7 +1665,10 @@ void drawIndividual(HDC hdc, HDC hdcBuffer, individual* thisIndividual, shiftDat
 		return;
 	}
 
-	thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
+	if(!isPaused()){
+		thisIndividual->playerCharacter->thisAnimationContainer->clockTickCount++;
+	}
+
 
 	if(animationDelayUpdate(thisIndividual->playerCharacter)){
 		updateEquiptItemsToDelayedAnimationState(thisIndividual);
