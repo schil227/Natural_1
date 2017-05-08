@@ -125,6 +125,7 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	textRect.left = thisAbilityCreationInstance->creationWindow->x + 30;
 	textRect.bottom = textRect.top + 40;
 	textRect.right = textRect.left + 240;
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 
 	//draw create window
 	SelectObject(hdcMem, thisAbilityCreationInstance->creationWindow->fixedImage);

@@ -1740,6 +1740,11 @@ int attackModule(individual * thisIndividual, individual * player, groupContaine
 					thisIndividual->targetedIndividual->playerCharacter->x,
 					thisIndividual->targetedIndividual->playerCharacter->y);
 		}
+
+		if(hasActiveStatusEffect(thisIndividual, STATUS_BERZERK) && thisIndividual->isPlayer){
+			decreaseFood(thisIndividual, 1.0);
+		}
+
 		thisIndividual->remainingActions--;
 		return 0;
 	} else {
@@ -1972,13 +1977,12 @@ int berzerkIndividualAction(individual * thisIndividual, individual * player, gr
 	sprintf(logStr, "%s is berzerking!", thisIndividual->name);
 	cwrite(logStr);
 
-	// TODO: Add Allies
 	if(thisIndividual->currentGroupType == GROUP_ENEMIES || thisIndividual->currentGroupType == GROUP_BEASTS){
 		if(checkForTargets(thisIndividual, player, thisGroupContainer, thisField)){
 			thisIndividual->targetedDuration = 0;
 			return attackModule(thisIndividual, player, thisGroupContainer, thisField);
 		}
-	}else if(thisIndividual->currentGroupType == GROUP_GUARDS || thisIndividual->currentGroupType == GROUP_NPCS){
+	}else if(thisIndividual->currentGroupType == GROUP_GUARDS || thisIndividual->currentGroupType == GROUP_NPCS || thisIndividual->currentGroupType == GROUP_ALLIES){
 		findDangerousIndividualNearBy(thisIndividual, player, thisGroupContainer, thisField, thisField->isDark? getAttributeSum(player, "darkLoS") : getAttributeSum(player, "LoS"));
 
 		if(thisIndividual->targetedIndividual != NULL){

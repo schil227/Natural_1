@@ -34,6 +34,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 			RECT rect;
 			GetClientRect(hwnd, &rect);
+
 			if(canMoveCursor(player)){
 				moveCursor(main_field,direction, viewShift, &rect);
 
@@ -94,6 +95,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					viewShift->xShift = viewShift->xShiftOld;
 					viewShift->yShift = viewShift->yShiftOld;
 					decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
+					decreaseFood(player, 1.0);
 
 					player->thisBehavior->gotConfused = 0;
 
@@ -156,6 +158,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				viewShift->yShift = viewShift->yShiftOld;
 
 				decreaseTurns(player, thisGroupContainer, numActions, *inActionMode);
+				decreaseFood(player, 0.5);
 
 				player->thisBehavior->gotConfused = 0;
 

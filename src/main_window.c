@@ -479,6 +479,18 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	if(postMoveMode){
 		animateMove(rect, player, main_field, viewShift, &postMoveMode, animateMoveSpeed, 1);
 		if (!postMoveMode) {
+			moveNode * tmp = player->thisMoveNodeMeta->rootMoveNode;
+			int numSpaces = 0;
+
+			while(tmp->nextMoveNode != NULL){
+				tmp = (moveNode*)tmp->nextMoveNode;
+				numSpaces++;
+			}
+
+			double food = (numSpaces*1.0)/(getAttributeSum(player, "mvmt")*1.0);
+
+			decreaseFood(player, food);
+
 			freeUpMovePath(player->thisMoveNodeMeta->rootMoveNode->nextMoveNode);
 			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
 			free(player->thisMoveNodeMeta->rootMoveNode);
@@ -520,7 +532,8 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	}
 
 	//prevent AI inturruption
-	if(moveMode || postMoveMode){
+	if(moveMode || postMoveMode || inCursorMode() || moveMode || inInventoryViewMode() ||
+			inLookMode() || inAbilityViewMode() || inAbilityCreateMode() || inNameBoxMode() || shouldDrawDialogBox()){
 		drawLock = 0;
 		return 0;
 	}
@@ -536,11 +549,15 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 //
 //		releaseFieldReadLock();
 //		printf("RELEASED: action\n");fflush(stdout);
-		if(!inActionMode && !thisGroupContainer->groupActionMode){ // && thisGroupContainer->movingIndividuals->numIndividuals == 0
-			thisGroupContainer->initGroupActionMode = 1;
-			thisGroupContainer->groupActionMode = 1;
-			setNextActiveGroup(thisGroupContainer);
-			PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
+		if(!inActionMode){
+			decreaseFood(player, 0.025);
+
+			if(!thisGroupContainer->groupActionMode){ // && thisGroupContainer->movingIndividuals->numIndividuals == 0
+				thisGroupContainer->initGroupActionMode = 1;
+				thisGroupContainer->groupActionMode = 1;
+				setNextActiveGroup(thisGroupContainer);
+				PostMessage(hwnd, WM_MOUSEACTIVATE, 0, 0);
+			}
 		}
 	}
 
@@ -855,7 +872,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x57: //w key (wait)
 			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
-
+			decreaseFood(player, 0.1);
 			break;
 		case 0x34: //left
 		case 0x64:

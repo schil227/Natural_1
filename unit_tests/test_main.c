@@ -60,8 +60,8 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	ability * randBuffAbility = getRandomBuffAbility(testEnemy);
 	assert(strcmp(randBuffAbility->name, "Focus") == 0);
 
-	item * randHealingItem = getRandomHPRestoringItem(testEnemy->backpack);
-	assert(strcmp(randHealingItem->name, "Herb") == 0);
+//	item * randHealingItem = getRandomHPRestoringItem(testEnemy->backpack);
+//	assert(strcmp(randHealingItem->name, "Herb") == 0);
 
 	//uses healing ability, not item
 	rand();
@@ -155,7 +155,7 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	//Fireball player on their space
 	useAbilityOnTargetedSpace(testEnemy, testPlayer, testGroupContainer, testField, 4,1);
 
-	assert(testPlayer->hp == 14);
+	assert(testPlayer->hp == 16);
 
 	testEnemy->targetedIndividual = testPlayer;
 	testEnemy->targetedDuration = 3;
@@ -426,6 +426,8 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(!isInAttackRange(testGroupContainer->enemies->individuals[4],testPlayer, main_test_field));
 	assert(isInAttackRange(testPlayer,testGroupContainer->enemies->individuals[4], main_test_field));
 
+	rand();
+
 	//player attacks skeleton5, skeleton5 dies
 	assert(attackIndividual(testPlayer,testGroupContainer->enemies->individuals[4]));
 
@@ -623,11 +625,14 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	srand(8);
 	//consume more rand() to get better throws
 
+	//give enemy an HP boost, they're gonna need it
+	healIndividual(tmpNPC, 10);
+
 	//verify tmpNPC was killed by the multiple attacks
 	assert(tryAttackEnemies(testGroupContainer->enemies, testPlayer, main_test_field, tmpNPC->playerCharacter->x, tmpNPC->playerCharacter->y));
 
-	//tmpNPC has -7 hp after barrage of attacks
-	assert(tmpNPC->hp == -7);
+	//tmpNPC has -12 hp after barrage of attacks
+	assert(tmpNPC->hp == -12);
 
 	//after decreasing the turns, the ability is no longer selected, player has action debt
 	testGroupContainer->groupActionMode = 0;
@@ -645,6 +650,17 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(testGroupContainer->initGroupActionMode);
 
 	actionAITest(testPlayer,testGroupContainer, main_test_field);
+
+	//reduce food, lose well-fed bonus
+	decreaseFood(testPlayer, 100.0);
+	assert(getAttributeSum(testPlayer, "STR") == 3);
+
+	//reduce food more, gain hunger negative
+	decreaseFood(testPlayer, 225.0);
+	assert(getAttributeSum(testPlayer, "STR") == 2);
+
+	//restore back to normal
+	testPlayer->food = 300;
 
 	return 0;
 }
@@ -697,7 +713,7 @@ void createPermanentAbiltyTest(individual * testPlayer){
 	assert(testPlayer->activeAbilities->numAbilities == 1);
 	assert(testPlayer->abilities->numAbilities == 1);
 	assert(strcmp(testPlayer->abilities->abilitiesList[0]->name,"ABCBA") == 0);
-	assert(getAttributeSum(testPlayer, "STR") == 3);
+	assert(getAttributeSum(testPlayer, "STR") == 4);
 
 	//return to abilityType
 	selectPreviousEffect();

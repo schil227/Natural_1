@@ -16,6 +16,8 @@
 #define SILENCED_MODE_IMAGE_ID 1516
 #define SLEEPING_MODE_IMAGE_ID 1517
 #define SNEAKING_MODE_IMAGE_ID 1518
+#define HUNGRY_MODE_IMAGE_ID 1521
+#define STARVING_MODE_IMAGE_ID 1522
 #define ATTACK_SPACE_MARKER_IMAGE_ID 10002
 
 static hudInstance * thisHudInstance;
@@ -33,6 +35,8 @@ void initHudInstance(){
 	thisHudInstance->silencedCharacter = createCharacter(SILENCED_MODE_IMAGE_ID, RGB(255,0,255), 0, 0);
 	thisHudInstance->sleepCharacter = createCharacter(SLEEPING_MODE_IMAGE_ID, RGB(255,0,255), 0, 0);
 	thisHudInstance->attackSpaceMarker = createCharacterFromAnimation(cloneAnimationFromRegistry(ATTACK_SPACE_MARKER_IMAGE_ID));
+	thisHudInstance->hungryCharacter = createCharacter(HUNGRY_MODE_IMAGE_ID, RGB(255,0,255), 0, 0);
+	thisHudInstance->starvingCharacter = createCharacter(STARVING_MODE_IMAGE_ID, RGB(255,0,255), 0, 0);
 
 	thisHudInstance->isPoisoned = 0;
 	thisHudInstance->isBurning = 0;
@@ -112,6 +116,16 @@ void drawHudNotifications(HDC hdc, HDC hdcBuffer, RECT * prc, individual * playe
 
 	if(player->isSneaking){
 		SelectObject(hdcMem, thisHudInstance->sneakingCharacter->fixedImage);
+		BitBlt(hdcBuffer, x, y - (standardImageHeight*offset), standardImageWidth, standardImageHeight, hdcMem, 0, 0, SRCCOPY);
+		offset++;
+	}
+
+	if(player->food < 100 && player->food >= 50){
+		SelectObject(hdcMem, thisHudInstance->hungryCharacter->fixedImage);
+		BitBlt(hdcBuffer, x, y - (standardImageHeight*offset), standardImageWidth, standardImageHeight, hdcMem, 0, 0, SRCCOPY);
+		offset++;
+	}else if(player->food < 50){
+		SelectObject(hdcMem, thisHudInstance->starvingCharacter->fixedImage);
 		BitBlt(hdcBuffer, x, y - (standardImageHeight*offset), standardImageWidth, standardImageHeight, hdcMem, 0, 0, SRCCOPY);
 		offset++;
 	}

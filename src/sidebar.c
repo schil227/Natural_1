@@ -108,6 +108,36 @@ void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 
 	DrawText(hdcBuffer, goldOut, strlen(goldOut), &rect, DT_SINGLELINE);
 	rect.top += textYStep;
+
+	SIZE size;
+	GetTextExtentPoint32(hdcBuffer, "Food: ", 6, &size);
+
+	DrawText(hdcBuffer, "Food: ", 6, &rect, DT_SINGLELINE);
+	rect.left += size.cx;
+
+	char * foodStr[8];
+	sprintf(foodStr, "%d", (int)player->food);
+	GetTextExtentPoint32(hdcBuffer, foodStr, strlen(foodStr), &size);
+
+	if(player->food > 300){
+		SetTextColor(hdcBuffer, RGB(0, 162, 255));
+	}else if(player->food >= 50 && player->food < 100 ){
+		SetTextColor(hdcBuffer, RGB(255, 100, 0));
+	}else if(player->food < 50){
+		SetTextColor(hdcBuffer, RGB(255, 0, 0));
+	}
+	DrawText(hdcBuffer, foodStr, strlen(foodStr), &rect, DT_SINGLELINE);
+	rect.left += size.cx;
+
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+
+	foodStr[0] = '\0';
+	sprintf(foodStr, "/%d", player->totalFood);
+	DrawText(hdcBuffer, foodStr, strlen(foodStr), &rect, DT_SINGLELINE);
+
+	rect.top += textYStep;
+	rect.left = x + 10;
+
 //	SelectObject(hdc, oldfont);
 //	DeleteObject(hfont);
 

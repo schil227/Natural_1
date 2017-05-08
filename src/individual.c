@@ -182,6 +182,21 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->baseMana = baseMana;
 	thisIndividual->mana = baseMana + WILL * 2;
 
+	thisIndividual->totalFood = 300 + CON * 50;
+	thisIndividual->food = thisIndividual->totalFood;
+
+	if(thisIndividual->food > 300){
+		thisIndividual->foodBonusActive = 1;
+	}else{
+		thisIndividual->foodBonusActive = 0;
+	}
+
+	if(thisIndividual->food < 50){
+		thisIndividual->foodNegativeActive = 1;
+	}else{
+		thisIndividual->foodNegativeActive = 0;
+	}
+
 	thisIndividual->armorItem = NULL;
 	thisIndividual->weaponItem = NULL;
 	thisIndividual->shieldItem = NULL;
@@ -821,6 +836,12 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
+
+		addSpecialIndividual(targetIndividual);
+		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+		setIndividualDelayAnimation(targetIndividual, ANIMATION_DEATH, delay);
+		int deathDelay = targetIndividual->playerCharacter->thisAnimationContainer->animations[targetIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 		return 1;
 	}else{ //non-fatal blow
 		return 0;
@@ -974,7 +995,6 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 		removeFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
-//		setDelayAnimation(targetIndividual->playerCharacter->thisAnimationContainer, ANIMATION_DEATH,delay);
 		setIndividualDelayAnimation(targetIndividual, ANIMATION_DEATH, delay);
 		int deathDelay = targetIndividual->playerCharacter->thisAnimationContainer->animations[targetIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
 		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
@@ -1057,7 +1077,7 @@ int processActiveItems(individual * thisIndividual){
 				thisIndividual->activeItems->activeItemArr[i] = NULL;
 				thisIndividual->activeItems->activeItemsTotal--;
 			}else{
-				consumeItem(thisIndividual,tmpActiveItem->thisItem);
+				consumeDurationItem(thisIndividual,tmpActiveItem->thisItem);
 				if(thisIndividual->hp <= 0){
 					char * tmp[128];
 					sprintf(tmp, "%s has perished from %s!", thisIndividual->name, tmpActiveItem->thisItem->name);
@@ -1150,6 +1170,13 @@ int processStatuses(individual * thisIndividual){
 					sprintf(tmp, "%s has perished from ailment!", thisIndividual->name);
 					cwrite(tmp);
 					removeFromExistance(thisIndividual->ID);
+
+					enableSpecialDrawMode();
+					addSpecialIndividual(thisIndividual);
+					int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+					setIndividualDelayAnimation(thisIndividual, ANIMATION_DEATH, delay);
+					int deathDelay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+					increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 					return 1;
 				}
 			}else{
@@ -1371,6 +1398,46 @@ void endTurn(individual *thisIndividual){
 	printf("player turn ended\n");
 	thisIndividual->hasAttacked = 0;
 	thisIndividual->remainingActions += thisIndividual->totalActions;
+}
+
+int decreaseFood(individual * thisIndividual, double food){
+	if((int) thisIndividual->food <= 0){
+		return 1;
+	}
+
+	thisIndividual->food -= food;
+
+	if(thisIndividual->food <= 300 && thisIndividual->foodBonusActive){
+		thisIndividual->foodBonusActive = 0;
+	}
+
+	if(thisIndividual->food <= 50 && !thisIndividual->foodNegativeActive){
+		thisIndividual->foodNegativeActive = 1;
+	}
+
+	//Individual has died of starvation.
+	if(thisIndividual->food <= 0){
+		thisIndividual->food = 0.0;
+		thisIndividual->hp = 0;
+
+		char * starvationStr[64];
+		sprintf(starvationStr, "%s has starved to death.", thisIndividual->name);
+		cwrite(starvationStr);
+
+		triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
+
+		removeFromExistance(thisIndividual->ID);
+
+		enableSpecialDrawMode();
+		addSpecialIndividual(thisIndividual);
+		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+		setIndividualDelayAnimation(thisIndividual, ANIMATION_DEATH, delay);
+		int deathDelay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
+		return 1;
+	}
+
+	return 0;
 }
 
 int targetInRangeOfCord(individual * target, int range, int x, int y){
@@ -1825,6 +1892,27 @@ void consumeItem(individual * thisIndividual, item * theItem){
 			restoreMana(thisIndividual, theItem->manaMod);
 		}
 	}
+
+	if(theItem->food != 0){
+		if(theItem->food > 0){
+			restoreFood(thisIndividual, theItem->food);
+		}
+	}
+}
+
+void consumeDurationItem(individual * thisIndividual, item * theItem){
+	//note, +/- healthMod
+	if(theItem->healthMod != 0){
+		if(theItem->healthMod > 0){
+			healIndividual(thisIndividual, theItem->healthMod);
+		}
+	}
+
+	if(theItem->manaMod != 0){
+		if(theItem->manaMod > 0){
+			restoreMana(thisIndividual, theItem->manaMod);
+		}
+	}
 }
 
 void healIndividual(individual * thisIndividual, int hp){
@@ -1851,6 +1939,21 @@ void restoreMana(individual * thisIndividual, int mana){
 	}
 }
 
+void restoreFood(individual * thisIndividual, int food){
+	if(thisIndividual->food + food >= thisIndividual->totalFood){
+		thisIndividual->food = thisIndividual->totalFood;
+	}else{
+		thisIndividual->food += food;
+	}
+
+	if(thisIndividual->food > 300 && !thisIndividual->foodBonusActive){
+		thisIndividual->foodBonusActive = 1;
+	}
+
+	if(thisIndividual->food > 50 && thisIndividual->foodNegativeActive){
+		thisIndividual->foodNegativeActive = 0;
+	}
+}
 
 int getTotalMana(individual * thisIndividual){
 	return getAttributeSum(thisIndividual, "baseMana") + 2 * getAttributeSum(thisIndividual, "WILL");
@@ -1876,9 +1979,18 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 
 }
 
+void handlePureStats(individual * thisIndividual, ability * newAbility){
+	int conStat = newAbility->CON->effectAndManaArray[newAbility->CON->selectedIndex]->effectMagnitude;
+
+	if(conStat != 0){
+		thisIndividual->totalFood = 300 + (thisIndividual->CON + conStat) * 50;
+	}
+}
+
 void addAbilityToIndividual(individual * thisIndividual, ability * newAbility){
 	if (newAbility->type == 'p') {
 		addActiveAbilityToIndividual(thisIndividual, newAbility, 0);
+		handlePureStats(thisIndividual, newAbility);
 	}
 
 	if (thisIndividual->abilities->numAbilities == thisIndividual->abilities->MAX_ABILITIES) {
@@ -1931,6 +2043,13 @@ int useAbility(individual * thisIndividual, ability * thisAbility){
 			char * tmp[128];
 			sprintf(tmp, "%s perished from %s!", thisIndividual->name, thisAbility->name);
 			cwrite(tmp);
+
+			enableSpecialDrawMode();
+			addSpecialIndividual(thisIndividual);
+			int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+			setIndividualDelayAnimation(thisIndividual, ANIMATION_DEATH, delay);
+			int deathDelay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+			increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 			return 1;
 		}
 	}
@@ -2788,11 +2907,35 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 	int toReturn = 0;
 
 	if(strcmp("STR",attribute) == 0 ){
-			return thisIndividual->STR;
+		toReturn += thisIndividual->STR;
+
+		if(thisIndividual->foodBonusActive){
+			toReturn++;
+		}else if(thisIndividual->foodNegativeActive){
+			toReturn--;
+		}
+
+		return toReturn;
 	}else if(strcmp("DEX",attribute) == 0){
-		return thisIndividual->DEX;
+		toReturn += thisIndividual->DEX;
+
+		if(thisIndividual->foodBonusActive){
+			toReturn++;
+		}else if(thisIndividual->foodNegativeActive){
+			toReturn--;
+		}
+
+		return toReturn;
 	}else if(strcmp("CON",attribute) == 0){
-		return thisIndividual->CON;
+		toReturn += thisIndividual->CON;
+
+		if(thisIndividual->foodBonusActive){
+			toReturn++;
+		}else if(thisIndividual->foodNegativeActive){
+			toReturn--;
+		}
+
+		return toReturn;
 	}else if(strcmp("WILL",attribute) == 0){
 		return thisIndividual->WILL;
 	}else if(strcmp("INT",attribute) == 0){
@@ -3323,5 +3466,6 @@ int getAttributeSum(individual * thisIndividual, char * attribute){
 			}
 		}
 	}
+
 	return toReturn;
 }

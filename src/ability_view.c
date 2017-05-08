@@ -92,6 +92,8 @@ void drawThisAbilityView(HDC hdc, HDC hdcBuffer, RECT * prc){
 	manaRect.bottom = manaRect.top + 20;
 	manaRect.right = manaRect.left + 100;
 
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+
 	SelectObject(hdcMem, thisAbilityView->abilityViewWindow->fixedImage);
 	BitBlt(hdcBuffer, thisAbilityView->abilityViewWindow->x, thisAbilityView->abilityViewWindow->y, thisAbilityView->abilityViewWindow->fixedWidth, thisAbilityView->abilityViewWindow->fixedHeight, hdcMem, 0, 0, SRCCOPY);
 

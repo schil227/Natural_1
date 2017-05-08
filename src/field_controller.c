@@ -620,7 +620,7 @@ item * createFieldItemFromFile(char line[1024]){
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
 	char * strtok_save_pointer;
-	int npcID, ID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, acMod, attackMod, damMod,
+	int npcID, ID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, food, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
@@ -697,6 +697,8 @@ item * createFieldItemFromFile(char line[1024]){
 	totalManaMod = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	manaMod = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	food = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	acMod = atoi(value);
@@ -788,7 +790,7 @@ item * createFieldItemFromFile(char line[1024]){
 	newItem = createItem(npcID, RGB(r,g,b),x,y, ID, type, name, description,weaponStrMod,
 			strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
 			weaponDamType, armorClass, itemType, price, owner, isStolen,
-			totalHealthMod,healthMod,totalManaMod,manaMod,acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
+			totalHealthMod,healthMod,totalManaMod,manaMod,food, acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 			mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 			waterWeaknessMod, lightiningWeaknessMod, isEquipt, thisAnimationContainer, secondaryAnimationContainer);

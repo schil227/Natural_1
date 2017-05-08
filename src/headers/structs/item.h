@@ -40,6 +40,8 @@ typedef struct {
 	short int totalManaMod;
 	short int manaMod;
 
+	short int food;
+
 	short int minTurns;
 	short int maxTurns;
 

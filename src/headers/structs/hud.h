@@ -21,6 +21,8 @@ typedef struct{
 	fixedCharacter * silencedCharacter;
 	fixedCharacter * sleepCharacter;
 	fixedCharacter * sneakingCharacter;
+	fixedCharacter * hungryCharacter;
+	fixedCharacter * starvingCharacter;
 
 	character * attackSpaceMarker;
 

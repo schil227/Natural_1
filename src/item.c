@@ -9,7 +9,7 @@
 item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description,double weaponStrMod,
 		int strMod, int dexMod, int conMod, int willMod, int intMod, int wisMod, int chrMod, int luckMod,
 		char weaponDamageType, char armorClass, char itemType, int price, int owner, int isStolen, int totalHealthMod, int healthMod, int totalManaMod,
-		int manaMod, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
+		int manaMod, int food, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
 		int mvmtMod, int rangeMod, int bluntDRMod, int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod,
 		int fireDRMod, int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
 		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
@@ -53,6 +53,7 @@ item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char
 	thisItem->healthMod = healthMod;
 	thisItem->totalManaMod = totalManaMod;
 	thisItem->manaMod = manaMod;
+	thisItem->food = food;
 	thisItem->acMod = acMod;
 	thisItem->attackMod = attackMod;
 	thisItem->damMod = damMod;
@@ -121,6 +122,7 @@ item * cloneItem(item * thisItem, int keepOwner){
 	newItem->healthMod = thisItem->healthMod;
 	newItem->totalManaMod = thisItem->totalManaMod;
 	newItem->manaMod = thisItem->manaMod;
+	newItem->food = thisItem->food;
 	newItem->acMod = thisItem->acMod;
 	newItem->attackMod = thisItem->attackMod;
 	newItem->damMod = thisItem->damMod;
