@@ -65,7 +65,7 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 void createIndividualFromLine(individual * newIndividual, char * line){
 	int ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
-	fireWeakness,waterWeakness,lightiningWeakness,dialogID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
+	fireWeakness,waterWeakness,lightiningWeakness,dialogID,dialogPortraitID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
 	int offensiveness, abilityAffinity, tacticalness, cowardness;
 	char * name = malloc(sizeof(char) * 32);
 	char * strtok_save_pointer;
@@ -192,6 +192,9 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	thisDialog->playerIsMarkedForDeath = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	dialogPortraitID = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	gold = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -256,7 +259,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
 	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, dialogPortraitID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
 			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
@@ -1095,7 +1098,7 @@ int tryTalkIndividualFromField(individual * player, field * thisField, int curso
 		// Speaking individual is used for processing messages. Needs to be done here before the setCurrentMessage call.
 		setSpeakingIndividualID(tmpIndividual->ID);
 
-		if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)), tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer)){
+		if (setCurrentMessageByIndividualID(tmpIndividual->ID, (tmpIndividual->thisBehavior->isHostileToPlayer && (tmpIndividual->currentGroupType == GROUP_NPCS || tmpIndividual->currentGroupType == GROUP_GUARDS)), tmpIndividual->thisBehavior->hasAlreadyYieldedToPlayer, tmpIndividual->dialogPortraitID)){
 			toggleDrawDialogBox();
 			return 1;
 		}

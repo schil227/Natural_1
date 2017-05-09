@@ -109,7 +109,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
-		int lightiningWeakness, int dialogID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
+		int lightiningWeakness, int dialogID, int dialogPortraitID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
 		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 	int i;
 	BITMAP bm;
@@ -168,6 +168,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->lightiningWeakness = lightiningWeakness;
 
 	thisIndividual->dialogID = dialogID;
+	thisIndividual->dialogPortraitID = dialogPortraitID;
 
 	thisIndividual->specialDialog = thisDialog;
 

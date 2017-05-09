@@ -84,12 +84,13 @@ END
 1522 BITMAP DISCARDABLE "../images/starving_mode.bmp"
 
 //Look view
-1519  BITMAP DISCARDABLE "../images/look_background.bmp"
-1520  BITMAP DISCARDABLE "../images/view.bmp"
+1519 BITMAP DISCARDABLE "../images/look_background.bmp"
+1520 BITMAP DISCARDABLE "../images/view.bmp"
 
 //Pause view
-1523  BITMAP DISCARDABLE "../images/paused.bmp"
+1523 BITMAP DISCARDABLE "../images/paused.bmp"
 
+1524 BITMAP DISCARDABLE "../images/dialog_box_portrait.bmp"
 //Base character images 2000 - 2500
 2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001
 2002 BITMAP DISCARDABLE "../images/human_attack_slash.bmp"
@@ -115,6 +116,7 @@ END
 4500 BITMAP DISCARDABLE "../images/red_robed.bmp" //2013
 
 //Guard images 5500 - 6500
+5500 BITMAP DISCARDABLE "../images/guy_portrait.bmp"
 
 //Ally images 6500 - 7500
 

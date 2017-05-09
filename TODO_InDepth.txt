@@ -1,5 +1,8 @@
 == TODO In Depth ==
- 
+
+-When ally leaves party, set desired location to their current coordinates
+ -Ally doesn't move smoothly, needs to use xOff, yOff
+ -ally cant go though npc blocking path - maybe consider doing a larger movement akin to guards?
 -add LoS stat to ability, items	
 
 

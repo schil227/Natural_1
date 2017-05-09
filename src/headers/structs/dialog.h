@@ -75,6 +75,8 @@ typedef struct{
 	dialogMessage * nullMessage;
 	fixedCharacter * dialogWindow;
 	fixedCharacter * selectArrow;
+	fixedCharacter * portraitBorder;
+	character * portrait;
 	individualDialog * individualDialogRegistry[2000];
 	dialogMessage * dialogMessages[10000];
 } dialogInstance;

@@ -12,11 +12,8 @@
 static dialogInstance * thisDialogInstance;
 
 dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
-
-
 	dialogInstance * toReturn = malloc(sizeof(dialogInstance));
-	toReturn->dialogWindow = malloc(sizeof(fixedCharacter));
-	toReturn->selectArrow = malloc(sizeof(fixedCharacter));
+	toReturn->portrait = NULL;
 
 	toReturn->currentMessage = NULL;
 	toReturn->numRows = 6;
@@ -25,6 +22,7 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 
 	toReturn->dialogWindow = createCharacter(imageID, rgb, x, y);
 	toReturn->selectArrow = createCharacter(1504, RGB(255,0,255), x + 20, y);
+	toReturn->portraitBorder = createCharacter(1524, rgb, x + toReturn->dialogWindow->fixedWidth - 4, y);
 	toReturn->drawBox = 0;
 	toReturn->speakingIndividualID = 0;
 	toReturn->individualDialogRegistry[0] = NULL;
@@ -56,8 +54,13 @@ void initThisDialogBox(int imageID, int x, int y, COLORREF rgb){
 void destroyThisDialogBox(){
 	destroyFixedCharacter(thisDialogInstance->dialogWindow);
 	destroyFixedCharacter(thisDialogInstance->selectArrow);
-	free(thisDialogInstance);
+	destroyFixedCharacter(thisDialogInstance->portraitBorder);
 
+	if(thisDialogInstance->portrait != NULL){
+		destroyCharacter(thisDialogInstance->portrait);
+	}
+
+	free(thisDialogInstance);
 	thisDialogInstance = NULL;
 }
 
@@ -118,6 +121,15 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	BitBlt(hdcBuffer, thisDialogInstance->dialogWindow->x, thisDialogInstance->dialogWindow->y,
 			thisDialogInstance->dialogWindow->fixedWidth, thisDialogInstance->dialogWindow->fixedHeight, hdcMem, 0, 0, SRCCOPY);
+
+	if(thisDialogInstance->portrait != NULL){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, thisDialogInstance->portraitBorder->x, thisDialogInstance->portraitBorder->y, thisDialogInstance->portraitBorder);
+
+		updateAnimation(thisDialogInstance->portrait);
+
+		drawUnboundAnimationByPixels(hdc, hdcBuffer,
+				thisDialogInstance->portrait, thisDialogInstance->dialogWindow->x + thisDialogInstance->dialogWindow->fixedWidth, thisDialogInstance->dialogWindow->y + 4, 0);
+	}
 
 	if(thisDialogInstance->currentMessage->numDialogDecisionsParsed > 0 && !thisDialogInstance->speakMode){
 		int i, rowToStartOn;
@@ -363,13 +375,31 @@ void disalbeDrawDialogBox(){
 	thisDialogInstance->drawBox = 0;
 }
 
-int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlayer, int alreadyYielded){
+int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlayer, int alreadyYielded, int dialogPortraitID){
 	int i;
 
 	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
 		if(thisDialogInstance->individualDialogRegistry[i] == NULL){
 			return 0;
 		}else if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){
+			if(dialogPortraitID == -1){
+				if(thisDialogInstance->portrait != NULL){
+					free(thisDialogInstance->portrait);
+				}
+				thisDialogInstance->portrait = NULL;
+			}else{
+				thisDialogInstance->portrait = malloc(sizeof(character));
+				thisDialogInstance->portrait->direction = 0;
+				thisDialogInstance->portrait->x = 0;
+				thisDialogInstance->portrait->y = 0;
+				thisDialogInstance->portrait->xOff = 0;
+				thisDialogInstance->portrait->yOff = 0;
+				thisDialogInstance->portrait->thisAnimationContainer = initAnimationContainer();
+				thisDialogInstance->portrait->secondaryAnimationContainer = NULL;
+				thisDialogInstance->portrait->darkAnimationContainer = NULL;
+				addAnimationToContainer(thisDialogInstance->portrait->thisAnimationContainer,cloneAnimationFromRegistry(dialogPortraitID));
+			}
+
 			if(isNPCHostileTowardPlayer){
 				if(alreadyYielded){
 					return setCurrentMessageByMessageID(WONT_YIELD_DIALOG_ID);

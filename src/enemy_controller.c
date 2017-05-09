@@ -2409,7 +2409,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 			if(individualWithinTalkingRange(guard, player, 2)){
 				setSpeakingIndividualID(guard->ID);
 
-				if(setCurrentMessageByIndividualID(guard->ID, (guard->thisBehavior->isHostileToPlayer && (guard->currentGroupType == GROUP_NPCS || guard->currentGroupType == GROUP_GUARDS)), guard->thisBehavior->hasAlreadyYieldedToPlayer)){
+				if(setCurrentMessageByIndividualID(guard->ID, (guard->thisBehavior->isHostileToPlayer && (guard->currentGroupType == GROUP_NPCS || guard->currentGroupType == GROUP_GUARDS)), guard->thisBehavior->hasAlreadyYieldedToPlayer, guard->dialogPortraitID)){
 					toggleDrawDialogBox();
 					guard->remainingActions--;
 					return 0;

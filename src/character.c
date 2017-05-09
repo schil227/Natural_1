@@ -575,22 +575,25 @@ void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, ch
 void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharacter, int xCord, int yCord, int useSecondaryAnimationContainer){
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	HBITMAP image, imageMask;
+	animation * tmpAnimation;
+	int shitfX, width = 0, height = 0;
 
-	int shitfX;
 	if(useSecondaryAnimationContainer){
-		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
-		image = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->image;
-		imageMask = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->imageMask;
+		tmpAnimation = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation];
 	} else{
-		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
-		image = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
-		imageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
+		tmpAnimation = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
 	}
+
+	width = tmpAnimation->width;
+	height = tmpAnimation->height;
+	shitfX = tmpAnimation->currentFrame*width;
+	image = tmpAnimation->image;
+	imageMask = tmpAnimation->imageMask;
 
 	SelectObject(hdcMem, imageMask);
 
 	BitBlt(hdcBuffer, xCord, yCord,
-			100,100,
+			width, height,
 			hdcMem,
 			shitfX,
 			0,
@@ -599,7 +602,7 @@ void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharac
 	SelectObject(hdcMem, image);
 
 	BitBlt(hdcBuffer,xCord, yCord,
-			100, 100,
+			width, height,
 			hdcMem,
 			shitfX,
 			0,

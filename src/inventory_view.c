@@ -6,7 +6,7 @@
  */
 #include"./headers/inventory_view_pub_methods.h"
 
-inventoryView * thisInventoryView;
+static inventoryView * thisInventoryView;
 
 int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, inventory * playerInventory){
 	int i;

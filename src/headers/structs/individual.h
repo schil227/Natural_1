@@ -213,6 +213,7 @@ struct individual{
 	short int lightiningWeakness;
 
 	int dialogID;
+	int dialogPortraitID;
 
 	int gold;
 

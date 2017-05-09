@@ -308,7 +308,7 @@ int shouldEnableActionMode(){
 	return 0;
 }
 
-int forcePlayerTransit(int targetMapID, int transitID){
+void forcePlayerTransit(int targetMapID, int transitID){
 	if(attemptToForceTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory, targetMapID, transitID)){
 		RECT rect;
 		GetClientRect(hwnd_global, &rect);
@@ -658,7 +658,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		playerDialog->afraidOfPlayer = 0;
 		playerDialog->playerIsMarkedForDeath = 0;
 
-		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -1219,7 +1219,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	playerDialog->afraidOfPlayer = 0;
 	playerDialog->playerIsMarkedForDeath = 0;
 
-	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
