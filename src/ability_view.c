@@ -21,7 +21,7 @@ void initThisAbilityView(int imageID, COLORREF rgb, int x, int y){
 	thisAbilityView->MAX_ABILITIES_ON_WINDOW =3;
 
 	thisAbilityView->abilityViewWindow = createCharacter(imageID, rgb, x, y);
-	thisAbilityView->selector = createCharacter(9501, rgb, x, y);
+	thisAbilityView->selector = createCharacter(1504, rgb, x, y);
 }
 
 void toggleAbilityViewMode(){
@@ -102,7 +102,7 @@ void drawThisAbilityView(HDC hdc, HDC hdcBuffer, RECT * prc){
 	for(i = thisAbilityView->startingAbilityIndex; i < thisAbilityView->endingAbilityIndex; i++){
 		DrawText(hdcBuffer, thisAbilityView->abilitiesList[i]->name, strlen(thisAbilityView->abilitiesList[i]->name), &textRect, DT_SINGLELINE);
 		if(thisAbilityView->currentAbilityIndex == i){
-			drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect.left - 25,textRect.top,thisAbilityView->selector);
+			drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect.left - 20,textRect.top,thisAbilityView->selector);
 			drawAbilityEffects(hdcBuffer, thisAbilityView->abilitiesList[i],&effectRect);
 			drawManaCost(hdcBuffer, thisAbilityView->abilitiesList[i], &manaRect);
 		}

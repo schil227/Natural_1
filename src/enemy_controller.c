@@ -2977,38 +2977,38 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 //		}
 
 		if(!isNearIndividual(ally, player)){
-			if(inActionMode){
+//			if(inActionMode){
 				return moveCloserToTarget(ally, player, thisField);
-			}
-			else{
-				int tmpFaction = ally->faction;
-				ally->faction = -1;
-
-				int moveResult = moveToSelectedLocation(ally, thisField, player->playerCharacter->x, player->playerCharacter->y);
-
-				ally->faction = tmpFaction;
-
-				if(moveResult){
-					moveNode * targetSpace = ally->thisMoveNodeMeta->rootMoveNode;
-
-					if(targetSpace != NULL){
-						space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
-
-						if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
-							//individual is already removed from field
-							moveIndividualSpace(thisField, ally, targetSpace->x, targetSpace->y);
-							ally->remainingActions = 0;
-							return 0;
-						}
-					}
-
-					//put npc back on space they started
-					moveIndividualSpace(thisField, ally, ally->playerCharacter->x, ally->playerCharacter->y);
-
-					ally->remainingActions = 0;
-					return 0;
-				}
-			}
+//			}
+//			else{
+//				int tmpFaction = ally->faction;
+//				ally->faction = -1;
+//
+//				int moveResult = moveToSelectedLocation(ally, thisField, player->playerCharacter->x, player->playerCharacter->y);
+//
+//				ally->faction = tmpFaction;
+//
+//				if(moveResult){
+//					moveNode * targetSpace = ally->thisMoveNodeMeta->rootMoveNode;
+//
+//					if(targetSpace != NULL){
+//						space * tmpSpace = getSpaceFromField(thisField,targetSpace->x, targetSpace->y);
+//
+//						if(tmpSpace != NULL && tmpSpace->currentIndividual == NULL){
+//							//individual is already removed from field
+//							moveIndividualSpace(thisField, ally, targetSpace->x, targetSpace->y);
+//							ally->remainingActions = 0;
+//							return 0;
+//						}
+//					}
+//
+//					//put npc back on space they started
+//					moveIndividualSpace(thisField, ally, ally->playerCharacter->x, ally->playerCharacter->y);
+//
+//					ally->remainingActions = 0;
+//					return 0;
+//				}
+//			}
 		}
 
 		ally->remainingActions = 0;

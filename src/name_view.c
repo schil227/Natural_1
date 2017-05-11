@@ -56,6 +56,7 @@ void drawNameBoxInstance(HDC hdc, HDC hdcBuffer, RECT * prc){
 	textSelectRect.left = thisNameBoxInstance->nameBox->x + 12 + 21*thisNameBoxInstance->column;
 	textSelectRect.bottom = textSelectRect.top + 20;
 	textSelectRect.right = textSelectRect.left + 15;
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 
 	if(thisNameBoxInstance->row == thisNameBoxInstance->MAX_ROWS){
 		textSelectRect.top = thisNameBoxInstance->nameBox->y + 122;

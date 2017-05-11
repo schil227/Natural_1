@@ -745,6 +745,10 @@ int returnIndividualToDefaultGroup(groupContainer * thisGroupContainer, int indi
 	deleteIndividiaulFromGroup(currentGroup, thisIndividual);
 	addIndividualToGroup(defaultGroup, thisIndividual);
 
+	//Set their desired location to wherever they are
+	thisIndividual->desiredLocation->x = thisIndividual->playerCharacter->x;
+	thisIndividual->desiredLocation->y = thisIndividual->playerCharacter->y;
+
 	if(newDialogId > 0){
 		loadOrAddIndividualDialog(individualID, newDialogId, 1);
 	}

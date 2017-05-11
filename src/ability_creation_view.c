@@ -31,7 +31,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
 
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
-	thisAbilityCreationInstance->selector = createCharacter(9501, rgb, x, y);
+	thisAbilityCreationInstance->selector = createCharacter(1504, rgb, x, y);
 	thisAbilityCreationInstance->leftRightArrow = createCharacter(9502, rgb, x, y);
 	thisAbilityCreationInstance->scrollUpArrow = createCharacter(1505, rgb, x, y);
 	thisAbilityCreationInstance->scrollDownArrow = createCharacter(1507, rgb, x, y);
@@ -138,7 +138,7 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	tmpLine[0] = '\0';
 
 	if(thisAbilityCreationInstance->effectCurrentIndex == -1){
-		drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect.left - 25,textRect.top,thisAbilityCreationInstance->selector);
+		drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect.left - 20,textRect.top,thisAbilityCreationInstance->selector);
 	}
 
 	moveRECTRight(&textRect, 150);
@@ -295,7 +295,7 @@ void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HD
 			drawEffectMapList(hdcBuffer, textRect, fieldName, isDR, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				setAbilityCreationSelectedType(type);
-				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
+				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->left - 20,textRect->top-2,thisAbilityCreationInstance->selector);
 				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
 
@@ -310,7 +310,7 @@ void processTypeMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC 
 			drawTypeMapList(hdcBuffer, textRect, fieldName, isDR, mapList);
 			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
 				setAbilityCreationSelectedType(type);
-				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->left - 25,textRect->top-2,thisAbilityCreationInstance->selector);
+				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->left - 20,textRect->top-2,thisAbilityCreationInstance->selector);
 				drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect->right,textRect->top-2,thisAbilityCreationInstance->leftRightArrow);
 			}
 
