@@ -17,7 +17,7 @@ int attackIndividual(individual *thisIndividual, individual *targetIndividual);
 int individualWithinRange(individual * thisIndividual, individual * target);
 int calcDR(individual * targetIndividual, char attackType);
 int addItemToInventory(inventory * backpack, item * newItem);
-char * lookUpStatusEffectName(statusEffect effect);
+char * lookUpStatusEffectName(statusEffect effect, int isUppercase);
 statusEffect lookUpStatusType(char * statusType[16]);
 status * createStatusFromAbility(ability * thisAbility);
 char getIndividualAttackType(individual * thisIndividual, item * weapon);

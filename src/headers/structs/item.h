@@ -52,6 +52,7 @@ typedef struct {
 	short int minDamMod;
 	short int mvmtMod;
 	short int rangeMod;
+	short int darkLoSMod;
 
 	short int bluntDRMod;
 	short int chopDRMod;

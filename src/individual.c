@@ -1182,7 +1182,7 @@ int processStatuses(individual * thisIndividual){
 				}
 			}else{
 				char * tmp[64];
-				sprintf(tmp, "%s recovered from %s.", thisIndividual->name, lookUpStatusEffectName(tmpStatus->effect));
+				sprintf(tmp, "%s recovered from %s.", thisIndividual->name, lookUpStatusEffectName(tmpStatus->effect, 0));
 				cwrite(tmp);
 
 				thisIndividual->activeStatuses->statuses[i] = NULL;
@@ -1304,22 +1304,48 @@ void damageIndividualWithStatus(individual * thisIndividual, status * thisStatus
 	cwrite(hitMessage);
 }
 
-char * lookUpStatusEffectName(statusEffect effect){
+char * lookUpStatusEffectName(statusEffect effect, int uppercase){
 	switch(effect){
 	case(STATUS_POISONED):
+		if(uppercase){
+			return "Poison";
+		}
 		return "poison";
 	case(STATUS_PARALYZED):
+		if(uppercase){
+			return "Paralysis";
+		}
 		return "paralysis";
 	case(STATUS_CONFUSED):
+		if(uppercase){
+			return "Confusion";
+		}
 		return "confusion";
 	case(STATUS_BURNING):
+		if(uppercase){
+			return "Burning";
+		}
 		return "burning";
 	case(STATUS_BLEEDING):
+		if(uppercase){
+			return "Bleeding";
+		}
 		return "bleeding";
 	case(STATUS_BERZERK):
+		if(uppercase){
+			return "Berzerk";
+		}
 		return "berzerk";
 	case(STATUS_SILENCED):
+		if(uppercase){
+			return "Silence";
+		}
 		return "silence";
+	case(STATUS_SLEEPING):
+		if(uppercase){
+			return "Sleep";
+		}
+		return "sleep";
 	}
 
 	return "!! STATUS NOT FOUND !!";
@@ -3144,6 +3170,13 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->rangeMod;
+		 }
+	}else if(strcmp("darkLoS",attribute) == 0 ){
+		 if(thisItem != NULL && thisItem->isEquipt){
+			 toReturn += thisItem->darkLoSMod;
+		 }
+		 if(activeItem != NULL){
+			 toReturn += activeItem->darkLoSMod;
 		 }
 	} else if(strcmp("bluntDR",attribute) == 0 ){
 		 if(thisItem != NULL && thisItem->isEquipt){

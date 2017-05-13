@@ -90,7 +90,17 @@ END
 //Pause view
 1523 BITMAP DISCARDABLE "../images/paused.bmp"
 
+//Dialog portrait frame
 1524 BITMAP DISCARDABLE "../images/dialog_box_portrait.bmp"
+
+//Character Info
+1525 BITMAP DISCARDABLE "../images/info_background.bmp"
+1526 BITMAP DISCARDABLE "../images/effects_background.bmp"
+1527 BITMAP DISCARDABLE "../images/damage_reduction_chart.bmp"
+1528 BITMAP DISCARDABLE "../images/active_effects.bmp"
+1529 BITMAP DISCARDABLE "../images/level_up.bmp"
+1530 BITMAP DISCARDABLE "../images/character_info.bmp"
+
 //Base character images 2000 - 2500
 2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001
 2002 BITMAP DISCARDABLE "../images/human_attack_slash.bmp"

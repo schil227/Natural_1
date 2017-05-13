@@ -624,7 +624,7 @@ item * createFieldItemFromFile(char line[1024]){
 	char type, weaponDamType, armorClass, itemType;
 	char * strtok_save_pointer;
 	int npcID, ID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, food, acMod, attackMod, damMod,
-	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, bluntDRMod, chopDRMod, slashDRMod,
+	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, darkLoSMod, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
 	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 	double weaponStrMod;
@@ -723,6 +723,8 @@ item * createFieldItemFromFile(char line[1024]){
 	mvmtMod = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	rangeMod = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	darkLoSMod = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	bluntDRMod = atoi(value);
@@ -794,7 +796,7 @@ item * createFieldItemFromFile(char line[1024]){
 			strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
 			weaponDamType, armorClass, itemType, price, owner, isStolen,
 			totalHealthMod,healthMod,totalManaMod,manaMod,food, acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
-			mvmtMod,rangeMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
+			mvmtMod,rangeMod,darkLoSMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
 			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
 			waterWeaknessMod, lightiningWeaknessMod, isEquipt, thisAnimationContainer, secondaryAnimationContainer);
 

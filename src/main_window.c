@@ -422,6 +422,10 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 	releaseDialogReadLock();
 
+	if(inCharacterInfoView()){
+		drawCharacterInfoView();
+	}
+
 	if(isPaused()){
 		drawPauseWindow(hdc, hdcBuffer, prc);
 	}
@@ -625,6 +629,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initHudInstance();
 		initThisCursor(1508);
 		initLookView(1519, 1520);
+		initCharacterInfoView();
 		initPauseView(1523);
 
 		enableSound();
@@ -840,7 +845,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				enableLookMode();
 			}
 			break;
-		case 0x4F://o key (inventory)
+		case 0x4F://o key
 			{
 				restoreMana(player, 1);
 			}
@@ -848,6 +853,11 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x50://p key (inventory)
 			{
 				togglePaused();
+			}
+			break;
+		case 0x55://u key (info)
+			{
+				enableCharacterInfoView(player);
 			}
 			break;
 		case 0x54://t key (talk)
@@ -1012,6 +1022,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 	}else if (inLookViewScrollMode()) {
 		return lookViewScrollLoop(hwnd, msg, wParam, lParam);
+	}else if (inCharacterInfoView()){
+		return characterInfoViewLoop(hwnd, msg, wParam, lParam);
 	}else if (inCursorMode()) {
 		cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode, animateMoveSpeed);
 		return 0;
@@ -1200,6 +1212,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initThisCursor(1508);
 	initSoundPlayerInstance();
 	initLookView(1519, 1520);
+	initCharacterInfoView();
 	initPauseView(1523);
 	animationContainer * playerAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;

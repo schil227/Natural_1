@@ -103,7 +103,7 @@ void drawThisAbilityView(HDC hdc, HDC hdcBuffer, RECT * prc){
 		DrawText(hdcBuffer, thisAbilityView->abilitiesList[i]->name, strlen(thisAbilityView->abilitiesList[i]->name), &textRect, DT_SINGLELINE);
 		if(thisAbilityView->currentAbilityIndex == i){
 			drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect.left - 20,textRect.top,thisAbilityView->selector);
-			drawAbilityEffects(hdcBuffer, thisAbilityView->abilitiesList[i],&effectRect);
+			drawAbilityEffects(hdcBuffer, thisAbilityView->abilitiesList[i], &effectRect);
 			drawManaCost(hdcBuffer, thisAbilityView->abilitiesList[i], &manaRect);
 		}
 		moveRECTDown(&textRect, 17);
