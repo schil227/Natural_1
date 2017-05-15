@@ -208,7 +208,11 @@ void drawSpecificEffect(HDC hdcBuffer, effectAndManaMapList * mapList, int isEna
 				SetTextColor(hdcBuffer, RGB(255, 0, 0));
 			}
 
-			sprintf(outStr, "%s: %d",name, magnitude);
+			if(magnitude > 0){
+				sprintf(outStr, "%s: +%d",name, magnitude);
+			}else{
+				sprintf(outStr, "%s: %d",name, magnitude);
+			}
 
 			DrawText(hdcBuffer, outStr, strlen(outStr), effectRect, DT_SINGLELINE);
 

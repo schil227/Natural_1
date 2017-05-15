@@ -20,6 +20,8 @@ void initCharacterInfoView(){
 	thisCharacterInfoView->selectedEffectIndex = -1;
 	thisCharacterInfoView->numEquiptItems = 0;
 	thisCharacterInfoView->MAX_EQUIPPED_ITEMS = 5;
+	thisCharacterInfoView->effectDrawSkipCount = 0;
+	thisCharacterInfoView->MAX_EFFECTS = 5;
 
 	thisCharacterInfoView->infoWindow = createCharacter(1525,RGB(255,0,255),0,0);
 	thisCharacterInfoView->activeEffectsWindow = createCharacter(1526,RGB(255,0,255),0,0);
@@ -119,6 +121,8 @@ void findStartingCharacterInfoIndex(){
 		thisCharacterInfoView->selectedEffectMode = ACTIVE_EFFECT_ITEM;
 		thisCharacterInfoView->selectedEffectIndex = 0;
 	}
+
+	thisCharacterInfoView->effectDrawSkipCount = 0;
 }
 
 void selectNextActiveEffectUp(){
@@ -183,6 +187,49 @@ void selectNextActiveEffectUp(){
 	}
 }
 
+void calculateSkipIndex(){
+	activeEffectType traverseEffect = thisCharacterInfoView->selectedEffectMode;
+	int index = thisCharacterInfoView->selectedEffectIndex;
+	int skipTotal = 0;
+
+	if(thisCharacterInfoView->selectedEffectIndex == -1){
+		return;
+	}
+
+	if(traverseEffect == ACTIVE_EFFECT_ABILITY){
+			thisCharacterInfoView->effectDrawSkipCount = max(0, (skipTotal + index + 2) - thisCharacterInfoView->MAX_EFFECTS);
+			return;
+	}
+
+	skipTotal += thisCharacterInfoView->thisIndividual->activeAbilities->numAbilities + 1; // plus 1 for "Active Animations"
+
+	if(traverseEffect == ACTIVE_EFFECT_STATUS){
+		thisCharacterInfoView->effectDrawSkipCount = max(0, (skipTotal + index + 2) - thisCharacterInfoView->MAX_EFFECTS);
+		return;
+	}
+
+	skipTotal += thisCharacterInfoView->thisIndividual->activeStatuses->numStatuses + 1;
+
+	if(traverseEffect == ACTIVE_EFFECT_FOOD){
+		thisCharacterInfoView->effectDrawSkipCount = max(0, (skipTotal + index + 1) - thisCharacterInfoView->MAX_EFFECTS);
+		return;
+	}
+
+	skipTotal += 1;
+
+	if(traverseEffect == ACTIVE_EFFECT_EQUIPT_ITEM){
+		thisCharacterInfoView->effectDrawSkipCount = max(0, (skipTotal + index + 2) - thisCharacterInfoView->MAX_EFFECTS);
+		return;
+	}
+
+	skipTotal += thisCharacterInfoView->numEquiptItems + 1;
+
+	if(traverseEffect == ACTIVE_EFFECT_ITEM){
+		thisCharacterInfoView->effectDrawSkipCount = max(0, (skipTotal + index + 1) - thisCharacterInfoView->MAX_EFFECTS);
+		return;
+	}
+}
+
 void selectNextActiveEffectDown(){
 	activeEffectType traverseEffect = thisCharacterInfoView->selectedEffectMode;
 	int index = thisCharacterInfoView->selectedEffectIndex;
@@ -195,6 +242,7 @@ void selectNextActiveEffectDown(){
 		if(index + 1 < thisCharacterInfoView->thisIndividual->activeAbilities->numAbilities){
 			thisCharacterInfoView->selectedEffectIndex = index + 1;
 			thisCharacterInfoView->selectedEffectMode = traverseEffect;
+
 			return;
 		}else{
 			traverseEffect = ACTIVE_EFFECT_STATUS;
@@ -241,6 +289,20 @@ void selectNextActiveEffectDown(){
 			thisCharacterInfoView->selectedEffectMode = traverseEffect;
 			return;
 		}
+	}
+}
+
+void handleDownOnCharacterInfoView(){
+	if(!inInfoView()){
+		selectNextActiveEffectDown();
+		calculateSkipIndex();
+	}
+}
+
+void handleUpOnCharacterInfoView(){
+	if(!inInfoView()){
+		selectNextActiveEffectUp();
+		calculateSkipIndex();
 	}
 }
 
@@ -339,7 +401,7 @@ void drawFoodEffect(HDC hdc, HDC hdcBuffer, RECT * textBoxRect, RECT * effectRec
 }
 
 void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
-	int i, effectsPassed = 0;
+	int i, effectsPassed = 0, titleEffectsDrawn = 0;
 	RECT textBoxRect;
 	RECT effectRect;
 
@@ -349,7 +411,12 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 			yOff + thisCharacterInfoView->activeEffectsWindow->fixedHeight - (thisCharacterInfoView->characterInfoArrow->fixedHeight + 5),
 			thisCharacterInfoView->characterInfoArrow);
 
-	textBoxRect.top = yOff + 10;
+	drawUnboundCharacterByPixels(hdc, hdcBuffer,
+			xOff + 68 - (thisCharacterInfoView->scrollUpArrow->fixedWidth / 2),
+			yOff + 9,
+			thisCharacterInfoView->scrollUpArrow);
+
+	textBoxRect.top = yOff + 10 + thisCharacterInfoView->scrollUpArrow->fixedHeight;
 		textBoxRect.bottom = textBoxRect.top + 30;
 		textBoxRect.left = xOff + 10;
 		textBoxRect.right = textBoxRect.left + 200;
@@ -361,29 +428,37 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 	SetBkMode(hdcBuffer, TRANSPARENT);
-	DrawText(hdcBuffer, "Active Abilities", -1, &textBoxRect, DT_SINGLELINE);
+
+	if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+		DrawText(hdcBuffer, "Active Abilities", -1, &textBoxRect, DT_SINGLELINE);
+		textBoxRect.top = textBoxRect.top + 15;
+		textBoxRect.bottom = textBoxRect.bottom + 15;
+	}
+
+	titleEffectsDrawn++;
 
 	textBoxRect.left = textBoxRect.left + 5 + thisCharacterInfoView->selectArrow->fixedWidth;
-	textBoxRect.top = textBoxRect.top + 12;
-	textBoxRect.bottom = textBoxRect.bottom + 12;
 
 	for(i = 0; i < thisCharacterInfoView->thisIndividual->activeAbilities->MAX_ABILITIES; i++){
 		activeAbility * tmpAbility = thisCharacterInfoView->thisIndividual->activeAbilities->abilitiesList[i];
 
 		if(tmpAbility != NULL){
-			DrawText(hdcBuffer, tmpAbility->thisAbility->name, -1, &textBoxRect, DT_SINGLELINE);
+			if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+				DrawText(hdcBuffer, tmpAbility->thisAbility->name, -1, &textBoxRect, DT_SINGLELINE);
 
-			if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_ABILITY && effectsPassed == thisCharacterInfoView->selectedEffectIndex){
-				drawAbilityEffects(hdcBuffer, tmpAbility->thisAbility, &effectRect);
-				drawUnboundCharacterByPixels(hdc, hdcBuffer,
-						xOff + 7,
-						textBoxRect.top,
-						thisCharacterInfoView->selectArrow);
+				if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_ABILITY && effectsPassed == thisCharacterInfoView->selectedEffectIndex){
+					drawAbilityEffects(hdcBuffer, tmpAbility->thisAbility, &effectRect);
+					drawUnboundCharacterByPixels(hdc, hdcBuffer,
+							xOff + 7,
+							textBoxRect.top,
+							thisCharacterInfoView->selectArrow);
+				}
+
+				textBoxRect.top = textBoxRect.top + 15;
+				textBoxRect.bottom = textBoxRect.bottom + 15;
 			}
 
-			textBoxRect.top = textBoxRect.top + 12;
-			textBoxRect.bottom = textBoxRect.bottom + 12;
-
+			titleEffectsDrawn++;
 			effectsPassed++;
 
 			if(effectsPassed == thisCharacterInfoView->thisIndividual->activeAbilities->numAbilities){
@@ -394,30 +469,37 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 	effectsPassed = 0;
 
-	textBoxRect.left = textBoxRect.left - (5 + thisCharacterInfoView->selectArrow->fixedWidth);
-	DrawText(hdcBuffer, "Active Statuses", -1, &textBoxRect, DT_SINGLELINE);
+	if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+		textBoxRect.left = textBoxRect.left - (5 + thisCharacterInfoView->selectArrow->fixedWidth);
+		DrawText(hdcBuffer, "Active Statuses", -1, &textBoxRect, DT_SINGLELINE);
 
-	textBoxRect.left = textBoxRect.left + 5 + thisCharacterInfoView->selectArrow->fixedWidth;
-	textBoxRect.top = textBoxRect.top + 12;
-	textBoxRect.bottom = textBoxRect.bottom + 12;
+		textBoxRect.left = textBoxRect.left + 5 + thisCharacterInfoView->selectArrow->fixedWidth;
+		textBoxRect.top = textBoxRect.top + 15;
+		textBoxRect.bottom = textBoxRect.bottom + 15;
+	}
+
+	titleEffectsDrawn++;
 
 	for(i = 0; i < thisCharacterInfoView->thisIndividual->activeStatuses->numStatuses; i++){
 		status * tmpStatus = thisCharacterInfoView->thisIndividual->activeStatuses->statuses[i];
 
 		if(tmpStatus != NULL){
-			DrawText(hdcBuffer, lookUpStatusEffectName(tmpStatus->effect, 1), -1, &textBoxRect, DT_SINGLELINE);
+			if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+				DrawText(hdcBuffer, lookUpStatusEffectName(tmpStatus->effect, 1), -1, &textBoxRect, DT_SINGLELINE);
 
-			if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_STATUS && effectsPassed == thisCharacterInfoView->selectedEffectIndex){
-				drawStatus(hdcBuffer, tmpStatus, &effectRect);
-				drawUnboundCharacterByPixels(hdc, hdcBuffer,
-										xOff + 7,
-										textBoxRect.top,
-										thisCharacterInfoView->selectArrow);
+				if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_STATUS && effectsPassed == thisCharacterInfoView->selectedEffectIndex){
+					drawStatus(hdcBuffer, tmpStatus, &effectRect);
+					drawUnboundCharacterByPixels(hdc, hdcBuffer,
+											xOff + 7,
+											textBoxRect.top,
+											thisCharacterInfoView->selectArrow);
+				}
+
+				textBoxRect.top = textBoxRect.top + 15;
+				textBoxRect.bottom = textBoxRect.bottom + 15;
 			}
 
-			textBoxRect.top = textBoxRect.top + 12;
-			textBoxRect.bottom = textBoxRect.bottom + 12;
-
+			titleEffectsDrawn++;
 			effectsPassed++;
 
 			if(effectsPassed == thisCharacterInfoView->thisIndividual->activeStatuses->numStatuses){
@@ -428,47 +510,59 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 	effectsPassed = 0;
 
-	drawFoodEffect(hdc, hdcBuffer, &textBoxRect, &effectRect, xOff);
+	if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+		drawFoodEffect(hdc, hdcBuffer, &textBoxRect, &effectRect, xOff);
+	}
+	titleEffectsDrawn++;
 
-	textBoxRect.left = textBoxRect.left - (5 + thisCharacterInfoView->selectArrow->fixedWidth);
-	DrawText(hdcBuffer, "Active Items", -1, &textBoxRect, DT_SINGLELINE);
+	if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+		textBoxRect.left = textBoxRect.left - (5 + thisCharacterInfoView->selectArrow->fixedWidth);
+		DrawText(hdcBuffer, "Active Items", -1, &textBoxRect, DT_SINGLELINE);
 
-	textBoxRect.left = textBoxRect.left + 5 + thisCharacterInfoView->selectArrow->fixedWidth;
-	textBoxRect.top = textBoxRect.top + 12;
-	textBoxRect.bottom = textBoxRect.bottom + 12;
-
-	for(i = 0; i < thisCharacterInfoView->numEquiptItems; i++){
-		DrawText(hdcBuffer, thisCharacterInfoView->equippedItems[i]->name, -1, &textBoxRect, DT_SINGLELINE);
-
-		if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_EQUIPT_ITEM && i == thisCharacterInfoView->selectedEffectIndex){
-			drawItem(hdcBuffer, thisCharacterInfoView->equippedItems[i], 0, &effectRect);
-			drawUnboundCharacterByPixels(hdc, hdcBuffer,
-									xOff + 7,
-									textBoxRect.top,
-									thisCharacterInfoView->selectArrow);
-		}
-
-		textBoxRect.top = textBoxRect.top + 12;
-		textBoxRect.bottom = textBoxRect.bottom + 12;
+		textBoxRect.left = textBoxRect.left + 5 + thisCharacterInfoView->selectArrow->fixedWidth;
+		textBoxRect.top = textBoxRect.top + 15;
+		textBoxRect.bottom = textBoxRect.bottom + 15;
 	}
 
-	for(i = 0; i < thisCharacterInfoView->thisIndividual->activeItems->activeItemsTotal; i++){
-		activeItem * tmpItem = thisCharacterInfoView->thisIndividual->activeItems->activeItemArr[i];
+	titleEffectsDrawn++;
 
-		if(tmpItem != NULL){
-			DrawText(hdcBuffer, tmpItem->thisItem->name, -1, &textBoxRect, DT_SINGLELINE);
+	for(i = 0; i < thisCharacterInfoView->numEquiptItems; i++){
+		if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+			DrawText(hdcBuffer, thisCharacterInfoView->equippedItems[i]->name, -1, &textBoxRect, DT_SINGLELINE);
 
-			if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_ITEM && effectsPassed == thisCharacterInfoView->selectedEffectIndex){
-				drawItem(hdcBuffer, tmpItem->thisItem, tmpItem->remaningTurns, &effectRect);
+			if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_EQUIPT_ITEM && i == thisCharacterInfoView->selectedEffectIndex){
+				drawItem(hdcBuffer, thisCharacterInfoView->equippedItems[i], 0, &effectRect);
 				drawUnboundCharacterByPixels(hdc, hdcBuffer,
 										xOff + 7,
 										textBoxRect.top,
 										thisCharacterInfoView->selectArrow);
 			}
 
-			textBoxRect.top = textBoxRect.top + 12;
-			textBoxRect.bottom = textBoxRect.bottom + 12;
+			textBoxRect.top = textBoxRect.top + 15;
+			textBoxRect.bottom = textBoxRect.bottom + 15;
+		}
+		titleEffectsDrawn++;
+	}
 
+	for(i = 0; i < thisCharacterInfoView->thisIndividual->activeItems->activeItemsTotal; i++){
+		activeItem * tmpItem = thisCharacterInfoView->thisIndividual->activeItems->activeItemArr[i];
+
+		if(tmpItem != NULL){
+			if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
+				DrawText(hdcBuffer, tmpItem->thisItem->name, -1, &textBoxRect, DT_SINGLELINE);
+
+				if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_ITEM && effectsPassed == thisCharacterInfoView->selectedEffectIndex){
+					drawItem(hdcBuffer, tmpItem->thisItem, tmpItem->remaningTurns, &effectRect);
+					drawUnboundCharacterByPixels(hdc, hdcBuffer,
+											xOff + 7,
+											textBoxRect.top,
+											thisCharacterInfoView->selectArrow);
+				}
+
+				textBoxRect.top = textBoxRect.top + 15;
+				textBoxRect.bottom = textBoxRect.bottom + 15;
+			}
+			titleEffectsDrawn++;
 			effectsPassed++;
 
 			if(effectsPassed == thisCharacterInfoView->thisIndividual->activeItems->activeItemsTotal){

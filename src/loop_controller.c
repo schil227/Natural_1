@@ -516,18 +516,13 @@ int characterInfoViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			break;
 		case 0x38:
 		case 0x68: {
-			if(!inInfoView()){
-				selectNextActiveEffectUp();
-			}
+			handleUpOnCharacterInfoView();
 		}
 			break;
 
 		case 0x32:
 		case 0x62: {
-			if(!inInfoView()){
-				selectNextActiveEffectDown();
-			}
-
+			handleDownOnCharacterInfoView();
 		}
 			break;
 		case 0x1B: //escape

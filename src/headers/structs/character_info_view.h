@@ -18,6 +18,8 @@ typedef struct{
 	int canLevelUp;
 	activeEffectType selectedEffectMode;
 	int selectedEffectIndex;
+	int effectDrawSkipCount;
+	int MAX_EFFECTS;
 
 	individual * thisIndividual;
 	item * equippedItems[5];
