@@ -65,11 +65,6 @@ typedef struct {
 	short int waterDRMod;
 	short int lightningDRMod;
 
-	short int earthWeaknessMod;
-	short int fireWeaknessMod;
-	short int waterWeaknessMod;
-	short int lightiningWeaknessMod;
-
 	short int isEquipt;
 	short int price;
 	short int isStolen;

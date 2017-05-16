@@ -21,7 +21,7 @@ void initCharacterInfoView(){
 	thisCharacterInfoView->numEquiptItems = 0;
 	thisCharacterInfoView->MAX_EQUIPPED_ITEMS = 5;
 	thisCharacterInfoView->effectDrawSkipCount = 0;
-	thisCharacterInfoView->MAX_EFFECTS = 16;
+	thisCharacterInfoView->MAX_EFFECTS = 13;
 
 	thisCharacterInfoView->infoWindow = createCharacter(1525,RGB(255,0,255),0,0);
 	thisCharacterInfoView->activeEffectsWindow = createCharacter(1526,RGB(255,0,255),0,0);
@@ -216,7 +216,9 @@ void calculateSkipIndex(){
 		return;
 	}
 
-	skipTotal += 1;
+	if(thisCharacterInfoView->thisIndividual->foodBonusActive || thisCharacterInfoView->thisIndividual->foodNegativeActive){
+		skipTotal += 1;
+	}
 
 	if(traverseEffect == ACTIVE_EFFECT_EQUIPT_ITEM){
 		thisCharacterInfoView->effectDrawSkipCount = max(0, (skipTotal + index + 2) - thisCharacterInfoView->MAX_EFFECTS);
@@ -334,8 +336,8 @@ void drawStatChangeCharacterInfo(HDC hdcBuffer, int magnitude, RECT * textBox){
 void drawStatCharacterInfo(HDC hdcBuffer, int stat, int magnitude, char * outText, RECT * textBox){
 	char value[32];
 	int boxShift, magnitudeShift;
-	textBox->top = textBox->top + 15;
-	textBox->bottom = textBox->top + 15;
+	textBox->top = textBox->top + 16;
+	textBox->bottom = textBox->top + 16;
 
 	DrawText(hdcBuffer, outText, -1, textBox, DT_SINGLELINE);
 
@@ -445,60 +447,60 @@ void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 	//begin drawing right column
 	textBox.top = yOff + 30;
-	textBox.bottom = textBox.top + 15;
+	textBox.bottom = textBox.top + 16;
 	textBox.left = xOff + 100;
 	textBox.right = textBox.left + 400;
 
 	sprintf(value, "HP: %d/%d", tmpIndividual->hp, (getAttributeSum(tmpIndividual, "baseHP") + getAttributeSum(tmpIndividual, "CON") * 2));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
 
-	textBox.top = textBox.top + 15;
-	textBox.bottom = textBox.top + 15;
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "Actions: %d/%d", tmpIndividual->remainingActions, tmpIndividual->totalActions);
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
-	textBox.bottom = textBox.top + 15;
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "Attack: %d", getAttributeSum(tmpIndividual, "attack"));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
-	textBox.bottom = textBox.top + 15;
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "AC: %d", getAttributeSum(tmpIndividual, "ac"));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
-	textBox.bottom = textBox.top + 15;
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "Dam: [%d-%d]", calcMinDam(tmpIndividual), calcMaxDam(tmpIndividual));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
-	textBox.bottom = textBox.top + 15;
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "Crit: %s", tmpIndividual->critType);
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
-	textBox.bottom = textBox.top + 15;
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "Food: %d/%d", ((int)tmpIndividual->food), tmpIndividual->totalFood);
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
-	textBox.bottom = textBox.top + 15;
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "Mvmt: %d", getAttributeSum(tmpIndividual, "mvmt"));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
+	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 20;
 
 	sprintf(value, "Dark Sight: %d", getAttributeSum(tmpIndividual, "darkLoS"));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 15;
+	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 17;
 
 	//DR
 	DrawText(hdcBuffer, "Damage Reduction", -1, &textBox, DT_SINGLELINE);
-	textBox.top = textBox.top + 16;
-	textBox.bottom = textBox.top + 16;
+	textBox.top = textBox.top + 17;
+	textBox.bottom = textBox.top + 17;
 
 	drawUnboundCharacterByPixels(hdc, hdcBuffer, textBox.left, textBox.top, thisCharacterInfoView->drChart);
 	textBox.top = textBox.top + 16;
@@ -613,7 +615,7 @@ void drawFoodEffect(HDC hdc, HDC hdcBuffer, RECT * textBoxRect, RECT * effectRec
 }
 
 void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
-	int i, effectsPassed = 0, titleEffectsDrawn = 0;
+	int i, effectsPassed = 0, titleEffectsDrawn = 0, hitEnd = 0;
 	RECT textBoxRect;
 	RECT effectRect;
 
@@ -623,10 +625,12 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 			yOff + thisCharacterInfoView->activeEffectsWindow->fixedHeight - (thisCharacterInfoView->characterInfoArrow->fixedHeight + 5),
 			thisCharacterInfoView->characterInfoArrow);
 
-	drawUnboundCharacterByPixels(hdc, hdcBuffer,
-			xOff + 68 - (thisCharacterInfoView->scrollUpArrow->fixedWidth / 2),
-			yOff + 9,
-			thisCharacterInfoView->scrollUpArrow);
+	if(thisCharacterInfoView->effectDrawSkipCount > 0){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,
+				xOff + 68 - (thisCharacterInfoView->scrollUpArrow->fixedWidth / 2),
+				yOff + 9,
+				thisCharacterInfoView->scrollUpArrow);
+	}
 
 	textBoxRect.top = yOff + 10 + thisCharacterInfoView->scrollUpArrow->fixedHeight;
 		textBoxRect.bottom = textBoxRect.top + 30;
@@ -668,6 +672,8 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 				textBoxRect.top = textBoxRect.top + 15;
 				textBoxRect.bottom = textBoxRect.bottom + 15;
+			}else if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount == thisCharacterInfoView->MAX_EFFECTS){
+				hitEnd = 1;
 			}
 
 			titleEffectsDrawn++;
@@ -688,6 +694,8 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 		textBoxRect.left = textBoxRect.left + 5 + thisCharacterInfoView->selectArrow->fixedWidth;
 		textBoxRect.top = textBoxRect.top + 15;
 		textBoxRect.bottom = textBoxRect.bottom + 15;
+	}else if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount == thisCharacterInfoView->MAX_EFFECTS){
+		hitEnd = 1;
 	}
 
 	titleEffectsDrawn++;
@@ -709,6 +717,8 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 				textBoxRect.top = textBoxRect.top + 15;
 				textBoxRect.bottom = textBoxRect.bottom + 15;
+			}else if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount == thisCharacterInfoView->MAX_EFFECTS){
+				hitEnd = 1;
 			}
 
 			titleEffectsDrawn++;
@@ -724,7 +734,10 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 	if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
 		drawFoodEffect(hdc, hdcBuffer, &textBoxRect, &effectRect, xOff);
+	}else if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount == thisCharacterInfoView->MAX_EFFECTS){
+		hitEnd = 1;
 	}
+
 	titleEffectsDrawn++;
 
 	if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount >= 0 && titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount < thisCharacterInfoView->MAX_EFFECTS){
@@ -734,6 +747,8 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 		textBoxRect.left = textBoxRect.left + 5 + thisCharacterInfoView->selectArrow->fixedWidth;
 		textBoxRect.top = textBoxRect.top + 15;
 		textBoxRect.bottom = textBoxRect.bottom + 15;
+	}else if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount == thisCharacterInfoView->MAX_EFFECTS){
+		hitEnd = 1;
 	}
 
 	titleEffectsDrawn++;
@@ -752,7 +767,10 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 			textBoxRect.top = textBoxRect.top + 15;
 			textBoxRect.bottom = textBoxRect.bottom + 15;
+		}else if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount == thisCharacterInfoView->MAX_EFFECTS){
+			hitEnd = 1;
 		}
+
 		titleEffectsDrawn++;
 	}
 
@@ -773,7 +791,10 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 				textBoxRect.top = textBoxRect.top + 15;
 				textBoxRect.bottom = textBoxRect.bottom + 15;
+			}else if(titleEffectsDrawn - thisCharacterInfoView->effectDrawSkipCount == thisCharacterInfoView->MAX_EFFECTS){
+				hitEnd = 1;
 			}
+
 			titleEffectsDrawn++;
 			effectsPassed++;
 
@@ -786,6 +807,13 @@ void drawEffectsMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 	effectsPassed = 0;
 
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
+
+	if(hitEnd){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer,
+			xOff + 68 - (thisCharacterInfoView->scrollDownArrow->fixedWidth / 2),
+			yOff + thisCharacterInfoView->activeEffectsWindow->fixedHeight - (15 + thisCharacterInfoView->scrollDownArrow->fixedHeight * 2),
+			thisCharacterInfoView->scrollDownArrow);
+	}
 }
 
 void drawCharacterInfoView(HDC hdc, HDC hdcBuffer, RECT * rect){

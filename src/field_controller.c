@@ -64,8 +64,7 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 
 void createIndividualFromLine(individual * newIndividual, char * line){
 	int ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
-	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,
-	fireWeakness,waterWeakness,lightiningWeakness,dialogID,dialogPortraitID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
+	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,dialogID,dialogPortraitID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
 	int offensiveness, abilityAffinity, tacticalness, cowardness;
 	char * name = malloc(sizeof(char) * 32);
 	char * strtok_save_pointer;
@@ -165,15 +164,6 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	lightningDR = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	earthWeakness = atoi(value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	fireWeakness = atoi(value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	waterWeakness = atoi(value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	lightiningWeakness = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
 	dialogID = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -259,7 +249,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
 	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,earthWeakness,fireWeakness,waterWeakness,lightiningWeakness, dialogID, dialogPortraitID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR, dialogID, dialogPortraitID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
 			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
@@ -625,8 +615,7 @@ item * createFieldItemFromFile(char line[1024]){
 	char * strtok_save_pointer;
 	int npcID, ID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, food, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, darkLoSMod, bluntDRMod, chopDRMod, slashDRMod,
-	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod, earthWeaknessMod,
-	fireWeaknessMod, waterWeaknessMod, lightiningWeaknessMod, isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
+	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod,isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 	double weaponStrMod;
 	animationContainer * thisAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;
@@ -745,15 +734,6 @@ item * createFieldItemFromFile(char line[1024]){
 	lightningDRMod = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	earthWeaknessMod = atoi(value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	fireWeaknessMod = atoi(value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	waterWeaknessMod = atoi(value);
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	lightiningWeaknessMod = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
 	isEquipt = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -797,8 +777,7 @@ item * createFieldItemFromFile(char line[1024]){
 			weaponDamType, armorClass, itemType, price, owner, isStolen,
 			totalHealthMod,healthMod,totalManaMod,manaMod,food, acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
 			mvmtMod,rangeMod,darkLoSMod,bluntDRMod,chopDRMod,slashDRMod,pierceDRMod,earthDRMod,
-			fireDRMod,waterDRMod,lightningDRMod,earthWeaknessMod,fireWeaknessMod,
-			waterWeaknessMod, lightiningWeaknessMod, isEquipt, thisAnimationContainer, secondaryAnimationContainer);
+			fireDRMod,waterDRMod,lightningDRMod, isEquipt, thisAnimationContainer, secondaryAnimationContainer);
 
 	return newItem;
 }

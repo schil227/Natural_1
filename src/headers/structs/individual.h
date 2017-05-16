@@ -207,11 +207,6 @@ struct individual{
 	short int waterDR;
 	short int lightningDR;
 
-	short int earthWeakness;
-	short int fireWeakness;
-	short int waterWeakness;
-	short int lightiningWeakness;
-
 	int dialogID;
 	int dialogPortraitID;
 

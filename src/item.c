@@ -11,8 +11,7 @@ item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char
 		char weaponDamageType, char armorClass, char itemType, int price, int owner, int isStolen, int totalHealthMod, int healthMod, int totalManaMod,
 		int manaMod, int food, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
 		int mvmtMod, int rangeMod, int darkLoSMod, int bluntDRMod, int chopDRMod, int slashDRMod, int pierceDRMod, int earthDRMod,
-		int fireDRMod, int waterDRMod, int lightningDRMod, int earthWeaknessMod, int fireWeaknessMod,
-		int waterWeaknessMod, int lightiningWeaknessMod, int isEquipt, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
+		int fireDRMod, int waterDRMod, int lightningDRMod, int isEquipt, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 
 	item * thisItem = malloc(sizeof(item));
 	thisItem->itemCharacter = malloc(sizeof(character));
@@ -73,10 +72,6 @@ item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char
 	thisItem->fireDRMod = fireDRMod;
 	thisItem->waterDRMod = waterDRMod;
 	thisItem->lightningDRMod = lightningDRMod;
-	thisItem->earthWeaknessMod = earthWeaknessMod;
-	thisItem->fireWeaknessMod = fireWeaknessMod;
-	thisItem->waterWeaknessMod = waterWeaknessMod;
-	thisItem->lightiningWeaknessMod = lightiningWeaknessMod;
 	thisItem->isEquipt = isEquipt;
 
 	return thisItem;
@@ -144,10 +139,6 @@ item * cloneItem(item * thisItem, int keepOwner){
 	newItem->fireDRMod = thisItem->fireDRMod;
 	newItem->waterDRMod = thisItem->waterDRMod;
 	newItem->lightningDRMod = thisItem->lightningDRMod;
-	newItem->earthWeaknessMod = thisItem->earthWeaknessMod;
-	newItem->fireWeaknessMod = thisItem->fireWeaknessMod;
-	newItem->waterWeaknessMod = thisItem->waterWeaknessMod;
-	newItem->lightiningWeaknessMod = thisItem->lightiningWeaknessMod;
 	newItem->isEquipt = thisItem->isEquipt;
 
 	return newItem;
@@ -180,11 +171,7 @@ int itemIsBuffing(item * thisItem){
 		thisItem->earthDRMod > 0 ||
 		thisItem->fireDRMod > 0 ||
 		thisItem->waterDRMod > 0 ||
-		thisItem->lightningDRMod > 0 ||
-		thisItem->earthWeaknessMod > 0 ||
-		thisItem->fireWeaknessMod > 0 ||
-		thisItem->waterWeaknessMod > 0 ||
-		thisItem->lightiningWeaknessMod > 0 ){
+		thisItem->lightningDRMod > 0){
 		return 1;
 	}
 
@@ -509,7 +496,7 @@ void drawItem(HDC hdcBuffer, item * thisItem, int turns, RECT * effectRect){
 			effectRect->bottom = effectRect->bottom + 12;
 	}
 
-	int calculatedDR = thisItem->earthDRMod - thisItem->earthWeaknessMod;
+	int calculatedDR = thisItem->earthDRMod;
 
 	if(calculatedDR != 0){
 		setCursorColor(hdcBuffer, calculatedDR, 1);
@@ -524,7 +511,7 @@ void drawItem(HDC hdcBuffer, item * thisItem, int turns, RECT * effectRect){
 			effectRect->bottom = effectRect->bottom + 12;
 	}
 
-	calculatedDR = thisItem->fireDRMod - thisItem->fireWeaknessMod;
+	calculatedDR = thisItem->fireDRMod;
 
 	if(calculatedDR != 0){
 		setCursorColor(hdcBuffer, calculatedDR, 1);
@@ -539,7 +526,7 @@ void drawItem(HDC hdcBuffer, item * thisItem, int turns, RECT * effectRect){
 			effectRect->bottom = effectRect->bottom + 12;
 	}
 
-	calculatedDR = thisItem->waterDRMod - thisItem->waterWeaknessMod;
+	calculatedDR = thisItem->waterDRMod;
 
 	if(calculatedDR != 0){
 		setCursorColor(hdcBuffer, calculatedDR, 1);
@@ -554,7 +541,7 @@ void drawItem(HDC hdcBuffer, item * thisItem, int turns, RECT * effectRect){
 			effectRect->bottom = effectRect->bottom + 12;
 	}
 
-	calculatedDR = thisItem->lightningDRMod - thisItem->lightiningWeaknessMod;
+	calculatedDR = thisItem->lightningDRMod;
 
 	if(calculatedDR != 0){
 		setCursorColor(hdcBuffer, calculatedDR, 1);

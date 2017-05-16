@@ -107,9 +107,8 @@ individual *initIndividual(){
 
 int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
-		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
-		int waterDR, int lightningDR, int earthWeakness, int fireWeakness, int waterWeakness,
-		int lightiningWeakness, int dialogID, int dialogPortraitID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
+		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR, int waterDR, int lightningDR,
+		int dialogID, int dialogPortraitID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
 		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 	int i;
 	BITMAP bm;
@@ -161,11 +160,6 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->fireDR = fireDR;
 	thisIndividual->waterDR = waterDR;
 	thisIndividual->lightningDR = lightningDR;
-
-	thisIndividual->earthWeakness = earthWeakness;
-	thisIndividual->fireWeakness = fireWeakness;
-	thisIndividual->waterWeakness = waterWeakness;
-	thisIndividual->lightiningWeakness = lightiningWeakness;
 
 	thisIndividual->dialogID = dialogID;
 	thisIndividual->dialogPortraitID = dialogPortraitID;
@@ -3023,15 +3017,7 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 		return thisIndividual->waterDR;
 	} else if(strcmp("lightningDR",attribute) == 0 ){
 		return thisIndividual->lightningDR;
-	} else if(strcmp("earthWeakness",attribute) == 0 ){
-		return thisIndividual->earthWeakness;
-	} else if(strcmp("fireWeakness",attribute) == 0 ){
-		return thisIndividual->fireWeakness;
-	} else if(strcmp("waterWeakness",attribute) == 0 ){
-		return thisIndividual->waterWeakness;
-	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
-		return thisIndividual->lightiningWeakness;
-	}else if(strcmp("LoS", attribute) == 0){
+	} else if(strcmp("LoS", attribute) == 0){
 		return thisIndividual->LoS;
 	}else if(strcmp("darkLoS", attribute) == 0){
 		return thisIndividual->darkLoS;
@@ -3233,34 +3219,6 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 		 }
 		 if(activeItem != NULL){
 			 toReturn += activeItem->lightningDRMod;
-		 }
-	} else if(strcmp("earthWeakness",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->earthWeaknessMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->earthWeaknessMod;
-		 }
-	} else if(strcmp("fireWeakness",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->fireWeaknessMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->fireWeaknessMod;
-		 }
-	} else if(strcmp("waterWeakness",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->waterWeaknessMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->waterWeaknessMod;
-		 }
-	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
-		 if(thisItem != NULL && thisItem->isEquipt){
-			 toReturn += thisItem->lightiningWeaknessMod;
-		 }
-		 if(activeItem != NULL){
-			 toReturn += activeItem->lightiningWeaknessMod;
 		 }
 	}
 	return toReturn;
