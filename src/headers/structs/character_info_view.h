@@ -35,6 +35,7 @@ typedef struct{
 	fixedCharacter * scrollUpArrow;
 	fixedCharacter * scrollDownArrow;
 	fixedCharacter * drChart;
+	fixedCharacter * frame;
 } characterInfoView;
 
 #endif /* SRC_HEADERS_STRUCTS_CHARACTER_INFO_VIEW_H_ */

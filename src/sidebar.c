@@ -55,7 +55,7 @@ void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 	sprintf(hpOut, "HP: %d/%d", player->hp, (getAttributeSum(player, "baseHP") + getAttributeSum(player, "CON") * 2));
 
 	char manaOut[32];
-	sprintf(manaOut, "Mana: %d/%d", getAttributeSum(player, "mana"), (getAttributeSum(player, "baseMana")+ getAttributeSum(player, "WILL") * 2));
+	sprintf(manaOut, "Mana: %d/%d", player->mana, (getAttributeSum(player, "baseMana")+ getAttributeSum(player, "WILL") * 2));
 
 	char actionOut[16];
 	sprintf(actionOut, "Actions:%d",player->remainingActions);

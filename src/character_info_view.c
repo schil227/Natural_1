@@ -21,7 +21,7 @@ void initCharacterInfoView(){
 	thisCharacterInfoView->numEquiptItems = 0;
 	thisCharacterInfoView->MAX_EQUIPPED_ITEMS = 5;
 	thisCharacterInfoView->effectDrawSkipCount = 0;
-	thisCharacterInfoView->MAX_EFFECTS = 5;
+	thisCharacterInfoView->MAX_EFFECTS = 16;
 
 	thisCharacterInfoView->infoWindow = createCharacter(1525,RGB(255,0,255),0,0);
 	thisCharacterInfoView->activeEffectsWindow = createCharacter(1526,RGB(255,0,255),0,0);
@@ -32,6 +32,7 @@ void initCharacterInfoView(){
 	thisCharacterInfoView->scrollUpArrow = createCharacter(1505,RGB(255,0,255),0,0);
 	thisCharacterInfoView->scrollDownArrow = createCharacter(1507,RGB(255,0,255),0,0);
 	thisCharacterInfoView->drChart = createCharacter(1527,RGB(255,0,255),0,0);
+	thisCharacterInfoView->frame = createCharacter(1506,RGB(255,0,255),0,0);
 }
 
 void destroyCharacterInfoView(){
@@ -306,14 +307,225 @@ void handleUpOnCharacterInfoView(){
 	}
 }
 
+void setCursorColor(HDC hdcBuffer, int value, int isBuff){
+	if((value > 0 && isBuff) || (value < 0 && !isBuff)){
+		SetTextColor(hdcBuffer, RGB(0, 162, 255));
+	}else if((value < 0 && isBuff) || (value > 0 && !isBuff)){
+		SetTextColor(hdcBuffer, RGB(255, 0, 0));
+	}
+}
+
+void drawStatChangeCharacterInfo(HDC hdcBuffer, int magnitude, RECT * textBox){
+	char tmpStr[32];
+
+	setCursorColor(hdcBuffer, magnitude, 1);
+
+	if(magnitude > 0){
+		sprintf(tmpStr, "+%d", magnitude);
+	}else{
+		sprintf(tmpStr, "%d", magnitude);
+	}
+
+	DrawText(hdcBuffer, tmpStr, -1, textBox, DT_SINGLELINE);
+
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+}
+
+void drawStatCharacterInfo(HDC hdcBuffer, int stat, int magnitude, char * outText, RECT * textBox){
+	char value[32];
+	int boxShift, magnitudeShift;
+	textBox->top = textBox->top + 15;
+	textBox->bottom = textBox->top + 15;
+
+	DrawText(hdcBuffer, outText, -1, textBox, DT_SINGLELINE);
+
+	if(stat >= 0){
+		boxShift = 46;
+	}else{
+		boxShift = 42;
+	}
+
+	if(magnitude >= 0){
+		magnitudeShift = 54;
+	}else{
+		magnitudeShift = 56;
+	}
+
+
+	sprintf(value, "%d", stat);
+
+	textBox->left += boxShift;
+	textBox->right += boxShift;
+
+	DrawText(hdcBuffer, value, -1, textBox, DT_SINGLELINE);
+
+	textBox->left -= boxShift;
+	textBox->right -= boxShift;
+
+	if(magnitude != 0){
+		textBox->left += magnitudeShift;
+		textBox->right += magnitudeShift;
+
+		drawStatChangeCharacterInfo(hdcBuffer, magnitude, textBox);
+
+		textBox->left -= magnitudeShift;
+		textBox->right -= magnitudeShift;
+	}
+}
+
+void drawDR(HDC hdcBuffer, int value, int index, RECT * textBox){
+	SIZE size;
+	int startingLocation = textBox->left;
+	char drString[4];
+
+	sprintf(drString, "%d", value);
+	GetTextExtentPoint32(hdcBuffer, drString, strlen(drString), &size);
+
+	textBox->left = textBox->left + 10 + index * 20 - (size.cx/2);
+	textBox->right = textBox->left + 400;
+
+	DrawText(hdcBuffer, drString, -1, textBox, DT_SINGLELINE);
+
+	textBox->left = startingLocation;
+	textBox->right = textBox->left + 400;
+
+}
+
 void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
+	char value[32];
+	int tmpNum = 0;
+	SIZE size;
+
+	individual * tmpIndividual = thisCharacterInfoView->thisIndividual;
+
+	RECT textBox;
+	textBox.top = yOff + 8;
+	textBox.left = xOff + 10;
+	textBox.bottom = textBox.top + 15;
+	textBox.right = textBox.left + 256;
+
 	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisCharacterInfoView->infoWindow);
 	drawUnboundCharacterByPixels(hdc, hdcBuffer,
 			xOff + thisCharacterInfoView->infoWindow->fixedWidth - (thisCharacterInfoView->activeEffectsArrow->fixedWidth + 5),
 			yOff + thisCharacterInfoView->infoWindow->fixedHeight - (thisCharacterInfoView->activeEffectsArrow->fixedHeight + 5),
 			thisCharacterInfoView->activeEffectsArrow);
 
+	drawUnboundCharacterByPixels(hdc, hdcBuffer,
+						xOff + 25,
+						yOff + 30,
+						thisCharacterInfoView->frame);
 
+	drawIndividualDefaultByPixels(hdc, hdcBuffer, tmpIndividual, xOff, yOff + 5, 0);
+
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+	textBox.left = xOff + 20;
+
+	DrawText(hdcBuffer, tmpIndividual->name, -1, &textBox, DT_SINGLELINE);
+
+	textBox.top = textBox.top + 75;
+	textBox.bottom = textBox.top + 15;
+
+	DrawText(hdcBuffer, "Level: X", -1, &textBox, DT_SINGLELINE);
+
+	textBox.top = textBox.top + 20;
+	textBox.bottom = textBox.top + 15;
+	textBox.left = xOff + 10;
+	DrawText(hdcBuffer, "STATS:", -1, &textBox, DT_SINGLELINE);
+
+	textBox.left = xOff + 20;
+
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->STR, getAttributeSum(tmpIndividual, "STR") - tmpIndividual->STR, "STR:", &textBox);
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->DEX, getAttributeSum(tmpIndividual, "DEX") - tmpIndividual->DEX, "DEX:", &textBox);
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->CON, getAttributeSum(tmpIndividual, "CON") - tmpIndividual->CON, "CON:", &textBox);
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->INT, getAttributeSum(tmpIndividual, "INT") - tmpIndividual->INT, "INT:", &textBox);
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->WIS, getAttributeSum(tmpIndividual, "WIS") - tmpIndividual->WIS, "WIS:", &textBox);
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->WILL, getAttributeSum(tmpIndividual, "WILL") - tmpIndividual->WILL, "WILL:", &textBox);
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->CHR, getAttributeSum(tmpIndividual, "CHR") - tmpIndividual->CHR, "CHR:", &textBox);
+	drawStatCharacterInfo(hdcBuffer, tmpIndividual->LUCK, getAttributeSum(tmpIndividual, "LUCK") - tmpIndividual->LUCK, "LUCK:", &textBox);
+
+	//begin drawing right column
+	textBox.top = yOff + 30;
+	textBox.bottom = textBox.top + 15;
+	textBox.left = xOff + 100;
+	textBox.right = textBox.left + 400;
+
+	sprintf(value, "HP: %d/%d", tmpIndividual->hp, (getAttributeSum(tmpIndividual, "baseHP") + getAttributeSum(tmpIndividual, "CON") * 2));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 15;
+
+	sprintf(value, "Actions: %d/%d", tmpIndividual->remainingActions, tmpIndividual->totalActions);
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 15;
+
+	sprintf(value, "Attack: %d", getAttributeSum(tmpIndividual, "attack"));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 15;
+
+	sprintf(value, "AC: %d", getAttributeSum(tmpIndividual, "ac"));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 15;
+
+	sprintf(value, "Dam: [%d-%d]", calcMinDam(tmpIndividual), calcMaxDam(tmpIndividual));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 15;
+
+	sprintf(value, "Crit: %s", tmpIndividual->critType);
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 15;
+
+	sprintf(value, "Food: %d/%d", ((int)tmpIndividual->food), tmpIndividual->totalFood);
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 15;
+
+	sprintf(value, "Mvmt: %d", getAttributeSum(tmpIndividual, "mvmt"));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 20;
+
+	sprintf(value, "Dark Sight: %d", getAttributeSum(tmpIndividual, "darkLoS"));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 15;
+	textBox.bottom = textBox.top + 17;
+
+	//DR
+	DrawText(hdcBuffer, "Damage Reduction", -1, &textBox, DT_SINGLELINE);
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
+
+	drawUnboundCharacterByPixels(hdc, hdcBuffer, textBox.left, textBox.top, thisCharacterInfoView->drChart);
+	textBox.top = textBox.top + 16;
+	textBox.bottom = textBox.top + 16;
+
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "bluntDR"), 0, &textBox);
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "chopDR"), 1, &textBox);
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "pierceDR"), 2, &textBox);
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "slashDR"), 3, &textBox);
+
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "fireDR"), 4, &textBox);
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "waterDR"), 5, &textBox);
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "lightningDR"), 6, &textBox);
+	drawDR(hdcBuffer, getAttributeSum(tmpIndividual, "earthDR"), 7, &textBox);
+
+	textBox.top = textBox.top + 17;
+	textBox.bottom = textBox.top + 17;
+	sprintf(value, "Gold: %d", tmpIndividual->gold);
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+
+	textBox.left += 80;
+	textBox.right += 80;
+	sprintf(value, "Bounty: %d", getCurrentBounty(tmpIndividual));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+
+
+	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
 void drawStatus(HDC hdcBuffer, status * thisStatus, RECT * textBox){

@@ -191,14 +191,6 @@ int itemIsBuffing(item * thisItem){
 	return 0;
 }
 
-void setCursorColor(HDC hdcBuffer, int value, int isBuff){
-	if((value > 0 && isBuff) || (value < 0 && !isBuff)){
-		SetTextColor(hdcBuffer, RGB(0, 162, 255));
-	}else if((value < 0 && !isBuff) || (value > 0 && !isBuff)){
-		SetTextColor(hdcBuffer, RGB(255, 0, 0));
-	}
-}
-
 void drawItem(HDC hdcBuffer, item * thisItem, int turns, RECT * effectRect){
 	char value[16];
 
