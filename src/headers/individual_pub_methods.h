@@ -24,7 +24,7 @@ char getIndividualAttackType(individual * thisIndividual, item * weapon);
 double calcSlope(int x1, int y1, int x2, int y2);
 
 int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
-		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam, char critType[3],
+		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int hp, int mana, int food, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam, char critType[3],
 		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR,
 		int waterDR, int lightningDR, int dialogID, int dialogPortraitID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
 		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer,  animationContainer * secondaryAnimationContainer);

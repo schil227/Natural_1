@@ -106,7 +106,7 @@ individual *initIndividual(){
 }
 
 int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
-		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
+		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int hp, int mana, int food, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR, int waterDR, int lightningDR,
 		int dialogID, int dialogPortraitID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
 		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
@@ -172,13 +172,30 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->jumpTarget = 0;
 
 	thisIndividual->baseHP = baseHP;
+
+	if(hp == -1){
 	thisIndividual->hp = baseHP + CON * 2;
+	}else{
+		thisIndividual->hp = hp;
+	}
 
 	thisIndividual->baseMana = baseMana;
-	thisIndividual->mana = baseMana + WILL * 2;
+
+	if(mana == -1){
+		thisIndividual->mana = baseMana + WILL * 2;
+	}else{
+		thisIndividual->mana = mana;
+	}
 
 	thisIndividual->totalFood = 300 + CON * 50;
-	thisIndividual->food = thisIndividual->totalFood;
+
+	if(food == -1){
+		thisIndividual->food = thisIndividual->totalFood;
+	}else if(food < 50){
+		thisIndividual->food = 50;
+	}else{
+		thisIndividual->food = food;
+	}
 
 	if(thisIndividual->food > 300){
 		thisIndividual->foodBonusActive = 1;

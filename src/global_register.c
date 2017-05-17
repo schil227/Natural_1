@@ -352,6 +352,19 @@ int addAnimationToRegistry(animation * thisAnimation){
 	return 0;
 }
 
+int addAbilityToRegistryByType(ability * newAbility){
+	switch(newAbility->type){
+	case 'p':
+		return addPerminentAbilityToRegistry(newAbility);
+	case 'd':
+		return addSelfAbilityToRegistry(newAbility);
+	case 't':
+		return addTargetAbilityToRegistry(newAbility);
+	case 'i':
+		return addInstantAbilityToRegistry(newAbility);
+	}
+}
+
 int addPerminentAbilityToRegistry(ability * thisAbility){
 	if(thisGlobalRegister->numPerminentAbilities < thisGlobalRegister->MAX_PERMINENT_ABILITIES){
 		thisGlobalRegister->perminentAbilities[thisGlobalRegister->numPerminentAbilities] = thisAbility;

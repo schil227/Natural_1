@@ -1,7 +1,6 @@
 == TODO In Depth ==
--Thought: if im going to use images to represent concepts, I should use them everywhere 
 
--add LoS stat to ability, items	
+-add LoS stat to ability	
 
 
 Drawing the image mask is costly on all those spaces - for field spaces, combine mask and image into one, and only draw that.

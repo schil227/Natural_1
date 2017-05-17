@@ -64,7 +64,8 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 
 void createIndividualFromLine(individual * newIndividual, char * line){
 	int ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
-	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,dialogID,dialogPortraitID,gold,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction;
+	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,dialogID,dialogPortraitID,gold,
+	STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction,hp,mana,food;
 	int offensiveness, abilityAffinity, tacticalness, cowardness;
 	char * name = malloc(sizeof(char) * 32);
 	char * strtok_save_pointer;
@@ -114,6 +115,13 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	CHR = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	LUCK = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	hp = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	mana = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	food = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	baseHP = atoi(value);
@@ -248,7 +256,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
-	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
+	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,hp, mana, food, baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR, dialogID, dialogPortraitID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
 			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");

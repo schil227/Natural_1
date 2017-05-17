@@ -582,7 +582,7 @@ void drawFoodEffect(HDC hdc, HDC hdcBuffer, RECT * textBoxRect, RECT * effectRec
 				effectRect->bottom = effectRect->bottom + 12;
 		}
 
-	}else if(thisCharacterInfoView->thisIndividual->foodBonusActive){
+	}else if(thisCharacterInfoView->thisIndividual->foodNegativeActive){
 		strcpy(foodStr, "Starving");
 
 		if(thisCharacterInfoView->selectedEffectMode == ACTIVE_EFFECT_FOOD){

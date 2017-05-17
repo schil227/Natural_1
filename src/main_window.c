@@ -545,7 +545,7 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	}
 
 	//prevent AI inturruption
-	if(moveMode || postMoveMode || inCursorMode() || moveMode || inInventoryViewMode() ||
+	if(moveMode || postMoveMode || inCursorMode() || moveMode || inInventoryViewMode() || inCharacterInfoView() ||
 			inLookMode() || inAbilityViewMode() || inAbilityCreateMode() || inNameBoxMode() || shouldDrawDialogBox()){
 		drawLock = 0;
 		return 0;
@@ -663,7 +663,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		playerDialog->afraidOfPlayer = 0;
 		playerDialog->playerIsMarkedForDeath = 0;
 
-		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 			MessageBox(hwnd, "Failed to make player", "Notice",
 			MB_OK | MB_ICONINFORMATION);
 		}
@@ -1004,7 +1004,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			toggleAbilityWaitForNameMode();
 			if(!nameEmpty()){
 				setAbilityName(getNameFromInstance());
-				addAbilityToIndividual(player, getNewAbility());
+				ability * newAbility = getNewAbility();
+
+				addAbilityToIndividual(player, newAbility);
+				addAbilityToRegistryByType(newAbility);
 				changeAbilityTemplate(0);
 				resetNameBoxInstance();
 
@@ -1231,7 +1234,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	playerDialog->afraidOfPlayer = 0;
 	playerDialog->playerIsMarkedForDeath = 0;
 
-	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
 	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
