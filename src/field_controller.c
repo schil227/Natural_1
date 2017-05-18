@@ -38,6 +38,8 @@ int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividua
 		}
 	}
 
+	releaseIndividualGroupWriteLock();
+	releaseIndividualGroupReadLock();
 	return 0;
 }
 
@@ -63,10 +65,10 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 }
 
 void createIndividualFromLine(individual * newIndividual, char * line){
-	int ID,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
+	int ID,isPlayer,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,dialogID,dialogPortraitID,gold,
 	STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction,hp,mana,food;
-	int offensiveness, abilityAffinity, tacticalness, cowardness;
+	int offensiveness, abilityAffinity, tacticalness, cowardness, isHostileToPlayer, isFocusedOnPlayer, isSurrounded, respawns, desiredLocationX, desiredLocationY;
 	char * name = malloc(sizeof(char) * 32);
 	char * strtok_save_pointer;
 	char critType[4];
@@ -77,10 +79,14 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	abilityList loadedAbilities;
 	loadedAbilities.MAX_ABILITIES = 64;
 	loadedAbilities.numAbilities = 0;
-	groupType type = 0;
+	groupType defaultType = 0;
+	groupType currentType = 0;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	ID = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	isPlayer = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	r = atoi(value);
@@ -199,7 +205,10 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	faction = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	type = (groupType)(atoi(value));
+	defaultType = (groupType)(atoi(value));
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	currentType = (groupType)(atoi(value));
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	offensiveness = atoi(value);
@@ -212,6 +221,24 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	cowardness = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	isHostileToPlayer = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	isFocusedOnPlayer = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	isSurrounded = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	respawns = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	desiredLocationX = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	desiredLocationY = atoi(value);
 
 	//Load abilities from given type
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -256,9 +283,9 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
-	if(defineIndividual(newIndividual,ID,0,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,hp, mana, food, baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
-			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR, dialogID, dialogPortraitID, gold, faction, type, offensiveness, abilityAffinity, tacticalness, cowardness,
-			thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
+	if(defineIndividual(newIndividual,ID,isPlayer,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,hp, mana, food, baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
+			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR, dialogID, dialogPortraitID, gold, faction, defaultType, currentType, offensiveness, abilityAffinity, tacticalness, cowardness,
+			isHostileToPlayer, isFocusedOnPlayer, isSurrounded, respawns, desiredLocationX, desiredLocationY, thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");
 	}
 

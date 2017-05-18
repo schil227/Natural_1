@@ -76,6 +76,7 @@ individual *initIndividual(){
 	toReturn->thisBehavior->isFocusedOnPlayer = 0;
 	toReturn->thisBehavior->isThreatened = 0;
 	toReturn->thisBehavior->isSurrounded = 0;
+	toReturn->thisBehavior->respawns = 0;
 	toReturn->thisBehavior->hasAlreadyYieldedToPlayer = 0;
 	toReturn->thisBehavior->wasRecentlyAttacked = 0;
 	toReturn->thisBehavior->alertDuration = 0;
@@ -108,7 +109,8 @@ individual *initIndividual(){
 int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
 		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int hp, int mana, int food, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR, int waterDR, int lightningDR,
-		int dialogID, int dialogPortraitID, int gold, int faction, groupType type, int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
+		int dialogID, int dialogPortraitID, int gold, int faction, groupType defaultType, groupType currentType,  int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
+		int isHostileToPlayer, int isFocusedOnPlayer, int isSurrounded, int respawns, int desiredLocationX, int desiredLocationY,
 		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 	int i;
 	BITMAP bm;
@@ -213,16 +215,17 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->weaponItem = NULL;
 	thisIndividual->shieldItem = NULL;
 
-	thisIndividual->defaultGroupType = type;
-	thisIndividual->currentGroupType = type;
+	thisIndividual->defaultGroupType = defaultType;
+	thisIndividual->currentGroupType = currentType;
 
 	thisIndividual->thisBehavior->offensiveness = offensiveness;
 	thisIndividual->thisBehavior->abilityAffinity = abilityAffinity;
 	thisIndividual->thisBehavior->tacticalness = tacticalness;
 	thisIndividual->thisBehavior->cowardness = cowardness;
-	thisIndividual->thisBehavior->isHostileToPlayer = 0;
-	thisIndividual->thisBehavior->isFocusedOnPlayer = 0;
-	thisIndividual->thisBehavior->isSurrounded = 0;
+	thisIndividual->thisBehavior->isHostileToPlayer = isHostileToPlayer;
+	thisIndividual->thisBehavior->isFocusedOnPlayer = isFocusedOnPlayer;
+	thisIndividual->thisBehavior->isSurrounded = isSurrounded;
+	thisIndividual->thisBehavior->respawns = respawns;
 
 	if(loadedAbilities != NULL){
 		for(i = 0; i < loadedAbilities->numAbilities; i++){
@@ -230,8 +233,8 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 		}
 	}
 
-	thisIndividual->desiredLocation->x = x;
-	thisIndividual->desiredLocation->y = y;
+	thisIndividual->desiredLocation->x = desiredLocationX;
+	thisIndividual->desiredLocation->y = desiredLocationY;
 
 	character * shadowCharacter = malloc(sizeof(character));
 	shadowCharacter->thisAnimationContainer = cloneAnimationContainer(thisIndividual->playerCharacter->thisAnimationContainer);
@@ -251,6 +254,192 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->thisMoveNodeMeta->dummyCord = malloc(sizeof(cord));
 
 	return 0;
+}
+
+int getAnimationIDFromTypeToLine(animationContainer * thisAnimationContianer, animationState type){
+	int i;
+
+	for(i = 0; i < thisAnimationContianer->numAnimations; i++){
+		animation * tmpAnimation = thisAnimationContianer->animations[i];
+
+		if(tmpAnimation != NULL && tmpAnimation->state == type){
+			return tmpAnimation->imageID;
+		}
+	}
+
+	return -1;
+}
+
+char * getIndividualAsLine(individual * thisIndividual){
+	int i, j, numPermAbilites = 0, numDurationAbilites = 0, numTargetedAbilities = 0, numInstantAbilities = 0;
+	int permenantAbilities[64];
+	int selfDurationAbilities[64];
+	int targetAbilities[64];
+	int instantAbilities[64];
+
+	char * line = malloc(sizeof(char) * 2048);
+	line[0] = '\0';
+
+	animationContainer * thisAnimationContainer = thisIndividual->playerCharacter->thisAnimationContainer;
+
+	for(j = 0; j < thisIndividual->abilities->numAbilities; j++){
+		ability * tmpAbility = thisIndividual->abilities->abilitiesList [j];
+
+		if(tmpAbility == NULL){
+			continue;
+		}
+
+		switch(tmpAbility->type){
+			case 'p':
+				permenantAbilities[numPermAbilites] = tmpAbility->ID;
+				numPermAbilites++;
+				break;
+			case 'd':
+				selfDurationAbilities[numDurationAbilites] = tmpAbility->ID;
+				numDurationAbilites++;
+				break;
+			case 't':
+				targetAbilities[numTargetedAbilities] = tmpAbility->ID;
+				numTargetedAbilities++;
+				break;
+			case 'i':
+				instantAbilities[numInstantAbilities] = tmpAbility->ID;
+				numInstantAbilities++;
+				break;
+		}
+	}
+
+	i = sprintf(line, "%d;", thisIndividual->ID);
+	i += sprintf(line + i, "%d;", thisIndividual->isPlayer);
+	i += sprintf(line + i, "%d;", 255); // r
+	i += sprintf(line + i, "%d;", 0); // g
+	i += sprintf(line + i, "%d;", 255); // b
+	i += sprintf(line + i, "%s;", thisIndividual->name);
+	i += sprintf(line + i, "%d;", thisIndividual->playerCharacter->direction);
+	i += sprintf(line + i, "%d;", thisIndividual->playerCharacter->x);
+	i += sprintf(line + i, "%d;", thisIndividual->playerCharacter->y);
+
+	i += sprintf(line + i, "%d;", thisIndividual->STR);
+	i += sprintf(line + i, "%d;", thisIndividual->DEX);
+	i += sprintf(line + i, "%d;", thisIndividual->CON);
+	i += sprintf(line + i, "%d;", thisIndividual->WILL);
+	i += sprintf(line + i, "%d;", thisIndividual->INT);
+	i += sprintf(line + i, "%d;", thisIndividual->WIS);
+	i += sprintf(line + i, "%d;", thisIndividual->CHR);
+	i += sprintf(line + i, "%d;", thisIndividual->LUCK);
+
+	i += sprintf(line + i, "%d;", thisIndividual->hp);
+	i += sprintf(line + i, "%d;", thisIndividual->mana);
+	i += sprintf(line + i, "%d;", (int) thisIndividual->food);
+
+	i += sprintf(line + i, "%d;", thisIndividual->baseHP);
+	i += sprintf(line + i, "%d;", thisIndividual->totalActions);
+	i += sprintf(line + i, "%d;", thisIndividual->baseMana);
+	i += sprintf(line + i, "%d;", thisIndividual->AC);
+	i += sprintf(line + i, "%d;", thisIndividual->attack);
+	i += sprintf(line + i, "%d;", thisIndividual->maxDam);
+	i += sprintf(line + i, "%d;", thisIndividual->minDam);
+	i += sprintf(line + i, "%d;", thisIndividual->baseDam);
+	i += sprintf(line + i, "%s;", thisIndividual->critType);
+	i += sprintf(line + i, "%d;", thisIndividual->range);
+	i += sprintf(line + i, "%d;", thisIndividual->mvmt);
+	i += sprintf(line + i, "%d;", thisIndividual->LoS);
+	i += sprintf(line + i, "%d;", thisIndividual->darkLoS);
+	i += sprintf(line + i, "%d;", thisIndividual->isSneaking);
+
+	i += sprintf(line + i, "%d;", thisIndividual->bluntDR);
+	i += sprintf(line + i, "%d;", thisIndividual->chopDR);
+	i += sprintf(line + i, "%d;", thisIndividual->slashDR);
+	i += sprintf(line + i, "%d;", thisIndividual->pierceDR);
+	i += sprintf(line + i, "%d;", thisIndividual->earthDR);
+	i += sprintf(line + i, "%d;", thisIndividual->fireDR);
+	i += sprintf(line + i, "%d;", thisIndividual->waterDR);
+	i += sprintf(line + i, "%d;", thisIndividual->lightningDR);
+
+	i += sprintf(line + i, "%d;", thisIndividual->dialogID);
+	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->sawPlayerCrime);
+	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->attackedByPlayer);
+	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->stolenFromByPlayer);
+	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->afraidOfPlayer);
+	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->playerIsMarkedForDeath);
+	i += sprintf(line + i, "%d;", thisIndividual->dialogPortraitID);
+	i += sprintf(line + i, "%d;", thisIndividual->gold);
+	i += sprintf(line + i, "%d;", thisIndividual->faction);
+	i += sprintf(line + i, "%d;", thisIndividual->defaultGroupType);
+	i += sprintf(line + i, "%d;", thisIndividual->currentGroupType);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->offensiveness);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->abilityAffinity);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->tacticalness);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->cowardness);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->isHostileToPlayer);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->isFocusedOnPlayer);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->isSurrounded);
+	i += sprintf(line + i, "%d;", thisIndividual->thisBehavior->respawns);
+	i += sprintf(line + i, "%d;", thisIndividual->desiredLocation->x);
+	i += sprintf(line + i, "%d;", thisIndividual->desiredLocation->y);
+
+	if(numPermAbilites == 0){
+		i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < numPermAbilites; j++){
+			if(j + 1 == numPermAbilites){
+				i += sprintf(line + i, "%d;", permenantAbilities[j]);
+			}else{
+				i += sprintf(line + i, "%d,", permenantAbilities[j]);
+			}
+		}
+	}
+
+	if(numDurationAbilites == 0){
+		i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < numDurationAbilites; j++){
+			if(j + 1 == numDurationAbilites){
+				i += sprintf(line + i, "%d;", selfDurationAbilities[j]);
+			}else{
+				i += sprintf(line + i, "%d,", selfDurationAbilities[j]);
+			}
+
+		}
+	}
+
+	if(numTargetedAbilities == 0){
+		i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < numTargetedAbilities; j++){
+			if(j + 1 == numTargetedAbilities){
+				i += sprintf(line + i, "%d;", targetAbilities[j]);
+			}else{
+				i += sprintf(line + i, "%d,", targetAbilities[j]);
+			}
+		}
+	}
+
+	if(numInstantAbilities == 0){
+		i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < numInstantAbilities; j++){
+			if(j + 1 == numInstantAbilities){
+				i += sprintf(line + i, "%d;", instantAbilities[j]);
+			}else{
+				i += sprintf(line + i, "%d,", instantAbilities[j]);
+			}
+		}
+	}
+
+	i += sprintf(line + i, "%d;", thisAnimationContainer->animationsEnabled);
+	i += sprintf(line + i, "%d;", thisAnimationContainer->defaultAnimation);
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_IDLE));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_SLASH));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_CHOP));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_BLUNT));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_PIERCE));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_BOW));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_HARM));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_DEATH));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_CAST));
+
+	return line;
 }
 
 void destroyIndividual(individual* thisIndividual){

@@ -496,9 +496,9 @@ void loadIndividualsToRegistry(char* directory, char * individualsFileName){
 	char * fullFileName = appendStrings(directory, individualsFileName);
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
-	char line[1024];
+	char line[2048];
 
-	while(fgets(line,1024,FP) != NULL){
+	while(fgets(line,2048,FP) != NULL){
 		if (line[0] != '#') {
 			individual * newIndividual = initIndividual();
 			createIndividualFromLine(newIndividual, line);
@@ -743,4 +743,32 @@ int getBit(int * a, int k){
 	flag = flag >> pos;
 
 	return flag;
+}
+
+//////// Writing to Files //////////
+
+void writeIndividualsToFile(char * directory, char * saveDirectory, char * individualsFileName){
+	int i;
+
+	while(!tryGetIndividualGroupReadLock()){}
+	while(!tryGetIndividualGroupWriteLock()){}
+
+	char * fullFileName = appendStrings(directory,saveDirectory);
+
+	_mkdir(fullFileName);
+
+	strcat(fullFileName + strlen(fullFileName), individualsFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numIndividuals; i++){
+		char * line = getIndividualAsLine(thisGlobalRegister->individualRegistry[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+
+	fclose(FP);
+
+	releaseIndividualGroupWriteLock();
+	releaseIndividualGroupReadLock();
 }

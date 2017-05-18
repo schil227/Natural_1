@@ -29,6 +29,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW = 15;
 	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
 	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
+	thisAbilityCreationInstance->idCounter = 1000;
 
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
 	thisAbilityCreationInstance->selector = createCharacter(1504, rgb, x, y);
@@ -669,5 +670,9 @@ int inAbilityWaitForNameMode(){
 }
 
 ability * getNewAbility(){
-	return cloneAbility(thisAbilityCreationInstance->abilityInsance);
+	ability * newAbility = cloneAbility(thisAbilityCreationInstance->abilityInsance);
+	newAbility->ID = thisAbilityCreationInstance->idCounter;
+	thisAbilityCreationInstance->idCounter++;
+
+	return newAbility;
 }

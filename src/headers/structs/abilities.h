@@ -165,7 +165,7 @@ typedef struct {
 	int effectCurrentIndex;
 	int effectEndingIndex;
 	int MAX_FIELDS_ON_WINDOW;
-
+	int idCounter;
 	int waitingForName;
 
 	creation_modes mode;

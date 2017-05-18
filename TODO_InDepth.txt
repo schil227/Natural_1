@@ -1,7 +1,16 @@
 == TODO In Depth ==
 
--add LoS stat to ability	
-
+-Stuff that may be missed for to-lines:
+	thisIndividual->thisBehavior->isHostileToPlayer = 0;
+	thisIndividual->thisBehavior->isFocusedOnPlayer = 0;
+	thisIndividual->thisBehavior->isSurrounded = 0;
+	thisIndividual->defaultGroupType = type;
+	thisIndividual->desiredLocation->x = x;
+	thisIndividual->desiredLocation->y = y;
+	isplayer
+	
+	
+-add LoS stat to ability
 
 Drawing the image mask is costly on all those spaces - for field spaces, combine mask and image into one, and only draw that.
 

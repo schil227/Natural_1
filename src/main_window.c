@@ -593,6 +593,10 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	drawLock = 0;
 }
 
+void loadGame(HWND hwnd, char * saveDirectory){
+
+}
+
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 	case WM_CREATE: {
@@ -639,34 +643,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		testPlaySounds();
 
-		animationContainer * playerAnimationContainer = initAnimationContainer();
-		animationContainer * secondaryAnimationContainer = NULL;
-//		char line[] = "2,30,30,-1";
-//		loadAnimationFromLine(playerAnimationContainer, ANIMATION_IDLE, line);
-//		char line2[] = "7,5,5,5,5,5,5,5,3,7";
-//		loadAnimationFromLine(playerAnimationContainer, ANIMATION_ATTACK_SLASH, line2);
-//		char line3[] = "13,10,10,10,10,10,10,10,10,10,10,10,10,100,-1";
-//		loadAnimationFromLine(playerAnimationContainer, ANIMATION_DEATH, line3);
-
-		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2001));
-		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2002));
-		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2003));
-		addAnimationToContainer(playerAnimationContainer, cloneAnimationFromRegistry(2004));
-
-		secondaryAnimationContainer = cloneAnimationContainer(playerAnimationContainer);
-
-		specialDialogs * playerDialog = malloc(sizeof(specialDialogs));
-		playerDialog->activeDialog = DIALOG_DEFAULT;
-		playerDialog->sawPlayerCrime = 0;
-		playerDialog->attackedByPlayer = 0;
-		playerDialog->stolenFromByPlayer = 0;
-		playerDialog->afraidOfPlayer = 0;
-		playerDialog->playerIsMarkedForDeath = 0;
-
-		if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, 20, 2, 20, 13, 3, 4, 1, 1, "MAX", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
-			MessageBox(hwnd, "Failed to make player", "Notice",
-			MB_OK | MB_ICONINFORMATION);
-		}
+		player = getIndividualFromRegistry(1);
 
 		dialogMessage * thisMessage = malloc(sizeof(dialogMessage));
 		strcpy(thisMessage->message,"I am a message!\0");
@@ -674,13 +651,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 		updateFieldGraphics(hdc, hdcBuffer, main_field);
-
-//		ret = SetTimer(hwnd, ID_TIMER, 32, NULL); //fires every 16 ms - 60 fps, 32 - 30 fps, 48 - 15 fps
-//
-//		if (ret == 0) {
-//			MessageBox(hwnd, "Could not SetTimer()!", "Error",
-//			MB_OK | MB_ICONEXCLAMATION);
-//		}
 
 	    gDoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	    if (NULL == gDoneEvent)
@@ -733,6 +703,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		DestroyWindow(hwnd);
 		break;
 	case WM_DESTROY:
+
+
 		destroyIndividual(player);
 		destroyField(main_field, NULL);
 		destroyConsoleInstance();
@@ -821,6 +793,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			{
 //				sendMusicInterrupt(1);
 				triggerSoundEffect(6);
+
+				writeIndividualsToFile(mapDirectory,"saves\\test\\","individuals.txt");
+
+//				printf("player: %s",getIndividualAsLine(player));
+//				fflush(stdout);
+//				exit(0);
 			}
 			break;
 		case 0x49://i key (inventory)
@@ -1234,8 +1212,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	playerDialog->afraidOfPlayer = 0;
 	playerDialog->playerIsMarkedForDeath = 0;
 
-	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,100,100,100,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
-	}
+	player = getIndividualFromRegistry(2);
+//	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,0,100,100,100,0,0,0,0,0,0,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
+//	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
 
