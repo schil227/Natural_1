@@ -650,6 +650,8 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 						addItemToInventory(player->backpack, tmpItem);
 						removeItemFromInventory(main_field->currentSpaceInventory, tmpItem);
 						removeItemFromField(main_field, tmpItem);
+						tmpItem->npcID = player->ID;
+
 						triggerEventOnPickup(tmpItem->ID, player->isPlayer);
 
 						if(tmpItem->owner != 0 && tmpItem->isStolen == 0){

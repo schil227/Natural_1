@@ -8,10 +8,11 @@
 	thisIndividual->desiredLocation->x = x;
 	thisIndividual->desiredLocation->y = y;
 	isplayer
-	
+
+
 	
 -add LoS stat to ability
-
+-Add + Dam to characterInfo view
 Drawing the image mask is costly on all those spaces - for field spaces, combine mask and image into one, and only draw that.
 
 == Things to test ==

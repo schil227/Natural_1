@@ -473,6 +473,11 @@ void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 	textBox.bottom = textBox.top + 16;
 
 	sprintf(value, "Dam: [%d-%d]", calcMinDam(tmpIndividual), calcMaxDam(tmpIndividual));
+
+	if(tmpIndividual->baseDam != 0){
+		sprintf(value + strlen(value), " + %d", tmpIndividual->baseDam);
+	}
+
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
 	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 16;

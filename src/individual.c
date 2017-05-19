@@ -1275,6 +1275,8 @@ int processActiveItems(individual * thisIndividual){
 				sprintf(tmp, "%s has worn off.", tmpActiveItem->thisItem->name);
 				cwrite(tmp);
 
+				destroyItem(tmpActiveItem->thisItem);
+				free(tmpActiveItem);
 				thisIndividual->activeItems->activeItemArr[i] = NULL;
 				thisIndividual->activeItems->activeItemsTotal--;
 			}else{
@@ -2045,11 +2047,13 @@ void modifyItem(item * theItem, individual * thisIndividual) {
 		case 'i': {
 			if(theItem->itemType == 'c'){
 				consumeItem(thisIndividual, theItem);
-				free(removeItemFromInventory(thisIndividual->backpack, theItem));
+				deleteItemFromRegistry(theItem->ID);
+				destroyItem(removeItemFromInventory(thisIndividual->backpack, theItem));
 			}else if(theItem->itemType == 'd'){
 				if(thisIndividual->activeItems->activeItemsTotal < 40){
 					consumeItem(thisIndividual, theItem);
 					addItemToActiveItemList(thisIndividual, theItem);
+					deleteItemFromRegistry(theItem->ID);
 					removeItemFromInventory(thisIndividual->backpack, theItem);
 				}
 			}
@@ -2204,6 +2208,7 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 
 		addClonedItemToRegistry(newItem);
 		addItemToInventory(thisIndividual->backpack, newItem);
+		newItem->npcID = thisIndividual->ID;
 
 		thisIndividual->gold -= thisItem->price;
 		return 1;
@@ -3020,6 +3025,13 @@ void removeStolenItems(individual * player){
 
 		if(tmpItem != NULL && tmpItem->isStolen){
 			removeItemFromInventory(player->backpack, tmpItem);
+
+			individual * owner = getIndividualFromRegistry(tmpItem->owner);
+
+			if(owner != NULL){
+				addItemToInventory(owner->backpack, tmpItem);
+			}
+
 			i--;
 		}
 	}
@@ -3063,6 +3075,8 @@ int attemptToPickPocketItem(item * thisItem, individual * player){
 	if(d20 == 20){
 		removeItemFromInventory(targetIndividual->backpack, thisItem);
 		addItemToInventory(player->backpack, thisItem);
+		thisItem->npcID = player->ID;
+
 		refreshInventory(targetIndividual->backpack);
 		return 1;
 	}else if(d20 == 1){
@@ -3082,6 +3096,8 @@ int attemptToPickPocketItem(item * thisItem, individual * player){
 	if(d20 >= 10 + getAttributeSum(targetIndividual, "DEX")){
 		removeItemFromInventory(targetIndividual->backpack, thisItem);
 		addItemToInventory(player->backpack, thisItem);
+		thisItem->npcID = player->ID;
+
 		refreshInventory(targetIndividual->backpack);
 		return 1;
 	}else{

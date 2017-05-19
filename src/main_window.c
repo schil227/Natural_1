@@ -50,6 +50,8 @@ int mainWindowWidth = 640;
 int mainWindowHeight = 820;
 HWND hwnd_global;
 HANDLE gDoneEvent;
+HANDLE hTimerQueueTimer = NULL;
+HANDLE hTimerQueue = NULL;
 
 LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
 LARGE_INTEGER Frequency;
@@ -593,8 +595,107 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	drawLock = 0;
 }
 
-void loadGame(HWND hwnd, char * saveDirectory){
+void destroyGame(){
+	//will wait for timer callback to finish
+	DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, INVALID_HANDLE_VALUE);
 
+//	//Wait for final timer callback to finish
+//	while(!drawLock){}
+
+	destroyField(main_field, NULL);
+	destroyIndividual(player);
+	clearGroup(thisGroupContainer->enemies);
+	clearGroup(thisGroupContainer->npcs);
+	destroyThisDialogBox();
+	destroyConsoleInstance();
+	destroyTheGlobalRegister();
+	destroyEventHandlers();
+	destroySpecialDrawInstance();
+	thisGroupContainer->groupActionMode = 0;
+	thisGroupContainer->initGroupActionMode = 0;
+}
+
+void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
+	BITMAP bm;
+	UINT ret;
+	HDC hdc = GetDC(hwnd);
+	HDC hdcBuffer = CreateCompatibleDC(hdc);
+	char * saveMapDirectory = appendStrings(mapDirectory, saveDirectory);
+
+	if(!isFirstLoad){
+		destroyGame();
+	}
+
+	player = initIndividual();
+	enemies = initGroup();
+	npcs = initGroup();
+	thisGroupContainer = initGroupContainer(enemies,npcs, NULL, NULL, NULL);
+	initLockAuth();
+	initalizeTheGlobalRegister();
+
+	initThisConsole(1500,0,0,300,200);
+	initSidebarInstance(1502,0,0,185,400);
+	initThisDialogBox(1501,10,10,RGB(255, 70, 255));
+	initThisInventoryView(1503, 100, 100, 4, player->backpack);
+	initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
+	initThisAbilityView(9504, RGB(255, 0, 255), 10, 10);
+	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
+	initSpecialDrawInstance();
+	initEventHandlers();
+	loadTriggerMaps(mapDirectory, "onAttackTriggerMap.txt","onHarmTriggerMap.txt","onDeathTriggerMap.txt", "onPickupTriggerMap.txt");
+	appendNewMessageNode("You leave the forest.");
+	appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
+
+	loadGlobalRegister(saveMapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt");
+	loadDialog("dialog.txt", saveMapDirectory);
+
+	initHudInstance();
+	initThisCursor(1508);
+	initLookView(1519, 1520);
+	initCharacterInfoView();
+	initPauseView(1523);
+
+	enableSound();
+
+	setSoundID(1, SOUND_MUSIC);
+	setSoundID(2, SOUND_SOUND1);
+
+	testPlaySounds();
+
+	player = getIndividualFromRegistry(1);
+
+	dialogMessage * thisMessage = malloc(sizeof(dialogMessage));
+	strcpy(thisMessage->message,"I am a message!\0");
+	setCurrentMessage(thisMessage);
+
+	mapInfo * loadMapInfo = getCurrentMapInfoFromRegistry();
+
+	main_field = loadMap(loadMapInfo->mapName, mapDirectory, player, thisGroupContainer);
+	updateFieldGraphics(hdc, hdcBuffer, main_field);
+
+	gDoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (NULL == gDoneEvent)
+	{
+		printf("CreateEvent failed (%d)\n", GetLastError());
+		exit(0);
+	}
+
+	hTimerQueue = CreateTimerQueue();
+	if (NULL == hTimerQueue)
+	{
+		printf("CreateTimerQueue failed (%d)\n", GetLastError());
+		exit(0);
+	}
+
+	if (!CreateTimerQueueTimer( &hTimerQueueTimer, hTimerQueue, TimerProc, 123 , 32, 32, 0))
+	{
+		printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
+		exit(0);
+	}
+
+	viewShift = initShiftData();
+
+	inActionMode = shouldEnableActionMode();
 }
 
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -602,8 +703,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	case WM_CREATE: {
 		BITMAP bm;
 		UINT ret;
-		HANDLE hTimer = NULL;
-		HANDLE hTimerQueue = NULL;
+
 		HDC hdc = GetDC(hwnd);
 		HDC hdcBuffer = CreateCompatibleDC(hdc);
 
@@ -627,7 +727,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "mapInfo.txt", "descriptionLookup.txt");
+		loadGlobalRegister(mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt",  "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt");
 		loadDialog("dialog.txt", mapDirectory);
 
 		initHudInstance();
@@ -666,10 +766,10 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	        exit(0);
 	    }
 
-	    if (!CreateTimerQueueTimer( &hTimer, hTimerQueue, TimerProc, 123 , 32, 32, 0))
+	    if (!CreateTimerQueueTimer( &hTimerQueueTimer, hTimerQueue, TimerProc, 123 , 32, 32, 0))
 	    {
 	        printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
-	        return 3;
+	        exit(0);
 	    }
 
 		viewShift = initShiftData();
@@ -703,7 +803,11 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		DestroyWindow(hwnd);
 		break;
 	case WM_DESTROY:
+		//will wait for timer callback to finish
+		DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, INVALID_HANDLE_VALUE);
 
+		//Wait for final timer callback to finish
+		while(!drawLock){}
 
 		destroyIndividual(player);
 		destroyField(main_field, NULL);
@@ -754,17 +858,20 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x46: //f key
 			{
-				if(thisGroupContainer->npcs->numIndividuals > 0){
-					individual * tmpNPC = thisGroupContainer->npcs->individuals[0];
-					if(tmpNPC->desiredLocation->y == 3 && tmpNPC->desiredLocation->x == 6){
-						tmpNPC->desiredLocation->x = 5;
-						tmpNPC->desiredLocation->y = 9;
+//				if(thisGroupContainer->npcs->numIndividuals > 0){
+//					individual * tmpNPC = thisGroupContainer->npcs->individuals[0];
+//					if(tmpNPC->desiredLocation->y == 3 && tmpNPC->desiredLocation->x == 6){
+//						tmpNPC->desiredLocation->x = 5;
+//						tmpNPC->desiredLocation->y = 9;
+//
+//					}else{
+//						tmpNPC->desiredLocation->x = 6;
+//						tmpNPC->desiredLocation->y = 3;
+//					}
+//				}
 
-					}else{
-						tmpNPC->desiredLocation->x = 6;
-						tmpNPC->desiredLocation->y = 3;
-					}
-				}
+				destroyAndLoad(hwnd, 0, "saves\\test\\");
+
 			}
 			break;
 		case 0x47://g key (get)
@@ -775,6 +882,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					item * tmpItem = main_field->currentSpaceInventory->inventoryArr[0];
 					removeItemFromField(main_field, tmpItem);
 					addItemToInventory(player->backpack, tmpItem);
+					tmpItem->npcID = player->ID;
 
 					triggerEventOnPickup(tmpItem->ID, player->isPlayer);
 
@@ -795,10 +903,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				triggerSoundEffect(6);
 
 				writeIndividualsToFile(mapDirectory,"saves\\test\\","individuals.txt");
-
-//				printf("player: %s",getIndividualAsLine(player));
-//				fflush(stdout);
-//				exit(0);
+				writeMapInfoToFile(mapDirectory,"saves\\test\\","mapInfo.txt");
+				writeItemsToFile(mapDirectory,"saves\\test\\","items.txt");
 			}
 			break;
 		case 0x49://i key (inventory)
@@ -1185,7 +1291,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt", "test_onPickupTriggerMap.txt");
 
-	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "duration_abilities.txt", "targeted_abilities.txt", "test_mapInfo.txt", "descriptionLookup.txt");
+	loadGlobalRegister(mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "test_mapInfo.txt", "descriptionLookup.txt");
 
 	loadDialog("dialog.txt", mapTestDirectory);
 

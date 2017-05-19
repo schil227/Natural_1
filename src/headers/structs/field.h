@@ -73,6 +73,7 @@ typedef struct {
 	int * individuals[250];
 	int * items[500];
 	int isDark;
+	int isCurrentMap;
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;

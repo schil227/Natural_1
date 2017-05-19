@@ -548,6 +548,7 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 
 	mapInfo * thisMapInfo = getMapInfoFromRegistry(mapID);
 
+	thisMapInfo->isCurrentMap = 1;
 	loadGroups(thisGroupContainer, thisMapInfo, thisField);
 	addItemsToField(thisMapInfo, thisField);
 	thisField->isDark = thisMapInfo->isDark;
@@ -719,6 +720,7 @@ int attemptGetItemFromField(field * thisField, individual * thisIndividual){
 			if(theItem->itemCharacter->x == itemX && theItem->itemCharacter->y == itemY){
 				removeItemFromField(thisField, theItem);
 				addItemToInventory(thisIndividual->backpack, theItem);
+				theItem->npcID = thisIndividual->ID;
 
 				triggerEventOnPickup(theItem->ID, thisIndividual->isPlayer);
 
@@ -1074,6 +1076,7 @@ mapInfo * initMapInfo(){
 	newMapInfo->MAX_ITEMS = 500;
 	newMapInfo->numItems = 0;
 	newMapInfo->isDark = 0;
+	newMapInfo->isCurrentMap = 0;
 
 	return newMapInfo;
 }
@@ -1149,6 +1152,9 @@ void createMapInfoFromLine(mapInfo * thisMapInfo, char * line){
 	strcpy(thisMapInfo->mapName, value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	thisMapInfo->isCurrentMap = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	thisMapInfo->isDark = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -1156,6 +1162,38 @@ void createMapInfoFromLine(mapInfo * thisMapInfo, char * line){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	parseMapItemsFromLine(thisMapInfo, value);
+}
+
+char * getMapInfoAsLine(mapInfo * thisMapInfo){
+	int i = 0, j;
+	char * line = malloc(sizeof(char) * 2048);
+
+	i += sprintf(line + i, "%d;", thisMapInfo->id);
+	i += sprintf(line + i, "%s;", thisMapInfo->mapName);
+	i += sprintf(line + i, "%d;", thisMapInfo->isCurrentMap);
+	i += sprintf(line + i, "%d;", thisMapInfo->isDark);
+
+	for(j = 0; j < thisMapInfo->numIndividuals; j++){
+		if(j + 1 == thisMapInfo->numIndividuals){
+			i += sprintf(line + i, "%d", thisMapInfo->individuals[j]);
+		}else{
+			i += sprintf(line + i, "%d,", thisMapInfo->individuals[j]);
+		}
+	}
+
+	i += sprintf(line + i, ";");
+
+	for(j = 0; j < thisMapInfo->numItems; j++){
+		if(j + 1 == thisMapInfo->numItems){
+			i += sprintf(line + i, "%d", thisMapInfo->items[j]);
+		}else{
+			i += sprintf(line + i, "%d,", thisMapInfo->items[j]);
+		}
+	}
+
+	i += sprintf(line + i, ";");
+
+	return line;
 }
 
 void removeIndividualIdFromMapInfo(mapInfo * thisMap, int individualID){

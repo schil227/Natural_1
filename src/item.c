@@ -6,6 +6,8 @@
  */
 #include"./headers/item_pub_methods.h"
 
+static int itemIDIncrement = 3000;
+
 item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description,double weaponStrMod,
 		int strMod, int dexMod, int conMod, int willMod, int intMod, int wisMod, int chrMod, int luckMod,
 		char weaponDamageType, char armorClass, char itemType, int price, int owner, int isStolen, int totalHealthMod, int healthMod, int totalManaMod,
@@ -99,7 +101,7 @@ item * cloneItem(item * thisItem, int keepOwner){
 	newItem->itemCharacter->darkAnimationContainer = NULL;
 
 	newItem->npcID = thisItem->npcID;
-	newItem->ID = 0;
+	newItem->ID = itemIDIncrement++;
 	newItem->type = thisItem->type;
 	strcpy(newItem->name, thisItem->name);
 	strcpy(newItem->description, thisItem->description);
@@ -142,6 +144,86 @@ item * cloneItem(item * thisItem, int keepOwner){
 	newItem->isEquipt = thisItem->isEquipt;
 
 	return newItem;
+}
+
+char * getItemAsLine(item * thisItem){
+	int i = 0, j;
+
+	animationContainer * thisAnimationContainer = thisItem->itemCharacter->thisAnimationContainer;
+
+	char * line = malloc(sizeof(char) * 2048);
+	line[0] = '\0';
+
+	i = sprintf(line + i, "%d;", thisItem->npcID);
+	i += sprintf(line + i, "%d;", thisItem->ID);
+	i += sprintf(line + i, "%c;", thisItem->type);
+	i += sprintf(line + i, "%c;", thisItem->weaponDamageType);
+	i += sprintf(line + i, "%c;", thisItem->armorClass);
+	i += sprintf(line + i, "%c;", thisItem->itemType);
+	i += sprintf(line + i, "%d;", thisItem->price);
+	i += sprintf(line + i, "%d;", thisItem->owner);
+	i += sprintf(line + i, "%d;", thisItem->isStolen);
+	i += sprintf(line + i, "%d;", 255); // r
+	i += sprintf(line + i, "%d;", 0); // g
+	i += sprintf(line + i, "%d;", 255); // b
+	i += sprintf(line + i, "%s;", thisItem->name);
+	i += sprintf(line + i, "%d;", thisItem->itemCharacter->x);
+	i += sprintf(line + i, "%d;", thisItem->itemCharacter->y);
+	i += sprintf(line + i, "%.1f;", thisItem->weaponStrMod);
+
+	i += sprintf(line + i, "%d;", thisItem->strMod);
+	i += sprintf(line + i, "%d;", thisItem->dexMod);
+	i += sprintf(line + i, "%d;", thisItem->conMod);
+	i += sprintf(line + i, "%d;", thisItem->willMod);
+	i += sprintf(line + i, "%d;", thisItem->intMod);
+	i += sprintf(line + i, "%d;", thisItem->wisMod);
+	i += sprintf(line + i, "%d;", thisItem->chrMod);
+	i += sprintf(line + i, "%d;", thisItem->luckMod);
+
+	i += sprintf(line + i, "%d;", thisItem->totalHealthMod);
+	i += sprintf(line + i, "%d;", thisItem->healthMod);
+	i += sprintf(line + i, "%d;", thisItem->totalManaMod);
+	i += sprintf(line + i, "%d;", thisItem->manaMod);
+	i += sprintf(line + i, "%d;", thisItem->food);
+	i += sprintf(line + i, "%d;", thisItem->acMod);
+	i += sprintf(line + i, "%d;", thisItem->attackMod);
+	i += sprintf(line + i, "%d;", thisItem->damMod);
+	i += sprintf(line + i, "%d;", thisItem->maxDamMod);
+	i += sprintf(line + i, "%d;", thisItem->minDamMod);
+	i += sprintf(line + i, "%d;", thisItem->minTurns);
+	i += sprintf(line + i, "%d;", thisItem->maxTurns);
+	i += sprintf(line + i, "%d;", thisItem->mvmtMod);
+	i += sprintf(line + i, "%d;", thisItem->rangeMod);
+	i += sprintf(line + i, "%d;", thisItem->darkLoSMod);
+
+	i += sprintf(line + i, "%d;", thisItem->bluntDRMod);
+	i += sprintf(line + i, "%d;", thisItem->chopDRMod);
+	i += sprintf(line + i, "%d;", thisItem->slashDRMod);
+	i += sprintf(line + i, "%d;", thisItem->pierceDRMod);
+	i += sprintf(line + i, "%d;", thisItem->earthDRMod);
+	i += sprintf(line + i, "%d;", thisItem->fireDRMod);
+	i += sprintf(line + i, "%d;", thisItem->waterDRMod);
+	i += sprintf(line + i, "%d;", thisItem->lightningDRMod);
+	i += sprintf(line + i, "%d;", thisItem->isEquipt);
+	i += sprintf(line + i, "%d;", thisAnimationContainer->animationsEnabled);
+	i += sprintf(line + i, "%d;", thisAnimationContainer->defaultAnimation);
+	i += sprintf(line + i, "%d;", thisItem->itemCharacter->secondaryAnimationContainer->defaultAnimation);
+
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_IDLE));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_IDLE_EQUIPT));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_SLASH));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_CHOP));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_BLUNT));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_PIERCE));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_ATTACK_BOW));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_HARM));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_DEATH));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_CAST));
+	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisAnimationContainer, ANIMATION_CONSUME));
+
+	i += sprintf(line + i, "%s", thisItem->description);
+
+	return line;
 }
 
 int itemIsBuffing(item * thisItem){

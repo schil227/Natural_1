@@ -264,6 +264,22 @@ mapInfo * getMapInfoFromRegistry(int id){
 	return NULL;
 }
 
+mapInfo * getCurrentMapInfoFromRegistry(){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numMaps; i++){
+		if(thisGlobalRegister->mapInfoArr[i]->isCurrentMap){
+			return thisGlobalRegister->mapInfoArr[i];
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!COULD NOT FIND CURRENT MAPINFO IN REGISTRY!!");
+	cwrite(errLog);
+
+	return NULL;
+}
+
 char * getDescriptionFromID(int id){
 	int i;
 
@@ -477,11 +493,14 @@ void destroyTheGlobalRegister(){
 }
 
 void loadGlobalRegister(char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
-						char * animationData, char * selfAbilitiesData, char * targetedAbilitiesData, char * mapInfo, char * descriptions){
+						char * animationData, char * permenantAbilitiesData, char * selfAbilitiesData, char * targetedAbilitiesData,
+						char * instantAbilitiesData, char * mapInfo, char * descriptions){
 	// Priority loading:
 	//individuals dependant on xAbilities
+	loadPermenantAbilitiesToRegistry(mapDirectory, permenantAbilitiesData);
 	loadSelfAbilitiesToRegistry(mapDirectory, selfAbilitiesData);
 	loadTargetedAbilitiesToRegistry(mapDirectory, targetedAbilitiesData);
+	loadInstantAbilitiesToRegistry(mapDirectory, instantAbilitiesData);
 
 	loadAnimationsToRegistry(mapDirectory, animationData);
 	loadIndividualsToRegistry(mapDirectory, individualsData);
@@ -599,6 +618,23 @@ void loadAnimationsToRegistry(char* directory, char* animationFileName){
 	free(fullFileName);
 }
 
+void loadPermenantAbilitiesToRegistry(char* directory, char* permenantAbilitiesFileName){
+	char * fullFileName = appendStrings(directory, permenantAbilitiesFileName);
+
+	FILE * FP = fopen(fullFileName, "r");
+	char line[128];
+
+	while(fgets(line,128,FP) != NULL){
+		if (line[0] != '#') {
+			ability * newAbility = createPermenantAbilityFromLine(line);
+			addPerminentAbilityToRegistry(newAbility);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
 void loadSelfAbilitiesToRegistry(char* directory, char* selfAbilitiesFileName){
 	char * fullFileName = appendStrings(directory, selfAbilitiesFileName);
 
@@ -616,7 +652,6 @@ void loadSelfAbilitiesToRegistry(char* directory, char* selfAbilitiesFileName){
 	free(fullFileName);
 }
 
-//TODO: load other ability types to the registry
 void loadTargetedAbilitiesToRegistry(char* directory, char* targetedAbilitiesFileName){
 	char * fullFileName = appendStrings(directory, targetedAbilitiesFileName);
 
@@ -627,6 +662,23 @@ void loadTargetedAbilitiesToRegistry(char* directory, char* targetedAbilitiesFil
 		if (line[0] != '#') {
 			ability * newAbility = createTargetedAbilityFromLine(line);
 			addTargetAbilityToRegistry(newAbility);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void loadInstantAbilitiesToRegistry(char* directory, char* instantAbilitiesFileName){
+	char * fullFileName = appendStrings(directory, instantAbilitiesFileName);
+
+	FILE * FP = fopen(fullFileName, "r");
+	char line[128];
+
+	while(fgets(line,128,FP) != NULL){
+		if (line[0] != '#') {
+			ability * newAbility = createInstantAbilityFromLine(line);
+			addInstantAbilityToRegistry(newAbility);
 		}
 	}
 
@@ -701,6 +753,23 @@ int addClonedItemToRegistry(item * thisItem){
 	return newID;
 }
 
+item * deleteItemFromRegistry(int id){
+	int i;
+	item * toReturn;
+	for(i = 0; i < thisGlobalRegister->numItems; i++){
+		if(thisGlobalRegister->itemRegistry[i]->ID == id){
+			toReturn = thisGlobalRegister->itemRegistry[i];
+			thisGlobalRegister->numItems--;
+			thisGlobalRegister->itemRegistry[i] = thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems];
+			thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = NULL;
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!ITEM NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+}
+
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);
 }
@@ -772,3 +841,58 @@ void writeIndividualsToFile(char * directory, char * saveDirectory, char * indiv
 	releaseIndividualGroupWriteLock();
 	releaseIndividualGroupReadLock();
 }
+
+void writeItemsToFile(char * directory, char * saveDirectory, char * itemsFileName){
+	int i;
+
+	while(!tryGetIndividualGroupReadLock()){}
+	while(!tryGetIndividualGroupWriteLock()){}
+
+	char * fullFileName = appendStrings(directory,saveDirectory);
+
+	_mkdir(fullFileName);
+
+	strcat(fullFileName + strlen(fullFileName), itemsFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numItems; i++){
+		char * line = getItemAsLine(thisGlobalRegister->itemRegistry[i]);
+
+		//there's a '/n' at the end of the description, no need to include
+		fprintf(FP, "%s",  line);
+		free(line);
+	}
+
+	fclose(FP);
+
+	releaseIndividualGroupWriteLock();
+	releaseIndividualGroupReadLock();
+}
+
+void writeMapInfoToFile(char * directory, char * saveDirectory, char * individualsFileName){
+	int i;
+
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	char * fullFileName = appendStrings(directory,saveDirectory);
+
+	_mkdir(fullFileName);
+
+	strcat(fullFileName + strlen(fullFileName), individualsFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numMaps; i++){
+		char * line = getMapInfoAsLine(thisGlobalRegister->mapInfoArr[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+
+	fclose(FP);
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+}
+

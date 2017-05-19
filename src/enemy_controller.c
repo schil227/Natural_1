@@ -1801,14 +1801,16 @@ int tryRestoreMana(individual * thisIndividual){
 		if(manaRestoringItem->type == 'd' && thisIndividual->activeItems->activeItemsTotal < 40){
 			consumeItem(thisIndividual, manaRestoringItem);
 			addItemToActiveItemList(thisIndividual, manaRestoringItem);
-			free(removeItemFromInventory(thisIndividual->backpack, manaRestoringItem));
+			removeItemFromInventory(thisIndividual->backpack, manaRestoringItem);
+			deleteItemFromRegistry(manaRestoringItem->ID);
 			thisIndividual->remainingActions--;
 			return 1;
 		}
 
 		if(manaRestoringItem->type == 'i'){
 			consumeItem(thisIndividual, manaRestoringItem);
-			free(removeItemFromInventory(thisIndividual->backpack, manaRestoringItem));
+			deleteItemFromRegistry(manaRestoringItem->ID);
+			destroyItem(removeItemFromInventory(thisIndividual->backpack, manaRestoringItem));
 			thisIndividual->remainingActions--;
 			return 1;
 		}
@@ -1838,6 +1840,7 @@ int tryHeal(individual * thisIndividual, individual * player, groupContainer * t
 			consumeItem(thisIndividual, hpRestoringItem);
 			addItemToActiveItemList(thisIndividual, hpRestoringItem);
 			removeItemFromInventory(thisIndividual->backpack, hpRestoringItem);
+			deleteItemFromRegistry(hpRestoringItem->ID);
 
 			thisIndividual->remainingActions--;
 			return 1;
@@ -1848,7 +1851,8 @@ int tryHeal(individual * thisIndividual, individual * player, groupContainer * t
 			sprintf(msg, "%s used %s.\n", thisIndividual->name, hpRestoringItem->name);
 			cwrite(msg);
 			consumeItem(thisIndividual, hpRestoringItem);
-			free(removeItemFromInventory(thisIndividual->backpack, hpRestoringItem));
+			deleteItemFromRegistry(hpRestoringItem->ID);
+			destroyItem(removeItemFromInventory(thisIndividual->backpack, hpRestoringItem));
 			thisIndividual->remainingActions--;
 			return 1;
 		}

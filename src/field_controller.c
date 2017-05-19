@@ -649,7 +649,7 @@ item * createFieldItemFromFile(char line[1024]){
 	char type, weaponDamType, armorClass, itemType;
 	char * strtok_save_pointer;
 	int npcID, ID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, food, acMod, attackMod, damMod,
-	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, darkLoSMod, bluntDRMod, chopDRMod, slashDRMod,
+	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, darkLoSMod, secondaryDefaultAnimation, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod,isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 	double weaponStrMod;
 	animationContainer * thisAnimationContainer = initAnimationContainer();
@@ -778,6 +778,9 @@ item * createFieldItemFromFile(char line[1024]){
 	thisAnimationContainer->defaultAnimation = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
+	secondaryDefaultAnimation = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
 	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	addAnimationToContainer(thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
@@ -803,6 +806,8 @@ item * createFieldItemFromFile(char line[1024]){
 	thisAnimationContainer->currentAnimation = thisAnimationContainer->defaultAnimation;
 
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
+
+	setDefaultAnimation(secondaryAnimationContainer, (animationState) secondaryDefaultAnimation);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(description, value);
@@ -983,6 +988,9 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	while(!tryGetFieldWriteLock()){}
 	printf("GOT: destroy\n");fflush(stdout);
 
+	mapInfo * thisMapInfo = getMapInfoFromRegistry((*thisField)->id);
+	thisMapInfo->isCurrentMap = 0;
+
 	destroyField(*thisField, player);
 	clearGroup(thisGroupContainer->enemies);
 	clearGroup(thisGroupContainer->npcs);
@@ -1033,6 +1041,9 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			while(!tryGetFieldReadLock()){}
 			while(!tryGetFieldWriteLock()){}
 			printf("GOT: destroy\n");fflush(stdout);
+
+			mapInfo * thisMapInfo = getMapInfoFromRegistry((*thisField)->id);
+			thisMapInfo->isCurrentMap = 0;
 
 			destroyField(*thisField, player);
 			clearGroup(thisGroupContainer->enemies);
