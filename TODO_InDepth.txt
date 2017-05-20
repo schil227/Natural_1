@@ -13,6 +13,8 @@
 	
 -add LoS stat to ability
 -Add + Dam to characterInfo view
+-make an onDeath function for individuals in general to clear out stuff only they use, such as active items, etc.
+	--Note that on save, active abilities/items wont exist
 Drawing the image mask is costly on all those spaces - for field spaces, combine mask and image into one, and only draw that.
 
 == Things to test ==

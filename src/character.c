@@ -345,6 +345,10 @@ void destroyCharacter(character* thisCharacter){
 		if(thisCharacter->secondaryAnimationContainer != NULL){
 			destoryAnimationContainer(thisCharacter->secondaryAnimationContainer, thisCharacter->direction > 0);
 		}
+
+		if(thisCharacter->darkAnimationContainer != NULL){
+			destoryAnimationContainer(thisCharacter->darkAnimationContainer, 1);
+		}
 	}
 
 	free(thisCharacter);
@@ -990,7 +994,6 @@ void makeImageGreyscale(int frameHeight, long totalWidth, char * lpPixels){
 			L = 116*pow(y,0.3333) - 16;
 
 			if(L > 255 || L < 0){
-				printf("bad L");
 				continue;
 			}
 
@@ -1010,17 +1013,15 @@ void convertToGreyScale(HDC hdc, HDC hdcBuffer, animation * thisAnimation){
 		return;
 	}
 
-	printf("a\n");fflush(stdout);
 	BITMAPINFO bitMapInfo = {0};
 	bitMapInfo.bmiHeader.biSize = sizeof(bitMapInfo.bmiHeader);
 
-	printf("b\n");fflush(stdout);
 	HBITMAP thisImage = LoadImage(GetModuleHandle(NULL), thisAnimation->imageID, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
 
-	printf("c\n");fflush(stdout);
 	//Fill out bitMapInfo
 	if(!GetDIBits(hdcBuffer, thisImage, 0, 0, NULL, &bitMapInfo, DIB_RGB_COLORS)){
 		printf("Couldint get the bitMapInfo.\n");
+		DeleteObject(thisImage);
 		return;
 	}
 
@@ -1037,6 +1038,7 @@ void convertToGreyScale(HDC hdc, HDC hdcBuffer, animation * thisAnimation){
 
 	if(result == 0){
 		printf("Couldint get the bitmap.\n");
+		DeleteObject(thisImage);
 		free(lpPixels);
 		return;
 	}
@@ -1045,6 +1047,7 @@ void convertToGreyScale(HDC hdc, HDC hdcBuffer, animation * thisAnimation){
 
 	if(!SetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS)){
 		printf("Couldn't set the bitmap.\n");
+		DeleteObject(thisImage);
 		free(lpPixels);
 		return;
 	}

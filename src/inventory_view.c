@@ -130,6 +130,7 @@ void drawInventoryView(HDC hdc, HDC hdcBuffer, shiftData * viewShift){
 					thisInventoryView->inventoryBackground->y + 40 + 60 * i,
 					thisInventoryView->itemFrame);
 
+
 			drawUnboundAnimationByPixels(hdc, hdcBuffer, thisInventoryView->viewedItems[i]->itemCharacter,
 					thisInventoryView->inventoryBackground->x+15, thisInventoryView->inventoryBackground->y + 15 + 60*i, 1);
 

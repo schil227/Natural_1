@@ -397,6 +397,7 @@ int setCurrentMessageByIndividualID(int individualID, int isNPCHostileTowardPlay
 				thisDialogInstance->portrait->thisAnimationContainer = initAnimationContainer();
 				thisDialogInstance->portrait->secondaryAnimationContainer = NULL;
 				thisDialogInstance->portrait->darkAnimationContainer = NULL;
+
 				addAnimationToContainer(thisDialogInstance->portrait->thisAnimationContainer,cloneAnimationFromRegistry(dialogPortraitID));
 			}
 

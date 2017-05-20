@@ -311,6 +311,8 @@ int shouldEnableActionMode(){
 }
 
 void forcePlayerTransit(int targetMapID, int transitID){
+	while(!tryGetFieldReadLock()){}
+
 	if(attemptToForceTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory, targetMapID, transitID)){
 		RECT rect;
 		GetClientRect(hwnd_global, &rect);
@@ -318,7 +320,6 @@ void forcePlayerTransit(int targetMapID, int transitID){
 		HDC hdcBuffer = CreateCompatibleDC(hdc);
 
 		printf("WANT: transit\n");fflush(stdout);
-		while(!tryGetFieldReadLock()){}
 		while(!tryGetFieldWriteLock()){}
 		printf("GOT: transit\n");fflush(stdout);
 		updateFieldGraphics(hdc, hdcBuffer, main_field);
@@ -326,9 +327,11 @@ void forcePlayerTransit(int targetMapID, int transitID){
 		inActionMode = shouldEnableActionMode();
 
 		releaseFieldWriteLock();
-		releaseFieldReadLock();
+
 		printf("RELEASED: transit\n");fflush(stdout);
 	}
+
+	releaseFieldReadLock();
 }
 
 void drawAll(HDC hdc, RECT* prc) {
@@ -836,6 +839,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x45: //e key (enter area)
 			{
+				while(!tryGetFieldReadLock()){}
+
 				if(attemptToTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory)){
 					RECT rect;
 					GetClientRect(hwnd, &rect);
@@ -843,7 +848,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					HDC hdcBuffer = CreateCompatibleDC(hdc);
 
 					printf("WANT: transit\n");fflush(stdout);
-					while(!tryGetFieldReadLock()){}
 					while(!tryGetFieldWriteLock()){}
 					printf("GOT: transit\n");fflush(stdout);
 					updateFieldGraphics(hdc, hdcBuffer, main_field);
@@ -851,9 +855,11 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					inActionMode = shouldEnableActionMode();
 
 					releaseFieldWriteLock();
-					releaseFieldReadLock();
+
 					printf("RELEASED: transit\n");fflush(stdout);
 				}
+
+				releaseFieldReadLock();
 			}
 			break;
 		case 0x46: //f key

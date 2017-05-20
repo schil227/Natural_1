@@ -817,16 +817,18 @@ int getBit(int * a, int k){
 //////// Writing to Files //////////
 
 void writeIndividualsToFile(char * directory, char * saveDirectory, char * individualsFileName){
-	int i;
+	int i = 0;
 
 	while(!tryGetIndividualGroupReadLock()){}
 	while(!tryGetIndividualGroupWriteLock()){}
 
-	char * fullFileName = appendStrings(directory,saveDirectory);
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
 
 	_mkdir(fullFileName);
 
-	strcat(fullFileName + strlen(fullFileName), individualsFileName);
+	i += sprintf(fullFileName + i, "%s", individualsFileName);
 
 	FILE * FP = fopen(fullFileName, "w");
 
@@ -843,16 +845,18 @@ void writeIndividualsToFile(char * directory, char * saveDirectory, char * indiv
 }
 
 void writeItemsToFile(char * directory, char * saveDirectory, char * itemsFileName){
-	int i;
+	int i = 0;
 
 	while(!tryGetIndividualGroupReadLock()){}
 	while(!tryGetIndividualGroupWriteLock()){}
 
-	char * fullFileName = appendStrings(directory,saveDirectory);
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
 
 	_mkdir(fullFileName);
 
-	strcat(fullFileName + strlen(fullFileName), itemsFileName);
+	i += sprintf(fullFileName + i, "%s", itemsFileName);
 
 	FILE * FP = fopen(fullFileName, "w");
 
@@ -870,17 +874,19 @@ void writeItemsToFile(char * directory, char * saveDirectory, char * itemsFileNa
 	releaseIndividualGroupReadLock();
 }
 
-void writeMapInfoToFile(char * directory, char * saveDirectory, char * individualsFileName){
-	int i;
+void writeMapInfoToFile(char * directory, char * saveDirectory, char * mapInfoFileName){
+	int i = 0;
 
 	while(!tryGetFieldReadLock()){}
 	while(!tryGetFieldWriteLock()){}
 
-	char * fullFileName = appendStrings(directory,saveDirectory);
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
 
 	_mkdir(fullFileName);
 
-	strcat(fullFileName + strlen(fullFileName), individualsFileName);
+	i += sprintf(fullFileName + i, "%s", mapInfoFileName);
 
 	FILE * FP = fopen(fullFileName, "w");
 

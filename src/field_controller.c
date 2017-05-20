@@ -984,7 +984,6 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	removeAlliesFromField(thisGroupContainer->allies, *thisField);
 
 	printf("WANT: destroy\n");fflush(stdout);
-	while(!tryGetFieldReadLock()){}
 	while(!tryGetFieldWriteLock()){}
 	printf("GOT: destroy\n");fflush(stdout);
 
@@ -1000,7 +999,6 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
 	releaseFieldWriteLock();
-	releaseFieldReadLock();
 	printf("RELEASED: destroy\n");fflush(stdout);
 
 	if(player->thisReportedCrimes->numReportedCrimes > 0){
@@ -1038,7 +1036,6 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			removeAlliesFromField(thisGroupContainer->allies, *thisField);
 
 			printf("WANT: destroy\n");fflush(stdout);
-			while(!tryGetFieldReadLock()){}
 			while(!tryGetFieldWriteLock()){}
 			printf("GOT: destroy\n");fflush(stdout);
 
@@ -1054,7 +1051,6 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
 			releaseFieldWriteLock();
-			releaseFieldReadLock();
 			printf("RELEASED: destroy\n");fflush(stdout);
 
 			if(player->thisReportedCrimes->numReportedCrimes > 0){
