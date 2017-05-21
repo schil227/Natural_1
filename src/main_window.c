@@ -602,9 +602,6 @@ void destroyGame(){
 	//will wait for timer callback to finish
 	DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, INVALID_HANDLE_VALUE);
 
-//	//Wait for final timer callback to finish
-//	while(!drawLock){}
-
 	destroyField(main_field, NULL);
 	destroyIndividual(player);
 	clearGroup(thisGroupContainer->enemies);
@@ -619,11 +616,13 @@ void destroyGame(){
 }
 
 void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
-	BITMAP bm;
-	UINT ret;
+	int i;
 	HDC hdc = GetDC(hwnd);
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
-	char * saveMapDirectory = appendStrings(mapDirectory, saveDirectory);
+
+	char saveMapDirectory[256];
+	i = sprintf(saveMapDirectory, "%s", mapDirectory);
+	sprintf(saveMapDirectory + i, "%s", saveDirectory);
 
 	if(!isFirstLoad){
 		destroyGame();
@@ -658,18 +657,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 	initCharacterInfoView();
 	initPauseView(1523);
 
-	enableSound();
-
-	setSoundID(1, SOUND_MUSIC);
-	setSoundID(2, SOUND_SOUND1);
-
-	testPlaySounds();
-
 	player = getIndividualFromRegistry(1);
-
-	dialogMessage * thisMessage = malloc(sizeof(dialogMessage));
-	strcpy(thisMessage->message,"I am a message!\0");
-	setCurrentMessage(thisMessage);
 
 	mapInfo * loadMapInfo = getCurrentMapInfoFromRegistry();
 
@@ -806,18 +794,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		DestroyWindow(hwnd);
 		break;
 	case WM_DESTROY:
-		//will wait for timer callback to finish
-		DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, INVALID_HANDLE_VALUE);
-
-		//Wait for final timer callback to finish
-		while(!drawLock){}
-
-		destroyIndividual(player);
-		destroyField(main_field, NULL);
-		destroyConsoleInstance();
-		destroyTheInventoryView();
-		destroyTheGlobalRegister();
-		destroyEventHandlers();
+		destroyGame();
 		PostQuitMessage(0);
 		break;
 	case WM_LBUTTONDOWN:

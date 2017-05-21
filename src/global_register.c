@@ -753,21 +753,24 @@ int addClonedItemToRegistry(item * thisItem){
 	return newID;
 }
 
-item * deleteItemFromRegistry(int id){
+void deleteItemFromRegistry(int id){
 	int i;
-	item * toReturn;
+
 	for(i = 0; i < thisGlobalRegister->numItems; i++){
 		if(thisGlobalRegister->itemRegistry[i]->ID == id){
-			toReturn = thisGlobalRegister->itemRegistry[i];
 			thisGlobalRegister->numItems--;
 			thisGlobalRegister->itemRegistry[i] = thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems];
 			thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = NULL;
+
+			return;
 		}
 	}
 
 	char * errLog[128];
 	sprintf(errLog, "!!ITEM NOT FOUND IN REGISTRY - %d!!", id);
 	cwrite(errLog);
+
+	return;
 }
 
 void removeFromExistance(int id){

@@ -1090,7 +1090,7 @@ void parseMapIndividualsFromLine(mapInfo * thisMapInfo, char * line){
 
 	value = strtok(line, ",");
 
-	if(value == NULL){
+	if(value == NULL || *value == '\n'){
 		return;
 	}
 
@@ -1121,7 +1121,7 @@ void parseMapItemsFromLine(mapInfo * thisMapInfo, char * line){
 
 	value = strtok(line, ",");
 
-	if(value == NULL){
+	if(value == NULL || *value == '\n'){
 		return;
 	}
 
