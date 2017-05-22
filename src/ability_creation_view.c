@@ -29,7 +29,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW = 15;
 	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
 	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
-	thisAbilityCreationInstance->idCounter = 1000;
+	thisAbilityCreationInstance->idCounter = 0;
 
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
 	thisAbilityCreationInstance->selector = createCharacter(1504, rgb, x, y);
@@ -66,6 +66,10 @@ void loadTemplateAbilities(char* directory, char* effectsFileName){
 
 	fclose(FP);
 	free(fullFileName);
+}
+
+void setAbilityCreationIDCounter(int startingCount){
+	thisAbilityCreationInstance->idCounter = startingCount;
 }
 
 ability * getTemplateAbility(int ID){

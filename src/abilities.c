@@ -1105,6 +1105,51 @@ ability * cloneAbility(ability * thisAbility){
 	return newAbility;
 }
 
+
+int appendAbilityIndexToline(char * line, int lineIndex, int value, int defaultIndex){
+	if(value != defaultIndex){
+		return sprintf(line + lineIndex, "%d;", value);
+	}else{
+		return sprintf(line + lineIndex, "%c;", 'd');
+	}
+}
+
+char * getPermenantAbilityAsLine(ability * thisAbility){
+	int i;
+	char * line = malloc(sizeof(char) * 512);
+
+	i = sprintf(line, "%d;", thisAbility->ID);
+	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->range->selectedIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->STR->selectedIndex, thisAbility->STR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->DEX->selectedIndex, thisAbility->DEX->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->CON->selectedIndex, thisAbility->CON->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->WILL->selectedIndex, thisAbility->WILL->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->INT->selectedIndex, thisAbility->INT->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->WIS->selectedIndex, thisAbility->WIS->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->CHR->selectedIndex, thisAbility->CHR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->LUCK->selectedIndex, thisAbility->LUCK->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->ac->selectedIndex, thisAbility->ac->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->attack->selectedIndex, thisAbility->attack->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->damageMod->selectedIndex, thisAbility->damageMod->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->mvmt->selectedIndex, thisAbility->mvmt->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->baseHP->selectedIndex, thisAbility->baseHP->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->baseMana->selectedIndex, thisAbility->baseMana->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->bluntDR->selectedIndex, thisAbility->bluntDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->chopDR->selectedIndex, thisAbility->chopDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->pierceDR->selectedIndex, thisAbility->pierceDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->slashDR->selectedIndex, thisAbility->slashDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->earthDR->selectedIndex, thisAbility->earthDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->fireDR->selectedIndex, thisAbility->fireDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->waterDR->selectedIndex, thisAbility->waterDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->lightningDR->selectedIndex, thisAbility->lightningDR->defaultStartingIndex);
+
+	return line;
+}
+
 ability * createPermenantAbilityFromLine(char * line){
 	ability * permenantAbility = cloneAbility(getTemplateAbilityFromRegistry(0));
 	char * value;
@@ -1233,6 +1278,60 @@ ability * createPermenantAbilityFromLine(char * line){
 	permenantAbility->totalManaCost = 0;
 
 	return permenantAbility;
+}
+
+char * getDurationAbilityAsLine(ability * thisAbility){
+	int i;
+	char * line = malloc(sizeof(char) * 512);
+
+	i = sprintf(line, "%d;", thisAbility->ID);
+	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->damageType->selectedIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->range->selectedIndex, thisAbility->range->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceDamage->selectedIndex, thisAbility->diceDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceDamageMultiplier->selectedIndex, thisAbility->diceDamageMultiplier->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->damage->selectedIndex, thisAbility->damage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->status->selectedIndex, thisAbility->status->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDiceDamage->selectedIndex, thisAbility->statusDiceDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDamage->selectedIndex, thisAbility->statusDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceStatusDuration->selectedIndex, thisAbility->diceStatusDuration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDuration->selectedIndex, thisAbility->statusDuration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->aoe->selectedIndex, thisAbility->aoe->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->duration->selectedIndex, thisAbility->duration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->durationMod->selectedIndex, thisAbility->durationMod->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->actions->selectedIndex, thisAbility->actions->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->STR->selectedIndex, thisAbility->STR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->DEX->selectedIndex, thisAbility->DEX->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->CON->selectedIndex, thisAbility->CON->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->WILL->selectedIndex, thisAbility->WILL->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->INT->selectedIndex, thisAbility->INT->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->WIS->selectedIndex, thisAbility->WIS->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->CHR->selectedIndex, thisAbility->CHR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->LUCK->selectedIndex, thisAbility->LUCK->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->ac->selectedIndex, thisAbility->ac->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->attack->selectedIndex, thisAbility->attack->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->damageMod->selectedIndex, thisAbility->damageMod->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->mvmt->selectedIndex, thisAbility->mvmt->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceHP->selectedIndex, thisAbility->diceHP->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->hp->selectedIndex, thisAbility->hp->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->baseHP->selectedIndex, thisAbility->baseHP->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->baseMana->selectedIndex, thisAbility->baseMana->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->bluntDR->selectedIndex, thisAbility->bluntDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->chopDR->selectedIndex, thisAbility->chopDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->pierceDR->selectedIndex, thisAbility->pierceDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->slashDR->selectedIndex, thisAbility->slashDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->earthDR->selectedIndex, thisAbility->earthDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->fireDR->selectedIndex, thisAbility->fireDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->waterDR->selectedIndex, thisAbility->waterDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->lightningDR->selectedIndex, thisAbility->lightningDR->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->totalManaCost, 0);
+
+	return line;
 }
 
 ability * createDurationAbilityFromLine(char * line){
@@ -1436,9 +1535,66 @@ ability * createDurationAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if (*value != 'd') {
 		durationAbility->totalManaCost = atoi(value);
+	}else{
+		durationAbility->totalManaCost = calculateManaCost(durationAbility);
 	}
 
 	return durationAbility;
+}
+
+char * getTargetAbilityAsLine(ability * thisAbility){
+	int i;
+	char * line = malloc(sizeof(char) * 512);
+
+	i = sprintf(line, "%d;", thisAbility->ID);
+	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->damageType->selectedIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->range->selectedIndex, thisAbility->range->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->targeted->selectedIndex, thisAbility->targeted->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceDamage->selectedIndex, thisAbility->diceDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceDamageMultiplier->selectedIndex, thisAbility->diceDamageMultiplier->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->damage->selectedIndex, thisAbility->damage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->status->selectedIndex, thisAbility->status->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDiceDamage->selectedIndex, thisAbility->statusDiceDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDamage->selectedIndex, thisAbility->statusDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceStatusDuration->selectedIndex, thisAbility->diceStatusDuration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDuration->selectedIndex, thisAbility->statusDuration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->aoe->selectedIndex, thisAbility->aoe->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->duration->selectedIndex, thisAbility->duration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->durationMod->selectedIndex, thisAbility->durationMod->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->actions->selectedIndex, thisAbility->actions->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->STR->selectedIndex, thisAbility->STR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->DEX->selectedIndex, thisAbility->DEX->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->CON->selectedIndex, thisAbility->CON->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->WILL->selectedIndex, thisAbility->WILL->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->INT->selectedIndex, thisAbility->INT->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->WIS->selectedIndex, thisAbility->WIS->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->CHR->selectedIndex, thisAbility->CHR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->LUCK->selectedIndex, thisAbility->LUCK->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->ac->selectedIndex, thisAbility->ac->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->attack->selectedIndex, thisAbility->attack->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->damageMod->selectedIndex, thisAbility->damageMod->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->mvmt->selectedIndex, thisAbility->mvmt->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceHP->selectedIndex, thisAbility->diceHP->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->hp->selectedIndex, thisAbility->hp->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->baseHP->selectedIndex, thisAbility->baseHP->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->baseMana->selectedIndex, thisAbility->baseMana->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->bluntDR->selectedIndex, thisAbility->bluntDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->chopDR->selectedIndex, thisAbility->chopDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->pierceDR->selectedIndex, thisAbility->pierceDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->slashDR->selectedIndex, thisAbility->slashDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->earthDR->selectedIndex, thisAbility->earthDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->fireDR->selectedIndex, thisAbility->fireDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->waterDR->selectedIndex, thisAbility->waterDR->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->lightningDR->selectedIndex, thisAbility->lightningDR->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->totalManaCost, 0);
+
+	return line;
 }
 
 ability * createTargetedAbilityFromLine(char * line){
@@ -1647,9 +1803,38 @@ ability * createTargetedAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->totalManaCost = atoi(value);
+	}else{
+		targetedAbility->totalManaCost = calculateManaCost(targetedAbility);
 	}
 
 	return targetedAbility;
+}
+
+char * getInstantAbilityAsLine(ability * thisAbility){
+	int i;
+	char * line = malloc(sizeof(char) * 512);
+
+	i = sprintf(line, "%d;", thisAbility->ID);
+	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->damageType->selectedIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->diceDamage->selectedIndex, thisAbility->diceDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceDamageMultiplier->selectedIndex, thisAbility->diceDamageMultiplier->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->damage->selectedIndex, thisAbility->damage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->status->selectedIndex, thisAbility->status->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDiceDamage->selectedIndex, thisAbility->statusDiceDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDamage->selectedIndex, thisAbility->statusDamage->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->diceStatusDuration->selectedIndex, thisAbility->diceStatusDuration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->statusDuration->selectedIndex, thisAbility->statusDuration->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->actions->selectedIndex, thisAbility->actions->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->attack->selectedIndex, thisAbility->attack->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->damageMod->selectedIndex, thisAbility->damageMod->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->mvmt->selectedIndex, thisAbility->mvmt->defaultStartingIndex);
+
+	i += appendAbilityIndexToline(line, i, thisAbility->totalManaCost, 0);
+
+	return line;
 }
 
 ability * createInstantAbilityFromLine(char * line) {
@@ -1661,9 +1846,6 @@ ability * createInstantAbilityFromLine(char * line) {
 
 	value = strtok(NULL, ";");
 	strcpy(instantAbility->name, value);
-
-	value = strtok(NULL, ";");
-	instantAbility->damageType->selectedIndex = atoi(value);
 
 	value = strtok(NULL, ";");
 	instantAbility->damageType->selectedIndex = atoi(value);
@@ -1731,6 +1913,8 @@ ability * createInstantAbilityFromLine(char * line) {
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		instantAbility->totalManaCost = atoi(value);
+	}else{
+		instantAbility->totalManaCost = calculateManaCost(instantAbility);
 	}
 
 	return instantAbility;

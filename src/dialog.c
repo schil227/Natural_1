@@ -487,6 +487,22 @@ int setSpecialDialogId(int individualID, int specialID){
 	return 0;
 }
 
+int getDefaultDialogIDFromIndividual(int individualID){
+	int i;
+
+	for(i = 0; i < thisDialogInstance->MAX_INDIVIDUAL_DIALOG_REGISTRY; i++){
+		if(thisDialogInstance->individualDialogRegistry[i] != NULL){
+			if(thisDialogInstance->individualDialogRegistry[i]->individualID == individualID){
+				return thisDialogInstance->individualDialogRegistry[i]->dialogID;
+			}
+		}else{
+			break;
+		}
+	}
+
+	return -1;
+}
+
 int loadOrAddIndividualDialog(int individualID, int dialogID, int overrideValue){
 	int i;
 

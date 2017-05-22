@@ -271,7 +271,7 @@ int getAnimationIDFromTypeToLine(animationContainer * thisAnimationContianer, an
 }
 
 char * getIndividualAsLine(individual * thisIndividual){
-	int i, j, numPermAbilites = 0, numDurationAbilites = 0, numTargetedAbilities = 0, numInstantAbilities = 0;
+	int i, j, dialogId, numPermAbilites = 0, numDurationAbilites = 0, numTargetedAbilities = 0, numInstantAbilities = 0;
 	int permenantAbilities[64];
 	int selfDurationAbilities[64];
 	int targetAbilities[64];
@@ -356,7 +356,14 @@ char * getIndividualAsLine(individual * thisIndividual){
 	i += sprintf(line + i, "%d;", thisIndividual->waterDR);
 	i += sprintf(line + i, "%d;", thisIndividual->lightningDR);
 
-	i += sprintf(line + i, "%d;", thisIndividual->dialogID);
+	dialogId = getDefaultDialogIDFromIndividual(thisIndividual->ID);
+
+	if(dialogId > -1){
+		i += sprintf(line + i, "%d;", dialogId);
+	}else{
+		i += sprintf(line + i, "%d;", thisIndividual->dialogID);
+	}
+
 	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->sawPlayerCrime);
 	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->attackedByPlayer);
 	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->stolenFromByPlayer);
@@ -381,6 +388,8 @@ char * getIndividualAsLine(individual * thisIndividual){
 	if(numPermAbilites == 0){
 		i += sprintf(line + i, "-1;");
 	}else{
+		i += sprintf(line + i, "%d,", numPermAbilites);
+
 		for(j = 0; j < numPermAbilites; j++){
 			if(j + 1 == numPermAbilites){
 				i += sprintf(line + i, "%d;", permenantAbilities[j]);
@@ -393,6 +402,8 @@ char * getIndividualAsLine(individual * thisIndividual){
 	if(numDurationAbilites == 0){
 		i += sprintf(line + i, "-1;");
 	}else{
+		i += sprintf(line + i, "%d,", numDurationAbilites);
+
 		for(j = 0; j < numDurationAbilites; j++){
 			if(j + 1 == numDurationAbilites){
 				i += sprintf(line + i, "%d;", selfDurationAbilities[j]);
@@ -406,6 +417,8 @@ char * getIndividualAsLine(individual * thisIndividual){
 	if(numTargetedAbilities == 0){
 		i += sprintf(line + i, "-1;");
 	}else{
+		i += sprintf(line + i, "%d,", numTargetedAbilities);
+
 		for(j = 0; j < numTargetedAbilities; j++){
 			if(j + 1 == numTargetedAbilities){
 				i += sprintf(line + i, "%d;", targetAbilities[j]);
@@ -418,6 +431,8 @@ char * getIndividualAsLine(individual * thisIndividual){
 	if(numInstantAbilities == 0){
 		i += sprintf(line + i, "-1;");
 	}else{
+		i += sprintf(line + i, "%d,", numInstantAbilities);
+
 		for(j = 0; j < numInstantAbilities; j++){
 			if(j + 1 == numInstantAbilities){
 				i += sprintf(line + i, "%d;", instantAbilities[j]);

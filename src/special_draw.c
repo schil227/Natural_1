@@ -112,6 +112,7 @@ void resetSpecialDraw(){
 	specialDrawInstance->numSpecialIndividuals = 0;
 
 	for(i = 0; i < specialDrawInstance->numImagesToDraw; i++){
+//		destroyFixedCharacter(specialDrawInstance->imagesToDraw[i]->image);
 		destroyCharacter(specialDrawInstance->imagesToDraw[i]->image);
 		free(specialDrawInstance->imagesToDraw[i]);
 		specialDrawInstance->imagesToDraw[i] = NULL;

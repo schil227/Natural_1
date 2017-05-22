@@ -492,22 +492,22 @@ void destroyTheGlobalRegister(){
 	free(thisGlobalRegister);
 }
 
-void loadGlobalRegister(char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
+void loadGlobalRegister(char * saveMapDirectory, char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
 						char * animationData, char * permenantAbilitiesData, char * selfAbilitiesData, char * targetedAbilitiesData,
 						char * instantAbilitiesData, char * mapInfo, char * descriptions){
 	// Priority loading:
 	//individuals dependant on xAbilities
-	loadPermenantAbilitiesToRegistry(mapDirectory, permenantAbilitiesData);
-	loadSelfAbilitiesToRegistry(mapDirectory, selfAbilitiesData);
-	loadTargetedAbilitiesToRegistry(mapDirectory, targetedAbilitiesData);
-	loadInstantAbilitiesToRegistry(mapDirectory, instantAbilitiesData);
+	loadPermenantAbilitiesToRegistry(saveMapDirectory, permenantAbilitiesData);
+	loadSelfAbilitiesToRegistry(saveMapDirectory, selfAbilitiesData);
+	loadTargetedAbilitiesToRegistry(saveMapDirectory, targetedAbilitiesData);
+	loadInstantAbilitiesToRegistry(saveMapDirectory, instantAbilitiesData);
 
 	loadAnimationsToRegistry(mapDirectory, animationData);
-	loadIndividualsToRegistry(mapDirectory, individualsData);
-	loadItemsToRegistry(mapDirectory, itemsData);
+	loadIndividualsToRegistry(saveMapDirectory, individualsData);
+	loadItemsToRegistry(saveMapDirectory, itemsData);
 	loadEventsToRegistry(mapDirectory, eventsData);
 	loadSoundsToRegistry(mapDirectory, soundsData);
-	loadMapDataToRegistry(mapDirectory, mapInfo);
+	loadMapDataToRegistry(saveMapDirectory, mapInfo);
 	loadDescriptionsToRegistry(mapDirectory, descriptions);
 }
 
@@ -773,6 +773,10 @@ void deleteItemFromRegistry(int id){
 	return;
 }
 
+int numAbilitiesInGlobalRegistry(){
+	return thisGlobalRegister->numPerminentAbilities + thisGlobalRegister->numSelfAbilities + thisGlobalRegister->numTargetedAbilities + thisGlobalRegister->numInstantAbilities;
+}
+
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);
 }
@@ -905,3 +909,112 @@ void writeMapInfoToFile(char * directory, char * saveDirectory, char * mapInfoFi
 	releaseFieldReadLock();
 }
 
+void writePermenantAbilitiesToFile(char * directory, char * saveDirectory, char * mapInfoFileName){
+	int i = 0;
+
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
+
+	_mkdir(fullFileName);
+
+	i += sprintf(fullFileName + i, "%s", mapInfoFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+	for(i = 0; i < thisGlobalRegister->numPerminentAbilities; i++){
+		char * line = getPermenantAbilityAsLine(thisGlobalRegister->perminentAbilities[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+	fclose(FP);
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+}
+
+void writeDurationAbilitiesToFile(char * directory, char * saveDirectory, char * mapInfoFileName){
+	int i = 0;
+
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
+
+	_mkdir(fullFileName);
+
+	i += sprintf(fullFileName + i, "%s", mapInfoFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numSelfAbilities; i++){
+		char * line = getDurationAbilityAsLine(thisGlobalRegister->selfAbilities[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+
+	fclose(FP);
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+}
+
+void writeTargetedAbilitiesToFile(char * directory, char * saveDirectory, char * mapInfoFileName){
+	int i = 0;
+
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
+
+	_mkdir(fullFileName);
+
+	i += sprintf(fullFileName + i, "%s", mapInfoFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numTargetedAbilities; i++){
+		char * line = getTargetAbilityAsLine(thisGlobalRegister->targetedAbilities[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+
+	fclose(FP);
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+}
+
+void writeInstantAbilitiesToFile(char * directory, char * saveDirectory, char * mapInfoFileName){
+	int i = 0;
+
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
+
+	_mkdir(fullFileName);
+
+	i += sprintf(fullFileName + i, "%s", mapInfoFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numInstantAbilities; i++){
+		char * line = getInstantAbilityAsLine(thisGlobalRegister->instantAbilities[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+
+	fclose(FP);
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+}

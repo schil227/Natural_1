@@ -171,7 +171,7 @@ fixedCharacter * createCharacter(int imageID, COLORREF rgb, int x, int y){
 }
 
 character * createCharacterFromAnimation(animation * thisAnimation){
-	character * newCharacter = malloc(sizeof(fixedCharacter));
+	character * newCharacter = malloc(sizeof(character));
 
 	newCharacter->direction = 0;
 
@@ -179,6 +179,7 @@ character * createCharacterFromAnimation(animation * thisAnimation){
 	newCharacter->thisAnimationContainer->animations[0] = thisAnimation;
 	newCharacter->thisAnimationContainer->numAnimations = 1;
 	newCharacter->secondaryAnimationContainer = cloneAnimationContainer(newCharacter->thisAnimationContainer);
+	newCharacter->darkAnimationContainer = NULL;
 
 	return newCharacter;
 }
