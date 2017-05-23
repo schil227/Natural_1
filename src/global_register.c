@@ -530,6 +530,7 @@ void loadIndividualsToRegistry(char* directory, char * individualsFileName){
 }
 
 void loadItemsToRegistry(char* directory, char * itemsFileName){
+	int registeredCounterLine = 0;
 	char * fullFileName = appendStrings(directory, itemsFileName);
 	//fullFileName[strlen(fullFileName)-1] = '\0'; //remove '\n' at end of line
 	FILE * FP = fopen(fullFileName, "r");
@@ -537,30 +538,34 @@ void loadItemsToRegistry(char* directory, char * itemsFileName){
 
 	while(fgets(line,1024,FP) != NULL){
 		if (line[0] != '#') {
-			item * newItem = createFieldItemFromFile(line);
+			if(!registeredCounterLine){
+				setItemIDIncrement(atoi(line));
+				registeredCounterLine = 1;
+			}else{
+				item * newItem = createFieldItemFromFile(line);
 
-			if(newItem->npcID != 0){ // equip item to individual
-				individual * tmpIndividual = getIndividualFromRegistry(newItem->npcID);
+				if(newItem->npcID != 0){ // equip item to individual
+					individual * tmpIndividual = getIndividualFromRegistry(newItem->npcID);
 
-				if(tmpIndividual != NULL){
-					addItemToInventory(tmpIndividual->backpack, newItem);
-					if(newItem->isEquipt){
-						if(newItem->type == 'a'){
-							tmpIndividual->armorItem = newItem->itemCharacter;
-						}else if(newItem->type == 's'){
-							tmpIndividual->shieldItem = newItem->itemCharacter;
-						}else if(newItem->type == 'w'){
-							tmpIndividual->weaponItem = newItem->itemCharacter;
+					if(tmpIndividual != NULL){
+						addItemToInventory(tmpIndividual->backpack, newItem);
+						if(newItem->isEquipt){
+							if(newItem->type == 'a'){
+								tmpIndividual->armorItem = newItem->itemCharacter;
+							}else if(newItem->type == 's'){
+								tmpIndividual->shieldItem = newItem->itemCharacter;
+							}else if(newItem->type == 'w'){
+								tmpIndividual->weaponItem = newItem->itemCharacter;
+							}
 						}
+					}else{
+						char * errStr[128];
+						sprintf(errStr, "!!FAILED ADDING ITEM TO INDIVIDUAL ID : %d!!\0", newItem->npcID);
+						cwrite(errStr);
 					}
-				}else{
-					char * errStr[128];
-					sprintf(errStr, "!!FAILED ADDING ITEM TO INDIVIDUAL ID : %d!!\0", newItem->npcID);
-					cwrite(errStr);
 				}
+				addItemToRegistry(newItem);
 			}
-			addItemToRegistry(newItem);
-
 		}
 	}
 
@@ -734,25 +739,6 @@ void createDescriptionMapFromLine(descriptionMap * tmpDescription, char * line){
 	strcpy(tmpDescription->description, value);
 }
 
-int addClonedItemToRegistry(item * thisItem){
-	int i, newID = 0;
-
-	for(i = 0; i < thisGlobalRegister->numItems; i++){
-		if(newID < thisGlobalRegister->itemRegistry[i]->ID){
-			newID = thisGlobalRegister->itemRegistry[i]->ID;
-		}
-	}
-
-	newID++;
-	thisItem->ID = newID;
-	thisGlobalRegister->itemRegistry[i] = thisItem;
-	thisGlobalRegister->numItems++;
-
-	thisGlobalRegister->itemRegistry[thisGlobalRegister->numItems] = NULL;
-
-	return newID;
-}
-
 void deleteItemFromRegistry(int id){
 	int i;
 
@@ -866,6 +852,9 @@ void writeItemsToFile(char * directory, char * saveDirectory, char * itemsFileNa
 	i += sprintf(fullFileName + i, "%s", itemsFileName);
 
 	FILE * FP = fopen(fullFileName, "w");
+
+	//Add the current item id counter
+	fprintf(FP, "%d\n", getCurrentItemIDIncrement());
 
 	for(i = 0; i < thisGlobalRegister->numItems; i++){
 		char * line = getItemAsLine(thisGlobalRegister->itemRegistry[i]);

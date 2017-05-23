@@ -2221,7 +2221,8 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 			return 0;
 		}
 
-		addClonedItemToRegistry(newItem);
+		addItemToRegistry(newItem);
+
 		addItemToInventory(thisIndividual->backpack, newItem);
 		newItem->npcID = thisIndividual->ID;
 
@@ -3562,6 +3563,12 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 		}else{
 			return 0;
 		}
+	} else if(strcmp("darkLoS",attribute) == 0 ){
+//		if(activeAbility->rangeEnabled && (activeAbility->type == 'p' || activeAbility->type == 'd')){ //only applicable to perminant abilities
+//			return activeAbility->range->effectAndManaArray[activeAbility->range->selectedIndex]->effectMagnitude;
+//		}else{
+			return 0;
+//		}
 	} else if(strcmp("bluntDR",attribute) == 0 ){
 		if(activeAbility->bluntDREnabled){
 			return activeAbility->bluntDR->effectAndManaArray[activeAbility->bluntDR->selectedIndex]->effectMagnitude;
@@ -3610,31 +3617,9 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 		}else{
 			return 0;
 		}
-	} else if(strcmp("earthWeakness",attribute) == 0 ){
-//		if(activeAbility->earthDR){
-//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
-//		}else{
-			return 0;
-//		}
-	} else if(strcmp("fireWeakness",attribute) == 0 ){
-//		if(activeAbility->XXXXXX){
-//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
-//		}else{
-			return 0;
-//		}
-	} else if(strcmp("waterWeakness",attribute) == 0 ){
-//		if(activeAbility->XXXXXX){
-//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
-//		}else{
-			return 0;
-//		}
-	} else if(strcmp("lightiningWeakness",attribute) == 0 ){
-//		if(activeAbility->XXXXXX){
-//			return activeAbility->XXXXX->effectAndManaArray[activeAbility->XXXXXX->selectedIndex]->effectMagnitude;
-//		}else{
-			return 0;
-//		}
 	}
+
+	return 0;
 }
 
 int getAttributeFromActiveStatus(status * thisStatus, char * attribute){

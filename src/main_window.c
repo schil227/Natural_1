@@ -1054,8 +1054,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-
-
 	if(isPaused()){
 		return pausedLoop(hwnd, msg, wParam, lParam);
 	}
@@ -1309,8 +1307,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	playerDialog->playerIsMarkedForDeath = 0;
 
 	player = getIndividualFromRegistry(2);
-//	if (defineIndividual(player, 0, 1, RGB(255, 0, 255), "adr\0", 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, 20, 2, 4, 13, 3, 10, 1, 1, "MAX\0", 2, 4,10,2,0,0,0,0,0,0,0,0,0,0,-1,50,0,0,0,100,100,100,0,0,0,0,0,0,0, playerDialog, NULL, playerAnimationContainer, secondaryAnimationContainer)) {
-//	}
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
 

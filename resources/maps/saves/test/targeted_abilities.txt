@@ -2,4 +2,3 @@
 101;Burn;1;d;d;d;d;d;2;1;d;1;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;1;
 102;Heal Target;1;1;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;2;d;d;d;d;d;d;d;d;d;d;d;1;
 103;Focus;1;1;d;d;d;d;d;d;d;d;d;d;1;d;d;d;d;d;d;d;d;d;d;d;4;d;d;d;d;d;d;d;d;d;d;d;d;d;d;1;
-1007;AAAA;0;3;d;1;1;d;d;d;d;d;d;1;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;d;8;

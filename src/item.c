@@ -87,6 +87,16 @@ void destroyItem(item * thisItem){
 	free(thisItem);
 }
 
+void setItemIDIncrement(int counter){
+	if(counter > itemIDIncrement){
+		itemIDIncrement = counter;
+	}
+}
+
+int getCurrentItemIDIncrement(){
+	return itemIDIncrement;
+}
+
 item * cloneItem(item * thisItem, int keepOwner){
 	item * newItem = malloc(sizeof(item));
 	newItem->itemCharacter = malloc(sizeof(character));

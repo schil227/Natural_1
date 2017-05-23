@@ -1,17 +1,6 @@
 == TODO In Depth ==
 
--Stuff that may be missed for to-lines:
-	thisIndividual->thisBehavior->isHostileToPlayer = 0;
-	thisIndividual->thisBehavior->isFocusedOnPlayer = 0;
-	thisIndividual->thisBehavior->isSurrounded = 0;
-	thisIndividual->defaultGroupType = type;
-	thisIndividual->desiredLocation->x = x;
-	thisIndividual->desiredLocation->y = y;
-	isplayer
-
-
-	
--add LoS stat to ability
+-add dark LoS stat to ability
 -Add + Dam to characterInfo view
 -make an onDeath function for individuals in general to clear out stuff only they use, such as active items, etc.
 	--Note that on save, active abilities/items wont exist

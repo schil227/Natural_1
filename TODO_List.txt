@@ -3,11 +3,12 @@
 ===================
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
-- (5/7/17) have a view to show individual stats, pure stats, bonuses, negatives, active abilities/statuses/items, etc.
+- (5/18/17) Implement respawning
+- (5/22/17
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
-- (5/8/17) Create ability, get to name field, escape, escape, should see name field again
+
  
  
 ==BACK BURNER==
@@ -49,3 +50,6 @@
 - (4/29/17 - 5/7/17) Implement food (DONE)
 - (5/6/17 - 5/8/17) Add a pause mode (DONE)
 - (1/1/17 - 5/8/17) Put dialog box/speaker image next to dialog (DONE)
+- (5/8/17 - 5/10/17) Create ability, get to name field, escape, escape, should see name field again (DONE)
+- (5/7/17 - 5/16/17) have a view to show individual stats, pure stats, bonuses, negatives, active abilities/statuses/items, etc. (DONE)
+- (5/18/17 - 5/22/17) Add save/load functionality (DONE)
