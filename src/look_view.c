@@ -53,7 +53,11 @@ void disableLookMode(){
 }
 
 int inLookViewScrollMode(){
-	return thisLookView->inLookScrollMode;
+	if(thisLookView != NULL){
+		return thisLookView->inLookScrollMode;
+	}
+
+	return 0;
 }
 
 void enableLookScrollMode(){

@@ -4,15 +4,14 @@
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (5/18/17) Implement respawning
-- (5/22/17
+- (5/22/17) Map Generator: create a UI to make/generate maps
+- (5/22/17) Develop a way to see transit spaces (e.g. outline in gold)
+- (5/25/17) Make the main window run completely seperate from the tests (e.g. build/destroy everything)
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
-
- 
  
 ==BACK BURNER==
-- (11/12/16) Add more enemies to the field
 - (11/12/16) Add casting animations
 - (2/21/17) Abilities: change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
 - (4/29/17) Character creation/title screens
