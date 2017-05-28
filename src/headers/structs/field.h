@@ -36,13 +36,8 @@ typedef struct {
 typedef struct {
 	size_t size;
 	int id;
-	int displayedWidth;
-	int displayedHeight;
 	int isDark;
 	int playerLoS;
-
-	int displayedX;
-	int displayedY;
 
 	int totalX;
 	int totalY;

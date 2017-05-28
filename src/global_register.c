@@ -763,6 +763,28 @@ int numAbilitiesInGlobalRegistry(){
 	return thisGlobalRegister->numPerminentAbilities + thisGlobalRegister->numSelfAbilities + thisGlobalRegister->numTargetedAbilities + thisGlobalRegister->numInstantAbilities;
 }
 
+void populateMapGeneratorImages(character * characterSet[1000], int * numImages, int * maxImages){
+	int i, j = 0;
+
+	for(i = 0; i < thisGlobalRegister->numAnimations; i++){
+		if(thisGlobalRegister->animationRegistry[i] != NULL && thisGlobalRegister->animationRegistry[i]->imageID >= 7500 && thisGlobalRegister->animationRegistry[i]->imageID < 8500){
+			if(j < *maxImages){
+				characterSet[j] = createCharacterFromAnimation(thisGlobalRegister->animationRegistry[i]);
+				characterSet[j++] = createCharacterFromAnimation(thisGlobalRegister->animationRegistry[i]);
+				characterSet[j++] = createCharacterFromAnimation(thisGlobalRegister->animationRegistry[i]);
+				characterSet[j++] = createCharacterFromAnimation(thisGlobalRegister->animationRegistry[i]);
+				characterSet[j++] = createCharacterFromAnimation(thisGlobalRegister->animationRegistry[i]);
+
+//				j++;
+			}else{
+				break;
+			}
+		}
+	}
+
+	*numImages = j;
+}
+
 void removeFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);
 }

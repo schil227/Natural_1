@@ -86,7 +86,11 @@ void disableCharacterInfoView(){
 }
 
 int inCharacterInfoView(){
-	return thisCharacterInfoView->inCharacterInfoView;
+	if(thisCharacterInfoView != NULL){
+		return thisCharacterInfoView->inCharacterInfoView;
+	}
+
+	return 0;
 }
 
 void showInfoView(){

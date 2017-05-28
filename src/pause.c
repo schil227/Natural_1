@@ -15,7 +15,11 @@ initPauseView(int pauseViewWindowID){
 }
 
 int isPaused(){
-	return thisPauseView->isPaused;
+	if(thisPauseView != NULL){
+		return thisPauseView->isPaused;
+	}
+
+	return 0;
 }
 
 void togglePaused(){

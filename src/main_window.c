@@ -19,6 +19,8 @@
 #include"./headers/sound_pub_methods.h"
 #include "./headers/look_view_pub_methods.h"
 
+int MAP_CREATION_MODE = 0;
+
 //Debug timing data
 //
 // 	 	 	//Timer Example:
@@ -560,13 +562,6 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	if(freeTimer > animateMoveSpeed + 30 && thisGroupContainer->movingIndividuals->numIndividuals == 0){
 		freeTimer = 0;
 
-//		printf("WANT: action\n");fflush(stdout);
-//		while(!tryGetFieldReadLock()){}
-//		printf("GOT: action\n");fflush(stdout);
-//		inActionMode = shouldEnableActionMode();
-//
-//		releaseFieldReadLock();
-//		printf("RELEASED: action\n");fflush(stdout);
 		if(!inActionMode){
 			decreaseFood(player, 0.025);
 
@@ -1053,6 +1048,223 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
+LRESULT CALLBACK MapGeneratorTimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
+	//Wait for drawLock to be released
+	if(drawLock)
+	{
+		return 0;
+	}
+
+	//claim lock
+	drawLock = 1;
+
+	HWND hwnd = hwnd_global;
+
+	RECT rect;
+	HDC hdc = GetDC(hwnd);
+	GetClientRect(hwnd, &rect);
+
+	drawMapGenerator(hdc, &rect, viewShift);
+
+	ReleaseDC(hwnd, hdc);
+
+	drawLock = 0;
+
+	return 0;
+}
+
+LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	switch (msg) {
+		case WM_CREATE: {
+			HDC hdc = GetDC(hwnd);
+			HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+			initLockAuth();
+			initalizeTheGlobalRegister();
+
+			loadGlobalRegister(mapDirectory, mapDirectory, "", "", "", "", "images.txt", "", "", "", "", "", "");
+
+			initMapGenerator();
+
+			updateFieldGraphics(hdc, hdcBuffer, mapGeneratorField());
+
+			DeleteDC(hdcBuffer);
+			DeleteDC(hdc);
+
+		    gDoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+		    if (NULL == gDoneEvent)
+		    {
+		        printf("CreateEvent failed (%d)\n", GetLastError());
+		        exit(0);
+		    }
+
+		    hTimerQueue = CreateTimerQueue();
+		    if (NULL == hTimerQueue)
+		    {
+		        printf("CreateTimerQueue failed (%d)\n", GetLastError());
+		        exit(0);
+		    }
+
+		    if (!CreateTimerQueueTimer( &hTimerQueueTimer, hTimerQueue, MapGeneratorTimerProc, 123 , 32, 32, 0))
+		    {
+		        printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
+		        exit(0);
+		    }
+
+			viewShift = initShiftData();
+		}
+		break;
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			//will wait for timer callback to finish
+			DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, INVALID_HANDLE_VALUE);
+
+			PostQuitMessage(0);
+			break;
+		case WM_LBUTTONDOWN:
+			break;
+		case WM_KEYDOWN: {
+			switch (LOWORD(wParam)) {
+				case 0x34: //left
+				case 0x64:
+				{
+					if(inMapGenerationSelectionMode()){
+						changeMapGeneratorSelectX(-1);
+						break;
+					}
+				}
+				case 0x36: //right
+				case 0x66:
+				{
+					if(inMapGenerationSelectionMode()){
+						changeMapGeneratorSelectX(1);
+						break;
+					}
+				}
+				case 0x38: //up
+				case 0x68:
+				{
+					if(inMapGenerationSelectionMode()){
+						changeMapGeneratorSelectY(-1);
+						break;
+					}
+				}
+				case 0x32: //down
+				case 0x62:
+				{
+					if(inMapGenerationSelectionMode()){
+						changeMapGeneratorSelectY(1);
+						break;
+					}
+				}
+				case 0x31: //down left
+				case 0x61:
+				case 0x37: //up left
+				case 0x67:
+				case 0x39: //up right
+				case 0x69:
+				case 0x33: //down right
+				case 0x63:
+					{
+						int direction;
+						direction = LOWORD(wParam) % 16;
+
+						RECT rect;
+						GetClientRect(hwnd, &rect);
+
+						moveMapGeneratorCursor(direction, viewShift, &rect);
+					}
+					break;
+				case 0x41: //a key : bring up set image selector
+					enableMapGenerationSelectionMode();
+					break;
+				case 0x52: //r key
+					{
+						while(!tryGetFieldReadLock()){}
+						while(!tryGetFieldWriteLock()){}
+
+						HDC hdc = GetDC(hwnd);
+						HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+						rotateMapGenerationCharacter(hdc, hdcBuffer);
+
+						DeleteDC(hdcBuffer);
+						DeleteDC(hdc);
+
+						releaseFieldWriteLock();
+						releaseFieldReadLock();
+					}
+					break;
+				case 0x44: //d key
+					{
+						char mapGenerationDirectory[256];
+
+						sprintf(mapGenerationDirectory, "%s%s", mapDirectory, "generatedMaps\\");
+
+						writeGeneratedMapToFile(mapGenerationDirectory, "mapX.txt");
+					}
+					break;
+				case 0x26: //UP key
+					{
+						changeMapGeneratorHeight(-1);
+					}
+					break;
+				case 0x28: //DOWN key
+					{
+						changeMapGeneratorHeight(1);
+					}
+					break;
+
+				case 0x25: //LEFT key
+					{
+						changeMapGeneratorWidth(-1);
+					}
+					break;
+
+				case 0x27: //RIGHT key
+					{
+						changeMapGeneratorWidth(1);
+					}
+					break;
+				case 0x0D: //enter
+					{
+						if(inMapGenerationSelectionMode()){
+							setMapGenerationSelectedCharacter();
+							disableMapGenerationSelectionMode();
+						}else{
+							while(!tryGetFieldReadLock()){}
+							while(!tryGetFieldWriteLock()){}
+
+							HDC hdc = GetDC(hwnd);
+							HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+							setMapGenerationSpace(hdc, hdcBuffer);
+
+							DeleteDC(hdcBuffer);
+							DeleteDC(hdc);
+
+							releaseFieldWriteLock();
+							releaseFieldReadLock();
+						}
+					}
+					break;
+				case 0x1B: //escape
+					{
+						if(inMapGenerationSelectionMode()){
+							disableMapGenerationSelectionMode();
+						}
+					}
+					break;
+			}
+			break;
+		}
+	}
+
+	return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(isPaused()){
 		return pausedLoop(hwnd, msg, wParam, lParam);
@@ -1124,14 +1336,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	} else if(inInventoryViewMode()){
 		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
 		return 0;
-	}else if(thisGroupContainer->groupMoveMode){
+	}else if(thisGroupContainer != NULL && thisGroupContainer->groupMoveMode){
 		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		return 0;
-	}else if(thisGroupContainer->groupActionMode){
+	}else if(thisGroupContainer != NULL && thisGroupContainer->groupActionMode){
 		processActionLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode, &playerControlMode, animateMoveSpeed);
 		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		return 0;
-	}else if(thisGroupContainer->postGroupActionMode){
+	}else if(thisGroupContainer != NULL && thisGroupContainer->postGroupActionMode){
 		thisGroupContainer->postGroupActionMode = 0;
 
 		if(thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex] != NULL ){
@@ -1237,28 +1449,7 @@ char * getContextData(char * contextKey){
 	return processContextKey(contextKey, player, thisGroupContainer, main_field);
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-		LPSTR lpCmdLine, int nCmdShow) {
-
-	HWND hwnd;
-
-	WNDCLASSEX wc;
-	WNDCLASSEX wc2;
-
-	MSG Msg;
-
-	int consoleWindowWidth = 480;
-	int consoleWindowHeight = 175;
-	int sidebarWindowWidth = 175;
-	int sidebarWindowHeight = 655;
-
-	QueryPerformanceFrequency(&Frequency);
-
-	//run the tests!
-	//init rand for tests
-	srand(0);
-	int i;
-
+void runTests(){
 	//initialize for tests
 	player = initIndividual();
 	enemies = initGroup();
@@ -1324,6 +1515,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	destroySpecialDrawInstance();
 	thisGroupContainer->groupActionMode = 0;
 	thisGroupContainer->initGroupActionMode = 0;
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+		LPSTR lpCmdLine, int nCmdShow) {
+
+	HWND hwnd;
+
+	WNDCLASSEX wc = {0};
+
+	MSG Msg;
+
+	int consoleWindowWidth = 480;
+	int consoleWindowHeight = 175;
+	int sidebarWindowWidth = 175;
+	int sidebarWindowHeight = 655;
+
+
+	QueryPerformanceFrequency(&Frequency);
+
+	//run the tests!
+	//init rand for tests
+	srand(0);
+	int i;
+
+	if(!MAP_CREATION_MODE){
+		runTests();
+	}
 
 	srand(time(NULL));
 	for(i = 0; i < 10; i++){
@@ -1333,7 +1551,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure
 	wc.style = 0; //Class styles (usually zero)
-	wc.lpfnWndProc = WndProc; //Pointer to the window procedure for this window class
+
+	if(MAP_CREATION_MODE){
+		wc.lpfnWndProc = MapGeneratorProc; //Pointer to the window procedure for this window class
+	}else{
+		wc.lpfnWndProc = WndProc; //Pointer to the window procedure for this window class
+	}
+
 	wc.cbClsExtra = 0; //amount of extra data for this class in memory
 	wc.cbWndExtra = 0; //amount of extra data per window of this type
 	wc.hInstance = hInstance; //handle to app instance (input param)

@@ -101,6 +101,10 @@ END
 1529 BITMAP DISCARDABLE "../images/level_up.bmp"
 1530 BITMAP DISCARDABLE "../images/character_info.bmp"
 
+//Map Generator View
+1531 BITMAP DISCARDABLE "../images/selected_character_box.bmp"
+1532 BITMAP DISCARDABLE "../images/map_generator_character_select_background.bmp" 
+
 //Base character images 2000 - 2500
 2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001
 2002 BITMAP DISCARDABLE "../images/human_attack_slash.bmp"
@@ -191,7 +195,7 @@ END
 8524 BITMAP DISCARDABLE "../images/spear_1_item.bmp" 
 8525 BITMAP DISCARDABLE "../images/shield_1_item.bmp"
 
-8525 BITMAP DISCARDABLE "../images/ham.bmp"
+8526 BITMAP DISCARDABLE "../images/ham.bmp"
 
 //Ability images 9500 - 10000
 9500 BITMAP DISCARDABLE "../images/ability_creation_bg.bmp" //3500
