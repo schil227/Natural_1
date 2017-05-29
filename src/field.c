@@ -460,41 +460,41 @@ void wanderAround(field * thisField, individual * thisIndividual){
  int direction = rand() % 10+1;
  moveIndividual(thisField, thisIndividual, direction);
 }
-
-
-animation * generateBackground(char backgroundSymbol){
-	switch(backgroundSymbol){
-		case 'c':
-			return cloneAnimationFromRegistry(7502);
-		case 'g':
-			return cloneAnimationFromRegistry(7501);
-		case '-':
-			return cloneAnimationFromRegistry(7503);
-		case '=':
-			return cloneAnimationFromRegistry(7504);
-		case 'r':
-			return cloneAnimationFromRegistry(7505);
-		case 'u':
-			return cloneAnimationFromRegistry(7506);
-		case 'o':
-			return cloneAnimationFromRegistry(7507);
-		case 't':
-			return cloneAnimationFromRegistry(7514);
-		case 'p':
-			return cloneAnimationFromRegistry(7511);
-		case '\\':
-			return cloneAnimationFromRegistry(7512);
-		case 'f':
-			return cloneAnimationFromRegistry(7513);
-		case 'x':
-			return cloneAnimationFromRegistry(7508);
-		case 's':
-			return cloneAnimationFromRegistry(7509);
-		case 'd':
-			return cloneAnimationFromRegistry(7510);
-		default:
-			return cloneAnimationFromRegistry(7501);
-	}
+//
+//
+//animation * generateBackground(char backgroundSymbol){
+//	switch(backgroundSymbol){
+//		case 'c':
+//			return cloneAnimationFromRegistry(7502);
+//		case 'g':
+//			return cloneAnimationFromRegistry(7501);
+//		case '-':
+//			return cloneAnimationFromRegistry(7503);
+//		case '=':
+//			return cloneAnimationFromRegistry(7504);
+//		case 'r':
+//			return cloneAnimationFromRegistry(7505);
+//		case 'u':
+//			return cloneAnimationFromRegistry(7506);
+//		case 'o':
+//			return cloneAnimationFromRegistry(7507);
+//		case 't':
+//			return cloneAnimationFromRegistry(7514);
+//		case 'p':
+//			return cloneAnimationFromRegistry(7511);
+//		case '\\':
+//			return cloneAnimationFromRegistry(7512);
+//		case 'f':
+//			return cloneAnimationFromRegistry(7513);
+//		case 'x':
+//			return cloneAnimationFromRegistry(7508);
+//		case 's':
+//			return cloneAnimationFromRegistry(7509);
+//		case 'd':
+//			return cloneAnimationFromRegistry(7510);
+//		default:
+//			return cloneAnimationFromRegistry(7501);
+//	}
 
 //	if(backgroundSymbol == 'c'){
 //		return 7502;
@@ -527,7 +527,7 @@ animation * generateBackground(char backgroundSymbol){
 //	}else{
 //		return 7501;
 //	}
-}
+//}
 
 field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
 	int mapID;
@@ -771,18 +771,59 @@ void populateCurrentSpaceInventory(field * thisField, int x, int y){
 	}
 }
 
-field* initField(char* fieldFileName){
+int canPassThroughImage(int imageID){
+	if(imageID == 7502 ||
+		imageID == 7503 ||
+		imageID == 7504 ||
+		imageID == 7505 ||
+		imageID == 7506 ||
+		imageID == 7507 ||
+		imageID == 7509 ||
+		imageID == 7508 ||
+		imageID == 7514){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+int canSeeThroughImage(int imageID){
+	if(imageID == 7514 ||
+		imageID == 7509 ||
+		imageID == 7508){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+int canAttackThroughImage(int imageID){
+	if(imageID == 7514 ||
+		imageID == 7509 ||
+		imageID == 7508){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+field * initField(char * fieldFileName){
 	field* thisField = malloc(sizeof(field));
 	FILE * fp = fopen(fieldFileName, "r");
-	char line[80];
-	int init_y = 0, init_x = 0, xIndex, i, j;
+	char line[1024];
+	char * value;
+	char * strtok_save_pointer;
 
 	//used to get rid of the first 2 lines
-	fgets(line,80,fp);
+	fgets(line,1024,fp);
 
 	//field ID
-	fgets(line, 80, fp);
+	fgets(line, 1024, fp);
 	thisField->id = atoi(line);
+
+	int i, j;
+	int fieldWidth = 0;
+	int fieldHeight = 0;
 
 	//init field to null
 	for(i = 0; i < 100; i++){
@@ -791,20 +832,30 @@ field* initField(char* fieldFileName){
 		}
 	}
 
-	while(fgets(line,80,fp) != NULL){
-		init_x = 0;
-		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
-			char spaceType = line[xIndex];
-			char direction = line[xIndex+1];
+	i = 0;
+	j = 0;
 
-			space* newSpace = malloc(sizeof(space));
-			newSpace->currentIndividual = NULL;//malloc(sizeof(individual));
-			newSpace->thisTransitInfo = NULL;// malloc(sizeof(transitInfo));
+	while(fgets(line, 1024, fp) != NULL){
+		int imageId, direction;
+		i = 0;
+
+		value = strtok_r(line, ";", &strtok_save_pointer);
+
+		while(value != NULL){
+			imageId = atoi(strtok(value,","));
+			direction = atoi(strtok(NULL,","));
+
+			space * newSpace = malloc(sizeof(space));
+			newSpace->currentIndividual = NULL;
+			newSpace->thisTransitInfo = NULL;
 			newSpace->spaceIsReserved = 0;
+			newSpace->isPassable = canPassThroughImage(imageId);
+			newSpace->canSeeThrough = canSeeThroughImage(imageId);
+			newSpace->canAttackThrough = canAttackThroughImage(imageId);
 
 			character* backgroundCharacter = malloc(sizeof(character));
-			backgroundCharacter->x = init_x;
-			backgroundCharacter->y = init_y;
+			backgroundCharacter->x = i;
+			backgroundCharacter->y = j;
 			backgroundCharacter->xOff = 0;
 			backgroundCharacter->yOff = 0;
 			backgroundCharacter->thisAnimationContainer = initAnimationContainer();
@@ -814,54 +865,24 @@ field* initField(char* fieldFileName){
 			backgroundCharacter->darkAnimationContainer->animationsEnabled = 1;
 			backgroundCharacter->darkAnimationContainer->defaultAnimation = 0;
 			backgroundCharacter->secondaryAnimationContainer = NULL;
+			backgroundCharacter->direction = direction;
 
-			if(spaceType == 'c'
-				|| spaceType == '-'
-				|| spaceType == '='
-				|| spaceType == 'r'
-				|| spaceType == 'u'
-				|| spaceType == 'o'
-				|| spaceType == 's'
-				|| spaceType == 'x'
-				|| spaceType == 'w'
-				|| spaceType == 't'){
-				newSpace->isPassable = 0;
-			}else{
-				newSpace->isPassable = 1;
-			}
-
-			if(spaceType == 't' || spaceType == 's' ||  spaceType == 'x'){
-				newSpace->canSeeThrough = 0;
-				newSpace->canAttackThrough = 0;
-			}else{
-				newSpace->canSeeThrough = 1;
-				newSpace->canAttackThrough = 1;
-			}
-
-			if (direction == '>') {
-				backgroundCharacter->direction = 3;
-			}else if (direction == 'v'){
-				backgroundCharacter->direction = 2;
-			}else if (direction == '<'){
-				backgroundCharacter->direction = 1;
-			}else{
-				backgroundCharacter->direction = 0;
-			}
-
-			animation * backgroundAnimation = generateBackground(spaceType);
-			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, backgroundAnimation);
+			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, cloneAnimationFromRegistry(imageId));
 
 			newSpace->background = backgroundCharacter;
-			thisField->grid[init_x][init_y] = newSpace;
-			init_x++;
+			thisField->grid[i][j] = newSpace;
+			i++;
+
+			value = strtok_r(NULL, ";", &strtok_save_pointer);
 		}
 
-		init_y++;
-
+		j++;
 	}
 
 	fclose(fp);
 
+	thisField->totalX = i;
+	thisField->totalY = j;
 
 	thisField->thisFieldInventory = malloc(sizeof(fieldInventory));
 	thisField->thisFieldInventory->inventorySize = 0;
@@ -882,11 +903,127 @@ field* initField(char* fieldFileName){
 		}
 	}
 
-	thisField->totalX = init_x;
-	thisField->totalY = init_y;
-
 	return thisField;
 }
+//
+//field* initField(char* fieldFileName){
+//	field* thisField = malloc(sizeof(field));
+//	FILE * fp = fopen(fieldFileName, "r");
+//	char line[80];
+//	int init_y = 0, init_x = 0, xIndex, i, j;
+//
+//	//used to get rid of the first 2 lines
+//	fgets(line,80,fp);
+//
+//	//field ID
+//	fgets(line, 80, fp);
+//	thisField->id = atoi(line);
+//
+//	//init field to null
+//	for(i = 0; i < 100; i++){
+//		for(j = 0; j < 100; j++){
+//			thisField->grid[i][j] = NULL;
+//		}
+//	}
+//
+//	while(fgets(line,80,fp) != NULL){
+//		init_x = 0;
+//		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
+//			char spaceType = line[xIndex];
+//			char direction = line[xIndex+1];
+//
+//			space* newSpace = malloc(sizeof(space));
+//			newSpace->currentIndividual = NULL;//malloc(sizeof(individual));
+//			newSpace->thisTransitInfo = NULL;// malloc(sizeof(transitInfo));
+//			newSpace->spaceIsReserved = 0;
+//			newSpace->isPassable = isImagePassable();
+//			newSpace->canSeeThrough = canSeeThroughImage();
+//			newSpace->canAttackThrough = canAttackThroughImage();
+//
+//			character* backgroundCharacter = malloc(sizeof(character));
+//			backgroundCharacter->x = init_x;
+//			backgroundCharacter->y = init_y;
+//			backgroundCharacter->xOff = 0;
+//			backgroundCharacter->yOff = 0;
+//			backgroundCharacter->thisAnimationContainer = initAnimationContainer();
+//			backgroundCharacter->thisAnimationContainer->animationsEnabled = 1;
+//			backgroundCharacter->thisAnimationContainer->defaultAnimation = 0;
+//			backgroundCharacter->darkAnimationContainer = initAnimationContainer();
+//			backgroundCharacter->darkAnimationContainer->animationsEnabled = 1;
+//			backgroundCharacter->darkAnimationContainer->defaultAnimation = 0;
+//			backgroundCharacter->secondaryAnimationContainer = NULL;
+//
+//			if(spaceType == 'c'
+//				|| spaceType == '-'
+//				|| spaceType == '='
+//				|| spaceType == 'r'
+//				|| spaceType == 'u'
+//				|| spaceType == 'o'
+//				|| spaceType == 's'
+//				|| spaceType == 'x'
+//				|| spaceType == 'w'
+//				|| spaceType == 't'){
+//				newSpace->isPassable = 0;
+//			}else{
+//				newSpace->isPassable = 1;
+//			}
+//
+//			if(spaceType == 't' || spaceType == 's' ||  spaceType == 'x'){
+//				newSpace->canSeeThrough = 0;
+//				newSpace->canAttackThrough = 0;
+//			}
+//
+//			backgroundCharacter->direction = atoi(direction);
+////
+////			if (direction == '>') {
+////				backgroundCharacter->direction = 3;
+////			}else if (direction == 'v'){
+////				backgroundCharacter->direction = 2;
+////			}else if (direction == '<'){
+////				backgroundCharacter->direction = 1;
+////			}else{
+////				backgroundCharacter->direction = 0;
+////			}
+//
+//			animation * backgroundAnimation = cloneAnimationFromRegistry();// (spaceType);
+//			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, backgroundAnimation);
+//
+//			newSpace->background = backgroundCharacter;
+//			thisField->grid[init_x][init_y] = newSpace;
+//			init_x++;
+//		}
+//
+//		init_y++;
+//
+//	}
+//
+//	fclose(fp);
+//
+//
+//	thisField->thisFieldInventory = malloc(sizeof(fieldInventory));
+//	thisField->thisFieldInventory->inventorySize = 0;
+//	thisField->thisFieldInventory->MAX_ITEMS = 1000;
+//
+//	thisField->currentSpaceInventory = malloc(sizeof(inventory));
+//	thisField->currentSpaceInventory->inventorySize = 0;
+//	thisField->currentSpaceInventory->MAX_ITEMS = 40;
+//
+//	thisField->playerCords = malloc(sizeof(cord));
+//	thisField->playerCords->x = 0;
+//	thisField->playerCords->y = 0;
+//
+//	for(i = 0; i < 1000; i++){
+//		thisField->thisFieldInventory->inventoryArr[i] = NULL;
+//		if(i < 40){
+//			thisField->currentSpaceInventory->inventoryArr[i] = NULL;
+//		}
+//	}
+//
+//	thisField->totalX = init_x;
+//	thisField->totalY = init_y;
+//
+//	return thisField;
+//}
 
 void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* thisField){
 	int x, y, i;

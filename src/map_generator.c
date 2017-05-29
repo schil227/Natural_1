@@ -20,7 +20,6 @@ space * makeMapGeneratorSpace(int x, int y){
 	tmpSpace->canSeeThrough = 0;
 	tmpSpace->currentIndividual = NULL;
 	tmpSpace->isPassable = 0;
-	tmpSpace->numCharacters = 0;
 	tmpSpace->spaceIsReserved = 0;
 	tmpSpace->thisTransitInfo = NULL;
 
@@ -282,7 +281,7 @@ void writeGeneratedMapToFile(char * directory, char * fileName){
 
 		for(j = 0; j < thisMapGenerator->thisField->totalX; j++){
 			character * tmpBackground = thisMapGenerator->thisField->grid[j][i]->background;
-			index += sprintf(line + index, "%d;%d;", tmpBackground->thisAnimationContainer->animations[0]->imageID, tmpBackground->direction);
+			index += sprintf(line + index, "%d,%d;", tmpBackground->thisAnimationContainer->animations[0]->imageID, tmpBackground->direction);
 		}
 
 		fprintf(FP, "%s\n",  line);

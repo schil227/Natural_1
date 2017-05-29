@@ -6,7 +6,7 @@
 - (5/18/17) Implement respawning
 - (5/22/17) Map Generator: create a UI to make/generate maps
 - (5/22/17) Develop a way to see transit spaces (e.g. outline in gold)
-- (5/25/17) Make the main window run completely seperate from the tests (e.g. build/destroy everything)
+- (5/25/17) Make the main window run completely seperate from the tests (e.g. build/destroy everything, build resources that only need to be built once like Sound)
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)

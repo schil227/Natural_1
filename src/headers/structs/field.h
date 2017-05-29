@@ -23,7 +23,6 @@ typedef struct {
 } transitInfo;
 
 typedef struct {
-	int numCharacters;
 	int isPassable;
 	int canSeeThrough;
 	int canAttackThrough;
