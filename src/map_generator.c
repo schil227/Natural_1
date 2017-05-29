@@ -26,7 +26,7 @@ space * makeMapGeneratorSpace(int x, int y){
 	return tmpSpace;
 }
 
-void initMapGenerator(){
+void initMapGenerator(char * mapDirectory){
 	int i,j;
 
 	thisMapGenerator = malloc(sizeof(mapGenerator));
@@ -57,18 +57,25 @@ void initMapGenerator(){
 	thisMapGenerator->selectedCharacterBox = createCharacter(1531, RGB(255,0,255), 0, 0);
 	thisMapGenerator->characterSelectBackground = createCharacter(1532, RGB(255,0,255), 0, 0);
 
-	thisMapGenerator->thisField = malloc(sizeof(field));
-	thisMapGenerator->thisField->currentSpaceInventory = NULL;
+	char loadMap[256];
+	sprintf(loadMap, "%sgeneratedMaps\\loadmap.txt", mapDirectory);
+
+	thisMapGenerator->thisField = initField(loadMap);
+
+//	thisMapGenerator->thisField = malloc(sizeof(field));
+//	thisMapGenerator->thisField->currentSpaceInventory = NULL;
 	thisMapGenerator->thisField->isDark = 0;
 	thisMapGenerator->thisField->id = 0;
 	thisMapGenerator->thisField->playerCords = NULL;
 	thisMapGenerator->thisField->playerLoS = 0;
-	thisMapGenerator->thisField->thisFieldInventory = NULL;
-	thisMapGenerator->thisField->totalX = 10;
-	thisMapGenerator->thisField->totalY = 10;
 
+	//fill in remaining spaces
 	for(i = 0; i < 100; i++){
 		for(j = 0; j < 100; j++){
+			if(i < thisMapGenerator->thisField->totalX && j < thisMapGenerator->thisField->totalY){
+				continue;
+			}
+
 			thisMapGenerator->thisField->grid[i][j] = makeMapGeneratorSpace(i, j);
 		}
 	}
@@ -273,6 +280,10 @@ void writeGeneratedMapToFile(char * directory, char * fileName){
 	i += sprintf(fullFileName + strlen(fullFileName), "%s", fileName);
 
 	FILE * FP = fopen(fullFileName, "w");
+
+	//add transit.txt and id
+	fprintf(FP, "%s\n",  "dummy.txt");
+	fprintf(FP, "%s\n",  "0");
 
 	for(i = 0; i < thisMapGenerator->thisField->totalY; i++){
 		char line[2048];

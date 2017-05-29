@@ -19,7 +19,7 @@
 #include"./headers/sound_pub_methods.h"
 #include "./headers/look_view_pub_methods.h"
 
-int MAP_CREATION_MODE = 0;
+int MAP_CREATION_MODE = 1;
 
 //Debug timing data
 //
@@ -1084,7 +1084,7 @@ LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 			loadGlobalRegister(mapDirectory, mapDirectory, "", "", "", "", "images.txt", "", "", "", "", "", "");
 
-			initMapGenerator();
+			initMapGenerator(mapDirectory);
 
 			updateFieldGraphics(hdc, hdcBuffer, mapGeneratorField());
 
@@ -1204,6 +1204,7 @@ LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 						sprintf(mapGenerationDirectory, "%s%s", mapDirectory, "generatedMaps\\");
 
 						writeGeneratedMapToFile(mapGenerationDirectory, "mapX.txt");
+						writeGeneratedMapToFile(mapGenerationDirectory, "loadmap.txt");
 					}
 					break;
 				case 0x26: //UP key

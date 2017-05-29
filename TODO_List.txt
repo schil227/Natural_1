@@ -4,7 +4,6 @@
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (5/18/17) Implement respawning
-- (5/22/17) Map Generator: create a UI to make/generate maps
 - (5/22/17) Develop a way to see transit spaces (e.g. outline in gold)
 - (5/25/17) Make the main window run completely seperate from the tests (e.g. build/destroy everything, build resources that only need to be built once like Sound)
 
@@ -52,3 +51,4 @@
 - (5/8/17 - 5/10/17) Create ability, get to name field, escape, escape, should see name field again (DONE)
 - (5/7/17 - 5/16/17) have a view to show individual stats, pure stats, bonuses, negatives, active abilities/statuses/items, etc. (DONE)
 - (5/18/17 - 5/22/17) Add save/load functionality (DONE)
+- (5/22/17 - 5/28/17) Map Generator: create a UI to make/generate maps (DONE)

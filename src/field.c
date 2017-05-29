@@ -841,7 +841,7 @@ field * initField(char * fieldFileName){
 
 		value = strtok_r(line, ";", &strtok_save_pointer);
 
-		while(value != NULL){
+		while(value != NULL && *value != '\n'){
 			imageId = atoi(strtok(value,","));
 			direction = atoi(strtok(NULL,","));
 
