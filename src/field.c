@@ -460,74 +460,6 @@ void wanderAround(field * thisField, individual * thisIndividual){
  int direction = rand() % 10+1;
  moveIndividual(thisField, thisIndividual, direction);
 }
-//
-//
-//animation * generateBackground(char backgroundSymbol){
-//	switch(backgroundSymbol){
-//		case 'c':
-//			return cloneAnimationFromRegistry(7502);
-//		case 'g':
-//			return cloneAnimationFromRegistry(7501);
-//		case '-':
-//			return cloneAnimationFromRegistry(7503);
-//		case '=':
-//			return cloneAnimationFromRegistry(7504);
-//		case 'r':
-//			return cloneAnimationFromRegistry(7505);
-//		case 'u':
-//			return cloneAnimationFromRegistry(7506);
-//		case 'o':
-//			return cloneAnimationFromRegistry(7507);
-//		case 't':
-//			return cloneAnimationFromRegistry(7514);
-//		case 'p':
-//			return cloneAnimationFromRegistry(7511);
-//		case '\\':
-//			return cloneAnimationFromRegistry(7512);
-//		case 'f':
-//			return cloneAnimationFromRegistry(7513);
-//		case 'x':
-//			return cloneAnimationFromRegistry(7508);
-//		case 's':
-//			return cloneAnimationFromRegistry(7509);
-//		case 'd':
-//			return cloneAnimationFromRegistry(7510);
-//		default:
-//			return cloneAnimationFromRegistry(7501);
-//	}
-
-//	if(backgroundSymbol == 'c'){
-//		return 7502;
-//	}else if (backgroundSymbol == 'g'){
-//		return 7501;
-//	}else if (backgroundSymbol == '-'){
-//		return 7503;
-//	}else if (backgroundSymbol == '='){
-//		return 7504;
-//	}else if (backgroundSymbol == 'r'){
-//		return 7505;
-//	}else if (backgroundSymbol == 'u'){
-//		return 7506;
-//	}else if (backgroundSymbol == 'o'){
-//		return 7507;
-//	}else if (backgroundSymbol == 't'){
-//		return 7514;
-//	}else if (backgroundSymbol == 'p'){
-//		return 7511;
-//	}else if (backgroundSymbol == '\\'){
-//		return 7512;
-//	}else if (backgroundSymbol == 'f'){
-//		return 7513;
-//	}else if (backgroundSymbol == 'x'){
-//		return 7508;
-//	}else if (backgroundSymbol == 's'){
-//		return 7509;
-//	}else if (backgroundSymbol == 'd'){
-//		return 7510;
-//	}else{
-//		return 7501;
-//	}
-//}
 
 field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
 	int mapID;
@@ -551,6 +483,7 @@ field * loadMap(char * mapName, char* directory, individual * player, groupConta
 	thisMapInfo->isCurrentMap = 1;
 	loadGroups(thisGroupContainer, thisMapInfo, thisField);
 	addItemsToField(thisMapInfo, thisField);
+	addInteractableObjectsToField(thisMapInfo, thisField);
 	thisField->isDark = thisMapInfo->isDark;
 
 	makeTransitSpaces(transitMap, directory, thisField, player);
@@ -648,6 +581,21 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 	free(fullTransitFile);
 	fclose(enemyFP);
 
+}
+
+void addInteractableObjectToField(interactable * thisInteractableObject, field * thisField){
+	int x = thisInteractableObject->thisCharacter->x;
+	int y = thisInteractableObject->thisCharacter->y;
+
+	if(!thisInteractableObject->shouldDraw){
+		return;
+	}
+
+	space * tmpSpace = getSpaceFromField(thisField, x, y);
+
+	if(tmpSpace != NULL){
+		tmpSpace->interactableObject = thisInteractableObject;
+	}
 }
 
 int addItemToField(field * thisField, item * thisItem){
@@ -852,6 +800,7 @@ field * initField(char * fieldFileName){
 			newSpace->isPassable = canPassThroughImage(imageId);
 			newSpace->canSeeThrough = canSeeThroughImage(imageId);
 			newSpace->canAttackThrough = canAttackThroughImage(imageId);
+			newSpace->interactableObject = NULL;
 
 			character* backgroundCharacter = malloc(sizeof(character));
 			backgroundCharacter->x = i;
@@ -905,125 +854,6 @@ field * initField(char * fieldFileName){
 
 	return thisField;
 }
-//
-//field* initField(char* fieldFileName){
-//	field* thisField = malloc(sizeof(field));
-//	FILE * fp = fopen(fieldFileName, "r");
-//	char line[80];
-//	int init_y = 0, init_x = 0, xIndex, i, j;
-//
-//	//used to get rid of the first 2 lines
-//	fgets(line,80,fp);
-//
-//	//field ID
-//	fgets(line, 80, fp);
-//	thisField->id = atoi(line);
-//
-//	//init field to null
-//	for(i = 0; i < 100; i++){
-//		for(j = 0; j < 100; j++){
-//			thisField->grid[i][j] = NULL;
-//		}
-//	}
-//
-//	while(fgets(line,80,fp) != NULL){
-//		init_x = 0;
-//		for(xIndex = 0; xIndex < strlen(line); xIndex+=2){
-//			char spaceType = line[xIndex];
-//			char direction = line[xIndex+1];
-//
-//			space* newSpace = malloc(sizeof(space));
-//			newSpace->currentIndividual = NULL;//malloc(sizeof(individual));
-//			newSpace->thisTransitInfo = NULL;// malloc(sizeof(transitInfo));
-//			newSpace->spaceIsReserved = 0;
-//			newSpace->isPassable = isImagePassable();
-//			newSpace->canSeeThrough = canSeeThroughImage();
-//			newSpace->canAttackThrough = canAttackThroughImage();
-//
-//			character* backgroundCharacter = malloc(sizeof(character));
-//			backgroundCharacter->x = init_x;
-//			backgroundCharacter->y = init_y;
-//			backgroundCharacter->xOff = 0;
-//			backgroundCharacter->yOff = 0;
-//			backgroundCharacter->thisAnimationContainer = initAnimationContainer();
-//			backgroundCharacter->thisAnimationContainer->animationsEnabled = 1;
-//			backgroundCharacter->thisAnimationContainer->defaultAnimation = 0;
-//			backgroundCharacter->darkAnimationContainer = initAnimationContainer();
-//			backgroundCharacter->darkAnimationContainer->animationsEnabled = 1;
-//			backgroundCharacter->darkAnimationContainer->defaultAnimation = 0;
-//			backgroundCharacter->secondaryAnimationContainer = NULL;
-//
-//			if(spaceType == 'c'
-//				|| spaceType == '-'
-//				|| spaceType == '='
-//				|| spaceType == 'r'
-//				|| spaceType == 'u'
-//				|| spaceType == 'o'
-//				|| spaceType == 's'
-//				|| spaceType == 'x'
-//				|| spaceType == 'w'
-//				|| spaceType == 't'){
-//				newSpace->isPassable = 0;
-//			}else{
-//				newSpace->isPassable = 1;
-//			}
-//
-//			if(spaceType == 't' || spaceType == 's' ||  spaceType == 'x'){
-//				newSpace->canSeeThrough = 0;
-//				newSpace->canAttackThrough = 0;
-//			}
-//
-//			backgroundCharacter->direction = atoi(direction);
-////
-////			if (direction == '>') {
-////				backgroundCharacter->direction = 3;
-////			}else if (direction == 'v'){
-////				backgroundCharacter->direction = 2;
-////			}else if (direction == '<'){
-////				backgroundCharacter->direction = 1;
-////			}else{
-////				backgroundCharacter->direction = 0;
-////			}
-//
-//			animation * backgroundAnimation = cloneAnimationFromRegistry();// (spaceType);
-//			addAnimationToContainer(backgroundCharacter->thisAnimationContainer, backgroundAnimation);
-//
-//			newSpace->background = backgroundCharacter;
-//			thisField->grid[init_x][init_y] = newSpace;
-//			init_x++;
-//		}
-//
-//		init_y++;
-//
-//	}
-//
-//	fclose(fp);
-//
-//
-//	thisField->thisFieldInventory = malloc(sizeof(fieldInventory));
-//	thisField->thisFieldInventory->inventorySize = 0;
-//	thisField->thisFieldInventory->MAX_ITEMS = 1000;
-//
-//	thisField->currentSpaceInventory = malloc(sizeof(inventory));
-//	thisField->currentSpaceInventory->inventorySize = 0;
-//	thisField->currentSpaceInventory->MAX_ITEMS = 40;
-//
-//	thisField->playerCords = malloc(sizeof(cord));
-//	thisField->playerCords->x = 0;
-//	thisField->playerCords->y = 0;
-//
-//	for(i = 0; i < 1000; i++){
-//		thisField->thisFieldInventory->inventoryArr[i] = NULL;
-//		if(i < 40){
-//			thisField->currentSpaceInventory->inventoryArr[i] = NULL;
-//		}
-//	}
-//
-//	thisField->totalX = init_x;
-//	thisField->totalY = init_y;
-//
-//	return thisField;
-//}
 
 void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* thisField){
 	int x, y, i;
@@ -1071,6 +901,12 @@ void drawField(HDC hdc, HDC hdcBuffer, field* thisField, shiftData * viewShift){
 			}else{
 				drawCharacterAnimation(hdc, hdcBuffer, tmpBackground, viewShift, 0);
 			}
+
+			if(thisField->grid[x][y]->interactableObject != NULL && thisField->grid[x][y]->interactableObject->shouldDraw && (!thisField->isDark || thisField->playerLoS >= max(abs(thisField->playerCords->x - x), abs(thisField->playerCords->y - y)))){
+				drawCharacterAnimation(hdc, hdcBuffer, thisField->grid[x][y]->interactableObject->thisCharacter, viewShift, 0);
+				updateAnimation(thisField->grid[x][y]->interactableObject->thisCharacter);
+			}
+
 		}
 	}
 }
@@ -1212,6 +1048,8 @@ mapInfo * initMapInfo(){
 	newMapInfo->numIndividuals = 0;
 	newMapInfo->MAX_ITEMS = 500;
 	newMapInfo->numItems = 0;
+	newMapInfo->MAX_INTERACTABLES = 500;
+	newMapInfo->numInteractables = 0;
 	newMapInfo->isDark = 0;
 	newMapInfo->isCurrentMap = 0;
 
@@ -1227,7 +1065,7 @@ void parseMapIndividualsFromLine(mapInfo * thisMapInfo, char * line){
 
 	value = strtok(line, ",");
 
-	if(value == NULL || *value == '\n'){
+	if(value == NULL || *value == '\n' || atoi(value) == -1){
 		return;
 	}
 
@@ -1258,7 +1096,7 @@ void parseMapItemsFromLine(mapInfo * thisMapInfo, char * line){
 
 	value = strtok(line, ",");
 
-	if(value == NULL || *value == '\n'){
+	if(value == NULL || *value == '\n' || atoi(value) == -1){
 		return;
 	}
 
@@ -1275,6 +1113,37 @@ void parseMapItemsFromLine(mapInfo * thisMapInfo, char * line){
 
 		thisMapInfo->items[thisMapInfo->numItems] = atoi(value);
 		thisMapInfo->numItems++;
+
+		value = strtok(NULL, ",");
+	}
+}
+
+void parseMapInteractablesFromLine(mapInfo * thisMapInfo, char * line){
+	char * value;
+
+	if(line == NULL){
+		return;
+	}
+
+	value = strtok(line, ",");
+
+	if(value == NULL || *value == '\n' || atoi(value) == -1){
+		return;
+	}
+
+	thisMapInfo->interactableObjects[thisMapInfo->numInteractables] = atoi(value);
+	thisMapInfo->numInteractables++;
+
+	value = strtok(NULL, ",");
+
+	while(value != NULL){
+		if(thisMapInfo->numInteractables >= thisMapInfo->MAX_INTERACTABLES){
+			cwrite("!! MAX INTERACTABLES ON FIELD !!");
+			return;
+		}
+
+		thisMapInfo->interactableObjects[thisMapInfo->numInteractables] = atoi(value);
+		thisMapInfo->numInteractables++;
 
 		value = strtok(NULL, ",");
 	}
@@ -1299,6 +1168,9 @@ void createMapInfoFromLine(mapInfo * thisMapInfo, char * line){
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	parseMapItemsFromLine(thisMapInfo, value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	parseMapInteractablesFromLine(thisMapInfo, value);
 }
 
 char * getMapInfoAsLine(mapInfo * thisMapInfo){
@@ -1310,25 +1182,47 @@ char * getMapInfoAsLine(mapInfo * thisMapInfo){
 	i += sprintf(line + i, "%d;", thisMapInfo->isCurrentMap);
 	i += sprintf(line + i, "%d;", thisMapInfo->isDark);
 
-	for(j = 0; j < thisMapInfo->numIndividuals; j++){
-		if(j + 1 == thisMapInfo->numIndividuals){
-			i += sprintf(line + i, "%d", thisMapInfo->individuals[j]);
-		}else{
-			i += sprintf(line + i, "%d,", thisMapInfo->individuals[j]);
+	if(thisMapInfo->numIndividuals == 0){
+		i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < thisMapInfo->numIndividuals; j++){
+			if(j + 1 == thisMapInfo->numIndividuals){
+				i += sprintf(line + i, "%d", thisMapInfo->individuals[j]);
+			}else{
+				i += sprintf(line + i, "%d,", thisMapInfo->individuals[j]);
+			}
 		}
+
+		i += sprintf(line + i, ";");
 	}
 
-	i += sprintf(line + i, ";");
-
-	for(j = 0; j < thisMapInfo->numItems; j++){
-		if(j + 1 == thisMapInfo->numItems){
-			i += sprintf(line + i, "%d", thisMapInfo->items[j]);
-		}else{
-			i += sprintf(line + i, "%d,", thisMapInfo->items[j]);
+	if(thisMapInfo->numItems == 0){
+			i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < thisMapInfo->numItems; j++){
+			if(j + 1 == thisMapInfo->numItems){
+				i += sprintf(line + i, "%d", thisMapInfo->items[j]);
+			}else{
+				i += sprintf(line + i, "%d,", thisMapInfo->items[j]);
+			}
 		}
+
+		i += sprintf(line + i, ";");
 	}
 
-	i += sprintf(line + i, ";");
+	if(thisMapInfo->numInteractables == 0){
+			i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < thisMapInfo->numInteractables; j++){
+			if(j + 1 == thisMapInfo->numInteractables){
+				i += sprintf(line + i, "%d", thisMapInfo->interactableObjects[j]);
+			}else{
+				i += sprintf(line + i, "%d,", thisMapInfo->interactableObjects[j]);
+			}
+		}
+
+		i += sprintf(line + i, ";");
+	}
 
 	return line;
 }

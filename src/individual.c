@@ -25,6 +25,8 @@ individual *initIndividual(){
 	toReturn->playerCharacter = malloc(sizeof(character));
 	toReturn->playerCharacter->darkAnimationContainer = NULL;
 
+	toReturn->currentInteractableObject = NULL;
+
 	toReturn->backpack = malloc(sizeof(inventory));
 	toReturn->backpack->inventorySize = 0;
 	toReturn->backpack->MAX_ITEMS = 40;
@@ -254,20 +256,6 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->thisMoveNodeMeta->dummyCord = malloc(sizeof(cord));
 
 	return 0;
-}
-
-int getAnimationIDFromTypeToLine(animationContainer * thisAnimationContianer, animationState type){
-	int i;
-
-	for(i = 0; i < thisAnimationContianer->numAnimations; i++){
-		animation * tmpAnimation = thisAnimationContianer->animations[i];
-
-		if(tmpAnimation != NULL && tmpAnimation->state == type){
-			return tmpAnimation->imageID;
-		}
-	}
-
-	return -1;
 }
 
 char * getIndividualAsLine(individual * thisIndividual){

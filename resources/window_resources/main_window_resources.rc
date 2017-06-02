@@ -150,6 +150,11 @@ END
 7508 BITMAP DISCARDABLE "../images/stone_wall.bmp" //2531
 7509 BITMAP DISCARDABLE "../images/stone_wall_top.bmp" //2532
 7510 BITMAP DISCARDABLE "../images/stone_wall_doorway.bmp" //2533
+7515 BITMAP DISCARDABLE "../images/upstairs.bmp"
+7516 BITMAP DISCARDABLE "../images/downstairs.bmp"
+7517 BITMAP DISCARDABLE "../images/stone_floor.bmp"
+7518 BITMAP DISCARDABLE "../images/dungeon_door.bmp"
+7519 BITMAP DISCARDABLE "../images/dungeon_door_opening.bmp"
 
 	//walkway
 7511 BITMAP DISCARDABLE "../images/path.bmp" //2541

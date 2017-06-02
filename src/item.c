@@ -8,7 +8,7 @@
 
 static int itemIDIncrement = 3000;
 
-item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description,double weaponStrMod,
+item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char *name, char *description, int interactableObjectID, double weaponStrMod,
 		int strMod, int dexMod, int conMod, int willMod, int intMod, int wisMod, int chrMod, int luckMod,
 		char weaponDamageType, char armorClass, char itemType, int price, int owner, int isStolen, int totalHealthMod, int healthMod, int totalManaMod,
 		int manaMod, int food, int acMod, int attackMod, int damMod, int maxDamMod, int minDamMod, int minTurns, int maxTurns,
@@ -33,6 +33,7 @@ item * createItem(int npcID, COLORREF rgb, int x, int y, int ID, char type, char
 	strcpy(thisItem->name, name);
 	strcpy(thisItem->description, description);
 
+	thisItem->interactableObjectID = interactableObjectID;
 	thisItem->weaponDamageType= weaponDamageType;
 	thisItem->armorClass = armorClass;
 	thisItem->itemType = itemType;
@@ -116,6 +117,7 @@ item * cloneItem(item * thisItem, int keepOwner){
 	strcpy(newItem->name, thisItem->name);
 	strcpy(newItem->description, thisItem->description);
 
+	newItem->interactableObjectID = thisItem->interactableObjectID;
 	newItem->weaponDamageType= thisItem->weaponDamageType;
 	newItem->armorClass = thisItem->armorClass;
 	newItem->itemType = thisItem->itemType;
@@ -167,6 +169,7 @@ char * getItemAsLine(item * thisItem){
 	i = sprintf(line + i, "%d;", thisItem->npcID);
 	i += sprintf(line + i, "%d;", thisItem->ID);
 	i += sprintf(line + i, "%c;", thisItem->type);
+	i += sprintf(line + i, "%d;", thisItem->interactableObjectID);
 	i += sprintf(line + i, "%c;", thisItem->weaponDamageType);
 	i += sprintf(line + i, "%c;", thisItem->armorClass);
 	i += sprintf(line + i, "%c;", thisItem->itemType);

@@ -19,7 +19,7 @@
 #include"./headers/sound_pub_methods.h"
 #include "./headers/look_view_pub_methods.h"
 
-int MAP_CREATION_MODE = 1;
+int MAP_CREATION_MODE = 0;
 
 //Debug timing data
 //
@@ -643,7 +643,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 	appendNewMessageNode("You leave the forest.");
 	appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-	loadGlobalRegister(saveMapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt");
+	loadGlobalRegister(saveMapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt");
 	loadDialog("dialog.txt", saveMapDirectory);
 	setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
@@ -714,7 +714,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-		loadGlobalRegister(mapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt",  "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt");
+		loadGlobalRegister(mapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt",  "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt");
 		loadDialog("dialog.txt", mapDirectory);
 		setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
@@ -885,6 +885,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				writeIndividualsToFile(mapDirectory,"saves\\test\\","individuals.txt");
 				writeMapInfoToFile(mapDirectory,"saves\\test\\","mapInfo.txt");
 				writeItemsToFile(mapDirectory,"saves\\test\\","items.txt");
+				writeInteractableObjectToFile(mapDirectory,"saves\\test\\","interactableObjects.txt");
 
 				writePermenantAbilitiesToFile(mapDirectory,"saves\\test\\","permenant_abilities.txt");
 				writeDurationAbilitiesToFile(mapDirectory,"saves\\test\\","duration_abilities.txt");
@@ -1082,7 +1083,7 @@ LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 			initLockAuth();
 			initalizeTheGlobalRegister();
 
-			loadGlobalRegister(mapDirectory, mapDirectory, "", "", "", "", "images.txt", "", "", "", "", "", "");
+			loadGlobalRegister(mapDirectory, mapDirectory, "", "", "", "", "images.txt", "", "", "", "", "", "", "");
 
 			initMapGenerator(mapDirectory);
 
@@ -1471,7 +1472,7 @@ void runTests(){
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt", "test_onPickupTriggerMap.txt");
 
-	loadGlobalRegister(mapTestDirectory, mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "test_mapInfo.txt", "descriptionLookup.txt");
+	loadGlobalRegister(mapTestDirectory, mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "test_mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt");
 	loadDialog("dialog.txt", mapTestDirectory);
 	setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 

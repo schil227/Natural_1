@@ -1,16 +1,21 @@
 == TODO In Depth ==
 
+== minor todos ==
 -add dark LoS stat to ability
--Add + Dam to characterInfo view
 -make an onDeath function for individuals in general to clear out stuff only they use, such as active items, etc.
 	--Note that on save, active abilities/items wont exist
-Drawing the image mask is costly on all those spaces - for field spaces, combine mask and image into one, and only draw that.
-
-== Things to test ==
-getBuffItem (eh)
 
 
-==tested==
+== notes: action ==
+-reading signs
+-opening chests/triggering mimics
+-fishing for food
+-foraging for food
+-interacting with traps/leavers
+
+
+
+== tested ==
 isLowOnMana (DONE)
 tryRestoreMana (DONE)
 isLowOnHP (DONE)
@@ -62,19 +67,3 @@ getCurrentBounty (DONE)
 ==DEFERRED==
 -Pickpocked individual 3 times, only caught on the last, shouldn't have had crimes activated (DONE: could not replicate/may be sneak bug)
 -Guard wants to keep talking after player rejects surrender - should be immediately hostile (DONE: this is because the player is sneaking, and the guard cant see the player to make them targeted - should be fleshed out when updating sneak)
-
-
-
-== NOTES == 
-Implement double jepordy check for crimes (e.g. cant get assault or murder twice)
-Cant steal the same item twice (e.g. drop pickup drop pickup)
-	- murder: the victim  can only be claimed once
-	- assault: the victim will likely be assaulted several times - once per victim & witness (e.g. multiple people can witness the crime, only once)
-	- pickpocket: once per victim per item per witness
-	-stolen: once per item per witness - once stolen, it is owned, BUT can be taken back, so it needs the stolen flag.
-
-
-	
-	
-	
-	

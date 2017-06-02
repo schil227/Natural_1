@@ -35,6 +35,7 @@ typedef struct {
 	ability * instantAbilities[100];
 	mapInfo * mapInfoArr[1000];
 	descriptionMap * descriptions[500];
+	interactable * interactableObjects[1000];
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
@@ -74,6 +75,9 @@ typedef struct {
 
 	int numDescriptions;
 	int MAX_DESCRIPTIONS;
+
+	int numInteractalbeObjects;
+	int MAX_INTERACTABLE_OBJECTS;
 } globalRegister;
 
 #endif /* SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_ */

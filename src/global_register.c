@@ -61,6 +61,9 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_DESCRIPTIONS = 500;
 	thisGlobalRegister->numDescriptions = 0;
+
+	thisGlobalRegister->MAX_INTERACTABLE_OBJECTS = 1000;
+	thisGlobalRegister->numInteractalbeObjects = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -103,6 +106,12 @@ event * getEventFromRegistryByTypeAndIntA(int type, int intA){
 			return thisGlobalRegister->eventRegistry[i];
 		}
 	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!EVENT NOT FOUND IN REGISTRY BY TYPE AND INT A - %d %d!!", type, intA);
+	cwrite(errLog);
+
+	return NULL;
 }
 
 event * getEventFromRegistry(int id){
@@ -296,6 +305,22 @@ char * getDescriptionFromID(int id){
 	return NULL;
 }
 
+interactable * getInteractableObjectFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numInteractalbeObjects; i++){
+		if(thisGlobalRegister->interactableObjects[i]->ID == id){
+			return thisGlobalRegister->interactableObjects[i];
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!INTERACTABLE OBJECT NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
 int addIndividualToRegistry(individual * thisIndividual){
 	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
 		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
@@ -453,6 +478,18 @@ int addDescriptionMapToRegistry(descriptionMap * thisDescription){
 	return 0;
 }
 
+int addInteractableObjectToRegistry(interactable * thisInteractableObject){
+	if(thisGlobalRegister->numInteractalbeObjects < thisGlobalRegister->MAX_INTERACTABLE_OBJECTS){
+		thisGlobalRegister->interactableObjects[thisGlobalRegister->numInteractalbeObjects] = thisInteractableObject;
+		thisGlobalRegister->numInteractalbeObjects++;
+		return 1;
+	}
+
+	cwrite("!!MAX INTERACTABLE OBJECTS IN REGISTRY!!");
+
+	return 0;
+}
+
 /*
  * TODO: On cutover, make sure destroy individual doesn't destroy items.
  * That will be handed at the registry level
@@ -494,7 +531,7 @@ void destroyTheGlobalRegister(){
 
 void loadGlobalRegister(char * saveMapDirectory, char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
 						char * animationData, char * permenantAbilitiesData, char * selfAbilitiesData, char * targetedAbilitiesData,
-						char * instantAbilitiesData, char * mapInfo, char * descriptions){
+						char * instantAbilitiesData, char * mapInfo, char * descriptions, char * interactableObjects){
 	// Priority loading:
 	//individuals dependant on xAbilities
 	loadPermenantAbilitiesToRegistry(saveMapDirectory, permenantAbilitiesData);
@@ -509,6 +546,7 @@ void loadGlobalRegister(char * saveMapDirectory, char * mapDirectory, char * ind
 	loadSoundsToRegistry(mapDirectory, soundsData);
 	loadMapDataToRegistry(saveMapDirectory, mapInfo);
 	loadDescriptionsToRegistry(mapDirectory, descriptions);
+	loadInteractableObjectsToRegistry(saveMapDirectory, interactableObjects);
 }
 
 void loadIndividualsToRegistry(char* directory, char * individualsFileName){
@@ -721,6 +759,22 @@ void loadDescriptionsToRegistry(char * directory, char * mapData){
 
 			createDescriptionMapFromLine(tmpDescription, line);
 			addDescriptionMapToRegistry(tmpDescription);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
+void loadInteractableObjectsToRegistry(char * directory, char * interactableObjects){
+	char * fullFileName = appendStrings(directory, interactableObjects);
+	FILE * FP = fopen(fullFileName, "r");
+	char line[256];
+
+	while(fgets(line,256,FP) != NULL){
+		if (line[0] != '#') {
+			interactable * newInteractableObject = loadInteractableObjectFromLine(line);
+			addInteractableObjectToRegistry(newInteractableObject);
 		}
 	}
 
@@ -1014,6 +1068,34 @@ void writeInstantAbilitiesToFile(char * directory, char * saveDirectory, char * 
 
 	for(i = 0; i < thisGlobalRegister->numInstantAbilities; i++){
 		char * line = getInstantAbilityAsLine(thisGlobalRegister->instantAbilities[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+
+	fclose(FP);
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+}
+
+void writeInteractableObjectToFile(char * directory, char * saveDirectory, char * mapInfoFileName){
+	int i = 0;
+
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
+
+	_mkdir(fullFileName);
+
+	i += sprintf(fullFileName + i, "%s", mapInfoFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numInteractalbeObjects; i++){
+		char * line = getInteractableObjectAsLine(thisGlobalRegister->interactableObjects[i]);
 		fprintf(FP, "%s\n",  line);
 		free(line);
 	}

@@ -231,6 +231,14 @@ animationState pickAnimationState(char * state){
 		return ANIMATION_CAST;
 	}else if(strcmp(state, "ANIMATION_CONSUME") == 0){
 		return ANIMATION_CONSUME;
+	}else if(strcmp(state, "ANIMATION_INTERACTABLE_IDLE") == 0){
+		return ANIMATION_INTERACTABLE_IDLE;
+	}else if(strcmp(state, "ANIMATION_INTERACTABLE_ACTION_1") == 0){
+		return ANIMATION_INTERACTABLE_ACTION_1;
+	}else if(strcmp(state, "ANIMATION_INTERACTABLE_ACTION_2") == 0){
+		return ANIMATION_INTERACTABLE_ACTION_2;
+	}else if(strcmp(state, "ANIMATION_INTERACTABLE_ACTION_FINAL") == 0){
+		return ANIMATION_INTERACTABLE_ACTION_FINAL;
 	}
 
 	char outlog[128];
@@ -367,6 +375,21 @@ void destroyFixedCharacter(fixedCharacter * thisCharacter){
 	}
 
 	free(thisCharacter);
+}
+
+
+int getAnimationIDFromTypeToLine(animationContainer * thisAnimationContianer, animationState type){
+	int i;
+
+	for(i = 0; i < thisAnimationContianer->numAnimations; i++){
+		animation * tmpAnimation = thisAnimationContianer->animations[i];
+
+		if(tmpAnimation != NULL && tmpAnimation->state == type){
+			return tmpAnimation->imageID;
+		}
+	}
+
+	return -1;
 }
 
 void drawUnboundCharacterByPixels(HDC hdc, HDC hdcBuffer, int x, int y, fixedCharacter * thisCharacter){

@@ -19,11 +19,12 @@ typedef struct {
 	char description[256];
 
 	//type specific info
+	int interactableObjectID;
 	char weaponDamageType;//(b)lunt, (c)hop, (s)lash, (p)ierce
 	char armorClass;//(l)ight, (m)edium, (h)eavy
 	char itemType;//(c)onsumable, (d)uration
-
 	double weaponStrMod;
+
 
 	short int strMod;
 	short int dexMod;

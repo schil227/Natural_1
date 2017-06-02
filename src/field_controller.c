@@ -648,7 +648,7 @@ item * createFieldItemFromFile(char line[1024]){
 	char name[32], description[256];
 	char type, weaponDamType, armorClass, itemType;
 	char * strtok_save_pointer;
-	int npcID, ID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, food, acMod, attackMod, damMod,
+	int npcID, ID, interactableObjectID, price, owner, isStolen, r, g, b, x, y, totalHealthMod, healthMod, totalManaMod, manaMod, food, acMod, attackMod, damMod,
 	maxDamMod, minDamMod, minTurns, maxTurns, mvmtMod, rangeMod, darkLoSMod, secondaryDefaultAnimation, bluntDRMod, chopDRMod, slashDRMod,
 	pierceDRMod, earthDRMod, fireDRMod, waterDRMod, lightningDRMod,isEquipt, strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod;
 	double weaponStrMod;
@@ -681,7 +681,6 @@ item * createFieldItemFromFile(char line[1024]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	isStolen = atoi(value);
 
-
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	r = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -695,6 +694,9 @@ item * createFieldItemFromFile(char line[1024]){
 	x = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	y = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	interactableObjectID = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	weaponStrMod = atof(value);
@@ -812,7 +814,7 @@ item * createFieldItemFromFile(char line[1024]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(description, value);
 
-	newItem = createItem(npcID, RGB(r,g,b),x,y, ID, type, name, description,weaponStrMod,
+	newItem = createItem(npcID, RGB(r,g,b),x,y, ID, type, name, description, interactableObjectID, weaponStrMod,
 			strMod, dexMod, conMod, willMod, intMod, wisMod, chrMod, luckMod,
 			weaponDamType, armorClass, itemType, price, owner, isStolen,
 			totalHealthMod,healthMod,totalManaMod,manaMod,food, acMod,attackMod,damMod,maxDamMod,minDamMod, minTurns, maxTurns,
@@ -838,6 +840,26 @@ void addItemsToField(mapInfo * thisMapInfo, field * thisField){
 		}else{
 			char * errLog[128];
 			sprintf(errLog, "!! ITEM NOT FOUND : %d !!", thisMapInfo->items[i]);
+		}
+	}
+}
+
+void addInteractableObjectsToField(mapInfo * thisMapInfo, field * thisField){
+	int i;
+
+	interactable * tmpInteractable;
+
+	//thisMapInfo->numItems is self balancing
+	for(i = 0; i < thisMapInfo->numInteractables; i++){
+		tmpInteractable = getInteractableObjectFromRegistry(thisMapInfo->interactableObjects[i]);
+
+		if(tmpInteractable != NULL){
+			if (doesExist(tmpInteractable->ID)) {
+				addInteractableObjectToField(tmpInteractable, thisField);
+			}
+		}else{
+			char * errLog[128];
+			sprintf(errLog, "!! INTERACTABLE OBJECT NOT FOUND NOT FOUND : %d !!", thisMapInfo->interactableObjects[i]);
 		}
 	}
 }

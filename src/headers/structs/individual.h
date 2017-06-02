@@ -10,6 +10,7 @@
 //#include"../character_pub_methods.h"
 #include"../item_pub_methods.h"
 #include"../abilities_pub_methods.h"
+#include"../interactable_pub_methods.h"
 
 #include<math.h>
 
@@ -157,7 +158,7 @@ struct individual{
 	abilityList * abilities;
 	activeAbilityList * activeAbilities;
 	statusList * activeStatuses;
-
+	interactable * currentInteractableObject;
 	//for animating
 	character * weaponItem;
 	character * armorItem;

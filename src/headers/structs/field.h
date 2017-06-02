@@ -9,6 +9,7 @@
 #define SRC_HEADERS_STRUCTS_FIELD_H_
 #include<stdbool.h>
 #include "../individual_pub_methods.h"
+#include "../interactable_pub_methods.h"
 
 typedef struct {
 	int MAX_ITEMS;
@@ -29,6 +30,7 @@ typedef struct {
 	int spaceIsReserved;
 	character* background;
 	individual* currentIndividual;
+	interactable* interactableObject;
 	transitInfo* thisTransitInfo;
 } space;
 
@@ -66,6 +68,7 @@ typedef struct {
 	char mapName[64];
 	int * individuals[250];
 	int * items[500];
+	int * interactableObjects[500];
 	int isDark;
 	int isCurrentMap;
 
@@ -74,6 +77,9 @@ typedef struct {
 
 	int MAX_ITEMS;
 	int numItems;
+
+	int MAX_INTERACTABLES;
+	int numInteractables;
 } mapInfo;
 
 #endif /* SRC_HEADERS_STRUCTS_FIELD_H_ */

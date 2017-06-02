@@ -22,6 +22,7 @@ space * makeMapGeneratorSpace(int x, int y){
 	tmpSpace->isPassable = 0;
 	tmpSpace->spaceIsReserved = 0;
 	tmpSpace->thisTransitInfo = NULL;
+	tmpSpace->interactableObject = NULL;
 
 	return tmpSpace;
 }

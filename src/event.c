@@ -766,6 +766,56 @@ int getNextEventID(int eventID){
 	}
 }
 
+void completeAndDestroyCurrentInteractive(individual * player, event * thisEvent){
+	interactable * thisInteractableObject = player->currentInteractableObject;
+	animationState stateToClone;
+	animation * interactAnimation;
+
+	thisInteractableObject->isEnabled = 0;
+	thisInteractableObject->isPassable = 1;
+	thisInteractableObject->shouldDraw = 0;
+
+	switch(thisEvent->intA){
+		case 0:
+			return;
+		case 1:
+			stateToClone = ANIMATION_INTERACTABLE_ACTION_1;
+			break;
+		case 2:
+			stateToClone = ANIMATION_INTERACTABLE_ACTION_2;
+			break;
+		case 3:
+			stateToClone = ANIMATION_INTERACTABLE_ACTION_FINAL;
+			break;
+	}
+
+	interactAnimation = cloneAnimation(getAnimationIDFromTypeToLine(thisInteractableObject->thisCharacter->thisAnimationContainer, stateToClone));
+
+	addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(interactAnimation), thisInteractableObject->thisCharacter->x, thisInteractableObject->thisCharacter->y);
+	increaseSpecialDrawDurationIfGreater(interactAnimation->totalDuration);
+}
+
+
+void decreaseAttribute(individual * player, event * thisEvent){
+	if(strcmp(thisEvent->message, "hp") == 0){
+		player->hp -= thisEvent->intA;
+	}else if(strcmp(thisEvent->message, "mana") == 0){
+		player->mana -= thisEvent->intA;
+	}else if(strcmp(thisEvent->message, "food") == 0){
+		decreaseFood(player, thisEvent->intA);
+	}
+
+	if(player->hp <= 0){
+		removeFromExistance(player->ID);
+		enableSpecialDrawMode();
+		addSpecialIndividual(player);
+		int delay = player->playerCharacter->thisAnimationContainer->animations[player->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+		setIndividualDelayAnimation(player, ANIMATION_DEATH, delay);
+		int deathDelay = player->playerCharacter->thisAnimationContainer->animations[player->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
+	}
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, char * mapDirectory){
 	event * thisEvent = getEventFromRegistry(eventID);
 
@@ -816,6 +866,12 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return getCurrentBounty(player) <= player->gold;
 		case 23:
 			player->gold = max(0, player->gold - getCurrentBounty(player));
+			return 0;
+		case 24://complete and destroy current event
+			completeAndDestroyCurrentInteractive(player, thisEvent);
+			return 0;
+		case 25:
+			decreaseAttribute(player, thisEvent);
 			return 0;
 	}
 }
