@@ -1,7 +1,7 @@
 1008;Halt @! You are under arrest for @! Pay the fine of @ gold and surrender your stolen goods immediately! ;3;0;1;8;3;NAME,WORST_CRIME,BOUNTY
 1013;There is no future for you, hellion. En guarde.;0;0;0;0;0;0
 1014;Thank you for your cooperation. You're free to go.;0;0;0;20;0;0
-1015;Then you shal serve out the rest of your bounty in prison.;0;0;0;32;0;0
+1015;Then you shal serve out the rest of your bounty in Einzel prison.;0;0;0;32;0;0
 1024;Hail, adventurer. Beware, cursed undead wander near these woods.;0;0;0;0;0;0
 1016;[@ witnessed your crime of @];4;0;1;0;2;TARGET_NAME,WITNESSED_CRIME
 1017;[SUCCESS: They dont want any trouble];0;0;0;7;0;0
@@ -37,6 +37,12 @@
 1040;Then onward.;0;0;0;0;0;0
 1041;Very well - till we meet again, @.;0;0;0;30;1;NAME
 1042;You're free to come and go, but trust me, you'd rather go.;0;0;0;0;0;0
+1043;You see a sturdy locked door.;5;0;0;0;0;0
+1044;[FAILURE] You fail to open the door.;0;0;0;0;0;0
+1045;[SUCCESS] You bash down the door!;0;0;0;38;0;0
+1046;[SUCCESS] With a click, the lock opens!;0;0;0;38;0;0
+1047;[SUCCESS] The door opens itself!;0;0;0;39;0;0
+1048;[SUCCESS] You use the key and the door opens.;0;0;0;0;0;0
 
 1008;I Surrender.;1014;33;0;0;0
 1008;I Surrender, although I do not have enough money.;1015;0;0;0;0
@@ -60,3 +66,8 @@
 1036;Thanks, but perhaps another time.;1038;0;0;0;0
 1039;No, not yet.;1040;0;0;0;0
 1039;I'm afraid so, @.;1041;0;0;1;TARGET_NAME
+1043;[2 STR] Break the door down.;0;0;35;0;0
+1043;[1 DEX] Pick the lock.;0;0;36;0;0
+1043;[1 INT, 1 Mana] Unlock door with magic.;0;0;37;0;0
+1043;Use key.;0;0;0;0;0
+1043;Do nothing.;0;0;0;0;0

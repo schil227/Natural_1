@@ -99,6 +99,7 @@ void drawSpecial(HDC hdc, HDC hdcBuffer, field * thisField, shiftData * viewShif
 
 	for(i = 0; i < specialDrawInstance->numImagesToDraw; i++){
 		drawUnboundAnimation(hdc, hdcBuffer, specialDrawInstance->imagesToDraw[i]->x, specialDrawInstance->imagesToDraw[i]->y, specialDrawInstance->imagesToDraw[i]->image, viewShift,0);
+		updateAnimation(specialDrawInstance->imagesToDraw[i]->image);
 	}
 }
 

@@ -559,6 +559,14 @@ int statsAtLeastX(individual * player, event * thisEvent){
 	}
 }
 
+int returnstatsAtLeastXReturnDialog(individual * player, event * thisEvent){
+	if(statsAtLeastX(player, thisEvent)){
+		return thisEvent->dialogIDSuccess;
+	}else{
+		return thisEvent->dialogIDFailure;
+	}
+}
+
 int tryReturnStolenWitnessedItems(individual * player, int witnessID){
 	return 0;
 }
@@ -789,10 +797,11 @@ void completeAndDestroyCurrentInteractive(individual * player, event * thisEvent
 			break;
 	}
 
-	interactAnimation = cloneAnimation(getAnimationIDFromTypeToLine(thisInteractableObject->thisCharacter->thisAnimationContainer, stateToClone));
+	interactAnimation = cloneAnimation(getAnimationFromType(thisInteractableObject->thisCharacter->thisAnimationContainer, stateToClone));
 
 	addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(interactAnimation), thisInteractableObject->thisCharacter->x, thisInteractableObject->thisCharacter->y);
 	increaseSpecialDrawDurationIfGreater(interactAnimation->totalDuration);
+	enableSpecialDrawMode();
 }
 
 
@@ -873,7 +882,9 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 25:
 			decreaseAttribute(player, thisEvent);
 			return 0;
-	}
+		case 26://stat at least return dialog
+			returnstatsAtLeastXReturnDialog(player, thisEvent);
+		}
 }
 
 char * processContextKey(char * contextKey, individual * player, groupContainer * thisGroupContainer, field * thisField){

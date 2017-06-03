@@ -378,6 +378,20 @@ void destroyFixedCharacter(fixedCharacter * thisCharacter){
 }
 
 
+animation * getAnimationFromType(animationContainer * thisAnimationContianer, animationState type){
+	int i;
+
+	for(i = 0; i < thisAnimationContianer->numAnimations; i++){
+		animation * tmpAnimation = thisAnimationContianer->animations[i];
+
+		if(tmpAnimation != NULL && tmpAnimation->state == type){
+			return tmpAnimation;
+		}
+	}
+
+	return NULL;
+}
+
 int getAnimationIDFromTypeToLine(animationContainer * thisAnimationContianer, animationState type){
 	int i;
 

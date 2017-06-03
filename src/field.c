@@ -78,7 +78,6 @@ space* getSpaceAddressFromField(field* thisField, int x, int y){
 	return NULL;
 }
 
-
 int removeIndividualFromField(field * thisField, int x, int y){
 	space * tmpSpace = thisField->grid[x][y];
 
@@ -165,7 +164,7 @@ int moveIndividual(field *thisField, individual *thisIndividual, int direction){
 
 	space * tmpSpace = getSpaceFromField(thisField,newX,newY);
 
-	if(tmpSpace->isPassable && tmpSpace->currentIndividual == NULL){
+	if(tmpSpace->isPassable && canPassThroughInteractableObject(tmpSpace->interactableObject) && tmpSpace->currentIndividual == NULL){
 		getSpaceFromField(thisField,inX,inY)->currentIndividual = NULL;
 		tmpSpace->spaceIsReserved = 0;
 		getSpaceFromField(thisField,newX,newY)->currentIndividual = thisIndividual;

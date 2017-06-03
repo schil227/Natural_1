@@ -62,7 +62,7 @@ node ** getNewActiveNodes(node * parentNode, node ** allNodes, int targetX, int 
 					continue;
 				}
 
-				if (tmpSpace->isPassable && (thisIndividual == NULL || tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual) || (newX == targetX && newY == targetY))){
+				if (tmpSpace->isPassable  && canPassThroughInteractableObject(tmpSpace->interactableObject) && canPassThroughInteractableObject(tmpSpace->interactableObject) && (thisIndividual == NULL || tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual) || (newX == targetX && newY == targetY))){
 					node * newNode = createNewNode(parentNode->pathLength + 1, newX, newY);
 					newNode->previousNode = parentNode;
 					addNodeToList(newNode, allNodes);
@@ -92,7 +92,7 @@ cordArr * getUniquePassableCordsSurroundingCord(individual * thisIndividual, fie
 
 			space * tmpSpace = getSpaceFromField(thisField, newX, newY);
 
-			if(tmpSpace != NULL && tmpSpace->isPassable && (nonAlliesPassable || (thisIndividual == NULL || tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual)))){
+			if(tmpSpace != NULL && tmpSpace->isPassable && canPassThroughInteractableObject(tmpSpace->interactableObject) && (nonAlliesPassable || (thisIndividual == NULL || tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual)))){
 				cord * newCord = malloc(sizeof(cord));
 				newCord->x = newX;
 				newCord->y = newY;
@@ -731,7 +731,7 @@ cordArr * getAttackableCordsInRay(int startingX, int startingY, cord *endCord, i
 			break;
 		}
 
-		if(!tmpSpace->canAttackThrough){
+		if(!tmpSpace->canAttackThrough || !canAttackThroughInteractableObject(tmpSpace->interactableObject)){
 			break;
 		}
 
@@ -803,7 +803,7 @@ int isInAttackRange(individual * thisIndividual, individual * targetIndividual, 
 
 	for(i = 0; i < thisCordArr->numCords; i++){
 		space * tmpSpace = getSpaceFromField(thisField,thisCordArr->cords[i]->x + thisIndividual->playerCharacter->x, thisCordArr->cords[i]->y + thisIndividual->playerCharacter->y);
-		if( tmpSpace == NULL || !tmpSpace->canAttackThrough ){
+		if( tmpSpace == NULL || !tmpSpace->canAttackThrough || !canAttackThroughInteractableObject(tmpSpace->interactableObject)){
 			toReturn = 0;
 			break;
 		}
@@ -829,7 +829,7 @@ int isInLineOfSight(individual * thisIndividual, individual * targetIndividual, 
 
 	for(i = 0; i < thisCordArr->numCords; i++){
 		space * tmpSpace = getSpaceFromField(thisField,thisCordArr->cords[i]->x + thisIndividual->playerCharacter->x, thisCordArr->cords[i]->y + thisIndividual->playerCharacter->y);
-		if( tmpSpace == NULL || !tmpSpace->canSeeThrough ){
+		if( tmpSpace == NULL || !tmpSpace->canSeeThrough || !canSeeThroughInteractableObject(tmpSpace->interactableObject)){
 			toReturn = 0;
 			break;
 		}
@@ -1105,7 +1105,7 @@ cord * findRetreatSpace(individual * thisIndividual, groupContainer * thisGroupC
 
 			space * nextSpace = getSpaceFromField(thisField, newX, newY);
 
-			if(nextSpace != NULL && nextSpace->isPassable && (nextSpace->currentIndividual == NULL || isAlly(thisIndividual, nextSpace->currentIndividual)) ){
+			if(nextSpace != NULL && nextSpace->isPassable && canPassThroughInteractableObject(nextSpace->interactableObject) && (nextSpace->currentIndividual == NULL || isAlly(thisIndividual, nextSpace->currentIndividual)) ){
 				retreatSpot->x = newX;
 				retreatSpot->y = newY;
 

@@ -192,8 +192,28 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 //				cwrite(outLog);
 
 				toggleInCursorMode();
-			}else if(CURSOR_LOOK){
+			}else if(getCursorMode() == CURSOR_LOOK){
 				enableLookScrollMode();
+			}else if(getCursorMode() == CURSOR_INTERACT){
+				space * tmpSpace = getSpaceFromField(main_field, getCursorX(), getCursorY());
+
+				if(tmpSpace != NULL && tmpSpace->interactableObject != NULL){
+					interactable * thisObject =  tmpSpace->interactableObject;
+					player->currentInteractableObject = thisObject;
+
+					if(thisObject->isEnabled){
+						if(thisObject->triggerDialogID != -1){
+							if(setCurrentMessageByMessageID(thisObject->triggerDialogID)){
+								toggleDrawDialogBox();
+							}
+
+							toggleInCursorMode();
+						}else if(thisObject->triggerEventID != -1){
+							triggerEvent(thisObject->triggerEventID);
+							toggleInCursorMode();
+						}
+					}
+				}
 			}
 
 		}
@@ -777,7 +797,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 				}
 
 				space * tmpSpace = getSpaceFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
-				if ( tmpSpace != NULL && tmpSpace->isPassable && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual))) {
+				if ( tmpSpace != NULL && tmpSpace->isPassable && canPassThroughInteractableObject(tmpSpace->interactableObject) && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual))) {
 					moveNode ** oldNode = (moveNode **)alreadyContainsNode(((moveNode *)thisIndividual->thisMoveNodeMeta->rootMoveNode),(*currentNode)->x + dx, (*currentNode)->y + dy );
 
 					int screenX =  rect.right - rect.left - getSidebarWidth();
@@ -823,7 +843,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 
 			space * tmpSpace = getSpaceFromField(thisField, tmpMoveNode->x, tmpMoveNode->y);
 
-			if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL) {
+			if ( tmpSpace != NULL && tmpSpace->isPassable && canPassThroughInteractableObject(tmpSpace->interactableObject) && tmpSpace->currentIndividual == NULL) {
 				*moveMode = 0;
 				if(thisIndividual->thisMoveNodeMeta->rootMoveNode->nextMoveNode != NULL){
 					*postMoveMode = 1;

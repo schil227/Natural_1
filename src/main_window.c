@@ -964,6 +964,12 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
 			decreaseFood(player, 0.1);
 			break;
+		case 0x5A: //z key (interact)
+			{
+				toggleInCursorMode();
+				refreshCursor(CURSOR_INTERACT, player->playerCharacter->x, player->playerCharacter->y);
+			}
+			break;
 		case 0x34: //left
 		case 0x64:
 		case 0x36: //right
@@ -991,7 +997,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					int dy = yMoveChange(LOWORD(wParam) % 16);
 
 					space * tmpSpace = getSpaceFromField(main_field, player->playerCharacter->x + dx, player->playerCharacter->y + dy);
-					if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL) {
+					if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL && canPassThroughInteractableObject(tmpSpace->interactableObject)) {
 						player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
 						player->thisMoveNodeMeta->sum = 0;
 						player->thisMoveNodeMeta->pathLength = 0;
