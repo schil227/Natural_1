@@ -36,12 +36,13 @@ dialogInstance * initDialogBox(int imageID, int x, int y, COLORREF rgb){
 	toReturn->speakSoundID = 8;
 
 	toReturn->nullMessage = malloc(sizeof(dialogMessage));
-	toReturn->nullMessage->messageID = 0;
+	toReturn->nullMessage->messageID = -1;
 	toReturn->nullMessage->numDialogDecision = 0;
 	toReturn->nullMessage->numDialogDecisionsParsed = 0;
 	toReturn->nullMessage->nextMessage = NULL;
 	toReturn->nullMessage->message[0] = '\0';
 	toReturn->nullMessage->parsedMessage[0] = '\0';
+	toReturn->nullMessage->dialogCheckpoint = 0;
 
 	return toReturn;
 }

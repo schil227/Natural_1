@@ -825,6 +825,44 @@ void decreaseAttribute(individual * player, event * thisEvent){
 	}
 }
 
+int hasItemForSelectedInteractable(individual * player, event * thisEvent){
+	int i;
+	item * tmpItem;
+
+	if(player->currentInteractableObject == NULL){
+		return 0;
+	}
+
+	for(i = 0; i < player->backpack->inventorySize; i++){
+		tmpItem = player->backpack->inventoryArr[i];
+
+		if(tmpItem != NULL && tmpItem->itemType == 'o' && tmpItem->interactableObjectID == player->currentInteractableObject->ID){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int removeItemForSelectedInteractableReturnSuccessDialog(individual * player, event * thisEvent){
+	int i;
+	item * tmpItem;
+
+	if(player->currentInteractableObject == NULL){
+		return 0;
+	}
+
+	for(i = 0; i < player->backpack->inventorySize; i++){
+		tmpItem = player->backpack->inventoryArr[i];
+
+		if(tmpItem != NULL && tmpItem->itemType == 'o' && tmpItem->interactableObjectID == player->currentInteractableObject->ID){
+			removeItemFromInventory(player->backpack, tmpItem);
+		}
+	}
+
+	return thisEvent->dialogIDSuccess;
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, char * mapDirectory){
 	event * thisEvent = getEventFromRegistry(eventID);
 
@@ -883,7 +921,11 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			decreaseAttribute(player, thisEvent);
 			return 0;
 		case 26://stat at least return dialog
-			returnstatsAtLeastXReturnDialog(player, thisEvent);
+			return returnstatsAtLeastXReturnDialog(player, thisEvent);
+		case 27:
+			return hasItemForSelectedInteractable(player, thisEvent);
+		case 28:
+			return removeItemForSelectedInteractableReturnSuccessDialog(player, thisEvent);
 		}
 }
 

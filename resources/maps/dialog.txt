@@ -42,7 +42,7 @@
 1045;[SUCCESS] You bash down the door!;0;0;0;38;0;0
 1046;[SUCCESS] With a click, the lock opens!;0;0;0;38;0;0
 1047;[SUCCESS] The door opens itself!;0;0;0;39;0;0
-1048;[SUCCESS] You use the key and the door opens.;0;0;0;0;0;0
+1048;[SUCCESS] You use the key and the door opens.;0;0;0;38;0;0
 
 1008;I Surrender.;1014;33;0;0;0
 1008;I Surrender, although I do not have enough money.;1015;0;0;0;0
@@ -69,5 +69,5 @@
 1043;[2 STR] Break the door down.;0;0;35;0;0
 1043;[1 DEX] Pick the lock.;0;0;36;0;0
 1043;[1 INT, 1 Mana] Unlock door with magic.;0;0;37;0;0
-1043;Use key.;0;0;0;0;0
+1043;Use key.;0;40;41;0;0
 1043;Do nothing.;0;0;0;0;0

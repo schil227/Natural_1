@@ -169,7 +169,6 @@ char * getItemAsLine(item * thisItem){
 	i = sprintf(line + i, "%d;", thisItem->npcID);
 	i += sprintf(line + i, "%d;", thisItem->ID);
 	i += sprintf(line + i, "%c;", thisItem->type);
-	i += sprintf(line + i, "%d;", thisItem->interactableObjectID);
 	i += sprintf(line + i, "%c;", thisItem->weaponDamageType);
 	i += sprintf(line + i, "%c;", thisItem->armorClass);
 	i += sprintf(line + i, "%c;", thisItem->itemType);
@@ -182,6 +181,7 @@ char * getItemAsLine(item * thisItem){
 	i += sprintf(line + i, "%s;", thisItem->name);
 	i += sprintf(line + i, "%d;", thisItem->itemCharacter->x);
 	i += sprintf(line + i, "%d;", thisItem->itemCharacter->y);
+	i += sprintf(line + i, "%d;", thisItem->interactableObjectID);
 	i += sprintf(line + i, "%.1f;", thisItem->weaponStrMod);
 
 	i += sprintf(line + i, "%d;", thisItem->strMod);
