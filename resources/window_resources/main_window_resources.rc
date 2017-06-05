@@ -138,6 +138,7 @@ END
 //Interactable images 6000-7500
 6000 BITMAP DISCARDABLE "../images/dungeon_door.bmp"
 6001 BITMAP DISCARDABLE "../images/dungeon_door_opening.bmp"
+6002 BITMAP DISCARDABLE "../images/fishing_1.bmp"
 
 //Background images 7500 - 8500
 7500 BITMAP DISCARDABLE "../images/black.bmp" //2500
@@ -206,6 +207,8 @@ END
 
 8526 BITMAP DISCARDABLE "../images/ham.bmp"
 8527 BITMAP DISCARDABLE "../images/dungeon1_key.bmp"
+8528 BITMAP DISCARDABLE "../images/fish1_idle.bmp"
+8529 BITMAP DISCARDABLE "../images/fishingpole_idle.bmp"
 
 //Ability images 9500 - 10000
 9500 BITMAP DISCARDABLE "../images/ability_creation_bg.bmp" //3500

@@ -526,18 +526,74 @@ int multiStatDialogCheck(individual * player, event * thisEvent){
 	}
 }
 
-int statsAtLeastX(individual * player, event * thisEvent){
-	int numStats = thisEvent->intA;
-	int allMustSucceed = thisEvent->intB;
-	int atLeastOneSucceeded = 0;
-
+int multiStatDialogCheckCritShift(individual * player, event * thisEvent){
+	int toBeat = 10, statSum = 0, d20;
 	char * value = strtok(thisEvent->message,",");
+	int numStats = atoi(value);
+
+	d20 = rand() % 20 + 1;
+
+	if(d20 == 20){
+		cwrite("Natural 20!");
+		if(thisEvent->dialogIDCritSuccess > 0){
+			return thisEvent->dialogIDCritSuccess;
+		}else{
+			return thisEvent->dialogIDSuccess;
+		}
+	}else if(d20 == 1){
+		cwrite("Natural 1!");
+		if(thisEvent->dialogIDCritFailure > 0){
+			return thisEvent->dialogIDCritFailure;
+		}else{
+			return thisEvent->dialogIDFailure;
+		}
+	}
+
+	value = strtok(NULL,",");
 
 	while(value != NULL){
 		int tmpTotal = getAttributeSum(player, value);
 
 		//get magnitued of stat
 		value = strtok(NULL,",");
+		statSum += tmpTotal * atoi(value);
+
+		value = strtok(NULL,",");
+	}
+
+	d20 += statSum;
+
+	if(d20 == toBeat && thisEvent->dialogIDInconclusive > 0){
+		return thisEvent->dialogIDInconclusive;
+	}
+
+	if(d20 > thisEvent->intA){
+		return thisEvent->dialogIDCritSuccess;
+	}else if(d20 > toBeat){
+		return thisEvent->dialogIDSuccess;
+	}else if(d20 > thisEvent->intB){
+		return thisEvent->dialogIDFailure;
+	}else{
+		return thisEvent->dialogIDCritFailure;
+	}
+}
+
+int statsAtLeastX(individual * player, event * thisEvent){
+	int numStats = thisEvent->intA;
+	int allMustSucceed = thisEvent->intB;
+	int atLeastOneSucceeded = 0;
+	char * strtok_save_pointer;
+	char msg[128];
+
+	strcpy(msg, thisEvent->message);
+
+	char * value = strtok_r(msg,",", &strtok_save_pointer);
+
+	while(value != NULL){
+		int tmpTotal = getAttributeSum(player, value);
+
+		//get magnitued of stat
+		value = strtok_r(NULL,",", &strtok_save_pointer);
 
 		if(tmpTotal < atoi(value) && allMustSucceed){
 			return 0;
@@ -549,7 +605,7 @@ int statsAtLeastX(individual * player, event * thisEvent){
 			atLeastOneSucceeded = 1;
 		}
 
-		value = strtok(NULL,",");
+		value = strtok_r(NULL,",", &strtok_save_pointer);
 	}
 
 	if(atLeastOneSucceeded){
@@ -797,7 +853,13 @@ void completeAndDestroyCurrentInteractive(individual * player, event * thisEvent
 			break;
 	}
 
-	interactAnimation = cloneAnimation(getAnimationFromType(thisInteractableObject->thisCharacter->thisAnimationContainer, stateToClone));
+	animation * tmpAnimation = getAnimationFromType(thisInteractableObject->thisCharacter->thisAnimationContainer, stateToClone);
+
+	if(tmpAnimation == NULL){
+		return;
+	}
+
+	interactAnimation = cloneAnimation(tmpAnimation);
 
 	addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(interactAnimation), thisInteractableObject->thisCharacter->x, thisInteractableObject->thisCharacter->y);
 	increaseSpecialDrawDurationIfGreater(interactAnimation->totalDuration);
@@ -811,7 +873,7 @@ void decreaseAttribute(individual * player, event * thisEvent){
 	}else if(strcmp(thisEvent->message, "mana") == 0){
 		player->mana -= thisEvent->intA;
 	}else if(strcmp(thisEvent->message, "food") == 0){
-		decreaseFood(player, thisEvent->intA);
+		decreaseFood(player, ((double)thisEvent->intA));
 	}
 
 	if(player->hp <= 0){
@@ -836,7 +898,7 @@ int hasItemForSelectedInteractable(individual * player, event * thisEvent){
 	for(i = 0; i < player->backpack->inventorySize; i++){
 		tmpItem = player->backpack->inventoryArr[i];
 
-		if(tmpItem != NULL && tmpItem->itemType == 'o' && tmpItem->interactableObjectID == player->currentInteractableObject->ID){
+		if(tmpItem != NULL && tmpItem->interactableObjectType == player->currentInteractableObject->type){
 			return 1;
 		}
 	}
@@ -855,12 +917,24 @@ int removeItemForSelectedInteractableReturnSuccessDialog(individual * player, ev
 	for(i = 0; i < player->backpack->inventorySize; i++){
 		tmpItem = player->backpack->inventoryArr[i];
 
-		if(tmpItem != NULL && tmpItem->itemType == 'o' && tmpItem->interactableObjectID == player->currentInteractableObject->ID){
+		if(tmpItem != NULL && tmpItem->interactableObjectType == player->currentInteractableObject->type){
 			removeItemFromInventory(player->backpack, tmpItem);
 		}
 	}
 
 	return thisEvent->dialogIDSuccess;
+}
+
+int cloneItemToPlayer(individual * player, event * thisEvent){
+	item * tmpItem = getItemFromRegistry(thisEvent->intA);
+
+	if(tmpItem != NULL){
+		item * newItem = cloneItem(tmpItem, 0);
+
+		addItemToInventory(player->backpack, newItem);
+	}
+
+	return 0;
 }
 
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, char * mapDirectory){
@@ -926,6 +1000,10 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return hasItemForSelectedInteractable(player, thisEvent);
 		case 28:
 			return removeItemForSelectedInteractableReturnSuccessDialog(player, thisEvent);
+		case 29:
+			return multiStatDialogCheckCritShift(player, thisEvent);
+		case 30:
+			return cloneItemToPlayer(player, thisEvent);
 		}
 }
 

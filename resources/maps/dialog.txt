@@ -37,12 +37,17 @@
 1040;Then onward.;0;0;0;0;0;0
 1041;Very well - till we meet again, @.;0;0;0;30;1;NAME
 1042;You're free to come and go, but trust me, you'd rather go.;0;0;0;0;0;0
-1043;You see a sturdy locked door.;5;0;0;0;0;0
+1043;You see a sturdy locked door.;5;0;1;0;0;0
 1044;[FAILURE] You fail to open the door.;0;0;0;0;0;0
 1045;[SUCCESS] You bash down the door!;0;0;0;38;0;0
 1046;[SUCCESS] With a click, the lock opens!;0;0;0;38;0;0
 1047;[SUCCESS] The door opens itself!;0;0;0;39;0;0
 1048;[SUCCESS] You use the key and the door opens.;0;0;0;38;0;0
+1049;You see fish swiming in the water.;3;0;1;0;0;0
+1050;[SUCCESS!] You catch a big one!;0;0;0;45;0;0
+1051;[SUCCESS] You catch a fish.;0;0;0;45;0;0
+1052;[FAILURE] You fail to catch anything.;0;0;0;0;0;0
+1053;[FAILURE!] The fish swim away.;0;0;0;38;0;0
 
 1008;I Surrender.;1014;33;0;0;0
 1008;I Surrender, although I do not have enough money.;1015;0;0;0;0
@@ -71,3 +76,6 @@
 1043;[1 INT, 1 Mana] Unlock door with magic.;0;0;37;0;0
 1043;Use key.;0;40;41;0;0
 1043;Do nothing.;0;0;0;0;0
+1049;[2 WIS] Try to catch it [-5 food];0;44;42;0;0
+1049;Use Fishing rod. [-5 food];0;40;42;0;0
+1049;Do Nothing.;0;0;0;0;0

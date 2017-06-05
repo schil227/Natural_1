@@ -1,4 +1,8 @@
 == TODO In Depth ==
+Create Events:
+-Clone item to inventory
+-Multi-stat check with intA/B setting the crit success/fail bounds
+
 
 == minor todos ==
 -add dark LoS stat to ability
@@ -12,6 +16,12 @@
 -fishing for food
 -foraging for food
 -interacting with traps/leavers
+-doors
+
+-update mapinfo to attach interactable objects to spaces
+-on field load, add IOs spaces
+-add interaction UI
+-create interact events, attach current interact to player
 
 
 

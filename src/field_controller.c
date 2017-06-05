@@ -696,7 +696,7 @@ item * createFieldItemFromFile(char line[1024]){
 	y = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	interactableObjectID = atoi(value);
+	interactableObjectID = (int) getInteractType(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	weaponStrMod = atof(value);

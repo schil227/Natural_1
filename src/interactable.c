@@ -10,8 +10,8 @@
 interactType getInteractType(char * type){
 	if(strcmp(type, "INTERACT_DEFAULT") == 0){
 		return INTERACT_DEFAULT;
-	}else if(strcmp(type, "INTERACT_DOOR") == 0){
-		return INTERACT_DOOR;
+	}else if(strcmp(type, "INTERACT_DOOR_FOREST_DUNGEON") == 0){
+		return INTERACT_DOOR_FOREST_DUNGEON;
 	}else if(strcmp(type, "INTERACT_CHEST") == 0){
 		return INTERACT_CHEST;
 	}else if(strcmp(type, "INTERACT_FISHING") == 0){
@@ -56,8 +56,8 @@ int canSeeThroughInteractableObject(interactable * thisObject){
 char * getInteractString(interactType type){
 	if(type == INTERACT_DEFAULT){
 		return "INTERACT_DEFAULT";
-	}else if(type == INTERACT_DOOR){
-		return "INTERACT_DOOR";
+	}else if(type == INTERACT_DOOR_FOREST_DUNGEON){
+		return "INTERACT_DOOR_FOREST_DUNGEON";
 	}else if(type == INTERACT_CHEST){
 		return "INTERACT_CHEST";
 	}else if(type == INTERACT_FISHING){
