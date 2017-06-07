@@ -73,4 +73,10 @@ typedef struct {
 
 } item;
 
+typedef struct{
+	int MAX_ITEMS;
+	int inventorySize;
+	item * inventoryArr[40];
+} inventory;
+
 #endif /* SRC_HEADERS_STRUCTS_ITEM_H_ */

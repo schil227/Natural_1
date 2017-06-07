@@ -72,12 +72,56 @@ char * getInteractString(interactType type){
 }
 
 
+void parseInteractableInventoryFromLine(interactable * thisObject, char * line){
+	char * value;
+	item * tmpItem;
+
+	if(line == NULL){
+		return;
+	}
+
+	value = strtok(line, ",");
+
+	if(value == NULL || *value == '\n' || atoi(value) == -1){
+		return;
+	}
+
+	tmpItem = getItemFromRegistry(atoi(value));
+
+	if(tmpItem != NULL){
+		thisObject->objectInventory->inventoryArr[thisObject->objectInventory->inventorySize] = tmpItem;
+		thisObject->objectInventory->inventorySize++;
+	}
+
+	value = strtok(NULL, ",");
+
+	while(value != NULL){
+		if(thisObject->objectInventory->inventorySize >= thisObject->objectInventory->MAX_ITEMS){
+			cwrite("!! MAX ITEMS IN INTERACTABLE !!");
+			return;
+		}
+
+		tmpItem = getItemFromRegistry(atoi(value));
+
+		if(tmpItem != NULL){
+			thisObject->objectInventory->inventoryArr[thisObject->objectInventory->inventorySize] = tmpItem;
+			thisObject->objectInventory->inventorySize++;
+		}
+
+		value = strtok(NULL, ",");
+	}
+}
+
 interactable * loadInteractableObjectFromLine(char * line){
 	char * strtok_save_pointer;
+	char * strtok_inventory_save_pointer;
 	char * value;
 
 	interactable * thisInteractableObject = malloc(sizeof(interactable));
 	thisInteractableObject->thisCharacter = malloc(sizeof(character));
+	thisInteractableObject->objectInventory = malloc(sizeof(inventory));
+	thisInteractableObject->objectInventory->MAX_ITEMS = 40;
+	thisInteractableObject->objectInventory->inventorySize = 0;
 
 	value = strtok_r(line, ";", &strtok_save_pointer);
 	thisInteractableObject->ID = atoi(value);
@@ -102,6 +146,9 @@ interactable * loadInteractableObjectFromLine(char * line){
 	thisInteractableObject->triggerEventID = atoi(value);
 
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	thisInteractableObject->onAttackEventID = atoi(value);
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	thisInteractableObject->isEnabled = atoi(value);
 
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
@@ -122,6 +169,9 @@ interactable * loadInteractableObjectFromLine(char * line){
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	thisInteractableObject->finalEvent = atoi(value);
 
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	thisInteractableObject->inFinalMode = atoi(value);
+
 	thisInteractableObject->thisCharacter->thisAnimationContainer = initAnimationContainer();
 
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
@@ -136,14 +186,20 @@ interactable * loadInteractableObjectFromLine(char * line){
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	addAnimationToContainer(thisInteractableObject->thisCharacter->thisAnimationContainer, cloneAnimationFromRegistry(atoi(value)));
 
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	setDefaultAnimation(thisInteractableObject->thisCharacter->thisAnimationContainer, pickAnimationState(value));
+
 	thisInteractableObject->thisCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisInteractableObject->thisCharacter->thisAnimationContainer);
 	thisInteractableObject->thisCharacter->darkAnimationContainer = NULL;
+
+	value = strtok_r(NULL, ";", &strtok_save_pointer);
+	parseInteractableInventoryFromLine(thisInteractableObject, value);
 
 	return thisInteractableObject;
 }
 
 char * getInteractableObjectAsLine(interactable * thisObject){
-	int i = 0;
+	int i = 0, j;
 	char * line = malloc(sizeof(char) * 256);
 
 	i += sprintf(line + i, "%d;", thisObject->ID);
@@ -151,6 +207,7 @@ char * getInteractableObjectAsLine(interactable * thisObject){
 	i += sprintf(line + i, "%d;", thisObject->thisCharacter->x);
 	i += sprintf(line + i, "%d;", thisObject->thisCharacter->y);
 	i += sprintf(line + i, "%d;", thisObject->triggerDialogID);
+	i += sprintf(line + i, "%d;", thisObject->onAttackEventID);
 	i += sprintf(line + i, "%d;", thisObject->triggerEventID);
 	i += sprintf(line + i, "%d;", thisObject->isEnabled);
 	i += sprintf(line + i, "%d;", thisObject->shouldDraw);
@@ -159,10 +216,24 @@ char * getInteractableObjectAsLine(interactable * thisObject){
 	i += sprintf(line + i, "%d;", thisObject->canSeeThrough);
 	i += sprintf(line + i, "%d;", thisObject->isRespawning);
 	i += sprintf(line + i, "%d;", thisObject->finalEvent);
+	i += sprintf(line + i, "%d;", thisObject->inFinalMode);
 	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisObject->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_IDLE));
 	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisObject->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_1));
 	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisObject->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_2));
 	i += sprintf(line + i, "%d;", getAnimationIDFromTypeToLine(thisObject->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL));
+	i += sprintf(line + i, "%s;", getAnimationStateAsString(getDefaultAnimationState(thisObject->thisCharacter->thisAnimationContainer)));
+
+	if(thisObject->objectInventory->inventorySize == 0){
+		i += sprintf(line + i, "-1;");
+	}else{
+		for(j = 0; j < thisObject->objectInventory->inventorySize; j++){
+			if(j + 1 == thisObject->objectInventory->inventorySize){
+				i += sprintf(line + i, "%d;", thisObject->objectInventory->inventoryArr[j]->ID);
+			}else{
+				i += sprintf(line + i, "%d,", thisObject->objectInventory->inventoryArr[j]->ID);
+			}
+		}
+	}
 
 	return line;
 }

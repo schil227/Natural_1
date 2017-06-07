@@ -8,7 +8,7 @@
 #ifndef SRC_HEADERS_STRUCTS_INTERACTABLE_H_
 #define SRC_HEADERS_STRUCTS_INTERACTABLE_H_
 
-#include "../character_pub_methods.h"
+#include"../item_pub_methods.h"
 
 typedef enum {INTERACT_DEFAULT = 0, INTERACT_DOOR_FOREST_DUNGEON, INTERACT_CHEST, INTERACT_FISHING, INTERACT_SWITCH, INTERACT_SIGN} interactType;
 
@@ -19,12 +19,15 @@ typedef struct{
 	int canSeeThrough;
 	int triggerDialogID;
 	int triggerEventID;
+	int onAttackEventID;
 	int isEnabled;
 	int shouldDraw;
 	int isRespawning;
 	int finalEvent;
+	int inFinalMode;
 	interactType type;
 
+	inventory * objectInventory;
 	character * thisCharacter;
 } interactable;
 

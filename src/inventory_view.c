@@ -24,6 +24,7 @@ int initThisInventoryView(int imageID, int x, int y, int slotsPerScreen, invento
 	thisInventoryView->buyMode = 0;
 	thisInventoryView->pickpocketMode = 0;
 	thisInventoryView->fieldGetMode = 0;
+	thisInventoryView->objectGetMode = 0;
 
 	for(i = 0; i < slotsPerScreen; i++){
 		thisInventoryView->viewedItems[i] = NULL;
@@ -431,4 +432,16 @@ void disableItemFieldGetMode(){
 
 int inFieldGetMode(){
 	return thisInventoryView->fieldGetMode;
+}
+
+void enableObjectGetMode(){
+	thisInventoryView->objectGetMode = 1;
+}
+
+void disableObjectGetMode(){
+	thisInventoryView->objectGetMode = 0;
+}
+
+int inObjectGetMode(){
+	return thisInventoryView->objectGetMode;
 }

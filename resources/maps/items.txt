@@ -23,3 +23,4 @@
 0;1019;i;p;l;o;0;0;0;255;0;255;Key - Dungeon 1;13;1;INTERACT_DOOR_FOREST_DUNGEON;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;8527;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;A key that can open any locked door in the forest dungeon.
 207;1020;i;p;l;o;50;207;0;255;0;255;Fishing pole;0;0;INTERACT_FISHING;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;8529;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;A fine fishing rod. Useful for fishing, not fighting.
 0;1021;i;p;l;c;0;0;0;255;0;255;Fish;0;0;INTERACT_DEFAULT;0;0;0;0;0;0;0;0;0;0;0;0;0;50;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;8528;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;A tasty fish.&&(+50 Food)
+0;1022;i;p;l;o;50;207;0;255;0;255;Fishing pole;0;0;INTERACT_FISHING;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;8529;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;A fine fishing rod. Useful for fishing, not fighting.

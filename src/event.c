@@ -838,6 +838,7 @@ void completeAndDestroyCurrentInteractive(individual * player, event * thisEvent
 	thisInteractableObject->isEnabled = 0;
 	thisInteractableObject->isPassable = 1;
 	thisInteractableObject->shouldDraw = 0;
+	thisInteractableObject->inFinalMode = 1;
 
 	switch(thisEvent->intA){
 		case 0:
@@ -866,6 +867,25 @@ void completeAndDestroyCurrentInteractive(individual * player, event * thisEvent
 	enableSpecialDrawMode();
 }
 
+void finalizeInteractable(individual * player, event * thisEvent){
+	interactable * thisInteractableObject = player->currentInteractableObject;
+	animation * interactAnimation;
+
+	thisInteractableObject->inFinalMode = 1;
+
+	setDefaultAnimation(thisInteractableObject->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL);
+
+	if(thisEvent->intA != 0){
+		switch(thisEvent->intA){
+			case 1:
+				setAnimation(thisInteractableObject->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_1);
+				break;
+			case 2:
+				setAnimation(thisInteractableObject->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_2);
+				break;
+		}
+	}
+}
 
 void decreaseAttribute(individual * player, event * thisEvent){
 	if(strcmp(thisEvent->message, "hp") == 0){
@@ -937,6 +957,11 @@ int cloneItemToPlayer(individual * player, event * thisEvent){
 	return 0;
 }
 
+void viewInteractableItems(individual * player, event * thisEvent){
+	enableObjectGetMode();
+	enableInventoryViewMode(player->currentInteractableObject->objectInventory);
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, char * mapDirectory){
 	event * thisEvent = getEventFromRegistry(eventID);
 
@@ -1004,6 +1029,12 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return multiStatDialogCheckCritShift(player, thisEvent);
 		case 30:
 			return cloneItemToPlayer(player, thisEvent);
+		case 31:
+			finalizeInteractable(player, thisEvent);
+			return 0;
+		case 32:
+			viewInteractableItems(player, thisEvent);
+			return 0;
 		}
 }
 

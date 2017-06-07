@@ -139,6 +139,9 @@ END
 6000 BITMAP DISCARDABLE "../images/dungeon_door.bmp"
 6001 BITMAP DISCARDABLE "../images/dungeon_door_opening.bmp"
 6002 BITMAP DISCARDABLE "../images/fishing_1.bmp"
+6003 BITMAP DISCARDABLE "../images/chest_idle.bmp"
+6004 BITMAP DISCARDABLE "../images/chest_opening.bmp"
+6005 BITMAP DISCARDABLE "../images/chest_open.bmp"
 
 //Background images 7500 - 8500
 7500 BITMAP DISCARDABLE "../images/black.bmp" //2500

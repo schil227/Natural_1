@@ -248,6 +248,46 @@ animationState pickAnimationState(char * state){
 	return ANIMATION_IDLE;
 }
 
+char * getAnimationStateAsString(animationState state){
+	if(state == ANIMATION_IDLE){
+		return "ANIMATION_IDLE";
+	}else if(state == ANIMATION_IDLE_EQUIPT){
+		return "ANIMATION_IDLE_EQUIPT";
+	}else if(state == ANIMATION_ATTACK_SLASH){
+		return "ANIMATION_ATTACK_SLASH";
+	}else if(state == ANIMATION_ATTACK_CHOP){
+		return "ANIMATION_ATTACK_CHOP";
+	}else if(state == ANIMATION_ATTACK_BLUNT){
+		return "ANIMATION_ATTACK_BLUNT";
+	}else if(state == ANIMATION_ATTACK_PIERCE){
+		return "ANIMATION_ATTACK_PIERCE";
+	}else if(state == ANIMATION_ATTACK_BOW){
+		return "ANIMATION_ATTACK_BOW";
+	}else if(state == ANIMATION_HARM){
+		return "ANIMATION_HARM";
+	}else if(state == ANIMATION_DEATH){
+		return "ANIMATION_DEATH";
+	}else if(state == ANIMATION_CAST){
+		return "ANIMATION_CAST";
+	}else if(state == ANIMATION_CONSUME){
+		return "ANIMATION_CONSUME";
+	}else if(state == ANIMATION_INTERACTABLE_IDLE){
+		return "ANIMATION_INTERACTABLE_IDLE";
+	}else if(state == ANIMATION_INTERACTABLE_ACTION_1){
+		return "ANIMATION_INTERACTABLE_ACTION_1";
+	}else if(state == ANIMATION_INTERACTABLE_ACTION_2){
+		return "ANIMATION_INTERACTABLE_ACTION_2";
+	}else if(state == ANIMATION_INTERACTABLE_ACTION_FINAL){
+		return "ANIMATION_INTERACTABLE_ACTION_FINAL";
+	}
+
+	char outlog[128];
+	sprintf(outlog, "!! STATE %d NOT FOUND : USING DEFAULT !!", (int)state);
+	cwrite(outlog);
+
+	return "ANIMATION_IDLE";
+}
+
 animation * createAnimationFromLine(char line[512]){
 	char * strtok_save_pointer;
 	char * durations;
@@ -377,6 +417,9 @@ void destroyFixedCharacter(fixedCharacter * thisCharacter){
 	free(thisCharacter);
 }
 
+animationState getDefaultAnimationState(animationContainer * thisAnimationContianer){
+	return thisAnimationContianer->animations[thisAnimationContianer->defaultAnimation]->state;
+}
 
 animation * getAnimationFromType(animationContainer * thisAnimationContianer, animationState type){
 	int i;

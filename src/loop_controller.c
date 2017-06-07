@@ -202,7 +202,10 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					player->currentInteractableObject = thisObject;
 
 					if(thisObject->isEnabled){
-						if(thisObject->triggerDialogID != -1){
+						if(thisObject->inFinalMode && thisObject->finalEvent != -1){
+							triggerEvent(thisObject->finalEvent);
+							toggleInCursorMode();
+						}else if(thisObject->triggerDialogID != -1){
 							if(setCurrentMessageByMessageID(thisObject->triggerDialogID)){
 								toggleDrawDialogBox();
 							}
@@ -645,6 +648,10 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 				disableItemFieldGetMode();
 			}
 
+			if(inObjectGetMode()){
+				disableObjectGetMode();
+			}
+
 			break;
 		case 0x0D: //enter
 			{
@@ -681,7 +688,21 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 						}
 
 						refreshInventory(main_field->currentSpaceInventory);
-					} else {
+					} else if(inObjectGetMode()){
+						addItemToInventory(player->backpack, tmpItem);
+						removeItemFromInventory(player->currentInteractableObject->objectInventory, tmpItem);
+						tmpItem->npcID = player->ID;
+
+						triggerEventOnPickup(tmpItem->ID, player->isPlayer);
+
+						if(tmpItem->owner != 0 && tmpItem->isStolen == 0){
+							tmpItem->isStolen = 1;
+
+							processCrimeEvent(CRIME_STEALING, tmpItem->price, tmpItem->owner, tmpItem->ID);
+						}
+
+						refreshInventory(player->currentInteractableObject->objectInventory);
+					}else{
 						modifyItem(tmpItem, player);
 						refreshInventory(player->backpack);
 					}
