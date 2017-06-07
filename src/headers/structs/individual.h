@@ -35,12 +35,6 @@ typedef struct{
 }cordArr;
 
 typedef struct{
-	int MAX_ITEMS;
-	int inventorySize;
-	item * inventoryArr[40];
-} inventory;
-
-typedef struct{
 	int remaningTurns;
 	item * thisItem;
 } activeItem;
