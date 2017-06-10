@@ -1235,7 +1235,6 @@ void groupTransitUpdate(groupContainer * thisGroupContainer){
 					individualsPassed = 0;
 					break;
 				}
-
 			}
 		}
 	}
@@ -1255,9 +1254,43 @@ void groupTransitUpdate(groupContainer * thisGroupContainer){
 					individualsPassed = 0;
 					break;
 				}
-
 			}
 		}
 	}
+}
 
+void spawnIndividualToField(groupContainer * thisGroupContainer, field * thisField, int individualID, int x, int y, int desiredLocationX, int desiredLocationY){
+	individual * tmpIndividual = getIndividualFromRegistry(individualID);
+	space * tmpSpace = getSpaceFromField(thisField, x, y);
+	if(tmpIndividual == NULL || tmpSpace == NULL || tmpSpace->currentIndividual != NULL){
+		return;
+	}
+
+	tmpSpace->currentIndividual = tmpIndividual;
+
+	tmpIndividual->playerCharacter->x = x;
+	tmpIndividual->playerCharacter->y = y;
+	tmpIndividual->desiredLocation->x = x;
+	tmpIndividual->desiredLocation->y = y;
+
+	switch(tmpIndividual->currentGroupType){
+	case GROUP_ENEMIES:
+		addIndividualToGroup(thisGroupContainer->enemies, tmpIndividual);
+		break;
+	case GROUP_NPCS:
+		addIndividualToGroup(thisGroupContainer->npcs, tmpIndividual);
+		break;
+	case GROUP_GUARDS:
+		addIndividualToGroup(thisGroupContainer->guards, tmpIndividual);
+		break;
+	case GROUP_BEASTS:
+		addIndividualToGroup(thisGroupContainer->beasts, tmpIndividual);
+		break;
+	case GROUP_ALLIES:
+		addIndividualToGroup(thisGroupContainer->allies, tmpIndividual);
+		break;
+	}
+
+	mapInfo * thisMapInfo = getMapInfoFromRegistry(thisField->id);
+	addIndividualIdToMapInfo(thisMapInfo, individualID);
 }

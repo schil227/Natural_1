@@ -962,7 +962,48 @@ void viewInteractableItems(individual * player, event * thisEvent){
 	enableInventoryViewMode(player->currentInteractableObject->objectInventory);
 }
 
-int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, char * mapDirectory){
+void handleMimicActivation(individual * player, event * thisEvent, groupContainer * thisGroupContainer, field * thisField, int * inActionMode){
+	individual * tmpIndividual = getIndividualFromRegistry(thisEvent->individualID);
+	interactable * thisInteractable = player->currentInteractableObject;
+
+	if(tmpIndividual == NULL){
+		return;
+	}
+
+	spawnIndividualToField(thisGroupContainer, thisField, tmpIndividual->ID, thisInteractable->thisCharacter->x, thisInteractable->thisCharacter->y, thisInteractable->thisCharacter->x, thisInteractable->thisCharacter->y);
+	addAnimationToContainer(tmpIndividual->playerCharacter->thisAnimationContainer, cloneAnimation(getAnimationFromType(thisInteractable->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL)));
+	setAnimation(tmpIndividual->playerCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL);
+
+	thisInteractable->isEnabled = 0;
+	thisInteractable->shouldDraw = 0;
+	thisInteractable->isPassable = 1;
+	thisInteractable->inFinalMode = 1;
+
+	decreaseTurns(player, thisGroupContainer, player->remainingActions, *inActionMode);
+}
+
+void attackDesguisedMimic(individual * player, event * thisEvent, groupContainer * thisGroupContainer, field * thisField, int * inActionMode){
+	individual * tmpIndividual = getIndividualFromRegistry(thisEvent->individualID);
+	interactable * thisInteractable = player->currentInteractableObject;
+
+	if(tmpIndividual == NULL){
+		return;
+	}
+
+	spawnIndividualToField(thisGroupContainer, thisField, tmpIndividual->ID, thisInteractable->thisCharacter->x, thisInteractable->thisCharacter->y, thisInteractable->thisCharacter->x, thisInteractable->thisCharacter->y);
+	addAnimationToContainer(tmpIndividual->playerCharacter->thisAnimationContainer, cloneAnimation(getAnimationFromType(thisInteractable->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL)));
+	setAnimation(tmpIndividual->playerCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL);
+
+	thisInteractable->isEnabled = 0;
+	thisInteractable->shouldDraw = 0;
+	thisInteractable->isPassable = 1;
+	thisInteractable->inFinalMode = 1;
+
+	tmpIndividual->hp = (short int)(getTotalHP(tmpIndividual) * 0.8);
+	decreaseTurns(tmpIndividual, thisGroupContainer, tmpIndividual->remainingActions, *inActionMode);
+}
+
+int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode){
 	event * thisEvent = getEventFromRegistry(eventID);
 
 	switch(thisEvent->eventType){
@@ -1034,6 +1075,14 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return 0;
 		case 32:
 			viewInteractableItems(player, thisEvent);
+			return 0;
+		case 33:
+			handleMimicActivation(player, thisEvent, thisGroupContainer, thisField, inActionMode);
+			return 0;
+		case 34:
+			attackDesguisedMimic(player, thisEvent, thisGroupContainer, thisField, inActionMode);
+			return 0;
+		case 35:
 			return 0;
 		}
 }

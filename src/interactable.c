@@ -20,6 +20,8 @@ interactType getInteractType(char * type){
 		return INTERACT_SWITCH;
 	}else if(strcmp(type, "INTERACT_SIGN") == 0){
 		return INTERACT_SIGN;
+	}else if(strcmp(type, "INTERACT_MIMIC") == 0){
+		return INTERACT_MIMIC;
 	}
 
 	char outlog[128];
@@ -66,6 +68,8 @@ char * getInteractString(interactType type){
 		return "INTERACT_SWITCH";
 	}else if(type == INTERACT_SIGN){
 		return "INTERACT_SIGN";
+	}else if(type == INTERACT_MIMIC){
+		return "INTERACT_MIMIC";
 	}
 
 	return "INTERACT_DEFAULT";

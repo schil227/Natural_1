@@ -227,15 +227,34 @@ int attackIfInRange(individual *thisIndividual, individual *targetIndividual, fi
 }
 
 int tryAttackIndividual(groupContainer * thisGroupContainer, individual * player, field * thisField, int x, int y){
-	individual * tmpIndividual = getIndividualFromField(thisField, x, y);
-	int i, numTimesToAttack = 1;
+	int i, numTimesToAttack = 1, toReturn = 0;
+	space * tmpSpace = getSpaceFromField(thisField, x, y);
+
+	if(tmpSpace == NULL){
+		return 0;
+	}
+
+	individual * tmpIndividual = tmpSpace->currentIndividual;
+
 	numTimesToAttack += calcExtraTimesToAttack(player);
+
+	//Only player may trigger attack events for interactables
+	if(player->isPlayer){
+		interactable * tmpInteractable = tmpSpace->interactableObject;
+
+		if(tmpInteractable != NULL && tmpInteractable->isEnabled){
+			int attackEventID = tmpInteractable->onAttackEventID;
+			if(attackEventID != -1){
+				player->currentInteractableObject = tmpInteractable;
+				triggerEvent(attackEventID);
+				toReturn = 1;
+			}
+		}
+	}
 
 	if(tmpIndividual != NULL && (tmpIndividual != player || player->thisBehavior->gotConfused) && isInAttackRange(player, tmpIndividual, thisField)){
 		for(i = 0; i < numTimesToAttack; i++){
-
 			if(tmpIndividual->hp > 0){
-
 				if (attackIndividual(player, tmpIndividual)) {
 					deleteIndividiaulFromGroup(getGroupFromIndividual(thisGroupContainer, tmpIndividual), tmpIndividual);
 					removeIndividualFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
@@ -246,7 +265,7 @@ int tryAttackIndividual(groupContainer * thisGroupContainer, individual * player
 		return 1;
 	}
 
-	return 0;
+	return toReturn;
 }
 
 int tryAttackEnemies(individualGroup * enemies, individual * player, field * thisField, int x, int y){
@@ -339,6 +358,11 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 	minY = y - aoe;
 	maxY = y + aoe;
 
+	//Only Player may trigger attack on interactables
+	if(thisIndividual->isPlayer){
+		processInteractablesInAOE(thisIndividual, thisField, minX, maxX, minY, maxY);
+	}
+
 	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, minX, maxX, minY, maxY);
 	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, minX, maxX, minY, maxY);
 	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->guards, thisField, minX, maxX, minY, maxY);
@@ -364,10 +388,31 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 			}
 		}
 	}
-
 }
 
-void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField,int minX, int maxX, int minY, int maxY){
+void processInteractablesInAOE(individual * player, field * thisField, int minX, int maxX, int minY, int maxY){
+	int i, j;
+	space * tmpSpace;
+
+	for(i = minX; i < maxX; i++){
+		for(j = minY; j < maxY; j++){
+
+			tmpSpace = getSpaceFromField(thisField, i, j);
+
+			if(tmpSpace->interactableObject != NULL){
+				if(player->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(player->activeAbilities->selectedAbility)){
+					int attackEventID = tmpSpace->interactableObject->onAttackEventID;
+					if(attackEventID  != -1){
+						player->currentInteractableObject = tmpSpace->interactableObject;
+						triggerEvent(attackEventID);
+					}
+				}
+			}
+		}
+	}
+}
+
+void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField, int minX, int maxX, int minY, int maxY){
 	int i, individualsPassed = 0;
 
 		for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
@@ -1241,6 +1286,14 @@ void removeIndividualIdFromMapInfo(mapInfo * thisMap, int individualID){
 		}
 	}
 }
+
+void addIndividualIdToMapInfo(mapInfo * thisMap, int individualID){
+	if(thisMap->numIndividuals < thisMap->MAX_INDIVIDUALS){
+		thisMap->individuals[thisMap->numIndividuals] = individualID;
+		thisMap->numIndividuals++;
+	}
+}
+
 
 void removeItemIdFromMapInfo(mapInfo * thisMap, int itemID){
 	int i;

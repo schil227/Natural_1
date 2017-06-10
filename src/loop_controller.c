@@ -66,7 +66,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		{
 			if (getCursorMode() == CURSOR_ATTACK) {
 
-				if(getIndividualFromField(main_field, getCursorX(), getCursorY()) == NULL || !cordWithinRange(player, getCursorX(), getCursorY())){
+				if(!cordWithinRange(player, getCursorX(), getCursorY())){ // getIndividualFromField(main_field, getCursorX(), getCursorY()) == NULL
 					break;
 				}
 
@@ -204,17 +204,16 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					if(thisObject->isEnabled){
 						if(thisObject->inFinalMode && thisObject->finalEvent != -1){
 							triggerEvent(thisObject->finalEvent);
-							toggleInCursorMode();
 						}else if(thisObject->triggerDialogID != -1){
 							if(setCurrentMessageByMessageID(thisObject->triggerDialogID)){
 								toggleDrawDialogBox();
 							}
-
-							toggleInCursorMode();
 						}else if(thisObject->triggerEventID != -1){
 							triggerEvent(thisObject->triggerEventID);
-							toggleInCursorMode();
 						}
+
+						decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
+						toggleInCursorMode();
 					}
 				}
 			}

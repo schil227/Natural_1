@@ -123,6 +123,10 @@ END
 2511 BITMAP DISCARDABLE "../images/red_skelly_attack.bmp"
 2512 BITMAP DISCARDABLE "../images/red_skelly_death.bmp"
 
+2513 BITMAP DISCARDABLE "../images/mimic_idle.bmp"
+2514 BITMAP DISCARDABLE "../images/mimic_attack.bmp"
+2515 BITMAP DISCARDABLE "../images/mimic_death.bmp"
+
 //Beast images 3500 - 4500
 
 
@@ -138,10 +142,16 @@ END
 //Interactable images 6000-7500
 6000 BITMAP DISCARDABLE "../images/dungeon_door.bmp"
 6001 BITMAP DISCARDABLE "../images/dungeon_door_opening.bmp"
+
 6002 BITMAP DISCARDABLE "../images/fishing_1.bmp"
+
 6003 BITMAP DISCARDABLE "../images/chest_idle.bmp"
 6004 BITMAP DISCARDABLE "../images/chest_opening.bmp"
 6005 BITMAP DISCARDABLE "../images/chest_open.bmp"
+
+6006 BITMAP DISCARDABLE "../images/mimic_sleeping_idle.bmp"
+6007 BITMAP DISCARDABLE "../images/mimic_opening.bmp"
+6008 BITMAP DISCARDABLE "../images/chest_destroyed.bmp"
 
 //Background images 7500 - 8500
 7500 BITMAP DISCARDABLE "../images/black.bmp" //2500

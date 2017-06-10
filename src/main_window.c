@@ -1442,11 +1442,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //Note: The returned value is significant to the calling function. Therefore, only the first event result is returned.
 //All remaining event results are ignored.
 int triggerEvent(int eventID){
-	int toReturn = processEvent(eventID, player, thisGroupContainer, main_field);
+	int toReturn = processEvent(eventID, player, thisGroupContainer, main_field, &inActionMode);
 	int nextEventID = getNextEventID(eventID);
 
 	while(nextEventID){
-		processEvent(nextEventID, player, thisGroupContainer, main_field);
+		processEvent(nextEventID, player, thisGroupContainer, main_field, &inActionMode);
 		nextEventID = getNextEventID(nextEventID);
 	}
 

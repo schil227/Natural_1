@@ -243,6 +243,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	int x, y;
 	int imageID;
+	int dummyActionMode = 0;
 
 	assert(testGroupContainer->enemies->numIndividuals == 6);
 
@@ -491,7 +492,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	individual * tmpNPC = getIndividualFromRegistry(testGroupContainer->npcs->individuals[0]->ID);
 
 	//process the CHR Check, successful
-	processEvent(getEventFromCurrentMessage(), testPlayer, testGroupContainer, main_test_field);
+	processEvent(getEventFromCurrentMessage(), testPlayer, testGroupContainer, main_test_field, &dummyActionMode);
 
 	createPermanentAbiltyTest(testPlayer);
 	createSelfDurationAbility(testPlayer);
