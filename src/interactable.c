@@ -22,6 +22,8 @@ interactType getInteractType(char * type){
 		return INTERACT_SIGN;
 	}else if(strcmp(type, "INTERACT_MIMIC") == 0){
 		return INTERACT_MIMIC;
+	}else if(strcmp(type, "INTERACT_GATE") == 0){
+		return INTERACT_GATE;
 	}
 
 	char outlog[128];
@@ -70,6 +72,8 @@ char * getInteractString(interactType type){
 		return "INTERACT_SIGN";
 	}else if(type == INTERACT_MIMIC){
 		return "INTERACT_MIMIC";
+	}else if(type == INTERACT_GATE){
+		return "INTERACT_GATE";
 	}
 
 	return "INTERACT_DEFAULT";
@@ -211,8 +215,8 @@ char * getInteractableObjectAsLine(interactable * thisObject){
 	i += sprintf(line + i, "%d;", thisObject->thisCharacter->x);
 	i += sprintf(line + i, "%d;", thisObject->thisCharacter->y);
 	i += sprintf(line + i, "%d;", thisObject->triggerDialogID);
-	i += sprintf(line + i, "%d;", thisObject->onAttackEventID);
 	i += sprintf(line + i, "%d;", thisObject->triggerEventID);
+	i += sprintf(line + i, "%d;", thisObject->onAttackEventID);
 	i += sprintf(line + i, "%d;", thisObject->isEnabled);
 	i += sprintf(line + i, "%d;", thisObject->shouldDraw);
 	i += sprintf(line + i, "%d;", thisObject->isPassable);

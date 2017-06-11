@@ -757,7 +757,7 @@ void updateAnimation(character * thisCharacter){
 
 	animation * thisAnimationSet = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
 
-	if(thisAnimationSet->durationInTicks[thisAnimationSet->currentFrame] < thisCharacter->thisAnimationContainer->clockTickCount){
+	if(thisAnimationSet->durationInTicks[thisAnimationSet->currentFrame] <= thisCharacter->thisAnimationContainer->clockTickCount){
 	  if(thisAnimationSet->currentFrame + 1 == thisAnimationSet->numFrames){
 		thisAnimationSet->currentFrame = 0;
 		thisCharacter->thisAnimationContainer->currentAnimation = thisCharacter->thisAnimationContainer->defaultAnimation; // Go back to default animation

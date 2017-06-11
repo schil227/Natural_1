@@ -631,9 +631,9 @@ void addInteractableObjectToField(interactable * thisInteractableObject, field *
 	int x = thisInteractableObject->thisCharacter->x;
 	int y = thisInteractableObject->thisCharacter->y;
 
-	if(!thisInteractableObject->shouldDraw){
-		return;
-	}
+//	if(!thisInteractableObject->shouldDraw){
+//		return;
+//	}
 
 	space * tmpSpace = getSpaceFromField(thisField, x, y);
 

@@ -48,6 +48,8 @@
 1051;[SUCCESS] You catch a fish.;0;0;0;45;0;0
 1052;[FAILURE] You fail to catch anything.;0;0;0;0;0;0
 1053;[FAILURE!] The fish swim away.;0;0;0;38;0;0
+1054;!! WARNI..G - COND..NED !!;0;0;0;0;0;0
+1055;... attack the one on the le..;0;0;0;0;0;0
 
 1008;I Surrender.;1014;33;0;0;0
 1008;I Surrender, although I do not have enough money.;1015;0;0;0;0

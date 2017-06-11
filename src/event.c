@@ -1003,6 +1003,75 @@ void attackDesguisedMimic(individual * player, event * thisEvent, groupContainer
 	decreaseTurns(tmpIndividual, thisGroupContainer, tmpIndividual->remainingActions, *inActionMode);
 }
 
+void openGateEvent(individual * player, event * thisEvent){
+	interactable * gate = getInteractableObjectFromRegistry(thisEvent->intA);
+	interactable * thisSwitch = player->currentInteractableObject;
+	animation * gateOpenAnimation;
+
+	if(gate == NULL){
+		return;
+	}
+
+	//flip switch
+	thisSwitch->inFinalMode = 1;
+	setDefaultAnimation(thisSwitch->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL);
+	setAnimation(thisSwitch->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_1);
+
+	//raise gate
+	gate->isEnabled = 0;
+	gate->isPassable = 1;
+	gate->shouldDraw = 0;
+	gate->inFinalMode = 1;
+	gate->canAttackThrough = 1;
+
+	animation * tmpAnimation = getAnimationFromType(gate->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL);
+
+	if(tmpAnimation == NULL){
+		return;
+	}
+
+	gateOpenAnimation = cloneAnimation(tmpAnimation);
+
+	addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(gateOpenAnimation), gate->thisCharacter->x, gate->thisCharacter->y);
+	increaseSpecialDrawDurationIfGreater(gateOpenAnimation->totalDuration);
+	enableSpecialDrawMode();
+}
+
+void closeGateEvent(individual * player, event * thisEvent, field * thisField){
+	interactable * gate = getInteractableObjectFromRegistry(thisEvent->intA);
+	interactable * thisSwitch = player->currentInteractableObject;
+	animation * gateOpenAnimation;
+	space * tmpSpace;
+
+	if(gate == NULL){
+		return;
+	}
+
+	tmpSpace = getSpaceFromField(thisField, gate->thisCharacter->x, gate->thisCharacter->y);
+
+	//cant close gate if individual in the way
+	if(tmpSpace == NULL || tmpSpace->currentIndividual != NULL){
+		return;
+	}
+
+	//flip switch
+	thisSwitch->inFinalMode = 0;
+	setDefaultAnimation(thisSwitch->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_IDLE);
+	setAnimation(thisSwitch->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_2);
+
+	//lower gate
+	gate->isEnabled = 1;
+	gate->isPassable = 0;
+	gate->shouldDraw = 1;
+	gate->inFinalMode = 0;
+	gate->canAttackThrough = 0;
+
+	setAnimation(gate->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_1);
+
+	increaseSpecialDrawDurationIfGreater(gate->thisCharacter->thisAnimationContainer->animations[gate->thisCharacter->thisAnimationContainer->currentAnimation]->totalDuration);
+	enableSpecialDrawMode();
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode){
 	event * thisEvent = getEventFromRegistry(eventID);
 
@@ -1083,6 +1152,10 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			attackDesguisedMimic(player, thisEvent, thisGroupContainer, thisField, inActionMode);
 			return 0;
 		case 35:
+			openGateEvent(player, thisEvent);
+			return 0;
+		case 36:
+			closeGateEvent(player, thisEvent, thisField);
 			return 0;
 		}
 }

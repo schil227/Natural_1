@@ -148,10 +148,22 @@ END
 6003 BITMAP DISCARDABLE "../images/chest_idle.bmp"
 6004 BITMAP DISCARDABLE "../images/chest_opening.bmp"
 6005 BITMAP DISCARDABLE "../images/chest_open.bmp"
-
 6006 BITMAP DISCARDABLE "../images/mimic_sleeping_idle.bmp"
 6007 BITMAP DISCARDABLE "../images/mimic_opening.bmp"
 6008 BITMAP DISCARDABLE "../images/chest_destroyed.bmp"
+
+6009 BITMAP DISCARDABLE "../images/signpost_idle.bmp"
+6010 BITMAP DISCARDABLE "../images/sign_wall_idle.bmp"
+6011 BITMAP DISCARDABLE "../images/sign_low_wall_idle.bmp"
+
+6012 BITMAP DISCARDABLE "../images/iron_gate_idle.bmp"
+6013 BITMAP DISCARDABLE "../images/iron_gate_opening.bmp"
+
+6014 BITMAP DISCARDABLE "../images/stone_switch_idle.bmp"
+6015 BITMAP DISCARDABLE "../images/stone_switch_turning_on.bmp"
+6016 BITMAP DISCARDABLE "../images/stone_switch_on_idle.bmp"
+6017 BITMAP DISCARDABLE "../images/stone_switch_turning_off.bmp"
+6018 BITMAP DISCARDABLE "../images/iron_gate_closing.bmp"
 
 //Background images 7500 - 8500
 7500 BITMAP DISCARDABLE "../images/black.bmp" //2500
