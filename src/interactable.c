@@ -24,6 +24,8 @@ interactType getInteractType(char * type){
 		return INTERACT_MIMIC;
 	}else if(strcmp(type, "INTERACT_GATE") == 0){
 		return INTERACT_GATE;
+	}else if(strcmp(type, "INTERACT_TRAP") == 0){
+		return INTERACT_TRAP;
 	}
 
 	char outlog[128];
@@ -74,6 +76,8 @@ char * getInteractString(interactType type){
 		return "INTERACT_MIMIC";
 	}else if(type == INTERACT_GATE){
 		return "INTERACT_GATE";
+	}else if(type == INTERACT_TRAP){
+		return "INTERACT_TRAP";
 	}
 
 	return "INTERACT_DEFAULT";

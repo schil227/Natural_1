@@ -4,7 +4,8 @@
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (5/22/17) Develop a way to see transit spaces (e.g. outline in gold)
-- (4/29/17) Implement action - allows you to interact with things to make stuff happen
+- (5/18/17) Implement respawning Individuals, interactables (e.g. fishing)
+- (4/29/17) Character creation/title screens
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
@@ -13,12 +14,8 @@
 - (11/12/16) Add casting animations
 - (2/21/17) Abilities: change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
 - (4/17/17) Larger window draws more, bigger slowdown, find optimizations. See if I should convert to DirectX to draw (maybe with sound as well)
-- (4/29/17) Character creation/title screens
-- (5/18/17) Implement respawning
 - (5/25/17) Make the main window run completely seperate from the tests (e.g. build/destroy everything, build resources that only need to be built once like Sound)
 - (6/1/17) Make it so events dont chain together, rather an event encapsulates several smaller independent events.
-
-
 
 ==FINISHED==
 - (11/12/16 - 10/22/16) Implement Crimes (DONE)
@@ -55,3 +52,4 @@
 - (5/7/17 - 5/16/17) have a view to show individual stats, pure stats, bonuses, negatives, active abilities/statuses/items, etc. (DONE)
 - (5/18/17 - 5/22/17) Add save/load functionality (DONE)
 - (5/22/17 - 5/28/17) Map Generator: create a UI to make/generate maps (DONE)
+- (4/29/17 - 6/11/17) Implement action - allows you to interact with things to make stuff happen (DONE)

@@ -165,6 +165,9 @@ END
 6017 BITMAP DISCARDABLE "../images/stone_switch_turning_off.bmp"
 6018 BITMAP DISCARDABLE "../images/iron_gate_closing.bmp"
 
+6019 BITMAP DISCARDABLE "../images/raised_plate_idle.bmp"
+6020 BITMAP DISCARDABLE "../images/falling_stones.bmp"
+
 //Background images 7500 - 8500
 7500 BITMAP DISCARDABLE "../images/black.bmp" //2500
 7501 BITMAP DISCARDABLE "../images/grass.bmp" //2501

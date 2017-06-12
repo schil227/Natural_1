@@ -5,6 +5,7 @@
  *      Author: Adrian
  */
 #include"./headers/enemy_controller_pub_methods.h"
+#include"./headers/event_pub_methods.h"
 #include<stdio.h>
 
 node * createNewNode(int pathLength, int x, int y){
@@ -443,6 +444,44 @@ void animateMove(RECT rect, individual * thisIndividual, field * thisField, shif
 		if(updateViewShift){
 			tryUpdateXShift(viewShift, (*tmpMoveNode)->x, getGameFieldAreaX(&rect));
 			tryUpdateYShift(viewShift, (*tmpMoveNode)->y, getGameFieldAreaY(&rect));
+		}
+
+		space * tmpSpace = getSpaceFromField(thisField, (*tmpMoveNode)->x, (*tmpMoveNode)->y);
+
+		if(tmpSpace->interactableObject != NULL && tmpSpace->interactableObject->isEnabled && tmpSpace->interactableObject->type == INTERACT_TRAP && tmpSpace->currentIndividual == NULL){
+			event * trapEvent = getEventFromRegistry(tmpSpace->interactableObject->finalEvent);
+			interactable * trap = tmpSpace->interactableObject;
+
+			trap->inFinalMode = 1;
+			trapEvent->individualID = thisIndividual->ID;
+			thisIndividual->currentInteractableObject = trap;
+
+			//does the trap get triggered
+			if(triggerEvent(trapEvent->ID)){
+				// triggered trap, end movement
+				*postMoveMode = 0;
+				trap->isEnabled = 0;
+				trap->shouldDraw = 0;
+				trap->isPassable = 1;
+
+				if(thisIndividual->hp <= 0){
+					triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
+
+					removeFromExistance(thisIndividual->ID);
+					addSpecialIndividual(thisIndividual);
+
+					setIndividualDelayAnimation(thisIndividual, ANIMATION_DEATH, 0);
+					increaseSpecialDrawDurationIfGreater(thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration);
+				}else{
+					moveIndividualSpace(thisField, thisIndividual,(*tmpMoveNode)->x,(*tmpMoveNode)->y);
+				}
+
+				return;
+			}else{
+				//trap not triggered, skip
+				trap->inFinalMode = 0;
+				trapEvent->individualID = 0;
+			}
 		}
 
 		if((*tmpMoveNode)->nextMoveNode == NULL){

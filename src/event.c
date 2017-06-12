@@ -475,6 +475,45 @@ int crimeCommittedInLoS(individual * player, individualGroup * guards, individua
 	return toReturn;
 }
 
+int multiStatCheck(individual * player, event * thisEvent, int toBeat){
+	int statSum = 0, d20;
+	int numStats = thisEvent->intA;
+
+	if(toBeat == -1){
+		toBeat = thisEvent->intB;
+	}
+
+	d20 = rand() % 20 + 1;
+
+	if(d20 == 20){
+		cwrite("Natural 20!");
+		return 1;
+	}else if(d20 == 1){
+		cwrite("Natural 1!");
+		return 0;
+	}
+
+	char * value = strtok(thisEvent->message,",");
+
+	while(value != NULL){
+		int tmpTotal = getAttributeSum(player, value);
+
+		//get magnitued of stat
+		value = strtok(NULL,",");
+		statSum += tmpTotal * atoi(value);
+
+		value = strtok(NULL,",");
+	}
+
+	d20 += statSum;
+
+	if(d20 > toBeat){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
 int multiStatDialogCheck(individual * player, event * thisEvent){
 	int toBeat = 12, statSum = 0, d20;
 	int numStats = thisEvent->intA;
@@ -1072,6 +1111,60 @@ void closeGateEvent(individual * player, event * thisEvent, field * thisField){
 	enableSpecialDrawMode();
 }
 
+int triggerTrap(event * thisEvent, field * thisField){
+	int totalDamage = 0;
+	individual * thisIndividual = getIndividualFromRegistry(thisEvent->individualID);
+	interactable * trap;
+	animation * interactAnimation;
+	char out[128];
+
+	if(thisIndividual == NULL){
+		return 0;
+	}
+
+	//dont trigger the trap?
+	if(multiStatCheck(thisIndividual, thisEvent, 13)){
+
+		sprintf(out, "%s skillfully didn't trigger the trap!", thisIndividual->name);
+		cwrite(out);
+
+		return 0;
+	}
+
+	sprintf(out, "%s triggered the trap!", thisIndividual->name);
+	cwrite(out);
+
+	trap = thisIndividual->currentInteractableObject;
+
+	//finalize trap interactable
+	trap->isEnabled = 0;
+	trap->isPassable = 1;
+	trap->shouldDraw = 0;
+	trap->inFinalMode = 1;
+
+	animation * tmpAnimation = getAnimationFromType(trap->thisCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_FINAL);
+
+	interactAnimation = cloneAnimation(tmpAnimation);
+
+	addCharacterToSpecialDrawWithCoords(createCharacterFromAnimation(interactAnimation), trap->thisCharacter->x, trap->thisCharacter->y);
+	increaseSpecialDrawDurationIfGreater(interactAnimation->totalDuration);
+	enableSpecialDrawMode();
+
+	//damage individual
+	totalDamage = 1 + (rand() % thisEvent->intA);
+
+	totalDamage = totalDamage - calcDR(thisIndividual, (char)thisEvent->intB);
+
+	if(totalDamage < 1){
+		totalDamage = 0;
+	}
+
+	//check for death on return
+	thisIndividual->hp -= totalDamage;
+
+	return 1;
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode){
 	event * thisEvent = getEventFromRegistry(eventID);
 
@@ -1157,6 +1250,8 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 36:
 			closeGateEvent(player, thisEvent, thisField);
 			return 0;
+		case 37:
+			return triggerTrap(thisEvent, thisField);
 		}
 }
 

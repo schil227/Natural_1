@@ -1,8 +1,4 @@
 == TODO In Depth ==
-Create Events:
--Clone item to inventory
--Multi-stat check with intA/B setting the crit success/fail bounds
-
 
 == minor todos ==
 -add dark LoS stat to ability
