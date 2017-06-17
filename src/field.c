@@ -568,6 +568,8 @@ destroyField(field * thisField, individual * player){
 	free(thisField->playerCords);
 
 	free(thisField);
+
+	thisField = NULL;
 }
 
 void makeTransitSpaces(char * transitMap, char* directory, field * thisField, individual * player){
@@ -581,7 +583,7 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 	while (fgets(line, 80, enemyFP) != NULL) {
 		if (line[0] != '#') { //ignore commented-out lines
 			space * tmpSpace;
-			int id, x, y, targetID;
+			int id, x, y, targetID, areaNodeID;
 			char targetTransitMap[32]; // = malloc(sizeof(char) * 32);
 
 			char * transitInstance = strtok(line, ";");
@@ -599,6 +601,9 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 			transitInstance = strtok(NULL, ";");
 			targetID = atoi(transitInstance);
 
+			transitInstance = strtok(NULL, ";");
+			areaNodeID = atoi(transitInstance);
+
 			tmpSpace = getSpaceFromField(thisField, x, y);
 
 			if (thisField->grid[x][y]->thisTransitInfo != NULL) {
@@ -610,7 +615,7 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 			thisField->grid[x][y]->thisTransitInfo->transitID = id;
 			strcpy(thisField->grid[x][y]->thisTransitInfo->transitMap,targetTransitMap);
 			thisField->grid[x][y]->thisTransitInfo->targetMapTransitID = targetID;
-
+			thisField->grid[x][y]->thisTransitInfo->areaNodeID = areaNodeID;
 
 			//spawn player at this location
 			if(player->jumpTarget == id){

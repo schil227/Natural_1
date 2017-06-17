@@ -12,6 +12,7 @@
 #include"../event_pub_methods.h"
 #include"../abilities_pub_methods.h"
 #include"../sound_pub_methods.h"
+#include"../world_map_controller_pub_methods.h"
 #include<stdio.h>
 
 typedef struct {
@@ -36,6 +37,7 @@ typedef struct {
 	mapInfo * mapInfoArr[1000];
 	descriptionMap * descriptions[500];
 	interactable * interactableObjects[1000];
+	areaNode * areaNodes[100];
 
 	int MAX_INDIVIDUALS;
 	int numIndividuals;
@@ -78,6 +80,9 @@ typedef struct {
 
 	int numInteractalbeObjects;
 	int MAX_INTERACTABLE_OBJECTS;
+
+	int numAreaNodes;
+	int MAX_AREA_NODES;
 } globalRegister;
 
 #endif /* SRC_HEADERS_STRUCTS_GLOBAL_REGISTER_H_ */

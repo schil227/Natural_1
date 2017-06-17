@@ -64,6 +64,9 @@ void initalizeTheGlobalRegister(){
 
 	thisGlobalRegister->MAX_INTERACTABLE_OBJECTS = 1000;
 	thisGlobalRegister->numInteractalbeObjects = 0;
+
+	thisGlobalRegister->MAX_AREA_NODES = 100;
+	thisGlobalRegister->numAreaNodes = 0;
 }
 
 individual * getIndividualFromRegistry(int id){
@@ -321,6 +324,22 @@ interactable * getInteractableObjectFromRegistry(int id){
 	return NULL;
 }
 
+areaNode * getAreaNodeFromRegistry(int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numAreaNodes; i++){
+		if(thisGlobalRegister->areaNodes[i]->id == id){
+			return thisGlobalRegister->areaNodes[i];
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!AREA NODE NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return NULL;
+}
+
 int addIndividualToRegistry(individual * thisIndividual){
 	if(thisGlobalRegister->numIndividuals < thisGlobalRegister->MAX_INDIVIDUALS){
 		thisGlobalRegister->individualRegistry[thisGlobalRegister->numIndividuals] = thisIndividual;
@@ -490,6 +509,18 @@ int addInteractableObjectToRegistry(interactable * thisInteractableObject){
 	return 0;
 }
 
+int addAreaNodeToRegistry(areaNode * thisAreaNode){
+	if(thisGlobalRegister->numAreaNodes < thisGlobalRegister->MAX_AREA_NODES){
+		thisGlobalRegister->areaNodes[thisGlobalRegister->numAreaNodes] = thisAreaNode;
+		thisGlobalRegister->numAreaNodes++;
+		return 1;
+	}
+
+	cwrite("!!MAX AREA NODES IN REGISTRY!!");
+
+	return 0;
+}
+
 /*
  * TODO: On cutover, make sure destroy individual doesn't destroy items.
  * That will be handed at the registry level
@@ -531,7 +562,7 @@ void destroyTheGlobalRegister(){
 
 void loadGlobalRegister(char * saveMapDirectory, char * mapDirectory, char * individualsData, char * itemsData, char * eventsData, char * soundsData,
 						char * animationData, char * permenantAbilitiesData, char * selfAbilitiesData, char * targetedAbilitiesData,
-						char * instantAbilitiesData, char * mapInfo, char * descriptions, char * interactableObjects){
+						char * instantAbilitiesData, char * mapInfo, char * descriptions, char * interactableObjects, char * areaNodes){
 	// Priority loading:
 	//individuals dependant on xAbilities
 	loadPermenantAbilitiesToRegistry(saveMapDirectory, permenantAbilitiesData);
@@ -547,6 +578,7 @@ void loadGlobalRegister(char * saveMapDirectory, char * mapDirectory, char * ind
 	loadMapDataToRegistry(saveMapDirectory, mapInfo);
 	loadDescriptionsToRegistry(mapDirectory, descriptions);
 	loadInteractableObjectsToRegistry(saveMapDirectory, interactableObjects);
+	loadAreaNodesToRegistry(saveMapDirectory, areaNodes);
 }
 
 void loadIndividualsToRegistry(char* directory, char * individualsFileName){
@@ -782,6 +814,22 @@ void loadInteractableObjectsToRegistry(char * directory, char * interactableObje
 	free(fullFileName);
 }
 
+void loadAreaNodesToRegistry(char * directory, char * areaNodes){
+	char * fullFileName = appendStrings(directory, areaNodes);
+	FILE * FP = fopen(fullFileName, "r");
+	char line[256];
+
+	while(fgets(line,128,FP) != NULL){
+		if (line[0] != '#') {
+			areaNode * newAreaNode = getAreaNodeFromLine(line);
+			addAreaNodeToRegistry(newAreaNode);
+		}
+	}
+
+	fclose(FP);
+	free(fullFileName);
+}
+
 void createDescriptionMapFromLine(descriptionMap * tmpDescription, char * line){
 	char * strtok_save_pointer;
 	char * value;
@@ -831,6 +879,20 @@ void populateMapGeneratorImages(character * characterSet[1000], int * numImages,
 	}
 
 	*numImages = j;
+}
+
+int getAllAreaNodesFromRegistry(areaNode ** nodeContainer, int maxNodes){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numAreaNodes; i++){
+		if(i < maxNodes){
+			nodeContainer[i] = thisGlobalRegister->areaNodes[i];
+		}else{
+			break;
+		}
+	}
+
+	return i;
 }
 
 void removeFromExistance(int id){
@@ -1078,7 +1140,7 @@ void writeInstantAbilitiesToFile(char * directory, char * saveDirectory, char * 
 	releaseFieldReadLock();
 }
 
-void writeInteractableObjectToFile(char * directory, char * saveDirectory, char * mapInfoFileName){
+void writeInteractableObjectToFile(char * directory, char * saveDirectory, char * interactabeObjectFileName){
 	int i = 0;
 
 	while(!tryGetFieldReadLock()){}
@@ -1090,7 +1152,7 @@ void writeInteractableObjectToFile(char * directory, char * saveDirectory, char 
 
 	_mkdir(fullFileName);
 
-	i += sprintf(fullFileName + i, "%s", mapInfoFileName);
+	i += sprintf(fullFileName + i, "%s", interactabeObjectFileName);
 
 	FILE * FP = fopen(fullFileName, "w");
 
@@ -1104,4 +1166,26 @@ void writeInteractableObjectToFile(char * directory, char * saveDirectory, char 
 
 	releaseFieldWriteLock();
 	releaseFieldReadLock();
+}
+
+void writeAreaNodesToFile(char * directory, char * saveDirectory, char * areaNodeFileName){
+	int i = 0;
+
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
+
+	_mkdir(fullFileName);
+
+	i += sprintf(fullFileName + i, "%s", areaNodeFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	for(i = 0; i < thisGlobalRegister->numAreaNodes; i++){
+		char * line = getAreaNodeAsLine(thisGlobalRegister->areaNodes[i]);
+		fprintf(FP, "%s\n",  line);
+		free(line);
+	}
+
+	fclose(FP);
 }

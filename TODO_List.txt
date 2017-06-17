@@ -6,9 +6,11 @@
 - (5/22/17) Develop a way to see transit spaces (e.g. outline in gold)
 - (5/18/17) Implement respawning Individuals, interactables (e.g. fishing)
 - (4/29/17) Character creation/title screens
+- (6/12/17) Make a world map, implement moving around with it (tied to respawning)
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
+-(6/17/17) Attack and rob store clerk standing to the right of him, pathing error, need to handle case where nodeArr is one in length (original node). See getSpaceClosestToSpace in enemy_controller where resultArr->length = 1
  
 ==BACK BURNER==
 - (11/12/16) Add casting animations

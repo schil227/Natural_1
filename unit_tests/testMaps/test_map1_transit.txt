@@ -1,2 +1,2 @@
-1;1;1;nomap.txt;0
-2;6;8;test_map2.txt;1
+1;1;1;nomap.txt;0;-1
+2;6;8;test_map2.txt;1;-1

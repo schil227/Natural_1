@@ -6,6 +6,7 @@
  */
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
+#include <stdio.h>
 
 int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode, int * playerControlMode, int animateMoveSpeed) {
@@ -571,6 +572,77 @@ int characterInfoViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
+
+	return 0;
+}
+
+int worldMapLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int * inActionMode){
+	switch(msg){
+	case WM_KEYDOWN: {
+		switch(LOWORD(wParam)){
+		case 0x31:
+		case 0x61:
+		case 0x32:
+		case 0x62:
+		case 0x33:
+		case 0x63:
+		case 0x34:
+		case 0x64:
+		case 0x36:
+		case 0x66:
+		case 0x37:
+		case 0x67:
+		case 0x38:
+		case 0x68:
+		case 0x39:
+		case 0x69: {
+			tryMoveWorldMap(LOWORD(wParam) % 16);
+		}
+			break;
+
+		case 0x0D: //enter
+		{
+			if(transitFromAreaNode(getCurrentAreaNode(), thisField, player, thisGroupContainer, viewShift, mapDirectory)){
+				disableWorldMapMode();
+
+				RECT rect;
+				GetClientRect(hwnd, &rect);
+				HDC hdc = GetDC(hwnd);
+				HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+				printf("WANT: transit\n");fflush(stdout);
+				while(!tryGetFieldWriteLock()){}
+				printf("GOT: transit\n");fflush(stdout);
+				updateFieldGraphics(hdc, hdcBuffer, *thisField);
+				transitViewShift(viewShift, player, *thisField, &rect);
+				inActionMode = shouldEnableActionMode();
+
+				releaseFieldWriteLock();
+
+				printf("RELEASED: transit\n");fflush(stdout);
+			}
+		}
+			break;
+		case 0x50://p key (inventory)
+		{
+			togglePaused();
+		}
+		break;
+	}
+	break;
+	}
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		destroyTheGlobalRegister();
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+
+	return 0;
 }
 
 int lookViewScrollLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
@@ -613,6 +685,8 @@ int lookViewScrollLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
+
+	return 0;
 }
 
 int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * main_field, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, int * inActionMode) {

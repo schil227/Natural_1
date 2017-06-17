@@ -1032,11 +1032,29 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	return 1;
 }
 
+int transitFromAreaNode(areaNode * thisAreaNode, field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory){
+	mapInfo * thisMapInfo = getMapInfoFromRegistry(thisAreaNode->mapID);
+	player->jumpTarget = thisAreaNode->mapTransitID;
+
+	printf("WANT: world transit\n");fflush(stdout);
+	while(!tryGetFieldWriteLock()){}
+	printf("GOT: world transit\n");fflush(stdout);
+
+	*thisField = loadMap(thisMapInfo->mapName, mapDirectory, player, thisGroupContainer);
+
+	releaseFieldWriteLock();
+	printf("RELEASED: world transit\n");fflush(stdout);
+
+	setAlliesToField(player, thisGroupContainer->allies, *thisField);
+
+	return 1;
+}
+
 int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory){
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
-		if(tmpSpace->thisTransitInfo != NULL && tmpSpace->thisTransitInfo->targetMapTransitID != 0){
-//			int x, y, imageID;
+		if(tmpSpace->thisTransitInfo != NULL && (tmpSpace->thisTransitInfo->targetMapTransitID != 0 || tmpSpace->thisTransitInfo->areaNodeID != -1)){
+			int areaNodeID = tmpSpace->thisTransitInfo->areaNodeID;
 			char mapName[256];
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
@@ -1069,6 +1087,18 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			clearGroup(thisGroupContainer->npcs);
 			clearGroup(thisGroupContainer->beasts);
 			clearGroup(thisGroupContainer->guards);
+
+			if(areaNodeID != -1){
+				releaseFieldWriteLock();
+				printf("RELEASED: destroy\n");fflush(stdout);
+
+				if(player->thisReportedCrimes->numReportedCrimes > 0){
+					setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
+				}
+
+				enableWorldMapMode(areaNodeID);
+				return 1;//?
+			}
 
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 

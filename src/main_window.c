@@ -342,9 +342,33 @@ void drawAll(HDC hdc, RECT* prc) {
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
 	int index;
 
+	if(inWorldMapMode()){
+		drawWorldMapInstance(hdc, hdcBuffer, player, viewShift);
+
+		if(isPaused()){
+			drawPauseWindow(hdc, hdcBuffer, prc);
+		}
+
+		BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
+
+		SelectObject(hdcBuffer, hbmOldBuffer);
+		DeleteDC(hdcBuffer);
+		DeleteObject(hbmBuffer);
+		return;
+	}
+
 	printf("WANT: dark\n"); fflush(stdout);
 	while(!tryGetFieldReadLock()){}
 	printf("GOT: dark\n");fflush(stdout);
+
+	if(main_field == NULL){
+		BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
+
+		SelectObject(hdcBuffer, hbmOldBuffer);
+		DeleteDC(hdcBuffer);
+		DeleteObject(hbmBuffer);
+		return;
+	}
 
 	if(main_field->isDark){
 		main_field->playerLoS = getAttributeSum(player, "darkLoS");
@@ -643,7 +667,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 	appendNewMessageNode("You leave the forest.");
 	appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-	loadGlobalRegister(saveMapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt");
+	loadGlobalRegister(saveMapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt", "areaNodes.txt");
 	loadDialog("dialog.txt", saveMapDirectory);
 	setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
@@ -652,6 +676,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 	initLookView(1519, 1520);
 	initCharacterInfoView();
 	initPauseView(1523);
+	initWorldMapController(10003);
 
 	player = getIndividualFromRegistry(1);
 
@@ -714,7 +739,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("You leave the forest.");
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
-		loadGlobalRegister(mapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt",  "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt");
+		loadGlobalRegister(mapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt",  "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt", "areaNodes.txt");
 		loadDialog("dialog.txt", mapDirectory);
 		setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
@@ -723,6 +748,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initLookView(1519, 1520);
 		initCharacterInfoView();
 		initPauseView(1523);
+		initWorldMapController(10003);
 
 		enableSound();
 
@@ -1089,7 +1115,7 @@ LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 			initLockAuth();
 			initalizeTheGlobalRegister();
 
-			loadGlobalRegister(mapDirectory, mapDirectory, "", "", "", "", "images.txt", "", "", "", "", "", "", "");
+			loadGlobalRegister(mapDirectory, mapDirectory, "", "", "", "", "images.txt", "", "", "", "", "", "", "", "");
 
 			initMapGenerator(mapDirectory);
 
@@ -1282,7 +1308,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return 0;
 	}
 
-	if(isSpecialDrawModeEnabled()){
+	if(inWorldMapMode()){
+		return worldMapLoop(hwnd, msg, wParam, lParam, &main_field, player, thisGroupContainer, viewShift, mapDirectory, &inActionMode);
+	}else if(isSpecialDrawModeEnabled()){
 		specialDrawLoop(hwnd, msg, wParam, lParam);
 		return 0;
 	}else if(shouldDrawDialogBox()){
@@ -1478,7 +1506,7 @@ void runTests(){
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt", "test_onPickupTriggerMap.txt");
 
-	loadGlobalRegister(mapTestDirectory, mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "test_mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt");
+	loadGlobalRegister(mapTestDirectory, mapTestDirectory, "test_individuals.txt", "test_items.txt", "test_events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "test_mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt", "areaNodes.txt");
 	loadDialog("dialog.txt", mapTestDirectory);
 	setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
@@ -1487,6 +1515,8 @@ void runTests(){
 	initLookView(1519, 1520);
 	initCharacterInfoView();
 	initPauseView(1523);
+	initWorldMapController(10003);
+
 	animationContainer * playerAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;
 

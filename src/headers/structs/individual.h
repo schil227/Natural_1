@@ -24,11 +24,6 @@ typedef enum { CRIME_NONE, CRIME_STEALING, CRIME_PICKPOCKETING, CRIME_ASSULT, CR
 typedef enum {DIALOG_DEFAULT, DIALOG_CRIME_WITNESS, DIALOG_HOSTILE_TO_PLAYER, DIALOG_ATTACKED_BY_PLAYER, DIALOG_STOLEN_FROM_BY_PLAYER, DIALOG_AFRAID_OF_PLAYER} dialogType;
 
 typedef struct{
-	int x;
-	int y;
-} cord;
-
-typedef struct{
 	cord * cords[300];
 	int numCords;
 	int MAX_CORDS;

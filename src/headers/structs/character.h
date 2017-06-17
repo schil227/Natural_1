@@ -29,6 +29,11 @@ typedef enum {
 
 } animationState;
 
+typedef struct{
+	int x;
+	int y;
+} cord;
+
 typedef struct {
 	int imageID;
 	HBITMAP image;
