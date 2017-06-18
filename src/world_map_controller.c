@@ -32,9 +32,12 @@ void enableWorldMapMode(int areaNodeID){
 	thisWorldMapController->inWorldMapMode = 1;
 	thisWorldMapController->currentAreaNode = getAreaNodeFromRegistry(areaNodeID);
 	thisWorldMapController->currentAreaNode->playerOccupied = 1;
+	thisWorldMapController->currentAreaNode->isHidden = 0;
+	setCurrentNeighborNodeAnimations(thisWorldMapController->currentAreaNode, 1);
 }
 
 void disableWorldMapMode(){
+	setCurrentNeighborNodeAnimations(thisWorldMapController->currentAreaNode, 0);
 	thisWorldMapController->inWorldMapMode = 0;
 }
 
@@ -67,7 +70,9 @@ void drawWorldMapInstance(HDC hdc, HDC hdcBuffer, individual * player, shiftData
 		y = tmpNode->nodeCharacter->y;
 
 		//TODO: check if in bounds before drawing
+
 		drawUnboundAnimationByPixels(hdc, hdcBuffer, tmpNode->nodeCharacter, x, y, 0);
+		updateAnimation(tmpNode->nodeCharacter);
 
 		if(tmpNode->playerOccupied){
 			int playerXOff = x - 37;
@@ -100,8 +105,60 @@ void tryMoveWorldMap(int directionIndex){
 	newAreaNode = getAreaNodeFromRegistry(nextAreaNodeID);
 
 	thisWorldMapController->currentAreaNode->playerOccupied = 0;
+	setCurrentNeighborNodeAnimations(thisWorldMapController->currentAreaNode, 0);
 	thisWorldMapController->currentAreaNode = newAreaNode;
 	thisWorldMapController->currentAreaNode->playerOccupied = 1;
+
+	setCurrentNeighborNodeAnimations(thisWorldMapController->currentAreaNode, 1);
+}
+
+void setCurrentNeighborNodeAnimations(areaNode * newNode,  int animateSpace){
+	int i;
+
+	for(i = 0; i < thisWorldMapController->numAreaNodes; i++){
+		areaNode * tmpNode = thisWorldMapController->allNodes[i];
+
+		if(isCurrentNeighborNode(tmpNode)){
+			if(animateSpace){
+				setDefaultAnimation(tmpNode->nodeCharacter->thisAnimationContainer, ANIMATION_INTERACTABLE_ACTION_1);
+			}else{
+				setDefaultAnimation(tmpNode->nodeCharacter->thisAnimationContainer, ANIMATION_IDLE);
+			}
+		}
+	}
+}
+
+int isCurrentNeighborNode(areaNode * thisNode){
+	int i;
+
+	for(i = 0; i < thisWorldMapController->currentAreaNode->MAX_NODES; i++){
+		if(thisNode->id == thisWorldMapController->currentAreaNode->LinkedNodeIDs[i]){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+void unhideAreaNodes(char * areaNodeIDs){
+	char * strtok_line_pointer;
+	char * value;
+
+	value = strtok_r(areaNodeIDs, ",", &strtok_line_pointer);
+	while(value != NULL){
+		unhideAreaNodeByID(atoi(value));
+		value = strtok_r(NULL, ",", &strtok_line_pointer);
+	}
+}
+
+void unhideAreaNodeByID(int id){
+	int i;
+
+	for(i = 0; i < thisWorldMapController->numAreaNodes; i++){
+		if(thisWorldMapController->allNodes[i]->id == id){
+			thisWorldMapController->allNodes[i]->isHidden = 0;
+		}
+	}
 }
 
 areaNode * getAreaNodeFromLine(char * line){
@@ -141,7 +198,7 @@ areaNode * getAreaNodeFromLine(char * line){
 	thisAreaNode->mapTransitID = atoi(value);
 
 	value = strtok_r(NULL, ";", &strtok_line_pointer);
-	thisAreaNode->isHidden = 0;
+	thisAreaNode->isHidden = atoi(value);
 
 	value = strtok_r(NULL, ";", &strtok_line_pointer);
 	thisAreaNode->LinkedNodeIDs[0] = atoi(value);

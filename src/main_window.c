@@ -912,6 +912,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				writeMapInfoToFile(mapDirectory,"saves\\test\\","mapInfo.txt");
 				writeItemsToFile(mapDirectory,"saves\\test\\","items.txt");
 				writeInteractableObjectToFile(mapDirectory,"saves\\test\\","interactableObjects.txt");
+				writeAreaNodesToFile(mapDirectory,"saves\\test\\","areaNodes.txt");
 
 				writePermenantAbilitiesToFile(mapDirectory,"saves\\test\\","permenant_abilities.txt");
 				writeDurationAbilitiesToFile(mapDirectory,"saves\\test\\","duration_abilities.txt");

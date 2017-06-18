@@ -31,8 +31,10 @@ typedef struct{
 	fixedCharacter * worldMap;
 	areaNode * currentAreaNode;
 	areaNode * allNodes[100];
+
 	int numAreaNodes;
 	int MAX_AREA_NODES;
+
 	int inWorldMapMode;
 } worldMapController;
 

@@ -22,6 +22,7 @@ typedef struct {
 	int transitID;
 	int targetMapTransitID;
 	int areaNodeID;
+	int transitEventID;
 } transitInfo;
 
 typedef struct {

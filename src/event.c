@@ -1165,6 +1165,10 @@ int triggerTrap(event * thisEvent, field * thisField){
 	return 1;
 }
 
+void unhideMapSpacesEvent(event * thisEvent){
+	unhideAreaNodes(thisEvent->message);
+}
+
 int processEvent(int eventID, individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode){
 	event * thisEvent = getEventFromRegistry(eventID);
 
@@ -1252,6 +1256,9 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 			return 0;
 		case 37:
 			return triggerTrap(thisEvent, thisField);
+		case 38:
+			unhideMapSpacesEvent(thisEvent);
+			return 0;
 		}
 }
 

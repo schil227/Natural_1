@@ -583,42 +583,41 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 	while (fgets(line, 80, enemyFP) != NULL) {
 		if (line[0] != '#') { //ignore commented-out lines
 			space * tmpSpace;
-			int id, x, y, targetID, areaNodeID;
-			char targetTransitMap[32]; // = malloc(sizeof(char) * 32);
+			int x, y;
+			transitInfo * newTransitInfo = malloc(sizeof(transitInfo));
 
-			char * transitInstance = strtok(line, ";");
-			id = atoi(transitInstance);
+			char * value = strtok(line, ";");
+			newTransitInfo->transitID = atoi(value);
 
-			transitInstance = strtok(NULL, ";");
-			x = atoi(transitInstance);
+			value = strtok(NULL, ";");
+			x = atoi(value);
 
-			transitInstance = strtok(NULL, ";");
-			y = atoi(transitInstance);
+			value = strtok(NULL, ";");
+			y = atoi(value);
 
-			transitInstance = strtok(NULL, ";");
-			strcpy(targetTransitMap, transitInstance);
+			value = strtok(NULL, ";");
+			strcpy(newTransitInfo->transitMap, value);
 
-			transitInstance = strtok(NULL, ";");
-			targetID = atoi(transitInstance);
+			value = strtok(NULL, ";");
+			newTransitInfo->targetMapTransitID = atoi(value);
 
-			transitInstance = strtok(NULL, ";");
-			areaNodeID = atoi(transitInstance);
+			value = strtok(NULL, ";");
+			newTransitInfo->areaNodeID = atoi(value);
+
+			value = strtok(NULL, ";");
+			newTransitInfo->transitEventID = atoi(value);
 
 			tmpSpace = getSpaceFromField(thisField, x, y);
 
-			if (thisField->grid[x][y]->thisTransitInfo != NULL) {
-				free(thisField->grid[x][y]->thisTransitInfo);
-				thisField->grid[x][y]->thisTransitInfo = NULL;
+			if (tmpSpace->thisTransitInfo != NULL) {
+				free(tmpSpace->thisTransitInfo);
+				tmpSpace->thisTransitInfo = NULL;
 			}
 
-			thisField->grid[x][y]->thisTransitInfo = malloc(sizeof(transitInfo));
-			thisField->grid[x][y]->thisTransitInfo->transitID = id;
-			strcpy(thisField->grid[x][y]->thisTransitInfo->transitMap,targetTransitMap);
-			thisField->grid[x][y]->thisTransitInfo->targetMapTransitID = targetID;
-			thisField->grid[x][y]->thisTransitInfo->areaNodeID = areaNodeID;
+			thisField->grid[x][y]->thisTransitInfo = newTransitInfo;
 
 			//spawn player at this location
-			if(player->jumpTarget == id){
+			if(player->jumpTarget == newTransitInfo->transitID){
 				printf("Jumping player:[%d,%d]\n", x, y);
 				setIndividualSpace(thisField,player,x,y);
 				player->jumpTarget = 0;

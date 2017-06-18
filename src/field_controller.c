@@ -1059,6 +1059,10 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
 			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
 
+			if(tmpSpace->thisTransitInfo->transitEventID != -1){
+				triggerEvent(tmpSpace->thisTransitInfo->transitEventID);
+			}
+
 			while(!tryGetConsoleReadLock()){}
 			while(!tryGetConsoleWriteLock()){}
 
