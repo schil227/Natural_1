@@ -1093,15 +1093,15 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			clearGroup(thisGroupContainer->guards);
 
 			if(areaNodeID != -1){
-				releaseFieldWriteLock();
-				printf("RELEASED: destroy\n");fflush(stdout);
-
 				if(player->thisReportedCrimes->numReportedCrimes > 0){
 					setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
 				}
 
 				enableWorldMapMode(areaNodeID);
-				return 1;//?
+
+				releaseFieldWriteLock();
+				printf("RELEASED: destroy\n");fflush(stdout);
+				return 0;
 			}
 
 			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);

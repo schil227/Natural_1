@@ -29,6 +29,9 @@ typedef struct{
 
 	volatile int lookReadLock;
 	volatile int lookWriteLock;
+
+	volatile int worldMapReadLock;
+	volatile int worldMapWriteLock;
 } lockAuthority;
 
 #endif /* SRC_HEADERS_STRUCTS_ACCESS_REGISTRY_H_ */

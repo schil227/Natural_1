@@ -2327,6 +2327,8 @@ cordArr* initCordArr(){
 	cordArr * thisCordArr = malloc(sizeof(cordArr));
 	thisCordArr->numCords = 0;
 	thisCordArr->MAX_CORDS = 300;
+
+	return thisCordArr;
 }
 
 cord * makeCord(int x, int y){

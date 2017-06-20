@@ -342,7 +342,14 @@ void drawAll(HDC hdc, RECT* prc) {
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
 	int index;
 
+	printf("WANT: dark\n"); fflush(stdout);
+	while(!tryGetFieldReadLock()){}
+	printf("GOT: dark\n");fflush(stdout);
+
 	if(inWorldMapMode()){
+		releaseFieldReadLock();
+		printf("RELEASED: dark\n"); fflush(stdout);
+
 		drawWorldMapInstance(hdc, hdcBuffer, player, viewShift);
 
 		if(isPaused()){
@@ -356,10 +363,6 @@ void drawAll(HDC hdc, RECT* prc) {
 		DeleteObject(hbmBuffer);
 		return;
 	}
-
-	printf("WANT: dark\n"); fflush(stdout);
-	while(!tryGetFieldReadLock()){}
-	printf("GOT: dark\n");fflush(stdout);
 
 	if(main_field == NULL){
 		BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);

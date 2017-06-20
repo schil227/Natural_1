@@ -24,6 +24,8 @@ void initLockAuth(){
 	thisLockAuth->dialogWriteLock = 0;
 	thisLockAuth->lookReadLock = 0;
 	thisLockAuth->lookWriteLock = 0;
+	thisLockAuth->worldMapReadLock = 0;
+	thisLockAuth->worldMapWriteLock = 0;
 }
 
 int tryGetFieldReadLock(){
@@ -206,6 +208,32 @@ void releaseLookReadLock(){
 
 void releaseLookWriteLock(){
 	thisLockAuth->lookWriteLock = 0;
+}
+
+int tryGetWorldMapReadLock(){
+	if(thisLockAuth->worldMapReadLock == 0){
+		thisLockAuth->worldMapReadLock = 1;
+		return 1;
+	}
+
+	return 0;
+}
+
+int tryGetWorldMapWriteLock(){
+	if(thisLockAuth->worldMapWriteLock == 0){
+		thisLockAuth->worldMapWriteLock = 1;
+		return 1;
+	}
+
+	return 0;
+}
+
+void releaseWorldMapReadLock(){
+	thisLockAuth->worldMapReadLock = 0;
+}
+
+void releaseWorldMapWriteLock(){
+	thisLockAuth->worldMapWriteLock = 0;
 }
 
 lockAuthority * getLockAuthDEBUG(){
