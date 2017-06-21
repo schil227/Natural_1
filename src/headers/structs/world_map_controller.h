@@ -42,7 +42,7 @@ typedef struct{
 	cord * steppingStoneCords[2000];
 	character * activeSteppingStones[100];
 	int inWorldMapMode;
-	int steppingStonesPerCords;
+	int steppingStonesDistance;
 
 	int numAreaNodes;
 	int MAX_AREA_NODES;

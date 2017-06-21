@@ -29,7 +29,7 @@ void initWorldMapController(int worldMapImageID){
 	thisWorldMapController->numAreaNodes = getAllAreaNodesFromRegistry(thisWorldMapController->allNodes, thisWorldMapController->MAX_AREA_NODES);
 
 	thisWorldMapController->steppingStoneIdle = createCharacterFromAnimation(getAnimationFromRegistry(STEPPING_STONE_IDLE_IMAGE_ID));
-	thisWorldMapController->steppingStonesPerCords = 7;
+	thisWorldMapController->steppingStonesDistance = 20;
 }
 
 void destroyWorldMapController(){
@@ -229,9 +229,27 @@ int distanceBetweenTwoCordsInPixels(int x1, int x2, int y1, int y2){
 	return (int)floor(sqrt(pow(width, 2) + pow(height, 2)));
 }
 
-cordArr * getCordsSpacedOverLine(int x1, int y1, int x2, int y2, int cordsPerLine){
+cordArr * getCordsSpacedOverLine(int nodeAX, int nodeAY, int nodeBX, int nodeBY, int steppingStonesDistance){
 	int i, xSum = 0, ySum = 0;
+	int x1, x2, y1, y2;
+
+	//order nodes so the starting node is always the same; consistent stepping stone placement
+	if(nodeAX + nodeAY <= nodeBX + nodeBY){
+		x1 = nodeAX;
+		y1 = nodeAY;
+		x2 = nodeBX;
+		y2 = nodeBY;
+	}else{
+		x1 = nodeBX;
+		y1 = nodeBY;
+		x2 = nodeAX;
+		y2 = nodeAY;
+	}
+
 	int lineLength = distanceBetweenTwoCordsInPixels(x1, x2, y1, y2);
+
+	int cordsPerLine = lineLength / steppingStonesDistance;
+
 	int xStep = (x2 - x1) / cordsPerLine;
 	int yStep = (y2 - y1) / cordsPerLine;
 
@@ -250,66 +268,6 @@ cordArr * getCordsSpacedOverLine(int x1, int y1, int x2, int y2, int cordsPerLin
 
 	return cordsOnLine;
 }
-
-//void updateActiveSteppingStones(){
-//	int i, j, id;
-//
-//	cordArr * nodeCombinations = initCordArr();
-//
-//	//destroy previous cords
-//	for(i = 0; i < thisWorldMapController->numActiveSteppingStones; i++){
-//		destroyCharacter(thisWorldMapController->activeSteppingStones[i]);
-//	}
-//
-//	thisWorldMapController->numActiveSteppingStones = 0;
-//
-//	for(i = 0; i < thisWorldMapController->currentAreaNode->MAX_NODES; i++){
-//		if(thisWorldMapController->numActiveSteppingStones == thisWorldMapController->MAX_ACTIVE_STEPPING_STONES){
-//			break;
-//		}
-//
-//		id = thisWorldMapController->currentAreaNode->LinkedNodeIDs[i];
-//
-//		if(id != 0){
-//			areaNode * tmpNode = getAreaNodeFromRegistry(id);
-//
-//			if(!tmpNode->isHidden){
-//				int distanceBetweenChords = distanceBetweenTwoCordsInPixels(thisWorldMapController->currentAreaNode->nodeCharacter->x, thisWorldMapController->currentAreaNode->nodeCharacter->y, tmpNode->nodeCharacter->x, tmpNode->nodeCharacter->y);
-//
-//				cordArr * steppingStoneCords = getCordsSpacedOverLine(thisWorldMapController->currentAreaNode->nodeCharacter->x,
-//						thisWorldMapController->currentAreaNode->nodeCharacter->y,
-//						tmpNode->nodeCharacter->x,
-//						tmpNode->nodeCharacter->y,
-//						thisWorldMapController->steppingStonesPerCords);
-//
-//				if(steppingStoneCords == NULL){
-//					continue;
-//				}
-//
-//				int currentAnimationIndex = 0;
-//
-//				for(j = 0; j < steppingStoneCords->numCords; j++){
-//					if(thisWorldMapController->numActiveSteppingStones == thisWorldMapController->MAX_ACTIVE_STEPPING_STONES){
-//						free(steppingStoneCords);
-//						break;
-//					}
-//
-//					character * steppingStoneCharacter = createCharacterFromAnimation(cloneAnimation(getAnimationFromRegistry(STEPPING_STONE_ACTIVE_IMAGE_ID)));
-//					steppingStoneCharacter->x = steppingStoneCords->cords[j]->x;
-//					steppingStoneCharacter->y = steppingStoneCords->cords[j]->y;
-//
-//					steppingStoneCharacter->thisAnimationContainer->animations[0]->currentFrame = currentAnimationIndex;
-//					currentAnimationIndex = (currentAnimationIndex + 1) % steppingStoneCharacter->thisAnimationContainer->animations[0]->numFrames;
-//
-//					thisWorldMapController->activeSteppingStones[thisWorldMapController->numActiveSteppingStones] = steppingStoneCharacter;
-//					thisWorldMapController->numActiveSteppingStones++;
-//				}
-//
-//				free(steppingStoneCords);
-//			}
-//		}
-//	}
-//}
 
 void updateSteppingStones(){
 	int i, j, k, id, currentNodeID = thisWorldMapController->currentAreaNode->id;
@@ -347,7 +305,7 @@ void updateSteppingStones(){
 						thisWorldMapController->currentAreaNode->nodeCharacter->y,
 						tmpNode->nodeCharacter->x,
 						tmpNode->nodeCharacter->y,
-						thisWorldMapController->steppingStonesPerCords);
+						thisWorldMapController->steppingStonesDistance);
 
 				if(steppingStoneCords == NULL){
 					continue;
@@ -411,7 +369,7 @@ void updateSteppingStones(){
 							thisAreaNode->nodeCharacter->y,
 							tmpNode->nodeCharacter->x,
 							tmpNode->nodeCharacter->y,
-							thisWorldMapController->steppingStonesPerCords);
+							thisWorldMapController->steppingStonesDistance);
 
 					if(steppingStoneCords == NULL){
 						continue;

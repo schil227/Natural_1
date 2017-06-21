@@ -11,7 +11,8 @@
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
 -(6/17/17) Attack and rob store clerk standing to the right of him, pathing error, need to handle case where nodeArr is one in length (original node). See getSpaceClosestToSpace in enemy_controller where resultArr->length = 1
- 
+-(6/20/17) In map 5, sometimes the grass spaces by the lake become impassable; not sure why. Could be from other undefined behavior.
+
 ==BACK BURNER==
 - (11/12/16) Add casting animations
 - (2/21/17) Abilities: change to points (e.g. if you want to cast an ability between 5 and 10 spaces, it would cost 50  points, to use it between 0 and 4 with a hinderance, it would cost an additional 25, etc.)
