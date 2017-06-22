@@ -1038,7 +1038,7 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 			processCrimeEvent(CRIME_MURDER, 300, targetIndividual->ID, 0);
 		}
 
-		removeFromExistance(targetIndividual->ID);
+		removeIndividualFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 
 		addSpecialIndividual(targetIndividual);
@@ -1196,7 +1196,7 @@ int damageIndividual(individual *thisIndividual, individual *targetIndividual, i
 			processCrimeEvent(CRIME_MURDER, 300, targetIndividual->ID, 0);
 		}
 
-		removeFromExistance(targetIndividual->ID);
+		removeIndividualFromExistance(targetIndividual->ID);
 		addSpecialIndividual(targetIndividual);
 		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
 		setIndividualDelayAnimation(targetIndividual, ANIMATION_DEATH, delay);
@@ -1288,7 +1288,7 @@ int processActiveItems(individual * thisIndividual){
 					char * tmp[128];
 					sprintf(tmp, "%s has perished from %s!", thisIndividual->name, tmpActiveItem->thisItem->name);
 					cwrite(tmp);
-					removeFromExistance(thisIndividual->ID);
+					removeIndividualFromExistance(thisIndividual->ID);
 					return 1;
 				}
 				itemsPassed++;
@@ -1322,7 +1322,7 @@ int processActiveAbilities(individual * thisIndividual){
 						char * tmp[128];
 						sprintf(tmp, "%s has perished from %s!", thisIndividual->name, thisActiveAbility->thisAbility->name);
 						cwrite(tmp);
-						removeFromExistance(thisIndividual->ID);
+						removeIndividualFromExistance(thisIndividual->ID);
 						return 1;
 					}
 				} else {
@@ -1375,7 +1375,7 @@ int processStatuses(individual * thisIndividual){
 					char * tmp[128];
 					sprintf(tmp, "%s has perished from ailment!", thisIndividual->name);
 					cwrite(tmp);
-					removeFromExistance(thisIndividual->ID);
+					removeIndividualFromExistance(thisIndividual->ID);
 
 					enableSpecialDrawMode();
 					addSpecialIndividual(thisIndividual);
@@ -1658,7 +1658,7 @@ int decreaseFood(individual * thisIndividual, double food){
 
 		triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
 
-		removeFromExistance(thisIndividual->ID);
+		removeIndividualFromExistance(thisIndividual->ID);
 
 		enableSpecialDrawMode();
 		addSpecialIndividual(thisIndividual);

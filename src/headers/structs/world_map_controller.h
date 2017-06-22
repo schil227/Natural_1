@@ -41,6 +41,8 @@ typedef struct{
 	areaNode * allNodes[100];
 	cord * steppingStoneCords[2000];
 	character * activeSteppingStones[100];
+	int fieldsTraversed[200];
+
 	int inWorldMapMode;
 	int steppingStonesDistance;
 
@@ -52,6 +54,9 @@ typedef struct{
 
 	int numActiveSteppingStones;
 	int MAX_ACTIVE_STEPPING_STONES;
+
+	int numFieldsTraversed;
+	int MAX_FIELDS_TRAVERSED;
 
 } worldMapController;
 

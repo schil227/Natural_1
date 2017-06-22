@@ -643,6 +643,38 @@ void setGroupToField(field * thisField, individualGroup * thisGroup){
 	}
 }
 
+void respawnFieldEntities(int fieldID){
+	int i;
+
+	mapInfo * thisMapInfo = getMapInfoFromRegistry(fieldID);
+
+	for(i = 0; i < thisMapInfo->numIndividuals; i++){
+		individual * tmpIndividual = getIndividualFromRegistry(thisMapInfo->individuals[i]);
+
+		if(tmpIndividual != NULL){
+			if(tmpIndividual->thisBehavior->respawns){
+				tmpIndividual->hp = getTotalHP(tmpIndividual);
+				addIndividualToExistance(tmpIndividual->ID);
+			}else if(tmpIndividual->hp > 0){
+				tmpIndividual->hp = getTotalHP(tmpIndividual);
+			}
+
+			tmpIndividual->playerCharacter->x = tmpIndividual->desiredLocation->x;
+			tmpIndividual->playerCharacter->y = tmpIndividual->desiredLocation->y;
+		}
+	}
+
+	for(i = 0; i < thisMapInfo->numInteractables; i++){
+		interactable * tmpInteractable = getInteractableObjectFromRegistry(thisMapInfo->interactableObjects[i]);
+
+		if(tmpInteractable->isRespawning){
+			tmpInteractable->isEnabled = 1;
+			tmpInteractable->inFinalMode = 0;
+			tmpInteractable->shouldDraw = 1;//?
+		}
+	}
+}
+
 item * createFieldItemFromFile(char line[1024]){
 	item * newItem;
 	char name[32], description[256];
@@ -834,9 +866,9 @@ void addItemsToField(mapInfo * thisMapInfo, field * thisField){
 		tmpItem = getItemFromRegistry(thisMapInfo->items[i]);
 
 		if(tmpItem != NULL){
-			if (doesExist(tmpItem->ID)) {
+//			if (doesExist(tmpItem->ID)) {
 				addItemToField(thisField, tmpItem);
-			}
+//			}
 		}else{
 			char * errLog[128];
 			sprintf(errLog, "!! ITEM NOT FOUND : %d !!", thisMapInfo->items[i]);
@@ -854,9 +886,9 @@ void addInteractableObjectsToField(mapInfo * thisMapInfo, field * thisField){
 		tmpInteractable = getInteractableObjectFromRegistry(thisMapInfo->interactableObjects[i]);
 
 		if(tmpInteractable != NULL){
-			if (doesExist(tmpInteractable->ID)) {
+//			if (doesExist(tmpInteractable->ID)) {
 				addInteractableObjectToField(tmpInteractable, thisField);
-			}
+//			}
 		}else{
 			char * errLog[128];
 			sprintf(errLog, "!! INTERACTABLE OBJECT NOT FOUND NOT FOUND : %d !!", thisMapInfo->interactableObjects[i]);
@@ -1012,6 +1044,8 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	mapInfo * thisMapInfo = getMapInfoFromRegistry((*thisField)->id);
 	thisMapInfo->isCurrentMap = 0;
 
+	addFieldToTraversedMaps(thisMapInfo->id);
+
 	destroyField(*thisField, player);
 	clearGroup(thisGroupContainer->enemies);
 	clearGroup(thisGroupContainer->npcs);
@@ -1085,6 +1119,8 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 
 			mapInfo * thisMapInfo = getMapInfoFromRegistry((*thisField)->id);
 			thisMapInfo->isCurrentMap = 0;
+
+			addFieldToTraversedMaps(thisMapInfo->id);
 
 			destroyField(*thisField, player);
 			clearGroup(thisGroupContainer->enemies);

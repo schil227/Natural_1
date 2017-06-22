@@ -12,7 +12,7 @@ static int AREA_NODE_ACTIVE_IMAGE_ID = 10005;
 static int STEPPING_STONE_IDLE_IMAGE_ID = 10006;
 static int STEPPING_STONE_ACTIVE_IMAGE_ID = 10007;
 
-worldMapController * thisWorldMapController;
+static worldMapController * thisWorldMapController;
 
 void initWorldMapController(int worldMapImageID){
 	thisWorldMapController = malloc(sizeof(worldMapController));
@@ -24,6 +24,8 @@ void initWorldMapController(int worldMapImageID){
 	thisWorldMapController->MAX_STEPPING_STONE_CORDS = 2000;
 	thisWorldMapController->numActiveSteppingStones = 0;
 	thisWorldMapController->MAX_ACTIVE_STEPPING_STONES = 100;
+	thisWorldMapController->numFieldsTraversed = 0;
+	thisWorldMapController->MAX_FIELDS_TRAVERSED = 200;
 
 	thisWorldMapController->currentAreaNode = NULL;
 	thisWorldMapController->numAreaNodes = getAllAreaNodesFromRegistry(thisWorldMapController->allNodes, thisWorldMapController->MAX_AREA_NODES);
@@ -54,6 +56,8 @@ void enableWorldMapMode(int areaNodeID){
 	thisWorldMapController->currentAreaNode->isHidden = 0;
 	setCurrentNeighborNodeAnimations(thisWorldMapController->currentAreaNode, 1);
 	updateSteppingStones();
+
+	resetTraversedMaps();
 
 	releaseWorldMapWriteLock();
 	releaseWorldMapReadLock();
@@ -171,6 +175,33 @@ void tryMoveWorldMap(int directionIndex){
 
 	releaseWorldMapWriteLock();
 	releaseWorldMapReadLock();
+}
+
+void resetTraversedMaps(){
+	int i;
+
+	for(i = 0; i < thisWorldMapController->numFieldsTraversed; i++){
+		respawnFieldEntities(thisWorldMapController->fieldsTraversed[i]);
+	}
+
+	thisWorldMapController->numFieldsTraversed = 0;
+}
+
+void addFieldToTraversedMaps(int fieldID){
+	int i;
+
+	if(thisWorldMapController->numFieldsTraversed == thisWorldMapController->MAX_FIELDS_TRAVERSED){
+		return;
+	}
+
+	for(i = 0; i < thisWorldMapController->numFieldsTraversed; i++){
+		if(thisWorldMapController->fieldsTraversed[i] == fieldID){
+			return;
+		}
+	}
+
+	thisWorldMapController->fieldsTraversed[thisWorldMapController->numFieldsTraversed] = fieldID;
+	thisWorldMapController->numFieldsTraversed++;
 }
 
 void setCurrentNeighborNodeAnimations(areaNode * newNode,  int animateSpace){

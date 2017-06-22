@@ -346,7 +346,7 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 		removeIndividualFromField(thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
 		triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
 
-		removeFromExistance(thisIndividual->ID);
+		removeIndividualFromExistance(thisIndividual->ID);
 	}
 
 	if(tmpAbility->aoeEnabled){
@@ -399,7 +399,7 @@ void processInteractablesInAOE(individual * player, field * thisField, int minX,
 
 			tmpSpace = getSpaceFromField(thisField, i, j);
 
-			if(tmpSpace->interactableObject != NULL){
+			if(tmpSpace != NULL && tmpSpace->interactableObject != NULL){
 				if(player->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(player->activeAbilities->selectedAbility)){
 					int attackEventID = tmpSpace->interactableObject->onAttackEventID;
 					if(attackEventID  != -1){
@@ -469,7 +469,7 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 							|| useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
-						removeFromExistance(tmp->ID);
+						removeIndividualFromExistance(tmp->ID);
 
 						individualsPassed--;
 					}
@@ -485,7 +485,7 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 						}
 
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
-						removeFromExistance(tmp->ID);
+						removeIndividualFromExistance(tmp->ID);
 
 						individualsPassed--;
 					}

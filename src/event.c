@@ -936,7 +936,7 @@ void decreaseAttribute(individual * player, event * thisEvent){
 	}
 
 	if(player->hp <= 0){
-		removeFromExistance(player->ID);
+		removeIndividualFromExistance(player->ID);
 		enableSpecialDrawMode();
 		addSpecialIndividual(player);
 		int delay = player->playerCharacter->thisAnimationContainer->animations[player->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;

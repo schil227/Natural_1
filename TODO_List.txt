@@ -4,9 +4,7 @@
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (5/22/17) Develop a way to see transit spaces (e.g. outline in gold)
-- (5/18/17) Implement respawning Individuals, interactables (e.g. fishing)
 - (4/29/17) Character creation/title screens
-- (6/12/17) Make a world map, implement moving around with it (tied to respawning)
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
@@ -56,3 +54,5 @@
 - (5/18/17 - 5/22/17) Add save/load functionality (DONE)
 - (5/22/17 - 5/28/17) Map Generator: create a UI to make/generate maps (DONE)
 - (4/29/17 - 6/11/17) Implement action - allows you to interact with things to make stuff happen (DONE)
+- (6/12/17 - 6/20/17) Make a world map, implement moving around with it (tied to respawning) (DONE)
+- (5/18/17 - 6/21/17) Implement respawning Individuals, interactables (e.g. fishing) (DONE)

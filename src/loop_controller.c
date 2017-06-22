@@ -414,7 +414,7 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 					if(useAbility(player,getAbilityToActivate())){
 						removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
 						triggerEventOnDeath(player->ID, player->isPlayer);
-						removeFromExistance(player->ID);
+						removeIndividualFromExistance(player->ID);
 						return 0;
 					}
 

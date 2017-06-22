@@ -467,7 +467,7 @@ void animateMove(RECT rect, individual * thisIndividual, field * thisField, shif
 				if(thisIndividual->hp <= 0){
 					triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
 
-					removeFromExistance(thisIndividual->ID);
+					removeIndividualFromExistance(thisIndividual->ID);
 					addSpecialIndividual(thisIndividual);
 
 					setIndividualDelayAnimation(thisIndividual, ANIMATION_DEATH, 0);

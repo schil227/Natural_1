@@ -895,7 +895,11 @@ int getAllAreaNodesFromRegistry(areaNode ** nodeContainer, int maxNodes){
 	return i;
 }
 
-void removeFromExistance(int id){
+void addIndividualToExistance(int id){
+	setBit(thisGlobalRegister->existanceArray, id);
+}
+
+void removeIndividualFromExistance(int id){
 	clearBit(thisGlobalRegister->existanceArray,id);
 }
 
