@@ -237,6 +237,7 @@ node * shallowCloneNode(node * thisNode){
 	newNode->pathLength = thisNode->pathLength;
 	newNode->x = thisNode->x;
 	newNode->y = thisNode->y;
+	newNode->previousNode = NULL;
 	return newNode;
 }
 
@@ -306,6 +307,7 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 
 	if(nodeIndex > 0){ //going somewhere
 		node * endNode = nodePath->nodeArray[nodeIndex-1];
+		nodePath->nodeArray[0]->previousNode = NULL;
 		node * allNodes[300];
 		node * activeNodes[300];
 		int i;
@@ -339,9 +341,6 @@ nodeArr * processPath(field * thisField, nodeArr * nodePath, individual * thisIn
 			printf("returning null\n");
 
 			for (i = 0; i < 300; i++) {
-//				if(activeNodes[i] != NULL){
-//					free(activeNodes[i]);
-//				}
 				if(allNodes[i] != NULL){
 					free(allNodes[i]);
 				}

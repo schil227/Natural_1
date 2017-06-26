@@ -5,10 +5,10 @@
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (5/22/17) Develop a way to see transit spaces (e.g. outline in gold)
 - (4/29/17) Character creation/title screens
+- (6/22/17) Performance is noticably slower with multiple images on screen - optimize the size of the images so there isn't any excess.
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
--(6/17/17) Attack and rob store clerk standing to the right of him, pathing error, need to handle case where nodeArr is one in length (original node). See getSpaceClosestToSpace in enemy_controller where resultArr->length = 1
 -(6/20/17) In map 5, sometimes the grass spaces by the lake become impassable; not sure why. Could be from other undefined behavior.
 
 ==BACK BURNER==
@@ -56,3 +56,4 @@
 - (4/29/17 - 6/11/17) Implement action - allows you to interact with things to make stuff happen (DONE)
 - (6/12/17 - 6/20/17) Make a world map, implement moving around with it (tied to respawning) (DONE)
 - (5/18/17 - 6/21/17) Implement respawning Individuals, interactables (e.g. fishing) (DONE)
+-(6/17/17 - 6/22/17) Attack and rob store clerk standing to the right of him, pathing error, need to handle case where nodeArr is one in length (original node). See getSpaceClosestToSpace in enemy_controller where resultArr->length = 1 (DONE)

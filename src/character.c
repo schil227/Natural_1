@@ -318,16 +318,16 @@ animation * createAnimationFromLine(char line[512]){
 
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	if(atoi(value) == -1){
-		newAnimation->width = 100;
+		newAnimation->imageWidth = 100;
 	}else{
-		newAnimation->width = atoi(value);
+		newAnimation->imageWidth = atoi(value);
 	}
 
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	if(atoi(value) == -1){
-		newAnimation->height = 100;
+		newAnimation->imageHeight = 100;
 	}else{
-		newAnimation->height = atoi(value);
+		newAnimation->imageHeight = atoi(value);
 	}
 
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
@@ -344,6 +344,12 @@ animation * createAnimationFromLine(char line[512]){
 		if(i+1 < newAnimation->numFrames){
 			value = strtok(NULL, ",");
 		}
+
+		newAnimation->drawArea[i] = malloc(sizeof(animationDrawArea));
+		newAnimation->drawArea[i]->startX = 0;
+		newAnimation->drawArea[i]->startY = 0;
+		newAnimation->drawArea[i]->width = 100;
+		newAnimation->drawArea[i]->height = 100;
 	}
 
 	newAnimation->totalDuration = totalDuration;
@@ -524,35 +530,96 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
 	int shitfX;
-
+	animationDrawArea * thisDrawArea;
 	HBITMAP selectedImage, selectedImageMask;
+	animation * thisAnimation;
 
 	if(useSecondaryAnimationContainer){
-		shitfX = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->currentFrame*100;
-		selectedImage = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->image;
-		selectedImageMask = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation]->imageMask;
+		thisAnimation = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation];
 	} else {
-		shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
-		selectedImage = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
-		selectedImageMask = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->imageMask;
+		thisAnimation = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
 	}
+
+	shitfX = thisAnimation->currentFrame*100;
+	selectedImage = thisAnimation->image;
+	selectedImageMask = thisAnimation->imageMask;
+	thisDrawArea = thisAnimation->drawArea[thisAnimation->currentFrame];
+
+	if(thisDrawArea == NULL){
+		return;
+	}
+
 	SelectObject(hdcMem, selectedImageMask);
 
-	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
-			100,100,
+//	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+//			100,100,
+//			hdcMem,
+//			shitfX,
+//			0,
+//			SRCAND);
+//
+//	SelectObject(hdcMem, selectedImage);
+//
+//	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+//			100,100,
+//			hdcMem,
+//			shitfX,
+//			0,
+//			SRCPAINT);
+
+	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 + thisDrawArea->startX - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 + thisDrawArea->startY - 25,
+			thisDrawArea->width,thisDrawArea->height,
 			hdcMem,
-			shitfX,
-			0,
+			shitfX+thisDrawArea->startX,
+			thisDrawArea->startY,
 			SRCAND);
 
 	SelectObject(hdcMem, selectedImage);
 
-	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
-			100,100,
+	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 + thisDrawArea->startX - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 + thisDrawArea->startY - 25,
+			thisDrawArea->width,thisDrawArea->height,
 			hdcMem,
-			shitfX,
-			0,
+			shitfX+thisDrawArea->startX,
+			thisDrawArea->startY,
 			SRCPAINT);
+
+
+	DeleteDC(hdcMem);
+}
+
+void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, animationContainer * baseAnimation, int xCord, int yCord, double xOffset, double yOffset, shiftData * viewShift){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	animation * thisAnimation;
+	HBITMAP image, imageMask;
+	animationDrawArea * thisDrawArea;
+
+	int shitfX;
+	shitfX = baseAnimation->animations[baseAnimation->currentAnimation]->currentFrame*100;
+
+	thisAnimation = layer->thisAnimationContainer->animations[layer->thisAnimationContainer->currentAnimation];
+
+	image = thisAnimation->image;
+	imageMask = thisAnimation->imageMask;
+	thisDrawArea = thisAnimation->drawArea[thisAnimation->currentFrame];
+
+	SelectObject(hdcMem, imageMask);
+
+	BitBlt(hdcBuffer, xCord*52 + (int)(xOffset*52) - (viewShift->xShift)*52 - 25, yCord*52 + (int)(yOffset*52) - (viewShift->yShift)*52 - 25,
+			thisDrawArea->width,thisDrawArea->height,
+			hdcMem,
+			shitfX+thisDrawArea->startX,
+			thisDrawArea->startY,
+			SRCAND);
+
+	SelectObject(hdcMem, image);
+
+	BitBlt(hdcBuffer, xCord*52 + (int)(xOffset*52) - (viewShift->xShift)*52 - 25, yCord*52 + (int)(yOffset*52) - (viewShift->yShift)*52 - 25,
+			thisDrawArea->width,thisDrawArea->height,
+			hdcMem,
+			shitfX+thisDrawArea->startX,
+			thisDrawArea->startY,
+			SRCPAINT);
+	DeleteDC(hdcMem);
 
 	DeleteDC(hdcMem);
 }
@@ -669,8 +736,8 @@ void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharac
 		tmpAnimation = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
 	}
 
-	width = tmpAnimation->width;
-	height = tmpAnimation->height;
+	width = tmpAnimation->imageWidth;
+	height = tmpAnimation->imageHeight;
 	shitfX = tmpAnimation->currentFrame*width;
 	image = tmpAnimation->image;
 	imageMask = tmpAnimation->imageMask;
@@ -693,47 +760,6 @@ void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharac
 			0,
 			SRCPAINT);
 	DeleteDC(hdcMem);
-}
-
-/*
- * Note that this method was created because using a mask with rotated characters was very taxing for some reason.
- */
-void drawRotatedBackgroundByPixel(HDC hdc, HDC hdcBuffer, character * thisCharacter, shiftData * viewShift, int xCord, int yCord, int useSecondaryAnimationContainer){
-	HDC hdcMem = CreateCompatibleDC(hdc);
-
-	int shitfX = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->currentFrame*100;
-	HBITMAP image = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation]->image;
-
-	SelectObject(hdcMem, image);
-
-	LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
-	LARGE_INTEGER Frequency;
-	///// START PERF TIMER /////
-	QueryPerformanceFrequency(&Frequency);
-	QueryPerformanceCounter(&StartingTime);
-	////////////////////////////
-
-	BitBlt(hdcBuffer,xCord, yCord,
-			100, 100,
-			hdcMem,
-			shitfX,
-			0,
-			SRCPAINT);//SRCPAINT
-	DeleteDC(hdcMem);
-
-
-	///// END PERF TIMER /////
-	QueryPerformanceCounter(&EndingTime);
-	ElapsedMicroseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
-
-	ElapsedMicroseconds.QuadPart *= 1000000;
-	ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
-
-//	printf("draw timing: %llu\n",ElapsedMicroseconds.QuadPart);
-	char outLog[256];
-	sprintf(outLog, "End drawall field process: %llu",ElapsedMicroseconds.QuadPart);
-	cwrite(outLog);
-	/////////////////////////
 }
 
 void updateAnimation(character * thisCharacter){
@@ -874,8 +900,8 @@ animation * initAnimation(animationState state){
 	int i;
 	animation * thisAnimation = malloc(sizeof(animation));
 
-	thisAnimation->height = 0;
-	thisAnimation->width = 0;
+	thisAnimation->imageHeight = 0;
+	thisAnimation->imageWidth = 0;
 
 	thisAnimation->state = state;
 	thisAnimation->MAX_FRAMES = 20;
@@ -903,11 +929,12 @@ animation * cloneAnimation(animation * thisAnimation){
 	newAnimation->image = thisAnimation->image;//LoadBitmap(GetModuleHandle(NULL) , newAnimation->imageID);
 	newAnimation->imageMask =  thisAnimation->imageMask;//CreateBitmapMask(newAnimation->imageID, newAnimation->rgb);
 
-	newAnimation->height = thisAnimation->height;
-	newAnimation->width = thisAnimation->width;
+	newAnimation->imageHeight = thisAnimation->imageHeight;
+	newAnimation->imageWidth = thisAnimation->imageWidth;
 
 	for(i = 0; i < newAnimation->MAX_FRAMES; i++){
 		newAnimation->durationInTicks[i] = thisAnimation->durationInTicks[i];
+		newAnimation->drawArea[i] = thisAnimation->drawArea[i];
 	}
 
 	newAnimation->MAX_FRAMES = thisAnimation->MAX_FRAMES;
@@ -1015,6 +1042,114 @@ void flipBitmap180Degrees(int startingPosition, int frameWidth, int frameHeight,
 	}
 }
 
+animationDrawArea * getFrameDrawArea(int imageID, int startingPosition, int frameWidth, int frameHeight, long totalWidth, char * lpPixels){
+	int i,j,index;
+
+	animationDrawArea * thisDrawArea = malloc(sizeof(animationDrawArea));
+
+	int leftX = -1;
+	int upY = 0;
+	int rightX = 0;
+	int downY = -1;
+
+	for(j = 0; j < frameHeight; j++){
+		for(i = 0; i < frameWidth; i++){
+			index = i*3 + startingPosition*3 + j*totalWidth*3;
+
+			if(imageID == 7514 && j == 83 && i == 48){
+				printf("here we are!");
+			}
+
+			if((int)lpPixels[index] != -1 || (int)lpPixels[index + 1] != 0 || (int)lpPixels[index + 2] != -1){
+				if(i <= leftX || leftX == -1){
+					leftX = i;
+				}else if( i > rightX){
+					rightX = i;
+				}
+
+				if(j <= downY || downY == -1){
+					downY = j;
+				}else if(j > upY){
+					upY = j;
+				}
+			}
+		}
+	}
+
+	thisDrawArea->startX = leftX - 1;
+	thisDrawArea->startY = frameHeight - upY;
+	thisDrawArea->width = rightX - leftX;
+	thisDrawArea->height = upY - downY;
+
+	return thisDrawArea;
+}
+
+void setAnimationDrawArea(HDC hdc, HDC hdcBuffer, animation * thisAnimation){
+	int i;
+
+	if(thisAnimation == NULL){
+		printf("NULL ANIMATION!!\n");fflush(stdout);
+		return;
+	}
+
+	BITMAPINFO bitMapInfo = {0};
+	bitMapInfo.bmiHeader.biSize = sizeof(bitMapInfo.bmiHeader);
+
+	HBITMAP thisImage = LoadImage(GetModuleHandle(NULL), thisAnimation->imageID, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+
+	//Fill out bitMapInfo
+	if(!GetDIBits(hdcBuffer, thisImage, 0, 0, NULL, &bitMapInfo, DIB_RGB_COLORS)){
+		printf("Couldn't get the bitMapInfo.\n");
+		DeleteObject(thisImage);
+		return;
+	}
+
+	//biBitCount 8 appears to be unsupported, causes crash. Only do this performance enhancement for 24+
+	if(bitMapInfo.bmiHeader.biBitCount < 24){
+		printf("biBitCount incompatable.\n");
+		DeleteObject(thisImage);
+		return;
+	}
+
+	//Create pixel buffer
+	char * lpPixels = malloc(sizeof(char)*(bitMapInfo.bmiHeader.biSizeImage));
+
+	bitMapInfo.bmiHeader.biCompression = BI_RGB;
+	bitMapInfo.bmiHeader.biHeight = abs(bitMapInfo.bmiHeader.biHeight);
+
+	int result = GetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS);
+
+	if(result == 0){
+		printf("Couldn't get the bitmap.\n");
+		DeleteObject(thisImage);
+		free(lpPixels);
+		return;
+	}
+
+	for(i = 0; i < thisAnimation->numFrames; i++){
+//		animationDrawArea * tmpDrawArea = getFrameDrawArea(thisAnimation->imageID, i*thisAnimation->imageWidth, thisAnimation->imageWidth, thisAnimation->imageHeight, bitMapInfo.bmiHeader.biWidth, lpPixels);
+//
+//		thisAnimation->drawArea[i]->startX = tmpDrawArea->startX;
+//		thisAnimation->drawArea[i]->startY = tmpDrawArea->startY;
+//		thisAnimation->drawArea[i]->width = tmpDrawArea->width;
+//		thisAnimation->drawArea[i]->height = tmpDrawArea->height;
+//
+//		free(tmpDrawArea);
+
+		thisAnimation->drawArea[i] = getFrameDrawArea(thisAnimation->imageID, i*thisAnimation->imageWidth, thisAnimation->imageWidth, thisAnimation->imageHeight, bitMapInfo.bmiHeader.biWidth, lpPixels);
+	}
+
+	if(!SetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS)){
+		printf("Couldn't set the bitmap.\n");
+		DeleteObject(thisImage);
+		free(lpPixels);
+		return;
+	}
+
+	DeleteObject(thisImage);
+	free(lpPixels);
+}
+
 void rotateBitmap90Degrees(int direction, int startingPosition, int frameWidth, int frameHeight, long totalWidth, char * lpPixels){
 	int i,j,index;
 
@@ -1101,30 +1236,27 @@ void convertToGreyScale(HDC hdc, HDC hdcBuffer, animation * thisAnimation){
 
 	//Fill out bitMapInfo
 	if(!GetDIBits(hdcBuffer, thisImage, 0, 0, NULL, &bitMapInfo, DIB_RGB_COLORS)){
-		printf("Couldint get the bitMapInfo.\n");
+		printf("Couldn't get the bitMapInfo.\n");
 		DeleteObject(thisImage);
 		return;
 	}
 
-	printf("d\n");fflush(stdout);
 	//Create pixel buffer
 	char * lpPixels = malloc(sizeof(char)*(bitMapInfo.bmiHeader.biSizeImage));
 
-	printf("e\n");fflush(stdout);
 	bitMapInfo.bmiHeader.biCompression = BI_RGB;
 	bitMapInfo.bmiHeader.biHeight = abs(bitMapInfo.bmiHeader.biHeight);
 
-	printf("f\n");fflush(stdout);
 	int result = GetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS);
 
 	if(result == 0){
-		printf("Couldint get the bitmap.\n");
+		printf("Couldn't get the bitmap.\n");
 		DeleteObject(thisImage);
 		free(lpPixels);
 		return;
 	}
 
-	makeImageGreyscale(thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
+	makeImageGreyscale(thisAnimation->imageHeight, bitMapInfo.bmiHeader.biWidth, lpPixels);
 
 	if(!SetDIBits(hdcBuffer, thisImage, 0, bitMapInfo.bmiHeader.biHeight, lpPixels, &bitMapInfo, DIB_RGB_COLORS)){
 		printf("Couldn't set the bitmap.\n");
@@ -1168,9 +1300,9 @@ void rotateAnimationFrames(HDC hdc, HDC hdcBuffer, animation * thisAnimation, in
 
 	for(i = 0; i < thisAnimation->numFrames; i++){
 		if(direction == 1 || direction == 3){
-			rotateBitmap90Degrees(direction, i*thisAnimation->width, thisAnimation->width, thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
+			rotateBitmap90Degrees(direction, i*thisAnimation->imageWidth, thisAnimation->imageWidth, thisAnimation->imageHeight, bitMapInfo.bmiHeader.biWidth, lpPixels);
 		} else if(direction == 2){
-			flipBitmap180Degrees(i*thisAnimation->width, thisAnimation->width, thisAnimation->height, bitMapInfo.bmiHeader.biWidth, lpPixels);
+			flipBitmap180Degrees(i*thisAnimation->imageWidth, thisAnimation->imageWidth, thisAnimation->imageHeight, bitMapInfo.bmiHeader.biWidth, lpPixels);
 		}
 	}
 

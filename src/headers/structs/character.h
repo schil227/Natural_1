@@ -34,13 +34,20 @@ typedef struct{
 	int y;
 } cord;
 
+typedef struct{
+	int startX;
+	int startY;
+	int width;
+	int height;
+} animationDrawArea;
+
 typedef struct {
 	int imageID;
 	HBITMAP image;
 	HBITMAP imageMask;
 
-	int width;
-	int height;
+	int imageHeight;
+	int imageWidth;
 
 	COLORREF rgb;
 
@@ -54,6 +61,8 @@ typedef struct {
 
 	int soundFrame;
 	int soundID;
+
+	animationDrawArea * drawArea[20];
 } animation;
 
 typedef struct {

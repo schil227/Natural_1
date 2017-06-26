@@ -671,6 +671,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 	appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
 	loadGlobalRegister(saveMapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt", "areaNodes.txt");
+	setUpAnimationDrawAreas(hdc, hdcBuffer);
 	loadDialog("dialog.txt", saveMapDirectory);
 	setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
@@ -687,6 +688,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 
 	main_field = loadMap(loadMapInfo->mapName, mapDirectory, player, thisGroupContainer);
 	updateFieldGraphics(hdc, hdcBuffer, main_field);
+	setUpAnimationDrawAreas(hdc, hdcBuffer);
 
 	gDoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (NULL == gDoneEvent)
@@ -743,6 +745,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		appendNewMessageNode("The sun briefly blinds you as you step forth. There's a building in the distance, however it appears to be well guarded by several undead warriors.");
 
 		loadGlobalRegister(mapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt",  "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt", "areaNodes.txt");
+
 		loadDialog("dialog.txt", mapDirectory);
 		setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
@@ -765,6 +768,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		dialogMessage * thisMessage = malloc(sizeof(dialogMessage));
 		strcpy(thisMessage->message,"I am a message!\0");
 		setCurrentMessage(thisMessage);
+
+		setUpAnimationDrawAreas(hdc, hdcBuffer);
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 		updateFieldGraphics(hdc, hdcBuffer, main_field);
@@ -1120,7 +1125,7 @@ LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 			initalizeTheGlobalRegister();
 
 			loadGlobalRegister(mapDirectory, mapDirectory, "", "", "", "", "images.txt", "", "", "", "", "", "", "", "");
-
+			setUpAnimationDrawAreas(hdc, hdcBuffer);
 			initMapGenerator(mapDirectory);
 
 			updateFieldGraphics(hdc, hdcBuffer, mapGeneratorField());
@@ -1573,7 +1578,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	int sidebarWindowWidth = 175;
 	int sidebarWindowHeight = 655;
 
-
 	QueryPerformanceFrequency(&Frequency);
 
 	//run the tests!
@@ -1618,7 +1622,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 0;
 	}
 
-//	create the window (handle)
+	//	create the window (handle)
+	// NOTE: triggers WM_CREATE
 	hwnd_global = CreateWindowEx(WS_EX_CLIENTEDGE, g_szClassName, "Natural 1",
 	WS_OVERLAPPEDWINDOW,
 	CW_USEDEFAULT,

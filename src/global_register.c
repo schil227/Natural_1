@@ -5,6 +5,7 @@
  *      Author: Adrian
  */
 #include<math.h>
+#include<windows.h>
 #include"./headers/structs/global_register.h"
 
 static globalRegister * thisGlobalRegister;
@@ -859,6 +860,14 @@ void deleteItemFromRegistry(int id){
 	cwrite(errLog);
 
 	return;
+}
+
+void setUpAnimationDrawAreas(HDC hdc, HDC hdcBuffer){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numAnimations; i++){
+		setAnimationDrawArea(hdc, hdcBuffer, thisGlobalRegister->animationRegistry[i]);
+	}
 }
 
 int numAbilitiesInGlobalRegistry(){
