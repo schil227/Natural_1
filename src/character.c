@@ -1056,10 +1056,6 @@ animationDrawArea * getFrameDrawArea(int imageID, int startingPosition, int fram
 		for(i = 0; i < frameWidth; i++){
 			index = i*3 + startingPosition*3 + j*totalWidth*3;
 
-			if(imageID == 7514 && j == 83 && i == 48){
-				printf("here we are!");
-			}
-
 			if((int)lpPixels[index] != -1 || (int)lpPixels[index + 1] != 0 || (int)lpPixels[index + 2] != -1){
 				if(i <= leftX || leftX == -1){
 					leftX = i;
@@ -1077,9 +1073,9 @@ animationDrawArea * getFrameDrawArea(int imageID, int startingPosition, int fram
 	}
 
 	thisDrawArea->startX = leftX - 1;
-	thisDrawArea->startY = frameHeight - upY;
-	thisDrawArea->width = rightX - leftX;
-	thisDrawArea->height = upY - downY;
+	thisDrawArea->startY = frameHeight - upY - 1;
+	thisDrawArea->width = rightX - (leftX - 2);
+	thisDrawArea->height = upY - (downY - 1);
 
 	return thisDrawArea;
 }
