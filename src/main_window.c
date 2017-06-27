@@ -380,7 +380,8 @@ void drawAll(HDC hdc, RECT* prc) {
 	}
 
 	printf("draw field\n");
-	drawField(hdc, hdcBuffer, main_field, viewShift);
+	int consoleHeight = inLookMode() ? prc->bottom : prc->bottom - getConsoleHeight();
+	drawField(hdc, hdcBuffer, main_field, consoleHeight,  prc->right - getSidebarWidth(), viewShift);
 
 	drawHUDAttackSpaces(hdc, hdcBuffer, prc);
 

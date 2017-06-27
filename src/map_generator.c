@@ -248,7 +248,7 @@ void drawMapGenerator(HDC hdc, RECT * prc, shiftData * viewShift){
 	xOff = prc->right - thisMapGenerator->selectedCharacterBox->fixedWidth;
 	yOff = prc->bottom - thisMapGenerator->selectedCharacterBox->fixedHeight;
 
-	drawField(hdc, hdcBuffer, thisMapGenerator->thisField, viewShift);
+	drawField(hdc, hdcBuffer, thisMapGenerator->thisField, -1, -1, viewShift);
 	drawCharacterAnimation(hdc, hdcBuffer, thisMapGenerator->cursor, viewShift, 0);
 
 	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisMapGenerator->selectedCharacterBox);

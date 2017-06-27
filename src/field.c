@@ -936,13 +936,34 @@ void updateFieldGraphics(HDC hdc, HDC hdcBuffer, field* thisField){
 	}
 }
 
-void drawField(HDC hdc, HDC hdcBuffer, field* thisField, shiftData * viewShift){
+int spaceInDisplayView(int spaceX, int spaceY, int consoleHeightStartY, int sideBarStartX, shiftData * viewShift){
+	if(spaceX - viewShift->xShift < 0 || spaceY - viewShift->yShift < 0){
+		return 0;
+	}
+
+	if(sideBarStartX == -1 || consoleHeightStartY == -1){
+		return 1;
+	}
+
+	if((spaceX - viewShift->xShift) * 52 > sideBarStartX || (spaceY - viewShift->yShift) * 52 > consoleHeightStartY){
+		return 0;
+	}
+
+	return 1;
+}
+
+void drawField(HDC hdc, HDC hdcBuffer, field* thisField, int consoleHeightStartY, int sideBarStartX, shiftData * viewShift){
 	int x, y, i;
 
 	for (y = 0; y < thisField->totalY; y++) {
 		for (x = 0; x < thisField->totalX; x++) {
+
 			character * tmpBackground = thisField->grid[x][y]->background;
 			updateAnimation(tmpBackground);
+
+			if(!spaceInDisplayView(x, y, consoleHeightStartY, sideBarStartX, viewShift)){
+				continue;
+			}
 
 			if(thisField->isDark && thisField->playerLoS < max(abs(thisField->playerCords->x - x), abs(thisField->playerCords->y - y))){
 				drawCharacterAnimationGreyscale(hdc, hdcBuffer, tmpBackground, viewShift, 0);

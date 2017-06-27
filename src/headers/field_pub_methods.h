@@ -13,7 +13,7 @@
 
 
 field* initField(char* fieldFileName);
-void drawField(HDC hdc, HDC hdcBuffer, field* thisField, shiftData * viewShift);
+void drawField(HDC hdc, HDC hdcBuffer, field* thisField, int consoleHeightStartY, int sideBarStartX, shiftData * viewShift);
 int moveIndividual(field *thisField, individual *thisIndividual, int direction);
 void wanderAround(field * thisField, individual * thisIndividual);
 space** getAdjacentSpaces(field *thisField, int x, int y);
