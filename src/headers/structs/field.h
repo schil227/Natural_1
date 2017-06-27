@@ -12,6 +12,11 @@
 #include "../interactable_pub_methods.h"
 
 typedef struct {
+	character * transitSpaceCharacter;
+	character * worldSpaceCharacter;
+} fieldGraphicContainer;
+
+typedef struct {
 	int MAX_ITEMS;
 	int inventorySize;
 	item * inventoryArr[1000];
@@ -23,6 +28,7 @@ typedef struct {
 	int targetMapTransitID;
 	int areaNodeID;
 	int transitEventID;
+	int showOutline;
 } transitInfo;
 
 typedef struct {

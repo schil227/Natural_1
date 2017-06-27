@@ -254,5 +254,8 @@ END
 10005 BITMAP DISCARDABLE "../images/area_node_active.bmp"
 10006 BITMAP DISCARDABLE "../images/stepping_stone_idle.bmp"
 10007 BITMAP DISCARDABLE "../images/stepping_stone_active.bmp"
+10008 BITMAP DISCARDABLE "../images/transit_space_outline.bmp"
+10009 BITMAP DISCARDABLE "../images/world_space_outline.bmp"
+
 //The Icon :)
 IDI_MYICON ICON "../images/nat_1.ico"

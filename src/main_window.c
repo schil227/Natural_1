@@ -626,6 +626,7 @@ void destroyGame(){
 	DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, INVALID_HANDLE_VALUE);
 
 	destroyField(main_field, NULL);
+	destroyFieldGraphicContainer();
 	destroyIndividual(player);
 	clearGroup(thisGroupContainer->enemies);
 	clearGroup(thisGroupContainer->npcs);
@@ -689,6 +690,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 
 	main_field = loadMap(loadMapInfo->mapName, mapDirectory, player, thisGroupContainer);
 	updateFieldGraphics(hdc, hdcBuffer, main_field);
+	initFieldGraphicContainer();
 	setUpAnimationDrawAreas(hdc, hdcBuffer);
 
 	gDoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -774,6 +776,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 		updateFieldGraphics(hdc, hdcBuffer, main_field);
+		initFieldGraphicContainer();
 
 	    gDoneEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	    if (NULL == gDoneEvent)
@@ -1548,7 +1551,7 @@ void runTests(){
 	player = getIndividualFromRegistry(2);
 
 	main_field = loadMap("test_map1.txt", mapTestDirectory, player, thisGroupContainer);
-
+	initFieldGraphicContainer();
 	test_main(player, thisGroupContainer, main_field, viewShift);
 
 	//break down mock up

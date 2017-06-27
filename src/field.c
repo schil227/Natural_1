@@ -11,6 +11,7 @@
 #include<string.h>
 #include<math.h>
 
+static fieldGraphicContainer * thisGraphicContainer;
 
 individual* getIndividualFromField(field* thisField, int x, int y){
 	if(thisField == NULL){
@@ -505,6 +506,18 @@ void wanderAround(field * thisField, individual * thisIndividual){
  moveIndividual(thisField, thisIndividual, direction);
 }
 
+void initFieldGraphicContainer(){
+	thisGraphicContainer = malloc(sizeof(fieldGraphicContainer));
+	thisGraphicContainer->transitSpaceCharacter = createCharacterFromAnimation(getAnimationFromRegistry(10008));
+	thisGraphicContainer->worldSpaceCharacter = createCharacterFromAnimation(getAnimationFromRegistry(10009));
+}
+
+void destroyFieldGraphicContainer(){
+	destroyCharacter(thisGraphicContainer->transitSpaceCharacter);
+	destroyCharacter(thisGraphicContainer->worldSpaceCharacter);
+	free(thisGraphicContainer);
+}
+
 field * loadMap(char * mapName, char* directory, individual * player, groupContainer * thisGroupContainer){
 	int mapID;
 	char transitMap[80], mapIDStr[80];
@@ -606,6 +619,9 @@ void makeTransitSpaces(char * transitMap, char* directory, field * thisField, in
 
 			value = strtok(NULL, ";");
 			newTransitInfo->transitEventID = atoi(value);
+
+			value = strtok(NULL, ";");
+			newTransitInfo->showOutline = atoi(value);
 
 			tmpSpace = getSpaceFromField(thisField, x, y);
 
@@ -957,7 +973,7 @@ void drawField(HDC hdc, HDC hdcBuffer, field* thisField, int consoleHeightStartY
 
 	for (y = 0; y < thisField->totalY; y++) {
 		for (x = 0; x < thisField->totalX; x++) {
-
+			transitInfo * tmpTransitInfo = thisField->grid[x][y]->thisTransitInfo;
 			character * tmpBackground = thisField->grid[x][y]->background;
 			updateAnimation(tmpBackground);
 
@@ -976,6 +992,13 @@ void drawField(HDC hdc, HDC hdcBuffer, field* thisField, int consoleHeightStartY
 				updateAnimation(thisField->grid[x][y]->interactableObject->thisCharacter);
 			}
 
+			if(tmpTransitInfo != NULL && tmpTransitInfo->showOutline){
+				if(tmpTransitInfo->areaNodeID != -1){
+					drawUnboundAnimation(hdc, hdcBuffer, x, y, thisGraphicContainer->worldSpaceCharacter, viewShift, 0);
+				}else if(tmpTransitInfo->targetMapTransitID != 0){
+					drawUnboundAnimation(hdc, hdcBuffer, x, y, thisGraphicContainer->transitSpaceCharacter, viewShift, 0);
+				}
+			}
 		}
 	}
 }
