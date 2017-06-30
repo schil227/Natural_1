@@ -90,38 +90,38 @@ HWND getGlobalHWnd(){
 	return hwnd_global;
 }
 
-BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-	int len = 0;
-	switch (Message) {
-	case WM_COMMAND:
-
-		switch (LOWORD(wParam)) {
-		case IDC_SECOND: // get the Name
-			len = GetWindowTextLength(GetDlgItem(hwnd, IDC_TEXT));
-			if (len == 0) {
-				MessageBox(hwnd, "Longer name, please.",
-						"Awesome Message Title~", MB_OK | MB_ICONEXCLAMATION);
-			} else {
-				char * textStr = (char*) GlobalAlloc(GPTR, len + 1);
-				GetDlgItemText(hwnd, IDC_TEXT, textStr, len + 1);
-//						printf("string: %s\n", textStr);
-				char * str = (char *) join("Name: ", textStr);
-//						printf("str: %s\n", str);
-				MessageBox(hwnd, str, "Awesome Message Title~",
-				MB_OK | MB_ICONEXCLAMATION);
-				free(str);
-			}
-			break;
-		}
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return FALSE;
-	}
-	return TRUE;
-}
+//BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
+//	int len = 0;
+//	switch (Message) {
+//	case WM_COMMAND:
+//
+//		switch (LOWORD(wParam)) {
+//		case IDC_SECOND: // get the Name
+//			len = GetWindowTextLength(GetDlgItem(hwnd, IDC_TEXT));
+//			if (len == 0) {
+//				MessageBox(hwnd, "Longer name, please.",
+//						"Awesome Message Title~", MB_OK | MB_ICONEXCLAMATION);
+//			} else {
+//				char * textStr = (char*) GlobalAlloc(GPTR, len + 1);
+//				GetDlgItemText(hwnd, IDC_TEXT, textStr, len + 1);
+////						printf("string: %s\n", textStr);
+//				char * str = (char *) join("Name: ", textStr);
+////						printf("str: %s\n", str);
+//				MessageBox(hwnd, str, "Awesome Message Title~",
+//				MB_OK | MB_ICONEXCLAMATION);
+//				free(str);
+//			}
+//			break;
+//		}
+//		break;
+//	case WM_DESTROY:
+//		PostQuitMessage(0);
+//		break;
+//	default:
+//		return FALSE;
+//	}
+//	return TRUE;
+//}
 
 BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
 		LPARAM lParam) {
@@ -336,7 +336,7 @@ void forcePlayerTransit(int targetMapID, int transitID){
 	releaseFieldReadLock();
 }
 
-void drawAll(HDC hdc, RECT* prc) {
+void drawGameMode(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
 	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
@@ -383,7 +383,7 @@ void drawAll(HDC hdc, RECT* prc) {
 	int consoleHeight = inLookMode() ? prc->bottom : prc->bottom - getConsoleHeight();
 	drawField(hdc, hdcBuffer, main_field, consoleHeight,  prc->right - getSidebarWidth(), viewShift);
 
-	drawHUDAttackSpaces(hdc, hdcBuffer, prc);
+	drawHUDAttackSpaces(hdc, hdcBuffer, prc, viewShift);
 
 	drawItemsFromField(hdc, hdcBuffer, main_field, viewShift);
 
@@ -497,7 +497,24 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	HDC hdc = GetDC(hwnd);
 	GetClientRect(hwnd, &rect);
 
-	drawAll(hdc, &rect);
+	if(inMainMenuMode()){
+		HDC hdcBuffer = CreateCompatibleDC(hdc);
+		HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+		HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer);
+
+		drawMainMenu(hdc, hdcBuffer, &rect);
+
+		BitBlt(hdc, 0, 0, rect.right, rect.bottom, hdcBuffer, 0, 0, SRCCOPY);
+		SelectObject(hdcBuffer, hbmOldBuffer);
+		DeleteDC(hdcBuffer);
+		DeleteObject(hbmBuffer);
+		ReleaseDC(hwnd, hdc);
+
+		drawLock = 0;
+		return 0;
+	}
+
+	drawGameMode(hdc, &rect);
 
 	ReleaseDC(hwnd, hdc);
 
@@ -773,8 +790,11 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		setCurrentMessage(thisMessage);
 
 		setUpAnimationDrawAreas(hdc, hdcBuffer);
+		viewShift = initShiftData();
+		initMainMenu(1);
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
+
 		updateFieldGraphics(hdc, hdcBuffer, main_field);
 		initFieldGraphicContainer();
 
@@ -797,8 +817,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	        printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
 	        exit(0);
 	    }
-
-		viewShift = initShiftData();
 
 		inActionMode = shouldEnableActionMode();
 
@@ -1062,8 +1080,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 		}
-
-
 	}
 		break;
 	case WM_COMMAND:
@@ -1313,6 +1329,11 @@ LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if(inMainMenuMode()){
+		mainMenuTitleLoop(hwnd, msg, wParam, lParam);
+		return 0;
+	}
+
 	if(isPaused()){
 		return pausedLoop(hwnd, msg, wParam, lParam);
 	}
@@ -1614,7 +1635,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_MYICON)); //Icon shown when user presses alt+tab
 	wc.hCursor = LoadCursorA(NULL, IDC_ARROW); //cursor that will be displayed over win.
 	wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1); //background brush to set color of window
-	wc.lpszMenuName = MAKEINTRESOURCE(IDR_MYMENU);
+	//wc.lpszMenuName = MAKEINTRESOURCE(IDR_MYMENU);
 	; // name of menu resource to use for the windows
 	wc.lpszClassName = g_szClassName; //name to identify class with
 	wc.hIconSm = (HICON) LoadImage(GetModuleHandle(NULL),

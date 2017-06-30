@@ -55,6 +55,12 @@ BEGIN
 	
 END
 
+//Main Menu images 1400 - 1500
+1400 BITMAP DISCARDABLE "../images/title.bmp"
+1401 BITMAP DISCARDABLE "../images/create_view.bmp"
+1402 BITMAP DISCARDABLE "../images/select_arrow_left.bmp"
+1403 BITMAP DISCARDABLE "../images/title_options.bmp"
+
 //Menu images 1500 - 2000
 1500 BITMAP DISCARDABLE "../images/console_bg.bmp" //2010
 1501 BITMAP DISCARDABLE "../images/dialog_box.bmp" //2012

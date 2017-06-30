@@ -5,10 +5,12 @@
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (4/29/17) Character creation/title screens
 - (6/26/17) update look function to display intractable objects
+- (6/27/17) Develop a map transition animation (fade to/from black?)
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
 -(6/20/17) In map 5, sometimes the grass spaces by the lake become impassable; not sure why. Could be from other undefined behavior.
+-(6/28/17) add lock around ability create logic, getting race condition when done creating ability and drawing current create view 
 
 ==BACK BURNER==
 - (11/12/16) Add casting animations

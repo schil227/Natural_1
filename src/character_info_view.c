@@ -458,6 +458,12 @@ void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 	sprintf(value, "HP: %d/%d", tmpIndividual->hp, (getAttributeSum(tmpIndividual, "baseHP") + getAttributeSum(tmpIndividual, "CON") * 2));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
 
+	textBox.left += 75;
+
+	sprintf(value, "Mana: %d/%d", tmpIndividual->mana, (getAttributeSum(tmpIndividual, "baseMana") + getAttributeSum(tmpIndividual, "WILL") * 2));
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+
+	textBox.left -= 75;
 	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 16;
 
