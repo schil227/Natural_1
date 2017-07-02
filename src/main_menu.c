@@ -12,10 +12,10 @@ static mainMenu * thisMainMenu;
 void initMainMenu(int inMenuMode){
 	thisMainMenu = malloc(sizeof(mainMenu));
 	thisMainMenu->title = malloc(sizeof(titleMenu));
+	thisMainMenu->newGame = malloc(sizeof(newGameMenu));
 	thisMainMenu->inMenuMode = inMenuMode;
 	thisMainMenu->currentMenu = MENU_TITLE;
 
-	thisMainMenu->creationScreen = createCharacter(1401, RGB(255,0,255), 0, 0);
 	thisMainMenu->leftSelectArrow = createCharacter(1402, RGB(255,0,255), 0, 0);
 	thisMainMenu->rightSelectArrow = createCharacter(1504, RGB(255,0,255), 0, 0);
 
@@ -25,6 +25,8 @@ void initMainMenu(int inMenuMode){
 	thisMainMenu->title->selectedOption = TITLE_NEW_GAME;
 	thisMainMenu->rightSelectArrow->y = 13;
 
+	thisMainMenu->newGame->creationScreen = createCharacter(1401, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->newPlayer = getIndividualFromRegistry(0);
 }
 
 void disableMainMenuMode(){
@@ -89,9 +91,10 @@ void mainMenuTitleSelect(){
 	if(thisMainMenu->title->titleOptionsDisplayed){
 		switch(thisMainMenu->title->selectedOption){
 		case TITLE_NEW_GAME:
-			disableMainMenuMode();
+			thisMainMenu->currentMenu = MENU_NEW_GAME;
 			break;
 		case TITLE_LOAD:
+			disableMainMenuMode();
 			break;
 		case TITLE_EXIT:
 			PostQuitMessage(0);

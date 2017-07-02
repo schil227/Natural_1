@@ -10,7 +10,7 @@
 
 #include"../individual_pub_methods.h"
 
-typedef enum {MENU_TITLE, MENU_CREATE, MENU_CREATE_ABILITY, MENU_LOAD} mainMenuMode;
+typedef enum {MENU_TITLE, MENU_NEW_GAME, MENU_NEW_GAME_ABILITY, MENU_LOAD} mainMenuMode;
 
 typedef enum {TITLE_NEW_GAME, TITLE_LOAD, TITLE_EXIT} titleScreenOption;
 
@@ -23,12 +23,17 @@ typedef struct{
 }titleMenu;
 
 typedef struct{
+	individual * newPlayer;
+	fixedCharacter * creationScreen;
+}newGameMenu;
+
+typedef struct{
 	int inMenuMode;
 	mainMenuMode currentMenu;
 
 	titleMenu * title;
+	newGameMenu * newGame;
 
-	fixedCharacter * creationScreen;
 	fixedCharacter * rightSelectArrow;
 	fixedCharacter * leftSelectArrow;
 	individual * newPlayer;
