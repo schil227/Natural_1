@@ -90,6 +90,10 @@ HWND getGlobalHWnd(){
 	return hwnd_global;
 }
 
+void setPlayer(individual * newPlayer){
+	player = newPlayer;
+}
+
 //BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
 //	int len = 0;
 //	switch (Message) {
@@ -503,6 +507,14 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 		HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer);
 
 		drawMainMenu(hdc, hdcBuffer, &rect);
+
+		if (inAbilityCreateMode()){
+			drawAbilityCreateWindow(hdc, hdcBuffer, &rect);
+		}
+
+		if(inNameBoxMode()){
+			drawNameBoxInstance(hdc, hdcBuffer, &rect);
+		}
 
 		BitBlt(hdc, 0, 0, rect.right, rect.bottom, hdcBuffer, 0, 0, SRCCOPY);
 		SelectObject(hdcBuffer, hbmOldBuffer);
@@ -1329,31 +1341,15 @@ LRESULT CALLBACK MapGeneratorProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if(inMainMenuMode()){
-		mainMenuTitleLoop(hwnd, msg, wParam, lParam);
-		return 0;
-	}
-
 	if(isPaused()){
 		return pausedLoop(hwnd, msg, wParam, lParam);
 	}
-	//Ignore inputs until drawing is finished.
-	if(postMoveMode){
-		return 0;
-	}
 
-	if(inWorldMapMode()){
-		return worldMapLoop(hwnd, msg, wParam, lParam, &main_field, player, thisGroupContainer, viewShift, mapDirectory, &inActionMode);
-	}else if(isSpecialDrawModeEnabled()){
-		specialDrawLoop(hwnd, msg, wParam, lParam);
-		return 0;
-	}else if(shouldDrawDialogBox()){
-		dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
-		return 0;
-	}else if(inNameBoxMode()){
+	//Required for menu mode
+	if(inNameBoxMode()){
 		nameLoop(hwnd, msg, wParam, lParam, player);
 		return 0;
-	} else if(inAbilityCreateMode()){
+	}else if(inAbilityCreateMode()){
 		if(inAbilityWaitForNameMode()){//Name loop finished, check for name
 			toggleAbilityWaitForNameMode();
 			if(!nameEmpty()){
@@ -1374,6 +1370,38 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			createAbilityLoop(hwnd, msg, wParam, lParam, player);
 			return 0;
 		}
+	}
+
+	if(inMainMenuMode()){
+		if(inMainMenuWaitForNameMode()){
+			disableMainMenuWaitForNameMode();
+			if(!nameEmpty()){
+				MainMenuSetName(getNameFromInstance());
+			}
+		}
+		mainMenuLoop(hwnd, msg, wParam, lParam);
+
+//		if(!inMainMenuMode()){
+//			destroyAndLoad(hwnd, 1, mapDirectory);
+//			disableMainMenuMode();
+//		}
+		return 0;
+	}
+
+
+	//Ignore inputs until drawing is finished.
+	if(postMoveMode){
+		return 0;
+	}
+
+	if(inWorldMapMode()){
+		return worldMapLoop(hwnd, msg, wParam, lParam, &main_field, player, thisGroupContainer, viewShift, mapDirectory, &inActionMode);
+	}else if(isSpecialDrawModeEnabled()){
+		specialDrawLoop(hwnd, msg, wParam, lParam);
+		return 0;
+	}else if(shouldDrawDialogBox()){
+		dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
+		return 0;
 	}else if(inAbilityViewMode()){
 		return abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
 	}else if (inLookViewScrollMode()) {

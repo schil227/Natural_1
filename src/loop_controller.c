@@ -1096,25 +1096,32 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 	}
 }
 
-int mainMenuTitleLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+int mainMenuLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch (msg) {
 		case WM_KEYDOWN:{
 			switch(LOWORD(wParam)){
-			case 0x0D://p key (inventory)
-				{
-					mainMenuTitleSelect();
-				}
+			case 0x0D://enter
+				mainMenuInterpretEnter();
+				break;
+			case 0x1B:
+				mainMenuInterpretEscape();
 				break;
 			case 0x38:
-			case 0x68:{ //'8'
-				mainMenuTitleUp();
+			case 0x68: //'8'
+				mainMenuInterpretUp();
 				break;
-			}
 			case 0x32:
-			case 0x62:{ //'2' key
-				mainMenuTitleDown();
+			case 0x62: //'2' key
+				mainMenuInterpretDown();
 				break;
-			}
+			case 0x34:
+			case 0x64: //'4'
+				mainMenuInterpretLeft();
+				break;
+			case 0x36:
+			case 0x66: //'6' key
+				mainMenuInterpretRight();
+				break;
 			}
 			break;
 		}

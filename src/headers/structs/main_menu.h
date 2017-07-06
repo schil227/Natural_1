@@ -11,8 +11,12 @@
 #include"../individual_pub_methods.h"
 
 typedef enum {MENU_TITLE, MENU_NEW_GAME, MENU_NEW_GAME_ABILITY, MENU_LOAD} mainMenuMode;
-
 typedef enum {TITLE_NEW_GAME, TITLE_LOAD, TITLE_EXIT} titleScreenOption;
+typedef enum {CREATE_NAME, CREATE_SPREAD, CREATE_STR, CREATE_DEX, CREATE_CON, CREATE_INT, CREATE_WIS, CREATE_WILL,
+	CREATE_CHR, CREATE_LUCK, CREATE_AVATAR, CREATE_HP, CREATE_MANA, CREATE_FOOD, CREATE_ATTACK, CREATE_AC, CREATE_DAM,
+	CREATE_CRIT, CREATE_MVMT, CREATE_NUM_ABILITIES, CREATE_FATE_TOKENS, CREATE_DONE} newGameCreateField;
+typedef enum {SPREAD_12_4, SPREAD_10_6, SPREAD_8_8, SPREAD_6_10, SPREAD_4_12} newGameSpread;
+
 
 typedef struct{
 	int titleOptionsDisplayed;
@@ -23,12 +27,30 @@ typedef struct{
 }titleMenu;
 
 typedef struct{
+	newGameCreateField currentField;
+	newGameSpread currentSpread;
+	int inEditMode;
+	int statPoints;
+	int numAbilites;
+
 	individual * newPlayer;
+
+	fixedCharacter * entry1Select;
+	fixedCharacter * entry1Edit;
+	fixedCharacter * entry2Select;
+	fixedCharacter * entry2Edit;
+	fixedCharacter * entry3Select;
+	fixedCharacter * entry3Edit;
+	fixedCharacter * entry4Select;
+	fixedCharacter * entry4Edit;
+	fixedCharacter * entry5Select;
+	fixedCharacter * entry5Edit;
 	fixedCharacter * creationScreen;
 }newGameMenu;
 
 typedef struct{
 	int inMenuMode;
+	int waitingForNameMode;
 	mainMenuMode currentMenu;
 
 	titleMenu * title;

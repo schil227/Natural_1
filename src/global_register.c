@@ -904,6 +904,26 @@ int getAllAreaNodesFromRegistry(areaNode ** nodeContainer, int maxNodes){
 	return i;
 }
 
+int replaceIndividualInRegistry(individual * newIndividual, int id){
+	int i;
+
+	for(i = 0; i < thisGlobalRegister->numIndividuals; i++){
+		individual * tmpIndividual = thisGlobalRegister->individualRegistry[i];
+		if(tmpIndividual != NULL && tmpIndividual->ID == id){
+			thisGlobalRegister->individualRegistry[i] = newIndividual;
+//			destroyIndividual(tmpIndividual);
+
+			return 1;
+		}
+	}
+
+	char * errLog[128];
+	sprintf(errLog, "!!INDIVIDUAL NOT FOUND IN REGISTRY - %d!!", id);
+	cwrite(errLog);
+
+	return 0;
+}
+
 void addIndividualToExistance(int id){
 	setBit(thisGlobalRegister->existanceArray, id);
 }
