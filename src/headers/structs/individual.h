@@ -201,6 +201,7 @@ struct individual{
 	int dialogID;
 	int dialogPortraitID;
 
+	int fateTokens;
 	int gold;
 
 	int jumpTarget;

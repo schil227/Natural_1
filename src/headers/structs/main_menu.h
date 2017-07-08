@@ -45,6 +45,32 @@ typedef struct{
 	fixedCharacter * entry4Edit;
 	fixedCharacter * entry5Select;
 	fixedCharacter * entry5Edit;
+	fixedCharacter * entry6Select;
+	fixedCharacter * entry6Edit;
+
+	fixedCharacter * descriptionName;
+	fixedCharacter * descriptionSpread;
+	fixedCharacter * descriptionAvatar;
+	fixedCharacter * descriptionSTR;
+	fixedCharacter * descriptionDEX;
+	fixedCharacter * descriptionCON;
+	fixedCharacter * descriptionINT;
+	fixedCharacter * descriptionWIS;
+	fixedCharacter * descriptionWILL;
+	fixedCharacter * descriptionCHR;
+	fixedCharacter * descriptionLUCK;
+	fixedCharacter * descriptionDone;
+	fixedCharacter * descriptionHP;
+	fixedCharacter * descriptionMana;
+	fixedCharacter * descriptionFood;
+	fixedCharacter * descriptionAttack;
+	fixedCharacter * descriptionAC;
+	fixedCharacter * descriptionDam;
+	fixedCharacter * descriptionCrit;
+	fixedCharacter * descriptionMvmt;
+	fixedCharacter * descriptionNumAbilities;
+	fixedCharacter * descriptionFateTokens;
+
 	fixedCharacter * creationScreen;
 }newGameMenu;
 

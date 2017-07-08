@@ -43,6 +43,33 @@ void initMainMenu(int inMenuMode){
 	thisMainMenu->newGame->entry4Edit = createCharacter(1412, RGB(255,0,255), 0, 0);
 	thisMainMenu->newGame->entry5Select = createCharacter(1408, RGB(255,0,255), 0, 0);
 	thisMainMenu->newGame->entry5Edit = createCharacter(1413, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->entry6Select = createCharacter(1414, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->entry6Edit = createCharacter(1415, RGB(255,0,255), 0, 0);
+
+
+	thisMainMenu->newGame->descriptionName = createCharacter(1415, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionSpread = createCharacter(1416, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionAvatar = createCharacter(1417, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionSTR = createCharacter(1418, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionDEX = createCharacter(1419, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionCON = createCharacter(1420, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionINT = createCharacter(1421, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionWIS = createCharacter(1422, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionWILL = createCharacter(1423, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionCHR = createCharacter(1424, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionLUCK = createCharacter(1425, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionDone = createCharacter(1426, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionHP = createCharacter(1427, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionMana = createCharacter(1428, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionFood = createCharacter(1429, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionAttack = createCharacter(1430, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionAC = createCharacter(1431, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionDam = createCharacter(1432, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionCrit = createCharacter(1433, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionMvmt = createCharacter(1434, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionNumAbilities = createCharacter(1435, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->descriptionFateTokens = createCharacter(1436, RGB(255,0,255), 0, 0);
+
 }
 
 void disableMainMenuMode(){
@@ -360,7 +387,7 @@ void newGameMenuIncreaseField(){
 		if(newPlayer->CON < 3){
 			newPlayer->CON++;
 			newPlayer->totalFood += 50;
-			newPlayer->baseHP += 2;
+			newPlayer->hp = newPlayer->baseHP + newPlayer->CON * 2;
 			thisMainMenu->newGame->statPoints--;
 		}
 		break;
@@ -375,7 +402,7 @@ void newGameMenuIncreaseField(){
 	case CREATE_WILL:
 		if(newPlayer->WILL < 3){
 			newPlayer->WILL++;
-			newPlayer->baseMana += 2;
+			newPlayer->mana = newPlayer->baseMana + newPlayer->WILL * 2;
 			thisMainMenu->newGame->statPoints--;
 		}
 		break;
@@ -388,6 +415,7 @@ void newGameMenuIncreaseField(){
 	case CREATE_CHR:
 		if(newPlayer->CHR < 3){
 			newPlayer->CHR++;
+			newPlayer->fateTokens++;
 			thisMainMenu->newGame->statPoints--;
 		}
 		break;
@@ -455,7 +483,7 @@ void newGameMenuDecreaseField(){
 		if(newPlayer->CON > -2){
 			newPlayer->CON--;
 			newPlayer->totalFood -= 50;
-			newPlayer->baseHP -= 2;
+			newPlayer->hp = newPlayer->baseHP + newPlayer->CON * 2;
 			thisMainMenu->newGame->statPoints++;
 		}
 		break;
@@ -470,7 +498,7 @@ void newGameMenuDecreaseField(){
 	case CREATE_WILL:
 		if(newPlayer->WILL > -2){
 			newPlayer->WILL--;
-			newPlayer->baseMana -= 2;
+			newPlayer->mana = newPlayer->baseMana + newPlayer->WILL * 2;
 			thisMainMenu->newGame->statPoints++;
 		}
 		break;
@@ -483,7 +511,7 @@ void newGameMenuDecreaseField(){
 	case CREATE_CHR:
 		if(newPlayer->CHR > -2){
 			newPlayer->CHR--;
-			//TODO: add fate tokens
+			newPlayer->fateTokens--;
 			thisMainMenu->newGame->statPoints++;
 		}
 		break;
@@ -519,6 +547,7 @@ void newGameMenuInterpretEnter(){
 		enableMainMenuWaitForNameMode();
 		break;
 	case CREATE_SPREAD:
+	case CREATE_AVATAR:
 	case CREATE_STR:
 	case CREATE_DEX:
 	case CREATE_CON:
@@ -698,6 +727,9 @@ void drawCreateField(HDC hdc, HDC hdcBuffer, int xCord, int yCord, int type){
 			case 5:
 				outline = thisMainMenu->newGame->entry5Edit;
 				break;
+			case 6:
+				outline = thisMainMenu->newGame->entry6Edit;
+				break;
 		}
 	}else{
 		switch(type){
@@ -716,76 +748,104 @@ void drawCreateField(HDC hdc, HDC hdcBuffer, int xCord, int yCord, int type){
 			case 5:
 				outline = thisMainMenu->newGame->entry5Select;
 				break;
+			case 6:
+				outline = thisMainMenu->newGame->entry6Select;
+				break;
 		}
 	}
 
 	drawUnboundCharacterByPixels(hdc, hdcBuffer, xCord, yCord, outline);
 }
 
-void drawNewGameCreateCursor(HDC hdc, HDC hdcBuffer, int xOff, int yOff){
+void drawNewGameSelectedInfo(HDC hdc, HDC hdcBuffer, int xOff, int yOff){
 	switch(thisMainMenu->newGame->currentField){
 		case CREATE_NAME:
 			drawCreateField(hdc, hdcBuffer, xOff + 102, yOff + 22, 5);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionName);
 			break;
 		case CREATE_SPREAD:
 			drawCreateField(hdc, hdcBuffer, xOff + 180, yOff + 68, 3);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionSpread);
+			break;
+		case CREATE_AVATAR:
+			drawCreateField(hdc, hdcBuffer, xOff + 296, yOff + 22, 6);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionAvatar);
 			break;
 		case CREATE_STR:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionSTR);
 			break;
 		case CREATE_DEX:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174 + 38, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionDEX);
 			break;
 		case CREATE_CON:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174 + 38 * 2, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionCON);
 			break;
 		case CREATE_INT:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174 + 38 * 3, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionINT);
 			break;
 		case CREATE_WIS:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174 + 38 * 4, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionWIS);
 			break;
 		case CREATE_WILL:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174 + 38 * 5, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionWILL);
 			break;
 		case CREATE_CHR:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174 + 38 * 6, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionCHR);
 			break;
 		case CREATE_LUCK:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 174 + 38 * 7, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionLUCK);
 			break;
 		case CREATE_DONE:
 			drawCreateField(hdc, hdcBuffer, xOff + 80, yOff + 486, 3);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionDone);
 			break;
 		case CREATE_HP:
 			drawCreateField(hdc, hdcBuffer, xOff + 306, yOff + 140, 3);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionHP);
 			break;
 		case CREATE_MANA:
 			drawCreateField(hdc, hdcBuffer, xOff + 338, yOff + 182, 3);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionMana);
 			break;
 		case CREATE_FOOD:
 			drawCreateField(hdc, hdcBuffer, xOff + 404, yOff + 224, 2);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionFood);
 			break;
 		case CREATE_ATTACK:
 			drawCreateField(hdc, hdcBuffer, xOff + 344, yOff + 266, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionAttack);
 			break;
 		case CREATE_AC:
 			drawCreateField(hdc, hdcBuffer, xOff + 302, yOff + 306, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionAC);
 			break;
 		case CREATE_DAM:
 			drawCreateField(hdc, hdcBuffer, xOff + 326, yOff + 344, 4);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionDam);
 			break;
 		case CREATE_CRIT:
 			drawCreateField(hdc, hdcBuffer, xOff + 310, yOff + 386, 3);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionCrit);
 			break;
 		case CREATE_MVMT:
 			drawCreateField(hdc, hdcBuffer, xOff + 340, yOff + 428, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionMvmt);
 			break;
 		case CREATE_NUM_ABILITIES:
 			drawCreateField(hdc, hdcBuffer, xOff + 440, yOff + 466, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionNumAbilities);
 			break;
 		case CREATE_FATE_TOKENS:
 			drawCreateField(hdc, hdcBuffer, xOff + 432, yOff + 504, 1);
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 14, yOff + 554, thisMainMenu->newGame->descriptionFateTokens);
 			break;
 	}
 }
@@ -802,7 +862,9 @@ void drawNewGameMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 
 	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisMainMenu->newGame->creationScreen);
 
-	drawNewGameCreateCursor(hdc, hdcBuffer, xOff, yOff);
+	drawNewGameSelectedInfo(hdc, hdcBuffer, xOff, yOff);
+
+	drawUnboundAnimationByPixels(hdc, hdcBuffer, newPlayer->playerCharacter, xOff + 296, yOff + 22, 0);
 
 	textBoxRect.top = yOff + 27;
 	textBoxRect.left = xOff + 110;
@@ -836,6 +898,7 @@ void drawNewGameMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 	drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 312 + 30, yOff + 387, newPlayer->critType);
 	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 340 + 22, yOff + 428, newPlayer->mvmt);
 	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 440 + 22, yOff + 466, thisMainMenu->newGame->numAbilites);
+	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 426 + 22, yOff + 504, newPlayer->fateTokens);
 
 	sprintf(outStr, "%d/%d", newPlayer->baseHP + newPlayer->CON * 2, newPlayer->baseHP + newPlayer->CON * 2);
 	drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 307 + 42, yOff + 141, outStr);
