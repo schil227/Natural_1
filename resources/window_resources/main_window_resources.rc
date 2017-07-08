@@ -74,29 +74,6 @@ END
 1414 BITMAP DISCARDABLE "../images/create_entry_6_select.bmp"
 1415 BITMAP DISCARDABLE "../images/create_entry_6_edit.bmp"
 
-1415 BITMAP DISCARDABLE "../images/create_description_name.bmp"
-1416 BITMAP DISCARDABLE "../images/create_description_dice_spread.bmp"
-1417 BITMAP DISCARDABLE "../images/create_description_avatar.bmp"
-1418 BITMAP DISCARDABLE "../images/create_description_str.bmp"
-1419 BITMAP DISCARDABLE "../images/create_description_dex.bmp"
-1420 BITMAP DISCARDABLE "../images/create_description_con.bmp"
-1421 BITMAP DISCARDABLE "../images/create_description_int.bmp"
-1422 BITMAP DISCARDABLE "../images/create_description_wis.bmp"
-1423 BITMAP DISCARDABLE "../images/create_description_will.bmp"
-1424 BITMAP DISCARDABLE "../images/create_description_chr.bmp"
-1425 BITMAP DISCARDABLE "../images/create_description_luck.bmp"
-1426 BITMAP DISCARDABLE "../images/create_description_done.bmp"
-1427 BITMAP DISCARDABLE "../images/create_description_hp.bmp"
-1428 BITMAP DISCARDABLE "../images/create_description_mana.bmp"
-1429 BITMAP DISCARDABLE "../images/create_description_food.bmp"
-1430 BITMAP DISCARDABLE "../images/create_description_attack.bmp"
-1431 BITMAP DISCARDABLE "../images/create_description_ac.bmp"
-1432 BITMAP DISCARDABLE "../images/create_description_dam.bmp"
-1433 BITMAP DISCARDABLE "../images/create_description_crit.bmp"
-1434 BITMAP DISCARDABLE "../images/create_description_mvmt.bmp"
-1435 BITMAP DISCARDABLE "../images/create_description_num_abilities.bmp"
-1436 BITMAP DISCARDABLE "../images/create_description_fate_tokens.bmp"
-
 //Menu images 1500 - 2000
 1500 BITMAP DISCARDABLE "../images/console_bg.bmp" //2010
 1501 BITMAP DISCARDABLE "../images/dialog_box.bmp" //2012

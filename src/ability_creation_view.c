@@ -190,21 +190,34 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageEnabled,
 			 hdc, hdcBuffer, &textRect, ABILITY_DAMAGE, "damage", 0, thisAbilityCreationInstance->abilityInsance->damage);
 
-	processTypeMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusEnabled,
-			 hdc, hdcBuffer, &textRect, ABILITY_STATUS, "Status", 0, thisAbilityCreationInstance->abilityInsance->status);
+	if(thisAbilityCreationInstance->abilityInsance->statusEnabled){
+		processTypeMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusEnabled,
+				hdc, hdcBuffer, &textRect, ABILITY_STATUS, "Status", 0, thisAbilityCreationInstance->abilityInsance->status);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDiceDamageEnabled,
-			 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DICE_DAMAGE, "Status Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDiceDamage);
+		char type[16];
+		strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDamageEnabled,
-			 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DAMAGE, "Status Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDamage);
+		//Dont show status options when status is type 'None'
+		if(strcmp(type, "None") != 0){
+			textRect.left += 20;
+			processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceStatusDurationEnabled,
+					 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DICE_DURATION, "Status Dice Duration", 0, thisAbilityCreationInstance->abilityInsance->diceStatusDuration);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceStatusDurationEnabled,
-			 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DICE_DURATION, "Status Dice Duration", 0, thisAbilityCreationInstance->abilityInsance->diceStatusDuration);
+			processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDurationEnabled,
+					 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DURATION, "Status Duration", 0, thisAbilityCreationInstance->abilityInsance->statusDuration);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDurationEnabled,
-			 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DURATION, "Status Duration", 0, thisAbilityCreationInstance->abilityInsance->statusDuration);
+			//only show damage options for damaging statuses.
+			if(strcmp(type, "Poison") == 0 || strcmp(type, "Burn") == 0 || strcmp(type, "Bleed") == 0){
+				processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDiceDamageEnabled,
+						 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DICE_DAMAGE, "Status Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDiceDamage);
 
+				processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDamageEnabled,
+						 hdc, hdcBuffer, &textRect, ABILITY_STATUS_DAMAGE, "Status Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDamage);
+			}
+
+			textRect.left -= 20;
+		}
+	}
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_AOE, "aoe", 0, thisAbilityCreationInstance->abilityInsance->aoe);
 

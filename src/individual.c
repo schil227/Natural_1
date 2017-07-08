@@ -359,6 +359,7 @@ char * getIndividualAsLine(individual * thisIndividual){
 	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->afraidOfPlayer);
 	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->playerIsMarkedForDeath);
 	i += sprintf(line + i, "%d;", thisIndividual->dialogPortraitID);
+	i += sprintf(line + i, "%d;", thisIndividual->fateTokens);
 	i += sprintf(line + i, "%d;", thisIndividual->gold);
 	i += sprintf(line + i, "%d;", thisIndividual->faction);
 	i += sprintf(line + i, "%d;", thisIndividual->defaultGroupType);
@@ -3593,7 +3594,6 @@ int getAttributeFromActiveStatus(status * thisStatus, char * attribute){
 
 	return 0;
 }
-
 
 int getAttributeSum(individual * thisIndividual, char * attribute){
 	int toReturn = 0, i, itemTotal = 0, activeItemTotal = 0, abilitiesPassed = 0, statusesPassed = 0;
