@@ -719,8 +719,55 @@ void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, ch
 			hdcMem,
 			shitfX,
 			0,
-			SRCAND);
+			SRCPAINT);
 
+	DeleteDC(hdcMem);
+}
+
+drawUnboundAnimationByPixelsStretch(HDC hdc, HDC hdcBuffer, character * thisCharacter, int xCord, int yCord, int widthStretch, int heightStretch, int useSecondaryAnimationContainer){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	HBITMAP image, imageMask;
+	animation * tmpAnimation;
+	int shitfX, width = 0, height = 0;
+
+	if(useSecondaryAnimationContainer){
+		tmpAnimation = thisCharacter->secondaryAnimationContainer->animations[thisCharacter->secondaryAnimationContainer->currentAnimation];
+	} else{
+		tmpAnimation = thisCharacter->thisAnimationContainer->animations[thisCharacter->thisAnimationContainer->currentAnimation];
+	}
+
+	width = tmpAnimation->imageWidth;
+	height = tmpAnimation->imageHeight;
+	shitfX = tmpAnimation->currentFrame*width;
+	image = tmpAnimation->image;
+	imageMask = tmpAnimation->imageMask;
+
+	SelectObject(hdcMem, imageMask);
+
+	StretchBlt(hdcBuffer,
+			 	 xCord, yCord,
+				 widthStretch, heightStretch,
+	 			 hdcMem,
+	 			 0,0,
+				 width, height,
+				 SRCAND);
+
+//	BitBlt(hdcBuffer, xCord, yCord,
+//			width, height,
+//			hdcMem,
+//			shitfX,
+//			0,
+//			SRCAND);
+
+	SelectObject(hdcMem, image);
+
+	StretchBlt(hdcBuffer,
+			 	 xCord, yCord,
+				 widthStretch, heightStretch,
+	 			 hdcMem,
+	 			 0,0,
+				 width, height,
+				 SRCPAINT);
 	DeleteDC(hdcMem);
 }
 

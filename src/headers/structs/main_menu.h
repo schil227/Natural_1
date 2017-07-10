@@ -14,7 +14,7 @@ typedef enum {MENU_TITLE, MENU_NEW_GAME, MENU_NEW_GAME_ABILITY, MENU_LOAD} mainM
 typedef enum {TITLE_NEW_GAME, TITLE_LOAD, TITLE_EXIT} titleScreenOption;
 typedef enum {CREATE_NAME, CREATE_SPREAD, CREATE_STR, CREATE_DEX, CREATE_CON, CREATE_INT, CREATE_WIS, CREATE_WILL,
 	CREATE_CHR, CREATE_LUCK, CREATE_AVATAR, CREATE_HP, CREATE_MANA, CREATE_FOOD, CREATE_ATTACK, CREATE_AC, CREATE_DAM,
-	CREATE_CRIT, CREATE_MVMT, CREATE_NUM_ABILITIES, CREATE_FATE_TOKENS, CREATE_DONE} newGameCreateField;
+	CREATE_DR, CREATE_CRIT, CREATE_MVMT, CREATE_NUM_ABILITIES, CREATE_FATE_TOKENS, CREATE_DONE} newGameCreateField;
 typedef enum {SPREAD_12_4, SPREAD_10_6, SPREAD_8_8, SPREAD_6_10, SPREAD_4_12} newGameSpread;
 
 
@@ -29,10 +29,12 @@ typedef struct{
 typedef struct{
 	newGameCreateField currentField;
 	newGameSpread currentSpread;
+	character * avatars[4];
 	int inEditMode;
 	int statPoints;
 	int numAbilites;
-
+	int numAvatars;
+	int currentAvatar;
 	individual * newPlayer;
 
 	fixedCharacter * entry1Select;
@@ -68,6 +70,7 @@ typedef struct{
 	char * descriptionAttack[350];
 	char * descriptionAC[350];
 	char * descriptionDam[350];
+	char * descriptionDR[350];
 	char * descriptionCrit[350];
 	char * descriptionMvmt[350];
 	char * descriptionNumAbilities[350];
@@ -86,7 +89,6 @@ typedef struct{
 
 	fixedCharacter * rightSelectArrow;
 	fixedCharacter * leftSelectArrow;
-	individual * newPlayer;
 }mainMenu;
 
 #endif /* SRC_HEADERS_STRUCTS_MAIN_MENU_H_ */

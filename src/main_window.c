@@ -94,61 +94,6 @@ void setPlayer(individual * newPlayer){
 	player = newPlayer;
 }
 
-//BOOL CALLBACK ToolDlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-//	int len = 0;
-//	switch (Message) {
-//	case WM_COMMAND:
-//
-//		switch (LOWORD(wParam)) {
-//		case IDC_SECOND: // get the Name
-//			len = GetWindowTextLength(GetDlgItem(hwnd, IDC_TEXT));
-//			if (len == 0) {
-//				MessageBox(hwnd, "Longer name, please.",
-//						"Awesome Message Title~", MB_OK | MB_ICONEXCLAMATION);
-//			} else {
-//				char * textStr = (char*) GlobalAlloc(GPTR, len + 1);
-//				GetDlgItemText(hwnd, IDC_TEXT, textStr, len + 1);
-////						printf("string: %s\n", textStr);
-//				char * str = (char *) join("Name: ", textStr);
-////						printf("str: %s\n", str);
-//				MessageBox(hwnd, str, "Awesome Message Title~",
-//				MB_OK | MB_ICONEXCLAMATION);
-//				free(str);
-//			}
-//			break;
-//		}
-//		break;
-//	case WM_DESTROY:
-//		PostQuitMessage(0);
-//		break;
-//	default:
-//		return FALSE;
-//	}
-//	return TRUE;
-//}
-
-BOOL CALLBACK AboutDlgProc(HWND hwnd, UINT Message, WPARAM wParam,
-		LPARAM lParam) {
-	switch (Message) {
-	case WM_INITDIALOG:
-		//do processing needed before the window appears
-		return TRUE;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		case IDOK:
-			EndDialog(hwnd, IDOK); //destroys dialog box, returns the second value
-			break;
-		case IDCANCEL:
-			EndDialog(hwnd, IDCANCEL);
-			break;
-		}
-		break;
-	default:
-		return FALSE;
-	}
-	return TRUE;
-}
-
 int getGameFieldAreaX(RECT * rect){
 	return rect->right - rect->left - getSidebarWidth();
 }
@@ -1096,21 +1041,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
-		case ID_HELP_ABOUT: {
-			int ret = DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
-			if (ret == IDOK) {
-				MessageBox(hwnd, "Dialog exited from clicking ok.", "Notice",
-				MB_OK | MB_ICONINFORMATION);
-			} else if (ret == IDCANCEL) {
-				MessageBox(hwnd, "Dialog exited from clicking cancel.",
-						"Notice",
-						MB_OK | MB_ICONINFORMATION);
-			} else if (ret == -1) {
-				MessageBox(hwnd, "Dialog failed!", "Error",
-				MB_OK | MB_ICONINFORMATION);
-			}
-		}
-			break;
 		case ID_FILE_EXIT:
 			PostQuitMessage(0);
 			break;
@@ -1377,6 +1307,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			disableMainMenuWaitForNameMode();
 			if(!nameEmpty()){
 				MainMenuSetName(getNameFromInstance());
+				resetNameBoxInstance();
 			}
 		}
 		mainMenuLoop(hwnd, msg, wParam, lParam);

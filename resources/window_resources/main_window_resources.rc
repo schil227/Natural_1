@@ -125,11 +125,25 @@ END
 1532 BITMAP DISCARDABLE "../images/map_generator_character_select_background.bmp" 
 
 //Base character images 2000 - 2500
-2001 BITMAP DISCARDABLE "../images/human_idle.bmp" //full: 2001
-2002 BITMAP DISCARDABLE "../images/human_attack_slash.bmp"
-2003 BITMAP DISCARDABLE "../images/human_attack_pierce.bmp"
-2004 BITMAP DISCARDABLE "../images/human_death.bmp"
+2001 BITMAP DISCARDABLE "../images/human_white_idle.bmp"
+2002 BITMAP DISCARDABLE "../images/human_white_attack_slash.bmp"
+2003 BITMAP DISCARDABLE "../images/human_white_attack_pierce.bmp"
+2004 BITMAP DISCARDABLE "../images/human_white_death.bmp"
 
+2005 BITMAP DISCARDABLE "../images/human_tan_idle.bmp"
+2008 BITMAP DISCARDABLE "../images/human_tan_attack_slash.bmp"
+2009 BITMAP DISCARDABLE "../images/human_tan_attack_pierce.bmp"
+2010 BITMAP DISCARDABLE "../images/human_tan_death.bmp"
+
+2006 BITMAP DISCARDABLE "../images/human_brown_idle.bmp"
+2011 BITMAP DISCARDABLE "../images/human_brown_attack_slash.bmp"
+2012 BITMAP DISCARDABLE "../images/human_brown_attack_pierce.bmp"
+2013 BITMAP DISCARDABLE "../images/human_brown_death.bmp"
+
+2007 BITMAP DISCARDABLE "../images/human_black_idle.bmp"
+2014 BITMAP DISCARDABLE "../images/human_black_attack_slash.bmp"
+2015 BITMAP DISCARDABLE "../images/human_black_attack_pierce.bmp"
+2016 BITMAP DISCARDABLE "../images/human_black_death.bmp"
 
 //Enemy images 2500 - 3500
 	//skelly

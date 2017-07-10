@@ -1,0 +1,68 @@
+==NAME==
+The name of your character.
+
+==Avatar==
+The avatar of your character.
+
+==Dice Spread==
+The starting HP/Mana of your character. Every time your character levels up, they will recieve at least half their dice spread for HP/Mana.\n\nFighters may opt for a 12/4 spread, wizards a 4/12, and the wily rogue an 8/8.
+
+==STR==
+How strong your character is. Determines how much physical damage they do.\n\nA fighter with 3 strength could easily break down a door, while a wizard with -2 strength could hardly manage to open a door.
+
+==DEX==
+How much dexterity your character has. Determines their AC defense and how far they can move in a turn.\n\nA rogue with 3 dexterity is nimble and difficult to hit, while a bumbling paladin with -2 dexterity would trip over their boots.
+
+==CON==
+How tough your character is. Determines their starting hit points and how long they can go without food.\n\nA monk with 3 constitution could handle walking through the desert, while a mage with -2 constitution might collapse after walking up a grassy hill.
+
+==INT==
+How intelligent your character is. Determines the cost of abilities and abilities gained each level.\n\nA wizard with +3 intelligence could summon powerful bolts of lightning, while a fighter with -2 intelligence could have trouble remembering their name.
+
+==WIS==
+How much wisdom your character has. Determines how well they use weapons and the number of abilities they start with.\n\nA weapons master with 3 wisdom will land many blows on their target, while a talentless barbarian will frequently 'wiff'.
+
+==WILL==
+How much willpower your character has. Determines their starting mana points and their spell resistance.\n\nA mage with +3 willpower will be able to cast abilities several times, while a fighter with -2 willpower couldn't cast themselves out of a sack.
+
+==CHR==
+How much charisma your character has. Determines how well they interact with other characters and their starting fate tokens.\n\nA bard with +3 charisma could smooth talk themselves out of a sticky situation, while a raider with -2 charisma could smooth talk themselves into a sticky situation.
+
+==LUCK==
+How lucky your character is. Determines how frequently they land critical hits and helps a little bit with everything they do.\n\nA rogue with +3 luck may find a valuable amulet on the ground, while a wizard with -2 luck may be missing their valuable amulet.
+
+==DONE==
+Move on to creating your characters abilities.
+
+==HP==
+The character's hit points. If their hit points reach zero, they die.\n\nTotal HP = HP dice spread + CON x 2
+
+==Mana==
+The character's mana points. Allows them to use abilities.\n\nTotal Mana = Mana dice spread + WILL x 2
+
+==Food==
+How full the character can be. If their food hits 0, they die.\n\nIf their food is greater than 300, they get a bonus to STR, DEX, and CON. If their food is less than 50, they get a penalty to STR, DEX, and CON.
+
+==Attack==
+The character's attack. The higher the attack, the more likely they will hit their target.\n\nWhen attacking, a d20 is rolled. If the roll plus attack is greater or equal to the targets AC, the attack hits. Rolling a 20 automatically hits, while rolling a 1 always misses.
+
+==AC==
+The character's armor class. The higher the AC, the more likely damage will be avoided entirely.\n\nAC = 10 + DEX
+
+==DAM==
+The character's damage output. When an attack connects, the target will receive a dice roll + STR damage.\n\nWeapons will change this damage output, some of which do 0.5, 1.0, 1.5, 2.0 x STR.
+
+==DR==
+The character's physical and magical damage resistance. The damage taken is equal to the total damage minus DR. Physical DR includes the types blunt, chop, slash and pierce, while magical DR can be earth, fire, water, and lightning.\n\nPhysical DR = CON / 2, Magical DR = INT / 2 (Rounded down).
+
+==CRIT==
+The character's critical strike.\n\nMAX always returns the highest dice roll, while DUB doubles the dice roll.
+
+==MVMT==
+The number of spaces the character can move in one turn.
+
+==Num Abilities==
+The number of abilities the character will start with.
+
+==Fate Tokens==
+The number of fate tokens the character starts with.\n\nFate tokens can be used in a variety of situations to change the state of the game, such as re-rolling a bad roll or making a door unlock without a key.
