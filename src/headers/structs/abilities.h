@@ -19,6 +19,8 @@ typedef enum {ABILITY_DAMAGE_TYPE, ABILITY_RANGE, ABILITY_TARGETED, ABILITY_EXTR
 	ABILITY_CHOP_DR, ABILITY_PIERCE_DR, ABILITY_SLASH_DR, ABILITY_EARTH_DR,	ABILITY_FIRE_DR, ABILITY_WATER_DR, ABILITY_LIGHTNING_DR
 } effect_types;
 
+typedef enum {ABILITY_CREATE_DEFAULT, ABILITY_CREATE_PERMENANT_ONLY, ABILITY_CREATE_EXCEPT_PERMENANT} abilityCreationMode;
+
 typedef enum {DEFAULT_ABILITY, LEVELUP_ABILITY} creation_modes;
 
 typedef struct{
@@ -168,7 +170,11 @@ typedef struct {
 	int idCounter;
 	int waitingForName;
 
+	int bonusMana;
+	int totalBonusMana;
+
 	creation_modes mode;
+	abilityCreationMode createMode;
 	effect_types selectedType;
 
 	fixedCharacter * creationWindow;

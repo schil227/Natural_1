@@ -100,6 +100,8 @@ void setUpAvatars(){
 }
 
 void initMainMenu(int inMenuMode){
+	int i;
+
 	thisMainMenu = malloc(sizeof(mainMenu));
 	thisMainMenu->title = malloc(sizeof(titleMenu));
 	thisMainMenu->newGame = malloc(sizeof(newGameMenu));
@@ -116,15 +118,33 @@ void initMainMenu(int inMenuMode){
 	thisMainMenu->title->selectedOption = TITLE_NEW_GAME;
 	thisMainMenu->rightSelectArrow->y = 13;
 
+	thisMainMenu->newGame->currentForm = NEW_GAME_CREATE;
 	thisMainMenu->newGame->currentField = CREATE_NAME;
 	thisMainMenu->newGame->currentSpread = SPREAD_8_8;
 	setUpAvatars();
 
 	thisMainMenu->newGame->inEditMode = 0;
+	thisMainMenu->newGame->inAbilityEditMode = 0;
 	thisMainMenu->newGame->statPoints = 6;
 	thisMainMenu->newGame->numAbilites = 2;
 	thisMainMenu->newGame->newPlayer = getIndividualFromRegistry(0);
+	thisMainMenu->newGame->newAbilities = malloc(sizeof(abilityList));
+	thisMainMenu->newGame->newAbilities->numAbilities = 0;
+	thisMainMenu->newGame->newAbilities->MAX_ABILITIES = 6;
+	thisMainMenu->newGame->selectedAbility = 0;
+
+	for(i = 0; i < thisMainMenu->newGame->newAbilities->MAX_ABILITIES; i++){
+		thisMainMenu->newGame->newAbilities->abilitiesList[i] = NULL;
+	}
+
+	thisMainMenu->newGame->descriptionRect = malloc(sizeof(RECT));
+	thisMainMenu->newGame->descriptionRect->top = 0;
+	thisMainMenu->newGame->descriptionRect->left = 0;
+	thisMainMenu->newGame->descriptionRect->bottom = 130;
+	thisMainMenu->newGame->descriptionRect->right = 486;
+
 	thisMainMenu->newGame->creationScreen = createCharacter(1401, RGB(255,0,255), 0, 0);
+	thisMainMenu->newGame->abilityCreationScreen = createCharacter(1416, RGB(255,0,255), 0, 0);
 	thisMainMenu->newGame->entry1Select = createCharacter(1404, RGB(255,0,255), 0, 0);
 	thisMainMenu->newGame->entry1Edit = createCharacter(1409, RGB(255,0,255), 0, 0);
 	thisMainMenu->newGame->entry2Select = createCharacter(1405, RGB(255,0,255), 0, 0);
@@ -137,12 +157,7 @@ void initMainMenu(int inMenuMode){
 	thisMainMenu->newGame->entry5Edit = createCharacter(1413, RGB(255,0,255), 0, 0);
 	thisMainMenu->newGame->entry6Select = createCharacter(1414, RGB(255,0,255), 0, 0);
 	thisMainMenu->newGame->entry6Edit = createCharacter(1415, RGB(255,0,255), 0, 0);
-
-	thisMainMenu->newGame->descriptionRect = malloc(sizeof(RECT));
-	thisMainMenu->newGame->descriptionRect->top = 0;
-	thisMainMenu->newGame->descriptionRect->left = 0;
-	thisMainMenu->newGame->descriptionRect->bottom = 130;
-	thisMainMenu->newGame->descriptionRect->right = 486;
+	thisMainMenu->newGame->entryAddAbility = createCharacter(1417, RGB(255,0,255), 0, 0);
 
 	strcpy(thisMainMenu->newGame->descriptionName, "The name of your character.");
 	strcpy(thisMainMenu->newGame->descriptionSpread, "The starting HP/Mana of your character. Every time your character levels up, they will recieve at least half their dice spread for HP/Mana.\n\nFighters may opt for a 12/4 spread, wizards a 4/12, and the wily rogue an 8/8.");
@@ -167,7 +182,10 @@ void initMainMenu(int inMenuMode){
 	strcpy(thisMainMenu->newGame->descriptionMvmt, "The number of spaces the character can move in one turn.");
 	strcpy(thisMainMenu->newGame->descriptionNumAbilities, "The number of abilities the character will start with.");
 	strcpy(thisMainMenu->newGame->descriptionFateTokens, "The number of fate tokens the character starts with.\n\nFate tokens can be used in a variety of situations to change the state of the game, such as re-rolling a bad roll or making a door unlock without a key.");
-
+	strcpy(thisMainMenu->newGame->descriptionBonusMana, "Bonus mana points can be added to abilities to make them more powerful or cheaper to cast. These can be spent in the ability creation menu.");
+	strcpy(thisMainMenu->newGame->descriptionClassAbility, "This permanent ability will be the class of your character. Its effects will always be active.");
+	strcpy(thisMainMenu->newGame->descriptionAbilityDone, "Finalize character creation.");
+	strcpy(thisMainMenu->newGame->descriptionAbility, "Create or edit an ability. Abilities can be used for a variety of purposes, from slaying your enemies, healing yourself, and giving your party temporary stat boosts. Allabilities cost at least one mana.");
 }
 
 void disableMainMenuMode(){
@@ -280,7 +298,43 @@ void drawMainMenuTitle(HDC hdc, HDC hdcBuffer, RECT * rect){
 	}
 }
 
-void newGameMenuMoveVertical(int goingUp){
+void newGameAbilityMenuMoveVertical(int goingUp){
+	if(thisMainMenu->newGame->inAbilityEditMode){
+		return;
+	}
+
+	switch(thisMainMenu->newGame->currentField){
+	case CREATE_ABILITY_SELECT:
+		if(goingUp){
+			if(thisMainMenu->newGame->selectedAbility - 1 >= 0){
+				thisMainMenu->newGame->selectedAbility--;
+			}
+		}else{
+			if(thisMainMenu->newGame->selectedAbility + 1 == thisMainMenu->newGame->newAbilities->MAX_ABILITIES){
+				thisMainMenu->newGame->currentField = CREATE_NUM_ABILITIES;
+			}else{
+				thisMainMenu->newGame->selectedAbility++;
+			}
+		}
+		break;
+	case CREATE_NUM_ABILITIES:
+		if(goingUp){
+			thisMainMenu->newGame->selectedAbility = thisMainMenu->newGame->newAbilities->MAX_ABILITIES - 1;
+			thisMainMenu->newGame->currentField = CREATE_ABILITY_SELECT;
+		}else{
+			thisMainMenu->newGame->currentField = CREATE_ABILITY_BONUS_MANA;
+		}
+		break;
+	case CREATE_ABILITY_BONUS_MANA:
+		thisMainMenu->newGame->currentField = (goingUp ? CREATE_NUM_ABILITIES : CREATE_DONE);
+		break;
+	case CREATE_DONE:
+		thisMainMenu->newGame->currentField = (goingUp ? CREATE_ABILITY_BONUS_MANA : CREATE_DONE);
+		break;
+	}
+}
+
+void newGameCreateMenuMoveVertical(int goingUp){
 	if(thisMainMenu->newGame->inEditMode){
 		return;
 	}
@@ -358,7 +412,7 @@ void newGameMenuMoveVertical(int goingUp){
 	}
 }
 
-void newGameMenuMoveHorizontal(int goingLeft){
+void newGameCreateMenuMoveHorizontal(int goingLeft){
 	if(thisMainMenu->newGame->inEditMode){
 		return;
 	}
@@ -462,6 +516,10 @@ void newGameMenuIncreaseField(){
 			newPlayer->baseMana = 10;
 			break;
 		case SPREAD_6_10:
+			if(newPlayer->hp <= 2){
+				break;
+			}
+
 			thisMainMenu->newGame->currentSpread = SPREAD_4_12;
 			newPlayer->baseHP = 4;
 			newPlayer->baseMana = 12;
@@ -539,7 +597,7 @@ void newGameMenuIncreaseField(){
 	}
 }
 
-void newGameMenuDecreaseField(){
+void newGameCreateMenuDecreaseField(){
 	individual * newPlayer = thisMainMenu->newGame->newPlayer;
 
 	switch(thisMainMenu->newGame->currentField){
@@ -594,7 +652,7 @@ void newGameMenuDecreaseField(){
 		}
 		break;
 	case CREATE_CON:
-		if(newPlayer->CON > -2){
+		if(newPlayer->CON > -2 && newPlayer->hp > 2){
 			newPlayer->CON--;
 			newPlayer->totalFood -= 50;
 			newPlayer->hp = newPlayer->baseHP + newPlayer->CON * 2;
@@ -638,23 +696,76 @@ void newGameMenuDecreaseField(){
 	}
 }
 
-void newGameMenuInterpretLeft(){
+void newGameCreateMenuInterpretLeft(){
 	if(thisMainMenu->newGame->inEditMode){
-		newGameMenuDecreaseField();
+		newGameCreateMenuDecreaseField();
 	}else{
-		newGameMenuMoveHorizontal(1);
+		newGameCreateMenuMoveHorizontal(1);
 	}
 }
 
-void newGameMenuInterpretRight(){
+void newGameCreateMenuInterpretRight(){
 	if(thisMainMenu->newGame->inEditMode){
 		newGameMenuIncreaseField();
 	}else{
-		newGameMenuMoveHorizontal(0);
+		newGameCreateMenuMoveHorizontal(0);
 	}
 }
 
-void newGameMenuInterpretEnter(){
+void disableNewGameAbilityEditMode(){
+	thisMainMenu->newGame->inAbilityEditMode = 0;
+}
+
+void addAbilityToNewGameAbilityMode(ability * newAbility){
+	ability * tmpOldAbility = thisMainMenu->newGame->newAbilities->abilitiesList[thisMainMenu->newGame->selectedAbility];
+
+	thisMainMenu->newGame->newAbilities->abilitiesList[thisMainMenu->newGame->selectedAbility] = newAbility;
+
+	if(tmpOldAbility != NULL){
+		free(tmpOldAbility);
+	}
+
+	thisMainMenu->newGame->bonusMana -= getSpentBonusMana();
+
+	thisMainMenu->newGame->inAbilityEditMode = 0;
+}
+
+void newGameAbilityMenuInterpretEnter(){
+	switch(thisMainMenu->newGame->currentField){
+		case CREATE_ABILITY_SELECT:
+			if(thisMainMenu->newGame->selectedAbility == 0){
+				enableAbilityCreateMode(0, ABILITY_CREATE_PERMENANT_ONLY, DEFAULT_ABILITY);
+			}else{
+				enableAbilityCreateMode(thisMainMenu->newGame->bonusMana, ABILITY_CREATE_EXCEPT_PERMENANT, DEFAULT_ABILITY);
+			}
+
+			thisMainMenu->newGame->inAbilityEditMode = 1;
+		break;
+		case CREATE_DONE:{
+			int i;
+			character * tmpCharacter;
+
+			tmpCharacter = thisMainMenu->newGame->newPlayer->playerCharacter;
+			thisMainMenu->newGame->newPlayer->playerCharacter = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar];
+			destroyCharacter(tmpCharacter);
+
+			for(i = 0; i < thisMainMenu->newGame->newAbilities->MAX_ABILITIES; i++){
+				if(thisMainMenu->newGame->newAbilities->abilitiesList[i] != NULL){
+					addAbilityToIndividual(thisMainMenu->newGame->newPlayer, thisMainMenu->newGame->newAbilities->abilitiesList[i]);
+				}
+			}
+
+			thisMainMenu->newGame->newPlayer->ID = 1;
+			setPlayer(thisMainMenu->newGame->newPlayer);
+			//TODO requres lock if I actually want to destory the other individual
+			replaceIndividualInRegistry(thisMainMenu->newGame->newPlayer, 1);
+			disableMainMenuMode();
+			break;
+		}
+	}
+}
+
+void newGameCreateMenuInterpretEnter(){
 	switch(thisMainMenu->newGame->currentField){
 	case CREATE_NAME:
 		toggleNameMode();
@@ -673,16 +784,40 @@ void newGameMenuInterpretEnter(){
 		thisMainMenu->newGame->inEditMode = (thisMainMenu->newGame->inEditMode + 1) % 2;
 		break;
 	case CREATE_DONE:
-		if(thisMainMenu->newGame->newPlayer->hp < 1){
-			break;
+		switch(thisMainMenu->newGame->currentForm){
+			case NEW_GAME_CREATE:
+				if(thisMainMenu->newGame->newPlayer->hp < 1){
+					break;
+				}
+
+				thisMainMenu->newGame->currentForm = NEW_GAME_ABILITIES;
+				thisMainMenu->newGame->currentField = CREATE_ABILITY_SELECT;
+				thisMainMenu->newGame->selectedAbility = 0;
+				thisMainMenu->newGame->newAbilities->MAX_ABILITIES = thisMainMenu->newGame->numAbilites + 1;
+				thisMainMenu->newGame->bonusMana = thisMainMenu->newGame->newPlayer->INT;
+
+				if(thisMainMenu->newGame->bonusMana < 0){
+					thisMainMenu->newGame->bonusMana = 0;
+				}
+
+				break;
+			case NEW_GAME_ABILITIES:
+			case NEW_GAME_FINALIZE:{
+				character * tmpCharacter;
+
+				tmpCharacter = thisMainMenu->newGame->newPlayer->playerCharacter;
+				thisMainMenu->newGame->newPlayer->playerCharacter = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar];
+				destroyCharacter(tmpCharacter);
+
+				thisMainMenu->newGame->newPlayer->ID = 1;
+				setPlayer(thisMainMenu->newGame->newPlayer);
+				//TODO requres lock if I actually want to destory the other individual
+				replaceIndividualInRegistry(thisMainMenu->newGame->newPlayer, 1);
+				disableMainMenuMode();
+				break;
+			}
 		}
 
-		thisMainMenu->newGame->newPlayer->ID = 1;
-		destroyCharacter(thisMainMenu->newGame->newPlayer->playerCharacter);
-		thisMainMenu->newGame->newPlayer->playerCharacter = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar];
-		setPlayer(thisMainMenu->newGame->newPlayer);
-		replaceIndividualInRegistry(thisMainMenu->newGame->newPlayer, 1);
-		disableMainMenuMode();
 		break;
 	}
 }
@@ -712,20 +847,30 @@ void newGameResetPlayer(){
 	strcpy(thisMainMenu->newGame->newPlayer->critType, "MAX");
 }
 
-void newGameMenuInterpretEscape(){
+void newGameCreateMenuInterpretEscape(){
 	if(thisMainMenu->newGame->inEditMode){
 		thisMainMenu->newGame->inEditMode = 0;
 	}else{
 		thisMainMenu->currentMenu = MENU_TITLE;
+		thisMainMenu->newGame->currentField = CREATE_NAME;
 		newGameResetPlayer();
 		thisMainMenu->newGame->statPoints = 6;
+	}
+}
+
+void newGameAbilitiesMenuInterpretEscape(){
+	if(thisMainMenu->newGame->inAbilityEditMode){
+		thisMainMenu->newGame->inAbilityEditMode = 0;
+	}else{
+		thisMainMenu->newGame->currentField = CREATE_NAME;
+		thisMainMenu->newGame->currentForm = NEW_GAME_CREATE;
 	}
 }
 
 void mainMenuInterpretRight(){
 	switch(thisMainMenu->currentMenu){
 	case MENU_NEW_GAME:
-		newGameMenuInterpretRight();
+		newGameCreateMenuInterpretRight();
 		break;
 	}
 }
@@ -733,7 +878,7 @@ void mainMenuInterpretRight(){
 void mainMenuInterpretLeft(){
 	switch(thisMainMenu->currentMenu){
 	case MENU_NEW_GAME:
-		newGameMenuInterpretLeft();
+		newGameCreateMenuInterpretLeft();
 		break;
 	}
 }
@@ -744,7 +889,15 @@ void mainMenuInterpretUp(){
 		mainMenuTitleUp();
 		break;
 	case MENU_NEW_GAME:
-		newGameMenuMoveVertical(1);
+		switch(thisMainMenu->newGame->currentForm){
+			case NEW_GAME_CREATE:
+				newGameCreateMenuMoveVertical(1);
+				break;
+			case NEW_GAME_ABILITIES:
+				newGameAbilityMenuMoveVertical(1);
+				break;
+		}
+
 		break;
 	}
 }
@@ -755,7 +908,14 @@ void mainMenuInterpretDown(){
 		mainMenuTitleDown();
 		break;
 	case MENU_NEW_GAME:
-		newGameMenuMoveVertical(0);
+		switch(thisMainMenu->newGame->currentForm){
+			case NEW_GAME_CREATE:
+				newGameCreateMenuMoveVertical(0);
+				break;
+			case NEW_GAME_ABILITIES:
+				newGameAbilityMenuMoveVertical(0);
+				break;
+		}
 		break;
 	}
 }
@@ -766,7 +926,14 @@ void mainMenuInterpretEnter(){
 		mainMenuTitleSelect();
 		break;
 	case MENU_NEW_GAME:
-		newGameMenuInterpretEnter();
+		switch(thisMainMenu->newGame->currentForm){
+		case NEW_GAME_CREATE:
+			newGameCreateMenuInterpretEnter();
+			break;
+		case NEW_GAME_ABILITIES:
+			newGameAbilityMenuInterpretEnter();
+			break;
+		}
 		break;
 	}
 }
@@ -777,8 +944,15 @@ void mainMenuInterpretEscape(){
 		thisMainMenu->title->titleOptionsDisplayed = 0;
 		break;
 	case MENU_NEW_GAME:
-		newGameMenuInterpretEscape();
-		break;
+		switch(thisMainMenu->newGame->currentForm){
+			case NEW_GAME_CREATE:
+				newGameCreateMenuInterpretEscape();
+				break;
+			case NEW_GAME_ABILITIES:
+				newGameAbilitiesMenuInterpretEscape();
+				break;
+		}
+
 	}
 }
 
@@ -888,7 +1062,33 @@ void drawCreateDescription(HDC hdcBuffer, char * description){
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
-void drawNewGameSelectedInfo(HDC hdc, HDC hdcBuffer, int xOff, int yOff){
+void drawNewGameAbilitySelectedInfo(HDC hdc, HDC hdcBuffer, int xOff, int yOff){
+	switch(thisMainMenu->newGame->currentField){
+	case CREATE_ABILITY_SELECT:
+		if(thisMainMenu->newGame->selectedAbility == 0){
+			drawCreateField(hdc, hdcBuffer, xOff + 40, yOff + 62, 5);
+			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionClassAbility);
+		}else{
+			drawCreateField(hdc, hdcBuffer, xOff + 40, yOff + 120  + 46 * thisMainMenu->newGame->selectedAbility, 5);
+			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionAbility);
+		}
+		break;
+	case CREATE_NUM_ABILITIES:
+		drawCreateField(hdc, hdcBuffer, xOff + 202, yOff + 410, 1);
+		drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionNumAbilities);
+		break;
+	case CREATE_ABILITY_BONUS_MANA:
+		drawCreateField(hdc, hdcBuffer,  xOff + 193, yOff + 452, 1);
+		drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionBonusMana);
+		break;
+	case CREATE_DONE:
+		drawCreateField(hdc, hdcBuffer, xOff + 100, yOff + 498, 3);
+		drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionAbilityDone);
+		break;
+	}
+}
+
+void drawNewGameCreateSelectedInfo(HDC hdc, HDC hdcBuffer, int xOff, int yOff){
 	switch(thisMainMenu->newGame->currentField){
 		case CREATE_NAME:
 			drawCreateField(hdc, hdcBuffer, xOff + 102, yOff + 22, 5);
@@ -985,11 +1185,10 @@ void drawNewGameSelectedInfo(HDC hdc, HDC hdcBuffer, int xOff, int yOff){
 	}
 }
 
-void drawNewGameMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
+void drawNewGameCreateMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 	int xOff = 0, yOff = 0;
 	char outStr[16];
 	RECT textBoxRect;
-	SIZE size;
 	individual * newPlayer = thisMainMenu->newGame->newPlayer;
 
 	xOff = max((rect->right / 2) - (thisMainMenu->newGame->creationScreen->fixedWidth / 2) , 0);
@@ -997,7 +1196,7 @@ void drawNewGameMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 
 	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisMainMenu->newGame->creationScreen);
 
-	drawNewGameSelectedInfo(hdc, hdcBuffer, xOff, yOff);
+	drawNewGameCreateSelectedInfo(hdc, hdcBuffer, xOff, yOff);
 
 	drawUnboundAnimationByPixelsStretch(hdc, hdcBuffer, thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar], xOff + 246, yOff - 29, 200, 200, 0);
 
@@ -1066,13 +1265,90 @@ void drawNewGameMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
+void drawNewGameAbilities(HDC hdc, HDC hdcBuffer, RECT * rect){
+	int i, xOff = 0, yOff = 0;
+	char outStr[16];
+	RECT textBoxRect;
+	individual * newPlayer = thisMainMenu->newGame->newPlayer;
+
+	xOff = max((rect->right / 2) - (thisMainMenu->newGame->abilityCreationScreen->fixedWidth / 2) , 0);
+	yOff = max((rect->bottom / 2) - (thisMainMenu->newGame->abilityCreationScreen->fixedHeight / 2) , 0);
+
+	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisMainMenu->newGame->abilityCreationScreen);
+
+	drawNewGameAbilitySelectedInfo(hdc, hdcBuffer, xOff, yOff);
+
+	textBoxRect.top = yOff;
+	textBoxRect.left = xOff;
+	textBoxRect.bottom = textBoxRect.top + 30;
+	textBoxRect.right = textBoxRect.left + 150;
+
+	thisMainMenu->newGame->descriptionRect->top = yOff + 558;
+	thisMainMenu->newGame->descriptionRect->bottom = yOff + 558 + 95;
+	thisMainMenu->newGame->descriptionRect->left = xOff + 13;
+	thisMainMenu->newGame->descriptionRect->right = xOff + 10 + 260;
+
+	SetBkMode(hdcBuffer, TRANSPARENT);
+
+	HFONT hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "System");
+	HFONT oldFont = SelectObject(hdcBuffer, hFont);
+
+	//class ability
+	if(thisMainMenu->newGame->newAbilities->abilitiesList[0] == NULL){
+		if(thisMainMenu->newGame->selectedAbility != 0){
+			drawUnboundCharacterByPixels(hdc, hdcBuffer,  xOff + 40, yOff + 62, thisMainMenu->newGame->entryAddAbility);
+		}
+
+		SetTextColor(hdcBuffer, RGB(255, 200, 0));
+		drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 40 + 81, yOff + 62, "[Add Ability]");
+		SetTextColor(hdcBuffer, RGB(0, 0, 0));
+	}else{
+		SetTextColor(hdcBuffer, RGB(255, 200, 0));
+		drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 40 + 81, yOff + 62, thisMainMenu->newGame->newAbilities->abilitiesList[0]->name);
+		SetTextColor(hdcBuffer, RGB(0, 0, 0));
+	}
+
+	for(i = 1; i < thisMainMenu->newGame->newAbilities->MAX_ABILITIES; i++){
+		if(thisMainMenu->newGame->newAbilities->abilitiesList[i] == NULL){
+			if(thisMainMenu->newGame->selectedAbility != i || thisMainMenu->newGame->currentField != CREATE_ABILITY_SELECT){
+				drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 40, yOff + 120 + 46 * i, thisMainMenu->newGame->entryAddAbility);
+			}
+
+			SetTextColor(hdcBuffer, RGB(255, 200, 0));
+			drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 40 + 81, yOff + 120 + 46 * i, "[Add Ability]");
+			SetTextColor(hdcBuffer, RGB(0, 0, 0));
+		}else{
+			SetTextColor(hdcBuffer, RGB(255, 200, 0));
+			drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 40 + 81, yOff + 120 + 46 * i, thisMainMenu->newGame->newAbilities->abilitiesList[i]->name);
+			SetTextColor(hdcBuffer, RGB(0, 0, 0));
+		}
+	}
+
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+
+	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 202 + 22, yOff + 410, thisMainMenu->newGame->numAbilites);
+	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 193 + 22, yOff + 452, thisMainMenu->newGame->bonusMana);
+	drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 100 + 42, yOff + 500, "DONE");
+
+	SelectObject(hdcBuffer, oldFont);
+	DeleteObject(hFont);
+	SetTextColor(hdcBuffer, RGB(0, 0, 0));
+}
+
 void drawMainMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 	switch(thisMainMenu->currentMenu){
 		case MENU_TITLE:
 			drawMainMenuTitle(hdc, hdcBuffer, rect);
 			break;
 		case MENU_NEW_GAME:
-			drawNewGameMenu(hdc, hdcBuffer, rect);
+			switch(thisMainMenu->newGame->currentForm){
+				case NEW_GAME_CREATE:
+					drawNewGameCreateMenu(hdc, hdcBuffer, rect);
+					break;
+				case NEW_GAME_ABILITIES:
+					drawNewGameAbilities(hdc, hdcBuffer, rect);
+					break;
+			}
 			break;
 	}
 }

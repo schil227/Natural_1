@@ -54,7 +54,7 @@ int calcAbilityDuration(ability * thisAbility){
 	}
 }
 
-int calculateManaCost(ability * thisAbility){
+int calculateManaCost(ability * thisAbility, int bonusMana){
 	int sum = 0; //Ability = -1
 	int diceDam = 0;
 	int duration = 0;
@@ -63,6 +63,7 @@ int calculateManaCost(ability * thisAbility){
 	int hasEffect = 0;
 	int dummyInt = 0;
 
+	sum = bonusMana * -1;
 
 	if(thisAbility->type == 't'){
 		updateElementSummation(&sum, &dummyInt, thisAbility->rangeEnabled, thisAbility->range);
@@ -918,7 +919,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(newAbility->description, value);
 
-	newAbility->totalManaCost = calculateManaCost(newAbility);
+	newAbility->totalManaCost = calculateManaCost(newAbility, 0);
 
 	return newAbility;
 }
@@ -1536,7 +1537,7 @@ ability * createDurationAbilityFromLine(char * line){
 	if (*value != 'd') {
 		durationAbility->totalManaCost = atoi(value);
 	}else{
-		durationAbility->totalManaCost = calculateManaCost(durationAbility);
+		durationAbility->totalManaCost = calculateManaCost(durationAbility, 0);
 	}
 
 	return durationAbility;
@@ -1804,7 +1805,7 @@ ability * createTargetedAbilityFromLine(char * line){
 	if(*value != 'd'){
 		targetedAbility->totalManaCost = atoi(value);
 	}else{
-		targetedAbility->totalManaCost = calculateManaCost(targetedAbility);
+		targetedAbility->totalManaCost = calculateManaCost(targetedAbility, 0);
 	}
 
 	return targetedAbility;
@@ -1914,7 +1915,7 @@ ability * createInstantAbilityFromLine(char * line) {
 	if(*value != 'd'){
 		instantAbility->totalManaCost = atoi(value);
 	}else{
-		instantAbility->totalManaCost = calculateManaCost(instantAbility);
+		instantAbility->totalManaCost = calculateManaCost(instantAbility, 0);
 	}
 
 	return instantAbility;

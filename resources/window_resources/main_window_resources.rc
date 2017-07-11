@@ -73,6 +73,8 @@ END
 1413 BITMAP DISCARDABLE "../images/create_entry_5_edit.bmp"
 1414 BITMAP DISCARDABLE "../images/create_entry_6_select.bmp"
 1415 BITMAP DISCARDABLE "../images/create_entry_6_edit.bmp"
+1416 BITMAP DISCARDABLE "../images/create_abilities_view.bmp"
+1417 BITMAP DISCARDABLE "../images/create_add_ability.bmp"
 
 //Menu images 1500 - 2000
 1500 BITMAP DISCARDABLE "../images/console_bg.bmp" //2010

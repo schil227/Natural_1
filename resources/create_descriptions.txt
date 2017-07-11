@@ -66,3 +66,15 @@ The number of abilities the character will start with.
 
 ==Fate Tokens==
 The number of fate tokens the character starts with.\n\nFate tokens can be used in a variety of situations to change the state of the game, such as re-rolling a bad roll or making a door unlock without a key.
+
+==Bonus Mana==
+This permanent ability will be the class of your character. Its effects will always be active.
+
+==Class Ability==
+This permanent ability will be the class of your character. Its effects will always be active.
+
+==Ability==
+Create or edit an ability. Abilities can be used for a variety of purposes, from slaying your enemies, healing yourself, and giving your party temporary stat boosts. All non-permanent abilities cost at least one mana.
+
+==Ability Done==
+Finalize character creation.

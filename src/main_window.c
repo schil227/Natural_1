@@ -959,7 +959,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x43://c key (ability create)
 			{
-				toggleCreateMode();
+				enableAbilityCreateMode(0, ABILITY_CREATE_DEFAULT, DEFAULT_ABILITY);
 			}
 			break;
 		case 0x52://r key (ability view)
@@ -1286,18 +1286,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				setAbilityName(getNameFromInstance());
 				ability * newAbility = getNewAbility();
 
-				addAbilityToIndividual(player, newAbility);
-				addAbilityToRegistryByType(newAbility);
+
+				if(inMainMenuMode()){
+					addAbilityToNewGameAbilityMode(newAbility);
+					disableAbilityCreateMode();
+				}else{
+					addAbilityToIndividual(player, newAbility);
+					addAbilityToRegistryByType(newAbility);
+					cwrite("Ability created!");
+				}
+
 				changeAbilityTemplate(0);
 				resetNameBoxInstance();
-
-				cwrite("Ability created!");
 			}
 
 			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 			return 0;
 		}else{
 			createAbilityLoop(hwnd, msg, wParam, lParam, player);
+			if(!inAbilityCreateMode() && inMainMenuMode()){
+				disableNewGameAbilityEditMode();
+			}
+
 			return 0;
 		}
 	}

@@ -719,7 +719,7 @@ void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, ch
 			hdcMem,
 			shitfX,
 			0,
-			SRCPAINT);
+			SRCAND);
 
 	DeleteDC(hdcMem);
 }

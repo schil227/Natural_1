@@ -19,6 +19,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->templateIndex = 0;
 
 	thisAbilityCreationInstance->waitingForName = 0;
+	thisAbilityCreationInstance->createMode = ABILITY_CREATE_DEFAULT;
 
 	thisAbilityCreationInstance->currentTemplateIndex = 0;
 	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 4;
@@ -30,6 +31,8 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
 	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
 	thisAbilityCreationInstance->idCounter = 0;
+	thisAbilityCreationInstance->bonusMana = 0;
+	thisAbilityCreationInstance->totalBonusMana = 0;
 
 	thisAbilityCreationInstance->creationWindow = createCharacter(imageID, rgb, x, y);
 	thisAbilityCreationInstance->selector = createCharacter(1504, rgb, x, y);
@@ -88,10 +91,25 @@ ability * getTemplateAbility(int ID){
 	return NULL;
 }
 
-void toggleCreateMode(){
-	thisAbilityCreationInstance->inCreateMode = (thisAbilityCreationInstance->inCreateMode + 1) % 2;
+void enableAbilityCreateMode(int bonusMana, abilityCreationMode createMode, creation_modes createModeType){
+	thisAbilityCreationInstance->createMode = createMode;
+	thisAbilityCreationInstance->mode = createModeType;
+	thisAbilityCreationInstance->bonusMana = bonusMana;
+	thisAbilityCreationInstance->totalBonusMana = bonusMana;
+
+	createMode == ABILITY_CREATE_EXCEPT_PERMENANT ? thisAbilityCreationInstance->templateIndex = 1 : 0;
+
+	if(thisAbilityCreationInstance->mode == DEFAULT_ABILITY){
+		free(thisAbilityCreationInstance->abilityInsance);
+	}
+
+	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]);
+	thisAbilityCreationInstance->inCreateMode = 1;
 }
 
+void disableAbilityCreateMode(){
+	thisAbilityCreationInstance->inCreateMode = 0;
+}
 
 int inAbilityCreateMode(){
 	if(thisAbilityCreationInstance != NULL){
@@ -102,8 +120,20 @@ int inAbilityCreateMode(){
 }
 
 void changeAbilityTemplate(int shift){
+	if(thisAbilityCreationInstance->createMode == ABILITY_CREATE_PERMENANT_ONLY){
+		return;
+	}
+
 	int newIndex = thisAbilityCreationInstance->templateIndex + shift;
 	newIndex = newIndex < 0 ? thisAbilityCreationInstance->numAbilityTemplates -1 : newIndex % (thisAbilityCreationInstance->numAbilityTemplates);
+
+	if(newIndex == 0 && thisAbilityCreationInstance->createMode == ABILITY_CREATE_EXCEPT_PERMENANT){
+		if(shift > 0){
+			newIndex++;
+		}else{
+			newIndex = thisAbilityCreationInstance->numAbilityTemplates - 1;
+		}
+	}
 
 	thisAbilityCreationInstance->templateIndex = newIndex;
 
@@ -184,8 +214,13 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageEnabled,
 			 hdc, hdcBuffer, &textRect, ABILITY_DICE_DAMAGE, "Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->diceDamage);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplierEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_DICE_DAMAGE_MULTIPLIER, "Dice Damage Multiplier", 0, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplier);
+	if(thisAbilityCreationInstance->abilityInsance->diceDamageEnabled
+			&& thisAbilityCreationInstance->abilityInsance->diceDamage->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->diceDamage->selectedIndex]->effectMagnitude > 0){
+		textRect.left += 20;
+		processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplierEnabled,
+					 hdc, hdcBuffer, &textRect, ABILITY_DICE_DAMAGE_MULTIPLIER, "Dice Damage Multiplier", 0, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplier);
+		textRect.left -= 20;
+	}
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageEnabled,
 			 hdc, hdcBuffer, &textRect, ABILITY_DAMAGE, "damage", 0, thisAbilityCreationInstance->abilityInsance->damage);
@@ -627,12 +662,36 @@ int canDecreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, i
 	return 1;
 }
 
+void addBonusMana(){
+	if(thisAbilityCreationInstance->bonusMana == 0){
+		return;
+	}
+
+	thisAbilityCreationInstance->bonusMana--;
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+}
+
+void removeBonusMana(){
+	if(thisAbilityCreationInstance->bonusMana == thisAbilityCreationInstance->totalBonusMana){
+		return;
+	}
+
+	thisAbilityCreationInstance->bonusMana++;
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+}
+
+int getSpentBonusMana(){
+	return thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana;
+}
+
 void increaseEffect(effectAndManaMapList * selectedMap){
 	if(selectedMap->selectedIndex + 1 < selectedMap->size){
 		selectedMap->selectedIndex++;
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
 
@@ -642,7 +701,7 @@ void decreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, int
 		selectedMap->selectedIndex--;
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
 
@@ -653,7 +712,7 @@ void selectNextType(typeAndManaMapList * thisMapList){
 		thisMapList->selectedIndex = 0;;
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
 void selectPreviousType(typeAndManaMapList * thisMapList){
@@ -663,7 +722,7 @@ void selectPreviousType(typeAndManaMapList * thisMapList){
 		thisMapList->selectedIndex = thisMapList->size - 1;
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
 int canCreateAbility(){

@@ -347,7 +347,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 
 		switch (LOWORD(wParam)) {
 			case 0x1B:{ //esc
-				toggleCreateMode();
+				disableAbilityCreateMode();
 				break;
 			}
 			case 0x0D: { //enter
@@ -379,7 +379,17 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 				interpretLeftAbilityCreation(player->range, player->mvmt, totalHP, totalMana);
 				break;
 			}
-			case 0x50://p key (inventory)
+			case 0x41://a key
+			{
+				addBonusMana();
+				break;
+			}
+			case 0x44://d key
+			{
+				removeBonusMana();
+				break;
+			}
+			case 0x50://p key (pause)
 			{
 				togglePaused();
 				break;
