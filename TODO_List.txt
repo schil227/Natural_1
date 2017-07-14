@@ -3,10 +3,9 @@
 ===================
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
-- (4/29/17) Character creation/title screens
 - (6/26/17) update look function to display intractable objects
 - (6/27/17) Develop a map transition animation (fade to/from black?)
-- (7/10/17) Update permanent abilities to have correct cost (e.g. 2 mana per stat)
+- (7/11/17) Add load menu
  
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
@@ -61,3 +60,5 @@
 - (6/17/17 - 6/22/17) Attack and rob store clerk standing to the right of him, pathing error, need to handle case where nodeArr is one in length (original node). See getSpaceClosestToSpace in enemy_controller where resultArr->length = 1 (DONE)
 - (6/22/17 - 6/25/17) Performance is noticably slower with multiple images on screen - optimize the size of the images so there isn't any excess. (DONE)
 - (5/22/17 - 6/27/17) Develop a way to see transit spaces (e.g. outline in gold) (DONE)
+- (7/10/17 - 7/11/17) Update permanent abilities to have correct cost (e.g. 2 mana per stat) (DONE)
+- (4/29/17 - 7/10/17) Character creation/title screens (DONE)

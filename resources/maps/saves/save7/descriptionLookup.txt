@@ -1,0 +1,14 @@
+7501;Patch of grass
+7502;Water
+7503;The shoreline
+7504;The shoreline
+7505;The shoreline
+7506;The shoreline
+7507;Small pond
+7508;Smooth stone wall
+7509;Smooth stone wall
+7510;A stone doorway
+7511;Cobblestone path
+7512;Cobblestone path
+7513;Hard wooden floor
+7514;A lovely tree

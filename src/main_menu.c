@@ -6,7 +6,7 @@
  */
 
 #include "./headers/main_menu_pub_methods.h"
-
+#include <stdio.h>
 static mainMenu * thisMainMenu;
 
 void setUpAvatars(){
@@ -99,12 +99,43 @@ void setUpAvatars(){
 	tmpCharacter->yOff = 0;
 }
 
-void initMainMenu(int inMenuMode){
+void setUpSaveLoadData(char * mapDirectory){
+	int i;
+	char * strtok_save_pointer;
+	char saveDirectory[256];
+	char line[64];
+
+	for(i = 0; i < thisMainMenu->load->numSaveData; i++){
+		sprintf(saveDirectory, "%ssaves\\save%d\\saveMetaData.txt", mapDirectory, i);
+
+		FILE * FP = fopen(saveDirectory, "r");
+
+		if(FP == NULL){
+			thisMainMenu->load->saves[i] = NULL;
+		}else{
+			thisMainMenu->load->saves[i] = malloc(sizeof(loadSaveData));
+
+			fgets(line, 64, FP);
+			thisMainMenu->load->saves[i]->saveNumber = i;
+
+			char * value = strtok_r(line, ";", &strtok_save_pointer);
+			strcpy(thisMainMenu->load->saves[i]->name, value);
+
+			value = strtok_r(NULL, ";", &strtok_save_pointer);
+			thisMainMenu->load->saves[i]->level = atoi(line);
+		}
+
+		fclose(FP);
+	}
+}
+
+void initMainMenu(int inMenuMode, char * mapDirectory){
 	int i;
 
 	thisMainMenu = malloc(sizeof(mainMenu));
 	thisMainMenu->title = malloc(sizeof(titleMenu));
 	thisMainMenu->newGame = malloc(sizeof(newGameMenu));
+	thisMainMenu->load = malloc(sizeof(loadMenu));
 	thisMainMenu->inMenuMode = inMenuMode;
 	thisMainMenu->currentMenu = MENU_TITLE;
 	thisMainMenu->waitingForNameMode = 0;
@@ -186,6 +217,20 @@ void initMainMenu(int inMenuMode){
 	strcpy(thisMainMenu->newGame->descriptionClassAbility, "This permanent ability will be the class of your character. Its effects will always be active.");
 	strcpy(thisMainMenu->newGame->descriptionAbilityDone, "Finalize character creation.");
 	strcpy(thisMainMenu->newGame->descriptionAbility, "Create or edit an ability. Abilities can be used for a variety of purposes, from slaying your enemies, healing yourself, and giving your party temporary stat boosts. Allabilities cost at least one mana.");
+
+	thisMainMenu->load->mode = LOAD_MODE;
+	thisMainMenu->load->numSaveData = 10;
+	thisMainMenu->load->selectedData = 0;
+	thisMainMenu->load->scrollCount = 0;
+	thisMainMenu->load->savesPerScreen = 4;
+
+	thisMainMenu->load->loadView = createCharacter(1418, RGB(255,0,255), 0, 0);
+	thisMainMenu->load->loadSelect = createCharacter(1419, RGB(255,0,255), 0, 0);
+	thisMainMenu->load->scrollUpArrow = createCharacter(1505, RGB(255,0,255), 0, 0);
+	thisMainMenu->load->scrollDownArrow = createCharacter(1507, RGB(255,0,255), 0, 0);
+	thisMainMenu->load->readyToLoad = 0;
+
+	setUpSaveLoadData(mapDirectory);
 }
 
 void disableMainMenuMode(){
@@ -202,6 +247,10 @@ int inMainMenuMode(){
 	}
 
 	return 0;
+}
+
+int mainMenuReadyToLoad(){
+	return thisMainMenu->load->readyToLoad;
 }
 
 void disableMainMenuWaitForNameMode(){
@@ -269,7 +318,7 @@ void mainMenuTitleSelect(){
 			thisMainMenu->currentMenu = MENU_NEW_GAME;
 			break;
 		case TITLE_LOAD:
-			disableMainMenuMode();
+			thisMainMenu->currentMenu = MENU_LOAD;
 			break;
 		case TITLE_EXIT:
 			PostQuitMessage(0);
@@ -295,6 +344,31 @@ void drawMainMenuTitle(HDC hdc, HDC hdcBuffer, RECT * rect){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisMainMenu->title->options);
 
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + thisMainMenu->rightSelectArrow->x - 9, yOff + thisMainMenu->rightSelectArrow->y, thisMainMenu->rightSelectArrow);
+	}
+}
+
+void loadMenuMoveVertical(int goingUp){
+	if(goingUp){
+		if(thisMainMenu->load->selectedData == 0){
+			return;
+		}
+
+		thisMainMenu->load->selectedData--;
+
+		if(thisMainMenu->load->scrollCount > 0 && thisMainMenu->load->scrollCount > thisMainMenu->load->selectedData){
+			thisMainMenu->load->scrollCount--;
+		}
+	}else{
+		if(thisMainMenu->load->selectedData + 1 == thisMainMenu->load->numSaveData){
+			return;
+		}
+
+		thisMainMenu->load->selectedData++;
+
+		if(thisMainMenu->load->scrollCount < thisMainMenu->load->numSaveData - thisMainMenu->load->savesPerScreen
+				&& thisMainMenu->load->scrollCount + thisMainMenu->load->savesPerScreen <= thisMainMenu->load->selectedData){
+			thisMainMenu->load->scrollCount++;
+		}
 	}
 }
 
@@ -730,6 +804,12 @@ void addAbilityToNewGameAbilityMode(ability * newAbility){
 	thisMainMenu->newGame->inAbilityEditMode = 0;
 }
 
+void loadMenuInterpretEnter(){
+	if(thisMainMenu->load->saves[thisMainMenu->load->selectedData] != NULL){
+		thisMainMenu->load->readyToLoad = 1;
+	}
+}
+
 void newGameAbilityMenuInterpretEnter(){
 	switch(thisMainMenu->newGame->currentField){
 		case CREATE_ABILITY_SELECT:
@@ -829,6 +909,10 @@ void MainMenuSetName(char * newName){
 	}
 }
 
+int getMainMenuLoadSlot(){
+	return thisMainMenu->load->selectedData;
+}
+
 void newGameResetPlayer(){
 	thisMainMenu->newGame->newPlayer->name[0] = '\0';
 	thisMainMenu->newGame->currentSpread = SPREAD_8_8;
@@ -897,7 +981,9 @@ void mainMenuInterpretUp(){
 				newGameAbilityMenuMoveVertical(1);
 				break;
 		}
-
+		break;
+	case MENU_LOAD:
+		loadMenuMoveVertical(1);
 		break;
 	}
 }
@@ -917,6 +1003,9 @@ void mainMenuInterpretDown(){
 				break;
 		}
 		break;
+	case MENU_LOAD:
+		loadMenuMoveVertical(0);
+		break;
 	}
 }
 
@@ -935,7 +1024,11 @@ void mainMenuInterpretEnter(){
 			break;
 		}
 		break;
+	case MENU_LOAD:
+		loadMenuInterpretEnter();
+			break;
 	}
+
 }
 
 void mainMenuInterpretEscape(){
@@ -952,7 +1045,8 @@ void mainMenuInterpretEscape(){
 				newGameAbilitiesMenuInterpretEscape();
 				break;
 		}
-
+	case MENU_LOAD:
+		break;
 	}
 }
 
@@ -970,6 +1064,15 @@ void drawNewGameFormNumber(HDC hdcBuffer, RECT * rect, int startX, int startY, i
 	rect->right = rect->left + 150;
 
 	DrawText(hdcBuffer, outStr, -1, rect, DT_SINGLELINE);
+}
+
+void drawNewGameText(HDC hdcBuffer, RECT * rect, int startX, int startY, char * text){
+	rect->top = startY;
+	rect->left = startX;
+	rect->bottom = rect->top + 30;
+	rect->right = rect->left + 150;
+
+	DrawText(hdcBuffer, text, -1, rect, DT_SINGLELINE);
 }
 
 void drawNewGameFormText(HDC hdcBuffer, RECT * rect, int startX, int startY, char * text){
@@ -1105,34 +1208,113 @@ void drawNewGameCreateSelectedInfo(HDC hdc, HDC hdcBuffer, int xOff, int yOff){
 		case CREATE_STR:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionSTR);
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->STR > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->STR < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_DEX:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172 + 42, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionDEX);
+
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->DEX > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182 + 42, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->DEX < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182 + 42, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_CON:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172 + 42 * 2, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionCON);
+
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->CON > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182 + 42 * 2, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->CON < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182 + 42 * 2, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_INT:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172 + 42 * 3, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionINT);
+
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->INT > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182 + 42 * 3, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->INT < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182 + 42 * 3, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_WIS:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172 + 42 * 4, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionWIS);
+
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->WIS > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182 + 42 * 4, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->WIS < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182 + 42 * 4, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_WILL:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172 + 42 * 5, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionWILL);
+
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->WILL > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182 + 42 * 5, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->WILL < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182 + 42 * 5, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_CHR:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172 + 42 * 6, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionCHR);
+
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->CHR > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182 + 42 * 6, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->CHR < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182 + 42 * 6, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_LUCK:
 			drawCreateField(hdc, hdcBuffer, xOff + 156, yOff + 172 + 42 * 7, 1);
 			drawCreateDescription(hdcBuffer, thisMainMenu->newGame->descriptionLUCK);
+
+			if(thisMainMenu->newGame->inEditMode){
+				if(thisMainMenu->newGame->newPlayer->LUCK > -2){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 134, yOff + 182 + 42 * 7, thisMainMenu->leftSelectArrow);
+				}
+
+				if(thisMainMenu->newGame->newPlayer->LUCK < 3){
+					drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 206, yOff + 182 + 42 * 7, thisMainMenu->rightSelectArrow);
+				}
+			}
 			break;
 		case CREATE_DONE:
 			drawCreateField(hdc, hdcBuffer, xOff + 80, yOff + 520, 3);
@@ -1335,6 +1517,59 @@ void drawNewGameAbilities(HDC hdc, HDC hdcBuffer, RECT * rect){
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
+void drawLoadMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
+	int i, xOff = 0, yOff = 0;
+	int upperBound = min(thisMainMenu->load->savesPerScreen + thisMainMenu->load->scrollCount, thisMainMenu->load->numSaveData);
+	char outStr[16];
+	RECT textBoxRect;
+
+	xOff = max((rect->right / 2) - (thisMainMenu->load->loadView->fixedWidth / 2) , 0);
+	yOff = max((rect->bottom / 2) - (thisMainMenu->load->loadView->fixedHeight / 2) , 0);
+
+	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisMainMenu->load->loadView);
+
+	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 36,
+			yOff + 56 + 135 * (thisMainMenu->load->selectedData - thisMainMenu->load->scrollCount), thisMainMenu->load->loadSelect);
+
+	if(thisMainMenu->load->scrollCount > 0){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 253 - (thisMainMenu->load->scrollUpArrow->fixedWidth / 2), yOff + 45 -(thisMainMenu->load->scrollUpArrow->fixedWidth / 2), thisMainMenu->load->scrollUpArrow);
+	}
+
+	if(thisMainMenu->load->numSaveData > thisMainMenu->load->scrollCount + thisMainMenu->load->savesPerScreen){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 253 - (thisMainMenu->load->scrollDownArrow->fixedWidth / 2), yOff + 620 -(thisMainMenu->load->scrollDownArrow->fixedWidth / 2), thisMainMenu->load->scrollDownArrow);
+	}
+
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+	SetBkMode(hdcBuffer, TRANSPARENT);
+
+	HFONT hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "System");
+	HFONT oldFont = SelectObject(hdcBuffer, hFont);
+
+	drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 10 + 36, yOff + 7, "Load");
+
+	for(i = thisMainMenu->load->scrollCount; i < upperBound; i++){
+		loadSaveData * tmpLoadSaveData= thisMainMenu->load->saves[i];
+
+		sprintf(outStr, "Save %d", i);
+
+		drawNewGameText(hdcBuffer, &textBoxRect, xOff + 69, yOff + 63 + (i - thisMainMenu->load->scrollCount) * 135, outStr);
+
+		if(tmpLoadSaveData == NULL){
+			drawNewGameText(hdcBuffer, &textBoxRect, xOff + 197, yOff + 104 + (i - thisMainMenu->load->scrollCount) * 135, "EMPTY");
+		}else{
+			drawNewGameText(hdcBuffer, &textBoxRect, xOff + 69, yOff + 91 + (i - thisMainMenu->load->scrollCount) * 135, tmpLoadSaveData->name);
+
+			outStr[0] = '\0';
+			sprintf(outStr, "Level: %d", tmpLoadSaveData->level);
+			drawNewGameText(hdcBuffer, &textBoxRect, xOff + 69, yOff + 120 + (i - thisMainMenu->load->scrollCount) * 135, outStr);
+		}
+	}
+
+	SelectObject(hdcBuffer, oldFont);
+	DeleteObject(hFont);
+	SetTextColor(hdcBuffer, RGB(0, 0, 0));
+}
+
 void drawMainMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 	switch(thisMainMenu->currentMenu){
 		case MENU_TITLE:
@@ -1349,6 +1584,9 @@ void drawMainMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 					drawNewGameAbilities(hdc, hdcBuffer, rect);
 					break;
 			}
+			break;
+		case MENU_LOAD:
+			drawLoadMenu(hdc, hdcBuffer, rect);
 			break;
 	}
 }

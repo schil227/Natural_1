@@ -613,14 +613,13 @@ void destroyGame(){
 	thisGroupContainer->initGroupActionMode = 0;
 }
 
-void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
+void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	int i;
 	HDC hdc = GetDC(hwnd);
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 
 	char saveMapDirectory[256];
-	i = sprintf(saveMapDirectory, "%s", mapDirectory);
-	sprintf(saveMapDirectory + i, "%s", saveDirectory);
+	i = sprintf(saveMapDirectory, "%ssaves\\save%d\\", mapDirectory, saveSlot);
 
 	if(!isFirstLoad){
 		destroyGame();
@@ -692,6 +691,24 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, char * saveDirectory){
 	inActionMode = shouldEnableActionMode();
 }
 
+void saveGame(int saveSlot){
+	char saveDirectory[32];
+
+	sprintf(saveDirectory, "saves\\save%d\\", saveSlot);
+
+	writeSaveMetaFile(mapDirectory,saveDirectory,"saveMetaData.txt", player);
+	writeIndividualsToFile(mapDirectory,saveDirectory,"individuals.txt");
+	writeMapInfoToFile(mapDirectory,saveDirectory,"mapInfo.txt");
+	writeItemsToFile(mapDirectory,saveDirectory,"items.txt");
+	writeInteractableObjectToFile(mapDirectory,saveDirectory,"interactableObjects.txt");
+	writeAreaNodesToFile(mapDirectory,saveDirectory,"areaNodes.txt");
+
+	writePermenantAbilitiesToFile(mapDirectory,saveDirectory,"permenant_abilities.txt");
+	writeDurationAbilitiesToFile(mapDirectory,saveDirectory,"duration_abilities.txt");
+	writeTargetedAbilitiesToFile(mapDirectory,saveDirectory,"targeted_abilities.txt");
+	writeInstantAbilitiesToFile(mapDirectory,saveDirectory,"instant_abilities.txt");
+}
+
 int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 	case WM_CREATE: {
@@ -748,7 +765,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		setUpAnimationDrawAreas(hdc, hdcBuffer);
 		viewShift = initShiftData();
-		initMainMenu(1);
+		initMainMenu(1, mapDirectory);
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 
@@ -851,20 +868,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x46: //f key
 			{
-//				if(thisGroupContainer->npcs->numIndividuals > 0){
-//					individual * tmpNPC = thisGroupContainer->npcs->individuals[0];
-//					if(tmpNPC->desiredLocation->y == 3 && tmpNPC->desiredLocation->x == 6){
-//						tmpNPC->desiredLocation->x = 5;
-//						tmpNPC->desiredLocation->y = 9;
-//
-//					}else{
-//						tmpNPC->desiredLocation->x = 6;
-//						tmpNPC->desiredLocation->y = 3;
-//					}
-//				}
-
-				destroyAndLoad(hwnd, 0, "saves\\test\\");
-
+				destroyAndLoad(hwnd, 0, 0);
 			}
 			break;
 		case 0x47://g key (get)
@@ -895,16 +899,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //				sendMusicInterrupt(1);
 				triggerSoundEffect(6);
 
-				writeIndividualsToFile(mapDirectory,"saves\\test\\","individuals.txt");
-				writeMapInfoToFile(mapDirectory,"saves\\test\\","mapInfo.txt");
-				writeItemsToFile(mapDirectory,"saves\\test\\","items.txt");
-				writeInteractableObjectToFile(mapDirectory,"saves\\test\\","interactableObjects.txt");
-				writeAreaNodesToFile(mapDirectory,"saves\\test\\","areaNodes.txt");
-
-				writePermenantAbilitiesToFile(mapDirectory,"saves\\test\\","permenant_abilities.txt");
-				writeDurationAbilitiesToFile(mapDirectory,"saves\\test\\","duration_abilities.txt");
-				writeTargetedAbilitiesToFile(mapDirectory,"saves\\test\\","targeted_abilities.txt");
-				writeInstantAbilitiesToFile(mapDirectory,"saves\\test\\","instant_abilities.txt");
+				saveGame(0);
 			}
 			break;
 		case 0x49://i key (inventory)
@@ -1322,10 +1317,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 		mainMenuLoop(hwnd, msg, wParam, lParam);
 
-//		if(!inMainMenuMode()){
-//			destroyAndLoad(hwnd, 1, mapDirectory);
-//			disableMainMenuMode();
-//		}
+		if(mainMenuReadyToLoad()){
+			destroyAndLoad(hwnd, 0, getMainMenuLoadSlot());
+			disableMainMenuMode();
+		}
+
 		return 0;
 	}
 

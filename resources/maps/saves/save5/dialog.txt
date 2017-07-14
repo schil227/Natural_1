@@ -1,0 +1,83 @@
+1008;Halt @! You are under arrest for @! Pay the fine of @ gold and surrender your stolen goods immediately! ;3;0;1;8;3;NAME,WORST_CRIME,BOUNTY
+1013;There is no future for you, hellion. En guarde.;0;0;0;0;0;0
+1014;Thank you for your cooperation. You're free to go.;0;0;0;20;0;0
+1015;Then you shal serve out the rest of your bounty in Einzel prison.;0;0;0;32;0;0
+1024;Hail, adventurer. Beware, cursed undead wander near these woods.;0;0;0;0;0;0
+1016;[@ witnessed your crime of @];4;0;1;0;2;TARGET_NAME,WITNESSED_CRIME
+1017;[SUCCESS: They dont want any trouble];0;0;0;7;0;0
+1018;[FAILURE: They shout for the guards];0;0;0;8;0;0
+1019;[SUCCESS: They are confused, and dont know what happend];0;0;0;7;0;0
+1020;[FAILURE: They shout for the guards];0;0;0;8;0;0
+1021;[SUCCESS: They content with your apology];0;0;0;7;0;0
+1022;[FAILURE: They shout for the guards];0;0;0;8;0;0
+1030;[Yield to @?];3;0;0;0;1;TARGET_NAME
+1031;[SUCCESS: They lower their guard];0;0;0;27;0;0
+1032;[FAILURE: They ignore your request for piece];0;0;0;0;0;0
+1034;[@ ignores your attempts to surrender];0;0;0;0;1;TARGET_NAME
+1025;[You have attacked @ - they will report your crime];4;0;0;0;1;TARGET_NAME
+1026;[SUCCESS: They content with your apology];0;0;0;7;0;0
+1027;[FAILURE: They shout for the guards];0;0;0;8;0;0
+1028;[SUCCESS: They give you everything they have];0;0;0;26;0;0
+1029;[FAILURE: They shout for the guards];0;0;0;8;0;0
+1033;[@ is too afriad to speak];0;0;0;0;1;TARGET_NAME
+1023;[@ doesnt respond - they look terrified];0;0;1;0;1;TARGET_NAME
+1000;Hello, @.;0;1001;0;0;1;NAME
+1001;Do you fancy these robes?;2;0;1;0;0;0
+1002;I agree - I found them in the graveyard to the east.;0;0;0;1;0;0
+1003;Dingy?! Are you trying to rile me?;2;0;0;0;0;0
+1006;(CHR check);0;0;0;4;0;0
+1005;Have at you!;0;0;0;2;0;0
+1007;Ah - forgive me for my aggression. It takes a stronger man to say the honest thing.;0;0;0;0;0;0
+1004;Welcome! We've got the lowest prices!;0;0;0;3;0;0
+1035;You are a stranger in these lands, I see.;0;1036;0;0;0;0
+1036;Might I join you on your adventure? I, too, am looking to wander seeking fame and fortune.;2;0;1;0;0;0
+1037;Excellent! I'll follow your lead!;0;0;0;29;0;0
+1038;Fair enough, I'll be here.;0;0;0;0;0;0
+1039;Is this where we part ways?;2;0;0;0;0;0
+1040;Then onward.;0;0;0;0;0;0
+1041;Very well - till we meet again, @.;0;0;0;30;1;NAME
+1042;You're free to come and go, but trust me, you'd rather go.;0;0;0;0;0;0
+1043;You see a sturdy locked door.;5;0;1;0;0;0
+1044;[FAILURE] You fail to open the door.;0;0;0;0;0;0
+1045;[SUCCESS] You bash down the door!;0;0;0;38;0;0
+1046;[SUCCESS] With a click, the lock opens!;0;0;0;38;0;0
+1047;[SUCCESS] The door opens itself!;0;0;0;39;0;0
+1048;[SUCCESS] You use the key and the door opens.;0;0;0;38;0;0
+1049;You see fish swiming in the water.;3;0;1;0;0;0
+1050;[SUCCESS!] You catch a big one!;0;0;0;45;0;0
+1051;[SUCCESS] You catch a fish.;0;0;0;45;0;0
+1052;[FAILURE] You fail to catch anything.;0;0;0;0;0;0
+1053;[FAILURE!] The fish swim away.;0;0;0;38;0;0
+1054;!! WARNI..G - COND..NED !!;0;0;0;0;0;0
+1055;... attack the one on the le..;0;0;0;0;0;0
+
+1008;I Surrender.;1014;33;0;0;0
+1008;I Surrender, although I do not have enough money.;1015;0;0;0;0
+1008;Never!;0;0;28;0;0
+1016;[STR/CON to intimidate];0;9;5;0;0
+1016;[INT/WLL to confuse them];0;10;6;0;0
+1016;[Return stolen items: <@>];0;0;11;1;STOLEN_ITEMS_WITNESSED
+1016;[Do nothing];0;0;0;0;0
+1001;Yes - they are quite flattering, fit for a wealthy noble;1002;0;0;0;0
+1001;No - they look rather dingy;1003;0;0;0;0
+1003;Yes! Have at you, poorly dressed mongrel!;1005;0;0;0;0
+1003;No! I'm merely trying to inform you as a friend! (CHR Check);1006;0;0;0;0
+1030;[Yes];0;0;21;0;0
+1030;[No];0;0;0;0;0
+1030;[Rob them] Give me your money!;0;0;25;0;0
+1025;[Apologize] I'm sorry, it wont happen again.;0;0;24;0;0
+1025;[STR/CON to intimidate];0;9;5;0;0
+1025;[INT/WLL to confuse them];0;10;6;0;0
+1025;[Do nothing];0;0;0;0;0
+1036;Certainly! The more, the merrier!;1037;0;0;0;0
+1036;Thanks, but perhaps another time.;1038;0;0;0;0
+1039;No, not yet.;1040;0;0;0;0
+1039;I'm afraid so, @.;1041;0;0;1;TARGET_NAME
+1043;[2 STR] Break the door down.;0;0;35;0;0
+1043;[1 DEX] Pick the lock.;0;0;36;0;0
+1043;[1 INT, 1 Mana] Unlock door with magic.;0;0;37;0;0
+1043;Use key.;0;40;41;0;0
+1043;Do nothing.;0;0;0;0;0
+1049;[2 WIS] Try to catch it [-5 food];0;44;42;0;0
+1049;Use Fishing rod. [-5 food];0;40;42;0;0
+1049;Do Nothing.;0;0;0;0;0

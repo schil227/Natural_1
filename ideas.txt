@@ -4,6 +4,10 @@ Story:
 -man so strong he loses dominant hand when punching
 -Sinus infection cause person to go insane
 
+-depressed guy in some town joins the player; 
+	"You forget most days you're alive. I just want to go anywhere, be anything. I cant stay here any longer". Depression doesn't get resolved.
+	[spoiler] "Dying on this bridge in the sunlight was the greatest thing that ever happened to me. Thank you, player" [/spoiler]
+
 Music:
 Rip of song Riki plays w/ leaf
 

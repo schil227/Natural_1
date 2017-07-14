@@ -156,7 +156,11 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificEffect(hdcBuffer, thisAbility->targeted, thisAbility->targetedEnabled, "targeted", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->extraAttack, thisAbility->extraAttackEnabled, "extraAttack", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->diceDamage, thisAbility->diceDamageEnabled, "diceDamage", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->diceDamageMultiplier, thisAbility->diceDamageMultiplierEnabled, "diceDamageMultiplier", effectRect);
+
+	if(thisAbility->diceDamageEnabled && thisAbility->diceDamage->effectAndManaArray[thisAbility->diceDamage->selectedIndex]->effectMagnitude != 0){
+		drawSpecificEffect(hdcBuffer, thisAbility->diceDamageMultiplier, thisAbility->diceDamageMultiplierEnabled, "diceDamageMultiplier", effectRect);
+	}
+
 	drawSpecificEffect(hdcBuffer, thisAbility->damage, thisAbility->damageEnabled, "damage", effectRect);
 	drawSpecificType(hdcBuffer, thisAbility->status, thisAbility->statusEnabled, "status", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->statusDiceDamage, thisAbility->statusDiceDamageEnabled, "statusDiceDamage", effectRect);

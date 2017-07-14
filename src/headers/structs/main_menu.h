@@ -17,7 +17,13 @@ typedef enum {CREATE_NAME, CREATE_SPREAD, CREATE_STR, CREATE_DEX, CREATE_CON, CR
 	CREATE_DR, CREATE_CRIT, CREATE_MVMT, CREATE_NUM_ABILITIES, CREATE_FATE_TOKENS, CREATE_DONE, CREATE_ABILITY_SELECT, CREATE_ABILITY_NUM_ABILITIES, CREATE_ABILITY_BONUS_MANA} newGameCreateField;
 typedef enum {SPREAD_12_4, SPREAD_10_6, SPREAD_8_8, SPREAD_6_10, SPREAD_4_12} newGameSpread;
 typedef enum {NEW_GAME_CREATE, NEW_GAME_ABILITIES, NEW_GAME_FINALIZE} newGameForm;
+typedef enum {LOAD_MODE, SAVE_MODE} loadSaveMode;
 
+typedef struct {
+	int saveNumber;
+	char name[16];
+	int level;
+} loadSaveData;
 
 typedef struct{
 	int titleOptionsDisplayed;
@@ -91,12 +97,29 @@ typedef struct{
 }newGameMenu;
 
 typedef struct{
+	loadSaveMode mode;
+
+	loadSaveData * saves[10];
+	int numSaveData;
+	int selectedData;
+	int readyToLoad;
+	int scrollCount;
+	int savesPerScreen;
+
+	fixedCharacter * loadView;
+	fixedCharacter * loadSelect;
+	fixedCharacter * scrollUpArrow;
+	fixedCharacter * scrollDownArrow;
+}loadMenu;
+
+typedef struct{
 	int inMenuMode;
 	int waitingForNameMode;
 	mainMenuMode currentMenu;
 
 	titleMenu * title;
 	newGameMenu * newGame;
+	loadMenu * load;
 
 	fixedCharacter * rightSelectArrow;
 	fixedCharacter * leftSelectArrow;

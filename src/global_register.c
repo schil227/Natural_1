@@ -974,6 +974,30 @@ int getBit(int * a, int k){
 
 //////// Writing to Files //////////
 
+void writeSaveMetaFile(char * directory, char * saveDirectory, char * saveMetaDataFileName, individual * player){
+	int i = 0;
+
+	while(!tryGetIndividualGroupReadLock()){}
+	while(!tryGetIndividualGroupWriteLock()){}
+
+	char fullFileName[256];
+	i += sprintf(fullFileName, "%s", directory);
+	i += sprintf(fullFileName + i, "%s", saveDirectory);
+
+	_mkdir(fullFileName);
+
+	i += sprintf(fullFileName + i, "%s", saveMetaDataFileName);
+
+	FILE * FP = fopen(fullFileName, "w");
+
+	fprintf(FP, "%s;%i", player->name, 0);
+
+	fclose(FP);
+
+	releaseIndividualGroupWriteLock();
+	releaseIndividualGroupReadLock();
+}
+
 void writeIndividualsToFile(char * directory, char * saveDirectory, char * individualsFileName){
 	int i = 0;
 
