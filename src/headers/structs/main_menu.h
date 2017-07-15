@@ -103,6 +103,7 @@ typedef struct{
 	int numSaveData;
 	int selectedData;
 	int readyToLoad;
+	int readyToSave;
 	int scrollCount;
 	int savesPerScreen;
 

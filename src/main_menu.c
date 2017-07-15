@@ -229,12 +229,15 @@ void initMainMenu(int inMenuMode, char * mapDirectory){
 	thisMainMenu->load->scrollUpArrow = createCharacter(1505, RGB(255,0,255), 0, 0);
 	thisMainMenu->load->scrollDownArrow = createCharacter(1507, RGB(255,0,255), 0, 0);
 	thisMainMenu->load->readyToLoad = 0;
+	thisMainMenu->load->readyToSave = 0;
 
 	setUpSaveLoadData(mapDirectory);
 }
 
 void disableMainMenuMode(){
 	thisMainMenu->inMenuMode = 0;
+	thisMainMenu->load->readyToLoad = 0;
+	thisMainMenu->load->readyToSave = 0;
 }
 
 void enableMainMenuMode(){
@@ -251,6 +254,10 @@ int inMainMenuMode(){
 
 int mainMenuReadyToLoad(){
 	return thisMainMenu->load->readyToLoad;
+}
+
+int mainMenuReadyToSave(){
+	return thisMainMenu->load->readyToSave;
 }
 
 void disableMainMenuWaitForNameMode(){
@@ -805,8 +812,21 @@ void addAbilityToNewGameAbilityMode(ability * newAbility){
 }
 
 void loadMenuInterpretEnter(){
-	if(thisMainMenu->load->saves[thisMainMenu->load->selectedData] != NULL){
+	if(thisMainMenu->load->mode == LOAD_MODE && thisMainMenu->load->saves[thisMainMenu->load->selectedData] != NULL){
 		thisMainMenu->load->readyToLoad = 1;
+	}else if(thisMainMenu->load->mode == SAVE_MODE){
+		thisMainMenu->load->readyToSave = 1;
+	}
+
+}
+
+void loadMenuInterpretEscape(){
+	if(thisMainMenu->load->mode == LOAD_MODE){
+		thisMainMenu->currentMenu = MENU_TITLE;
+		thisMainMenu->load->selectedData = 0;
+		thisMainMenu->load->scrollCount = 0;
+	}else if(thisMainMenu->load->mode == SAVE_MODE){
+		disableMainMenuMode();
 	}
 }
 
@@ -911,6 +931,16 @@ void MainMenuSetName(char * newName){
 
 int getMainMenuLoadSlot(){
 	return thisMainMenu->load->selectedData;
+}
+
+void showSaveMenu(){
+	thisMainMenu->load->mode = SAVE_MODE;
+	thisMainMenu->currentMenu = MENU_LOAD;
+	enableMainMenuMode();
+}
+
+void setupLoadMode(){
+	thisMainMenu->load->mode = LOAD_MODE;
 }
 
 void newGameResetPlayer(){
@@ -1026,7 +1056,7 @@ void mainMenuInterpretEnter(){
 		break;
 	case MENU_LOAD:
 		loadMenuInterpretEnter();
-			break;
+		break;
 	}
 
 }
@@ -1046,6 +1076,7 @@ void mainMenuInterpretEscape(){
 				break;
 		}
 	case MENU_LOAD:
+		loadMenuInterpretEscape();
 		break;
 	}
 }
@@ -1545,7 +1576,11 @@ void drawLoadMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 	HFONT hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "System");
 	HFONT oldFont = SelectObject(hdcBuffer, hFont);
 
-	drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 10 + 36, yOff + 7, "Load");
+	if(thisMainMenu->load->mode == LOAD_MODE){
+		drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 10 + 36, yOff + 7, "Load");
+	}else if(thisMainMenu->load->mode == SAVE_MODE){
+		drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 10 + 36, yOff + 7, "Save");
+	}
 
 	for(i = thisMainMenu->load->scrollCount; i < upperBound; i++){
 		loadSaveData * tmpLoadSaveData= thisMainMenu->load->saves[i];

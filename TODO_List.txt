@@ -5,8 +5,9 @@
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (6/26/17) update look function to display intractable objects
 - (6/27/17) Develop a map transition animation (fade to/from black?)
-- (7/11/17) Add load menu
- 
+- (7/11/17) Character info should show proper damageoutput and fate tokens
+- (7/14/17) Update save functionality to use the menu system
+
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
 -(6/20/17) In map 5, sometimes the grass spaces by the lake become impassable; not sure why. Could be from other undefined behavior.
@@ -62,3 +63,4 @@
 - (5/22/17 - 6/27/17) Develop a way to see transit spaces (e.g. outline in gold) (DONE)
 - (7/10/17 - 7/11/17) Update permanent abilities to have correct cost (e.g. 2 mana per stat) (DONE)
 - (4/29/17 - 7/10/17) Character creation/title screens (DONE)
+- (7/11/17 - 7/13/17) Add load menu (DONE)

@@ -1259,6 +1259,9 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 38:
 			unhideMapSpacesEvent(thisEvent);
 			return 0;
+		case 39:
+			showSaveMenu();
+			return 0;
 		}
 }
 

@@ -26,6 +26,8 @@ interactType getInteractType(char * type){
 		return INTERACT_GATE;
 	}else if(strcmp(type, "INTERACT_TRAP") == 0){
 		return INTERACT_TRAP;
+	}else if(strcmp(type, "INTERACT_SAVE") == 0){
+		return INTERACT_SAVE;
 	}
 
 	char outlog[128];
@@ -78,6 +80,8 @@ char * getInteractString(interactType type){
 		return "INTERACT_GATE";
 	}else if(type == INTERACT_TRAP){
 		return "INTERACT_TRAP";
+	}else if(type == INTERACT_SAVE){
+		return "INTERACT_SAVE";
 	}
 
 	return "INTERACT_DEFAULT";

@@ -647,7 +647,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 
 	loadGlobalRegister(saveMapDirectory, mapDirectory, "individuals.txt", "items.txt", "events.txt", "sounds.txt", "images.txt", "permenant_abilities.txt", "duration_abilities.txt", "targeted_abilities.txt", "instant_abilities.txt", "mapInfo.txt", "descriptionLookup.txt", "interactableObjects.txt", "areaNodes.txt");
 	setUpAnimationDrawAreas(hdc, hdcBuffer);
-	loadDialog("dialog.txt", saveMapDirectory);
+	loadDialog("dialog.txt", mapDirectory);
 	setAbilityCreationIDCounter(1000 + numAbilitiesInGlobalRegistry());
 
 	initHudInstance();
@@ -1320,6 +1320,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		if(mainMenuReadyToLoad()){
 			destroyAndLoad(hwnd, 0, getMainMenuLoadSlot());
 			disableMainMenuMode();
+		}else if(mainMenuReadyToSave()){
+			saveGame(getMainMenuLoadSlot());
+			disableMainMenuMode();
+			setupLoadMode();
 		}
 
 		return 0;
