@@ -13,7 +13,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 	switch (msg) {
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
-		case 0x50://p key (inventory)
+		case 0x50://p key
 			{
 				togglePaused();
 			}
@@ -242,7 +242,7 @@ int pausedLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	case WM_KEYDOWN:{
 		switch(LOWORD(wParam)){
 		case 0x1B: //escape
-		case 0x50://p key (inventory)
+		case 0x50://p key
 			{
 				togglePaused();
 			}
@@ -265,7 +265,7 @@ int specialDrawLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch(msg){
 	case WM_KEYDOWN:{
 		switch(LOWORD(wParam)){
-		case 0x50://p key (inventory)
+		case 0x50://p key
 			{
 				togglePaused();
 			}
@@ -321,7 +321,7 @@ int nameLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * pla
 				selectLetterLeft();
 				break;
 			}
-			case 0x50://p key (inventory)
+			case 0x50://p key
 			{
 				togglePaused();
 				break;
@@ -448,7 +448,7 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 				selectNextAbility();
 				break;
 			}
-			case 0x50://p key (inventory)
+			case 0x50://p key
 				{
 					togglePaused();
 				}
@@ -511,7 +511,7 @@ int dialogLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * p
 				nextDialogDecision();
 				break;
 			}
-			case 0x50://p key (inventory)
+			case 0x50://p key
 			{
 				togglePaused();
 			}
@@ -564,7 +564,7 @@ int characterInfoViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			showInfoView();
 		}
 			break;
-		case 0x50://p key (inventory)
+		case 0x50://p key
 		{
 			togglePaused();
 		}
@@ -633,7 +633,7 @@ int worldMapLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field ** thi
 			}
 		}
 			break;
-		case 0x50://p key (inventory)
+		case 0x50://p key
 		{
 			togglePaused();
 		}
@@ -677,7 +677,7 @@ int lookViewScrollLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			disableLookScrollMode();
 		}
 			break;
-		case 0x50://p key (inventory)
+		case 0x50://p key
 		{
 			togglePaused();
 		}
@@ -844,7 +844,7 @@ int inventoryLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field * mai
 				}
 			}
 			break;
-		case 0x50://p key (inventory)
+		case 0x50://p key
 			{
 				togglePaused();
 			}
@@ -958,7 +958,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 			}
 		}
 			break;
-		case 0x50://p key (inventory)
+		case 0x50://p key
 			{
 				togglePaused();
 			}
@@ -984,7 +984,7 @@ void processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 	switch (msg) {
 		case WM_KEYDOWN:{
 			switch(LOWORD(wParam)){
-			case 0x50://p key (inventory)
+			case 0x50://p key
 				{
 					togglePaused();
 				}
@@ -1013,7 +1013,7 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 	switch (msg) {
 		case WM_KEYDOWN:{
 			switch(LOWORD(wParam)){
-			case 0x50://p key (inventory)
+			case 0x50://p key
 				{
 					togglePaused();
 				}
@@ -1104,6 +1104,40 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			}
 		}
 	}
+}
+
+int gameMenuLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	switch (msg) {
+		case WM_KEYDOWN:{
+			switch(LOWORD(wParam)){
+			case 0x0D://enter
+				gameMenuInterpretEnter();
+				break;
+			case 0x1B:
+				gameMenuInterpretEscape();
+				break;
+			case 0x38:
+			case 0x68: //'8'
+				gameMenuInterpretUp();
+				break;
+			case 0x32:
+			case 0x62: //'2' key
+				gameMenuInterpretDown();
+				break;
+			}
+			break;
+		}
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+
+	return 0;
 }
 
 int mainMenuLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){

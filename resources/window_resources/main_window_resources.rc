@@ -77,6 +77,7 @@ END
 1417 BITMAP DISCARDABLE "../images/create_add_ability.bmp"
 1418 BITMAP DISCARDABLE "../images/save_load_screen.bmp"
 1419 BITMAP DISCARDABLE "../images/save_load_select.bmp"
+1420 BITMAP DISCARDABLE "../images/game_menu.bmp"
 
 //Menu images 1500 - 2000
 1500 BITMAP DISCARDABLE "../images/console_bg.bmp" //2010

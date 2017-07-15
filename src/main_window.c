@@ -414,6 +414,10 @@ void drawGameMode(HDC hdc, RECT* prc) {
 		drawPauseWindow(hdc, hdcBuffer, prc);
 	}
 
+	if(inGameMenuMode()){
+		drawGameMenu(hdc, hdcBuffer, prc);
+	}
+
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 	SelectObject(hdcBuffer, hbmOldBuffer);
@@ -766,6 +770,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		setUpAnimationDrawAreas(hdc, hdcBuffer);
 		viewShift = initShiftData();
 		initMainMenu(1, mapDirectory);
+		initGameMenu();
 
 		main_field = loadMap("map1.txt", mapDirectory, player, thisGroupContainer);
 
@@ -828,7 +833,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		break;
 	case WM_KEYDOWN: {
 		switch (LOWORD(wParam)) {
-
+		case 0x1B:
+			enableGameMenuMode();
+			break;
 		case 0x41: //a key (attack)
 			toggleInCursorMode();
 			refreshCursor(CURSOR_ATTACK, player->playerCharacter->x, player->playerCharacter->y);
@@ -1327,6 +1334,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		return 0;
+	}
+
+	if(inGameMenuMode()){
+		return gameMenuLoop(hwnd, msg, wParam, lParam);
 	}
 
 

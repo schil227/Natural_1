@@ -240,8 +240,27 @@ void disableMainMenuMode(){
 	thisMainMenu->load->readyToSave = 0;
 }
 
-void enableMainMenuMode(){
+void enableMainMenuMode(int mode){
 	thisMainMenu->inMenuMode = 1;
+
+	switch(mode){
+		case 0:
+			thisMainMenu->currentMenu = MENU_TITLE;
+			break;
+		case 1:
+			thisMainMenu->currentMenu = MENU_NEW_GAME;
+			break;
+		case 2:
+			thisMainMenu->currentMenu = MENU_NEW_GAME_ABILITY;
+			break;
+		case 3:
+			thisMainMenu->currentMenu = MENU_LOAD;
+			break;
+	}
+
+	thisMainMenu->currentMenu = mode;
+
+	//TODO: switch on mode here to re-initialize
 }
 
 int inMainMenuMode(){
@@ -935,8 +954,7 @@ int getMainMenuLoadSlot(){
 
 void showSaveMenu(){
 	thisMainMenu->load->mode = SAVE_MODE;
-	thisMainMenu->currentMenu = MENU_LOAD;
-	enableMainMenuMode();
+	enableMainMenuMode(3);
 }
 
 void setupLoadMode(){
