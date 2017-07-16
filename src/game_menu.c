@@ -80,13 +80,13 @@ void gameMenuInterpretEnter(){
 		break;
 	case GAME_MENU_LOAD:
 		setupLoadMode();
-		enableMainMenuMode(3);
+		enableMainMenuMode(3, 1);
 		disableGameMenuMode();
 		break;
 	case GAME_MENU_OPTIONS:
 		break;
 	case GAME_MENU_MAINMENU:
-		enableMainMenuMode(0);
+		enableMainMenuMode(0, 1);
 		disableGameMenuMode();
 		break;
 	}

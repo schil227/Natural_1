@@ -6,7 +6,7 @@
 - (6/26/17) update look function to display intractable objects
 - (6/27/17) Develop a map transition animation (fade to/from black?)
 - (7/11/17) Character info should show proper damageoutput and fate tokens
-- (7/14/17) Update save functionality to use the menu system
+
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
@@ -64,3 +64,5 @@
 - (7/10/17 - 7/11/17) Update permanent abilities to have correct cost (e.g. 2 mana per stat) (DONE)
 - (4/29/17 - 7/10/17) Character creation/title screens (DONE)
 - (7/11/17 - 7/13/17) Add load menu (DONE)
+- (7/14/17 - 7/14/17) Update save functionality to use the menu system (DONE)
+- (7/15/17 - 7/15/15) Add in game menu system

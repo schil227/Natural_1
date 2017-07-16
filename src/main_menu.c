@@ -99,6 +99,84 @@ void setUpAvatars(){
 	tmpCharacter->yOff = 0;
 }
 
+void cloneNewGameIndividual(){
+	individual * newGameClone = initIndividual();
+	individual * basePlayer = getIndividualFromRegistry(0);
+
+	newGameClone->ID = 1;
+	strcpy(newGameClone->name, basePlayer->name);
+	newGameClone->isPlayer = 1;
+
+	newGameClone->STR = basePlayer->STR;
+	newGameClone->DEX = basePlayer->DEX;
+	newGameClone->CON = basePlayer->CON;
+	newGameClone->INT = basePlayer->INT;
+	newGameClone->WIS = basePlayer->WIS;
+	newGameClone->WILL = basePlayer->WILL;
+	newGameClone->CHR = basePlayer->CHR;
+	newGameClone->LUCK = basePlayer->LUCK;
+
+	newGameClone->baseHP = basePlayer->baseHP;
+	newGameClone->hp = basePlayer->hp;
+	newGameClone->baseMana = basePlayer->baseMana;
+	newGameClone->mana = basePlayer->mana;
+	newGameClone->totalActions = basePlayer->totalActions;
+	newGameClone->remainingActions = basePlayer->remainingActions;
+	newGameClone->hasAttacked = basePlayer->hasAttacked;
+	newGameClone->totalFood = basePlayer->totalFood;
+	newGameClone->food = basePlayer->food;
+	newGameClone->foodBonusActive = basePlayer->foodBonusActive;
+	newGameClone->foodNegativeActive = basePlayer->foodNegativeActive;
+	newGameClone->AC = basePlayer->AC;
+	newGameClone->attack = basePlayer->attack;
+	newGameClone->maxDam = basePlayer->maxDam;
+	newGameClone->minDam = basePlayer->minDam;
+	newGameClone->baseDam = basePlayer->baseDam;
+
+	newGameClone->range = basePlayer->range;
+	strcpy(newGameClone->critType, basePlayer->critType);
+	newGameClone->mvmt = basePlayer->mvmt;
+	newGameClone->LoS = basePlayer->LoS;
+	newGameClone->darkLoS = basePlayer->darkLoS;
+	newGameClone->isSneaking = basePlayer->isSneaking;
+	newGameClone->bluntDR = basePlayer->bluntDR;
+	newGameClone->chopDR = basePlayer->chopDR;
+	newGameClone->slashDR = basePlayer->slashDR;
+	newGameClone->pierceDR = basePlayer->pierceDR;
+	newGameClone->earthDR = basePlayer->earthDR;
+	newGameClone->fireDR = basePlayer->fireDR;
+	newGameClone->waterDR = basePlayer->waterDR;
+	newGameClone->lightningDR = basePlayer->lightningDR;
+	newGameClone->dialogID = basePlayer->dialogID;
+	newGameClone->dialogPortraitID = basePlayer->dialogPortraitID;
+	newGameClone->fateTokens = basePlayer->fateTokens;
+	newGameClone->gold = basePlayer->gold;
+	newGameClone->jumpTarget = basePlayer->jumpTarget;
+	newGameClone->faction = basePlayer->faction;
+	newGameClone->targetedDuration = basePlayer->targetedDuration;
+
+	newGameClone->specialDialog = malloc(sizeof(specialDialogs));
+	newGameClone->specialDialog->sawPlayerCrime = basePlayer->specialDialog->sawPlayerCrime;
+	newGameClone->specialDialog->attackedByPlayer = basePlayer->specialDialog->attackedByPlayer;
+	newGameClone->specialDialog->stolenFromByPlayer = basePlayer->specialDialog->stolenFromByPlayer;
+	newGameClone->specialDialog->afraidOfPlayer = basePlayer->specialDialog->afraidOfPlayer;
+	newGameClone->specialDialog->playerIsMarkedForDeath = basePlayer->specialDialog->playerIsMarkedForDeath;
+
+	newGameClone->desiredLocation->x = 0;
+	newGameClone->desiredLocation->y = 0;
+
+	newGameClone->thisBehavior->offensiveness = basePlayer->thisBehavior->offensiveness;
+	newGameClone->thisBehavior->abilityAffinity = basePlayer->thisBehavior->abilityAffinity;
+	newGameClone->thisBehavior->tacticalness = basePlayer->thisBehavior->tacticalness;
+	newGameClone->thisBehavior->cowardness = basePlayer->thisBehavior->cowardness;
+	newGameClone->thisBehavior->isHostileToPlayer = basePlayer->thisBehavior->isHostileToPlayer;
+	newGameClone->thisBehavior->isFocusedOnPlayer = basePlayer->thisBehavior->isFocusedOnPlayer;
+	newGameClone->thisBehavior->isSurrounded = basePlayer->thisBehavior->isSurrounded;
+	newGameClone->thisBehavior->respawns = basePlayer->thisBehavior->respawns;
+
+	thisMainMenu->newGame->newPlayer = newGameClone;
+}
+
 void setUpSaveLoadData(char * mapDirectory){
 	int i;
 	char * strtok_save_pointer;
@@ -139,7 +217,7 @@ void initMainMenu(int inMenuMode, char * mapDirectory){
 	thisMainMenu->inMenuMode = inMenuMode;
 	thisMainMenu->currentMenu = MENU_TITLE;
 	thisMainMenu->waitingForNameMode = 0;
-
+	thisMainMenu->reloadBaseGame = 0;
 	thisMainMenu->leftSelectArrow = createCharacter(1402, RGB(255,0,255), 0, 0);
 	thisMainMenu->rightSelectArrow = createCharacter(1504, RGB(255,0,255), 0, 0);
 
@@ -158,7 +236,7 @@ void initMainMenu(int inMenuMode, char * mapDirectory){
 	thisMainMenu->newGame->inAbilityEditMode = 0;
 	thisMainMenu->newGame->statPoints = 6;
 	thisMainMenu->newGame->numAbilites = 2;
-	thisMainMenu->newGame->newPlayer = getIndividualFromRegistry(0);
+	cloneNewGameIndividual();
 	thisMainMenu->newGame->newAbilities = malloc(sizeof(abilityList));
 	thisMainMenu->newGame->newAbilities->numAbilities = 0;
 	thisMainMenu->newGame->newAbilities->MAX_ABILITIES = 6;
@@ -234,15 +312,45 @@ void initMainMenu(int inMenuMode, char * mapDirectory){
 	setUpSaveLoadData(mapDirectory);
 }
 
+void reinitializeMainMenu(){
+	int i;
+	thisMainMenu->title->selectedOption = TITLE_NEW_GAME;
+	thisMainMenu->rightSelectArrow->y = 13;
+
+	thisMainMenu->newGame->currentForm = NEW_GAME_CREATE;
+	thisMainMenu->newGame->currentField = CREATE_NAME;
+	thisMainMenu->newGame->currentSpread = SPREAD_8_8;
+	thisMainMenu->newGame->inEditMode = 0;
+	thisMainMenu->newGame->inAbilityEditMode = 0;
+	thisMainMenu->newGame->statPoints = 6;
+	thisMainMenu->newGame->numAbilites = 2;
+	cloneNewGameIndividual();
+	thisMainMenu->newGame->newAbilities->numAbilities = 0;
+	thisMainMenu->newGame->newAbilities->MAX_ABILITIES = 6;
+	thisMainMenu->newGame->selectedAbility = 0;
+	thisMainMenu->newGame->currentAvatar = rand() % 4;
+
+	for(i = 0; i < thisMainMenu->newGame->newAbilities->MAX_ABILITIES; i++){
+		thisMainMenu->newGame->newAbilities->abilitiesList[i] = NULL;
+	}
+
+	for(i = 0; i < 4; i++){
+		free(thisMainMenu->newGame->avatars[i]);
+	}
+
+	setUpAvatars();
+
+	thisMainMenu->load->selectedData = 0;
+	thisMainMenu->load->scrollCount = 0;
+}
+
 void disableMainMenuMode(){
 	thisMainMenu->inMenuMode = 0;
 	thisMainMenu->load->readyToLoad = 0;
 	thisMainMenu->load->readyToSave = 0;
 }
 
-void enableMainMenuMode(int mode){
-	thisMainMenu->inMenuMode = 1;
-
+void enableMainMenuMode(int mode, int reloadBaseGame){
 	switch(mode){
 		case 0:
 			thisMainMenu->currentMenu = MENU_TITLE;
@@ -258,9 +366,13 @@ void enableMainMenuMode(int mode){
 			break;
 	}
 
-	thisMainMenu->currentMenu = mode;
+	thisMainMenu->reloadBaseGame = reloadBaseGame;
 
-	//TODO: switch on mode here to re-initialize
+	if(!reloadBaseGame){
+		reinitializeMainMenu();
+	}
+
+	thisMainMenu->inMenuMode = 1;
 }
 
 int inMainMenuMode(){
@@ -269,6 +381,14 @@ int inMainMenuMode(){
 	}
 
 	return 0;
+}
+
+void disableMainMenuReloadBaseGame(){
+	thisMainMenu->reloadBaseGame = 0;
+}
+
+int mainMenuReloadBaseGame(){
+	return thisMainMenu->reloadBaseGame;
 }
 
 int mainMenuReadyToLoad(){
@@ -345,6 +465,7 @@ void mainMenuTitleSelect(){
 			break;
 		case TITLE_LOAD:
 			thisMainMenu->currentMenu = MENU_LOAD;
+			thisMainMenu->load->mode = LOAD_MODE;
 			break;
 		case TITLE_EXIT:
 			PostQuitMessage(0);
@@ -862,11 +983,13 @@ void newGameAbilityMenuInterpretEnter(){
 		break;
 		case CREATE_DONE:{
 			int i;
-			character * tmpCharacter;
 
-			tmpCharacter = thisMainMenu->newGame->newPlayer->playerCharacter;
-			thisMainMenu->newGame->newPlayer->playerCharacter = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar];
-			destroyCharacter(tmpCharacter);
+			thisMainMenu->newGame->newPlayer->playerCharacter->thisAnimationContainer = cloneAnimationContainer(thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar]->thisAnimationContainer);
+			thisMainMenu->newGame->newPlayer->playerCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar]->secondaryAnimationContainer);
+			thisMainMenu->newGame->newPlayer->playerCharacter->x = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar]->x;
+			thisMainMenu->newGame->newPlayer->playerCharacter->y = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar]->y;
+			thisMainMenu->newGame->newPlayer->playerCharacter->xOff = 0;
+			thisMainMenu->newGame->newPlayer->playerCharacter->yOff = 0;
 
 			for(i = 0; i < thisMainMenu->newGame->newAbilities->MAX_ABILITIES; i++){
 				if(thisMainMenu->newGame->newAbilities->abilitiesList[i] != NULL){
@@ -954,7 +1077,7 @@ int getMainMenuLoadSlot(){
 
 void showSaveMenu(){
 	thisMainMenu->load->mode = SAVE_MODE;
-	enableMainMenuMode(3);
+	enableMainMenuMode(3, 0);
 }
 
 void setupLoadMode(){
@@ -1093,6 +1216,7 @@ void mainMenuInterpretEscape(){
 				newGameAbilitiesMenuInterpretEscape();
 				break;
 		}
+		break;
 	case MENU_LOAD:
 		loadMenuInterpretEscape();
 		break;

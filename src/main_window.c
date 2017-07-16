@@ -618,12 +618,15 @@ void destroyGame(){
 }
 
 void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
-	int i;
 	HDC hdc = GetDC(hwnd);
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 
 	char saveMapDirectory[256];
-	i = sprintf(saveMapDirectory, "%ssaves\\save%d\\", mapDirectory, saveSlot);
+	if(saveSlot >= 0 && saveSlot < 10){
+		sprintf(saveMapDirectory, "%ssaves\\save%d\\", mapDirectory, saveSlot);
+	}else{
+		strcpy(saveMapDirectory, mapDirectory);
+	}
 
 	if(!isFirstLoad){
 		destroyGame();
@@ -1322,6 +1325,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				resetNameBoxInstance();
 			}
 		}
+
+		if(mainMenuReloadBaseGame()){
+			destroyAndLoad(hwnd, 0, -1);
+			disableMainMenuReloadBaseGame();
+			reinitializeMainMenu();
+		}
+
 		mainMenuLoop(hwnd, msg, wParam, lParam);
 
 		if(mainMenuReadyToLoad()){

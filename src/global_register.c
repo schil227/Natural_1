@@ -81,7 +81,7 @@ individual * getIndividualFromRegistry(int id){
 
 	char * errLog[128];
 	sprintf(errLog, "!!INDIVIDUAL NOT FOUND IN REGISTRY - %d!!", id);
-	cwrite(errLog);
+//	cwrite(errLog);
 
 	return NULL;
 }

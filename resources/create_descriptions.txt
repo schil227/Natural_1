@@ -74,7 +74,7 @@ This permanent ability will be the class of your character. Its effects will alw
 This permanent ability will be the class of your character. Its effects will always be active.
 
 ==Ability==
-Create or edit an ability. Abilities can be used for a variety of purposes, from slaying your enemies, healing yourself, and giving your party temporary stat boosts. All non-permanent abilities cost at least one mana.
+Create or edit an ability. Abilities can be used for a variety of purposes, from slaying your enemies, healing yourself, and giving your party temporary stat boosts. Allabilities cost at least one mana.
 
 ==Ability Done==
 Finalize character creation.

@@ -116,6 +116,7 @@ typedef struct{
 typedef struct{
 	int inMenuMode;
 	int waitingForNameMode;
+	int reloadBaseGame;
 	mainMenuMode currentMenu;
 
 	titleMenu * title;

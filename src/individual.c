@@ -105,6 +105,10 @@ individual *initIndividual(){
 	toReturn->desiredLocation = malloc(sizeof(cord));
 	toReturn->thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
 
+	toReturn->armorItem = NULL;
+	toReturn->weaponItem = NULL;
+	toReturn->shieldItem = NULL;
+
 	return toReturn;
 }
 
