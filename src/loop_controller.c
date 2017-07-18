@@ -901,7 +901,7 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 				}
 
 				space * tmpSpace = getSpaceFromField(thisField, (*currentNode)->x + dx, (*currentNode)->y + dy);
-				if ( tmpSpace != NULL && tmpSpace->isPassable && canPassThroughInteractableObject(tmpSpace->interactableObject) && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual))) {
+				if ( tmpSpace != NULL && tmpSpace->isPassable && !tmpSpace->spaceIsReserved && canPassThroughInteractableObject(tmpSpace->interactableObject) && (tmpSpace->currentIndividual == NULL || isAlly(thisIndividual, tmpSpace->currentIndividual))) {
 					moveNode ** oldNode = (moveNode **)alreadyContainsNode(((moveNode *)thisIndividual->thisMoveNodeMeta->rootMoveNode),(*currentNode)->x + dx, (*currentNode)->y + dy );
 
 					int screenX =  rect.right - rect.left - getSidebarWidth();

@@ -154,7 +154,7 @@ int calcNumIndexes(char currentMessage[256], int lineLength, HDC hdcBuffer, int 
 			//account for indent
 			rowLengthCounter = leftIndent;
 
-			if (i - spaceIndex < 3 && currentMessage[i] != '&') {
+			if (i - spaceIndex < 7 && currentMessage[i] != '&') {
 				//need to account for the added characters after the space break on next line
 				int j;
 
@@ -188,7 +188,7 @@ int * createSpaceIndexArr(char currentMessage[256], int breakIndexArrSize, int r
 
 		if (rowLengthCounter > rowlength || currentMessage[i] == '&') {
 			rowLengthCounter = leftIndent; //not 0, account for indent
-			if (i - spaceIndex < 3  && currentMessage[i] != '&') {
+			if (i - spaceIndex < 7  && currentMessage[i] != '&') {
 				spaceIndexArr[spaceIndexArrIndex] = spaceIndex;
 
 				//need to account for the added characters after the space break on next line
@@ -255,6 +255,11 @@ void drawConsoleText(HDC hdcBuffer, RECT * textBoxRect, messageNode * currentMes
 				}
 
 				messageSubLine[numCharactersToIndex] = '\0';
+
+				//dont draw & (or interpreted character)
+				if(messageSubLine[0] == '&'){
+					messageSubLine[0] = ' ';
+				}
 
 				//draw the substring to the window
 				if(!DrawText(hdcBuffer, messageSubLine, -1, textBoxRect, DT_SINGLELINE)){

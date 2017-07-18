@@ -79,8 +79,8 @@ void gameMenuInterpretEnter(){
 		disableGameMenuMode();
 		break;
 	case GAME_MENU_LOAD:
-		setupLoadMode();
-		enableMainMenuMode(3, 1);
+		setupLoadMode(1);
+		enableMainMenuMode(3, 0);
 		disableGameMenuMode();
 		break;
 	case GAME_MENU_OPTIONS:

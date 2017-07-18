@@ -620,7 +620,8 @@ void destroyGame(){
 void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	HDC hdc = GetDC(hwnd);
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
-
+	RECT * rect;
+	GetClientRect(hwnd_global, rect);
 	char saveMapDirectory[256];
 	if(saveSlot >= 0 && saveSlot < 10){
 		sprintf(saveMapDirectory, "%ssaves\\save%d\\", mapDirectory, saveSlot);
@@ -694,6 +695,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	}
 
 	viewShift = initShiftData();
+	transitViewShift(viewShift, player, main_field, rect);
 
 	inActionMode = shouldEnableActionMode();
 }
@@ -1016,7 +1018,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					int dy = yMoveChange(LOWORD(wParam) % 16);
 
 					space * tmpSpace = getSpaceFromField(main_field, player->playerCharacter->x + dx, player->playerCharacter->y + dy);
-					if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL && canPassThroughInteractableObject(tmpSpace->interactableObject)) {
+					if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved && canPassThroughInteractableObject(tmpSpace->interactableObject)) {
 						player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
 						player->thisMoveNodeMeta->sum = 0;
 						player->thisMoveNodeMeta->pathLength = 0;
@@ -1340,7 +1342,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}else if(mainMenuReadyToSave()){
 			saveGame(getMainMenuLoadSlot());
 			disableMainMenuMode();
-			setupLoadMode();
+			setupLoadMode(1);
 		}
 
 		return 0;

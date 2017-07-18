@@ -106,6 +106,7 @@ typedef struct{
 	int readyToSave;
 	int scrollCount;
 	int savesPerScreen;
+	int inGameLoadMode;
 
 	fixedCharacter * loadView;
 	fixedCharacter * loadSelect;

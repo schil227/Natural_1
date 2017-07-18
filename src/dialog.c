@@ -95,8 +95,8 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	RECT textBoxRect;
 		textBoxRect.left = thisDialogInstance->dialogWindow->x + 10;//prc->right - prc->right*0.95;
 		textBoxRect.bottom = thisDialogInstance->dialogWindow->y +  thisDialogInstance->dialogWindow->fixedHeight;  // prc->bottom;
-		textBoxRect.top = textBoxRect.bottom - 30;
-		textBoxRect.right = textBoxRect.left +  thisDialogInstance->dialogWindow->fixedWidth - 20;
+		textBoxRect.top = textBoxRect.bottom - 27;
+		textBoxRect.right = thisDialogInstance->dialogWindow->fixedWidth - 10;
 
 	messageNode drawMessageNode;
 	if(thisDialogInstance->speakMode && thisDialogInstance->speakDrawLength == strlen(thisDialogInstance->currentMessage->parsedMessage)){
@@ -114,7 +114,7 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 	drawMessageNode.nextMessageNode = NULL;
 	drawMessageNode.previousMessageNode = NULL;
 
-	rowLength = textBoxRect.right - textBoxRect.left;//(thisDialogBox->dialogWindow->width - thisDialogBox->dialogWindow->width * 0.1);
+	rowLength = textBoxRect.right - textBoxRect.left - 10;//(thisDialogBox->dialogWindow->width - thisDialogBox->dialogWindow->width * 0.1);
 
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
@@ -140,7 +140,7 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 			thisDialogInstance->decisionIndexRow[i] = rowToStartOn;
 			dialogDecision * tmpDecision = thisDialogInstance->currentMessage->parsedDecisions[i];
 			char tmpDecisionStr[70];
-			strcpy(tmpDecisionStr, "&     ");
+			strcpy(tmpDecisionStr, "&    ");
 			strcat(tmpDecisionStr, tmpDecision->processedMessage);
 
 			strcat(drawMessageNode.message, tmpDecisionStr);
@@ -150,7 +150,7 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 		SelectObject(hdcMem, thisDialogInstance->selectArrow->fixedImage);
 
-		int rowsFromTheTopRowInPixels = (15*(thisDialogInstance->numRows -  thisDialogInstance->decisionIndexRow[thisDialogInstance->decisionIndex]));
+		int rowsFromTheTopRowInPixels = (-4 + 15*(thisDialogInstance->numRows -  thisDialogInstance->decisionIndexRow[thisDialogInstance->decisionIndex]));
 
 		BitBlt(hdcBuffer, thisDialogInstance->selectArrow->x,
 				thisDialogInstance->selectArrow->y + thisDialogInstance->dialogWindow->fixedHeight - rowsFromTheTopRowInPixels,
@@ -159,6 +159,12 @@ void drawDialogBox(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	DeleteDC(hdcMem);
 
+	textBoxRect.bottom = textBoxRect.top + 120;
+
+	SetTextColor(hdcBuffer, RGB(255, 200, 0));
+	SetBkMode(hdcBuffer, TRANSPARENT);
+
+//	DrawText(hdcBuffer, drawMessageNode.message, -1, &textBoxRect, DT_WORDBREAK);
 	drawConsoleText(hdcBuffer, &textBoxRect, &drawMessageNode, thisDialogInstance->numRows, rowLength);
 
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));

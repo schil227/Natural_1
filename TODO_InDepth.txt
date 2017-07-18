@@ -4,23 +4,7 @@
 -add dark LoS stat to ability
 -make an onDeath function for individuals in general to clear out stuff only they use, such as active items, etc.
 	--Note that on save, active abilities/items wont exist
-
-
-== notes: action ==
--reading signs
--opening chests/triggering mimics
--fishing for food
--foraging for food
--interacting with traps/leavers
--doors
-
--update mapinfo to attach interactable objects to spaces
--on field load, add IOs spaces
--add interaction UI
--create interact events, attach current interact to player
-
-
-
+	
 == tested ==
 isLowOnMana (DONE)
 tryRestoreMana (DONE)

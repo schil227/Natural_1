@@ -308,6 +308,7 @@ void initMainMenu(int inMenuMode, char * mapDirectory){
 	thisMainMenu->load->scrollDownArrow = createCharacter(1507, RGB(255,0,255), 0, 0);
 	thisMainMenu->load->readyToLoad = 0;
 	thisMainMenu->load->readyToSave = 0;
+	thisMainMenu->load->inGameLoadMode = 0;
 
 	setUpSaveLoadData(mapDirectory);
 }
@@ -962,9 +963,13 @@ void loadMenuInterpretEnter(){
 
 void loadMenuInterpretEscape(){
 	if(thisMainMenu->load->mode == LOAD_MODE){
-		thisMainMenu->currentMenu = MENU_TITLE;
-		thisMainMenu->load->selectedData = 0;
-		thisMainMenu->load->scrollCount = 0;
+		if(thisMainMenu->load->inGameLoadMode){
+			disableMainMenuMode();
+		}else{
+			thisMainMenu->currentMenu = MENU_TITLE;
+			thisMainMenu->load->selectedData = 0;
+			thisMainMenu->load->scrollCount = 0;
+		}
 	}else if(thisMainMenu->load->mode == SAVE_MODE){
 		disableMainMenuMode();
 	}
@@ -1077,11 +1082,13 @@ int getMainMenuLoadSlot(){
 
 void showSaveMenu(){
 	thisMainMenu->load->mode = SAVE_MODE;
+	thisMainMenu->load->inGameLoadMode = 1;
 	enableMainMenuMode(3, 0);
 }
 
-void setupLoadMode(){
+void setupLoadMode(int inGameMode){
 	thisMainMenu->load->mode = LOAD_MODE;
+	thisMainMenu->load->inGameLoadMode = inGameMode;
 }
 
 void newGameResetPlayer(){

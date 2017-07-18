@@ -996,6 +996,9 @@ void setAlliesToField(individual * player, individualGroup * allies, field * thi
 	for(i = 0; i < allies->MAX_INDIVIDUALS; i++){
 		tmpAlly = allies->individuals[i];
 
+		tmpAlly->playerCharacter->x = -1;
+		tmpAlly->playerCharacter->y = -1;
+
 		if(tmpAlly != NULL){
 			individualsPassed++;
 
@@ -1003,10 +1006,12 @@ void setAlliesToField(individual * player, individualGroup * allies, field * thi
 
 			setIndividualSpace(thisField, tmpAlly, freeSpace->x, freeSpace->y);
 
-			getSpaceFromField(thisField, freeSpace->x, freeSpace->y)->currentIndividual = tmpAlly;
-			tmpAlly->playerCharacter->x = freeSpace->x;
-			tmpAlly->playerCharacter->y = freeSpace->y;
-			addIndividualsToMapInfo(thisMap, tmpAlly->ID);
+			if(tmpAlly->playerCharacter->x != -1 && tmpAlly->playerCharacter->y != -1){
+				getSpaceFromField(thisField, freeSpace->x, freeSpace->y)->currentIndividual = tmpAlly;
+				tmpAlly->playerCharacter->x = freeSpace->x;
+				tmpAlly->playerCharacter->y = freeSpace->y;
+				addIndividualsToMapInfo(thisMap, tmpAlly->ID);
+			}
 
 			if(individualsPassed == allies->numIndividuals){
 				break;

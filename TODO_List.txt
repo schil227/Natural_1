@@ -6,7 +6,9 @@
 - (6/26/17) update look function to display intractable objects
 - (6/27/17) Develop a map transition animation (fade to/from black?)
 - (7/11/17) Character info should show proper damageoutput and fate tokens
-
+- (7/17/17) Handle case where Ally cannot fit on map (omit from field?)
+- (7/17/17) Rebalance mana value for attributes (e.g. 2 mana for +1 WIS outstrips 2 mana for +1 attack... 3 mana for stat?)
+- (7/17/17) Add confirmation dialog when overriding saves or doing something that would destroy the game
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
@@ -66,3 +68,5 @@
 - (7/11/17 - 7/13/17) Add load menu (DONE)
 - (7/14/17 - 7/14/17) Update save functionality to use the menu system (DONE)
 - (7/15/17 - 7/15/15) Add in game menu system
+- (7/16/17 - 7/17/17) Update dialog text to use textbox rect, get rid of ugly formatting. (DONE - to complex for just textbox rect; however updated the formatting to be better)
+- (7/17/17 - 7/17/17) Make sure allied players don't occupy the same space as player, especially in free move. (DONE)
