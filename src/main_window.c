@@ -1018,28 +1018,34 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					int dy = yMoveChange(LOWORD(wParam) % 16);
 
 					space * tmpSpace = getSpaceFromField(main_field, player->playerCharacter->x + dx, player->playerCharacter->y + dy);
-					if ( tmpSpace != NULL && tmpSpace->isPassable && tmpSpace->currentIndividual == NULL && !tmpSpace->spaceIsReserved && canPassThroughInteractableObject(tmpSpace->interactableObject)) {
-						player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
-						player->thisMoveNodeMeta->sum = 0;
-						player->thisMoveNodeMeta->pathLength = 0;
+					if(tmpSpace != NULL && tmpSpace->isPassable  && !tmpSpace->spaceIsReserved && canPassThroughInteractableObject(tmpSpace->interactableObject)){
+						if (tmpSpace->currentIndividual == NULL) {
+							player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
+							player->thisMoveNodeMeta->sum = 0;
+							player->thisMoveNodeMeta->pathLength = 0;
 
-						player->thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
-						player->thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
-						player->thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
+							player->thisMoveNodeMeta->rootMoveNode->x = player->playerCharacter->x;
+							player->thisMoveNodeMeta->rootMoveNode->y = player->playerCharacter->y;
+							player->thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
 
-						moveNode * nextNode = malloc(sizeof(moveNode));
-						nextNode->x = player->playerCharacter->x + dx;
-						nextNode->y = player->playerCharacter->y + dy;
-						nextNode->nextMoveNode = NULL;
-						nextNode->hasTraversed = 0;
+							moveNode * nextNode = malloc(sizeof(moveNode));
+							nextNode->x = player->playerCharacter->x + dx;
+							nextNode->y = player->playerCharacter->y + dy;
+							nextNode->nextMoveNode = NULL;
+							nextNode->hasTraversed = 0;
 
-						player->thisMoveNodeMeta->rootMoveNode->nextMoveNode = nextNode;
+							player->thisMoveNodeMeta->rootMoveNode->nextMoveNode = nextNode;
 
-						removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
+							removeIndividualFromField(main_field, player->playerCharacter->x, player->playerCharacter->y);
 
-						postMoveMode = 1;
-					}else{
-						printf("not passable, slick.");
+							postMoveMode = 1;
+						}else{
+							individual * tmpIndividual = tmpSpace->currentIndividual;
+
+							if(tmpIndividual->currentGroupType == GROUP_ALLIES){
+								swapPositionWithAlly(main_field, thisGroupContainer->movingIndividuals, player, tmpIndividual, animateMoveSpeed);
+							}
+						}
 					}
 				}
 			}

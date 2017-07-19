@@ -1018,10 +1018,10 @@ void setAlliesToField(individual * player, individualGroup * allies, field * thi
 			}
 		}
 	}
-
 }
 
 int attemptToForceTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int targetMapID, int transitID){
+	int i;
 	char mapName[64];
 
 	mapInfo * targetMap = getMapInfoFromRegistry(targetMapID);
@@ -1060,6 +1060,14 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	clearGroup(thisGroupContainer->beasts);
 	clearGroup(thisGroupContainer->guards);
 
+	for(i = 0; i < thisGroupContainer->movingIndividuals->numIndividuals; i++){
+		thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->xOff = 0;
+		thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->yOff = 0;
+	}
+
+	clearGroup(thisGroupContainer->movingIndividuals);
+
+
 	*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
 	releaseFieldWriteLock();
@@ -1096,6 +1104,7 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
 
 		if(tmpSpace->thisTransitInfo != NULL && (tmpSpace->thisTransitInfo->targetMapTransitID != 0 || tmpSpace->thisTransitInfo->areaNodeID != -1)){
+			int i;
 			int areaNodeID = tmpSpace->thisTransitInfo->areaNodeID;
 			char mapName[256];
 			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
@@ -1135,6 +1144,14 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 			clearGroup(thisGroupContainer->npcs);
 			clearGroup(thisGroupContainer->beasts);
 			clearGroup(thisGroupContainer->guards);
+
+			for(i = 0; i < thisGroupContainer->movingIndividuals->numIndividuals; i++){
+				thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->xOff = 0;
+				thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->yOff = 0;
+				freeUpMovePath(thisGroupContainer->movingIndividuals->individuals[i]->thisMoveNodeMeta->rootMoveNode);
+			}
+
+			clearGroup(thisGroupContainer->movingIndividuals);
 
 			if(areaNodeID != -1){
 				if(player->thisReportedCrimes->numReportedCrimes > 0){
