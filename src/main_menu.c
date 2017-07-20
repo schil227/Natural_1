@@ -177,14 +177,14 @@ void cloneNewGameIndividual(){
 	thisMainMenu->newGame->newPlayer = newGameClone;
 }
 
-void setUpSaveLoadData(char * mapDirectory){
+void setUpSaveLoadData(){
 	int i;
 	char * strtok_save_pointer;
 	char saveDirectory[256];
 	char line[64];
 
 	for(i = 0; i < thisMainMenu->load->numSaveData; i++){
-		sprintf(saveDirectory, "%ssaves\\save%d\\saveMetaData.txt", mapDirectory, i);
+		sprintf(saveDirectory, "%ssaves\\save%d\\saveMetaData.txt", thisMainMenu->rootMapDirectory, i);
 
 		FILE * FP = fopen(saveDirectory, "r");
 
@@ -218,8 +218,11 @@ void initMainMenu(int inMenuMode, char * mapDirectory){
 	thisMainMenu->currentMenu = MENU_TITLE;
 	thisMainMenu->waitingForNameMode = 0;
 	thisMainMenu->reloadBaseGame = 0;
+	thisMainMenu->selectedDecision = CONFIRMATION_NO;
+	thisMainMenu->confirmationDialog = createCharacter(1421, RGB(255,0,255), 0, 0);
 	thisMainMenu->leftSelectArrow = createCharacter(1402, RGB(255,0,255), 0, 0);
 	thisMainMenu->rightSelectArrow = createCharacter(1504, RGB(255,0,255), 0, 0);
+	thisMainMenu->confirmationDialogSelect = createCharacter(1411, RGB(255,0,255), 0, 0);
 
 	thisMainMenu->title->titleScreen = createCharacter(1400, RGB(255,0,255), 0, 0);
 	thisMainMenu->title->options = createCharacter(1403, RGB(255,0,255), 0, 0);
@@ -301,16 +304,19 @@ void initMainMenu(int inMenuMode, char * mapDirectory){
 	thisMainMenu->load->selectedData = 0;
 	thisMainMenu->load->scrollCount = 0;
 	thisMainMenu->load->savesPerScreen = 4;
+	thisMainMenu->load->readyToLoad = 0;
+	thisMainMenu->load->readyToSave = 0;
+	thisMainMenu->load->inGameLoadMode = 0;
+	thisMainMenu->load->inConfirmationMode = 0;
 
 	thisMainMenu->load->loadView = createCharacter(1418, RGB(255,0,255), 0, 0);
 	thisMainMenu->load->loadSelect = createCharacter(1419, RGB(255,0,255), 0, 0);
 	thisMainMenu->load->scrollUpArrow = createCharacter(1505, RGB(255,0,255), 0, 0);
 	thisMainMenu->load->scrollDownArrow = createCharacter(1507, RGB(255,0,255), 0, 0);
-	thisMainMenu->load->readyToLoad = 0;
-	thisMainMenu->load->readyToSave = 0;
-	thisMainMenu->load->inGameLoadMode = 0;
 
-	setUpSaveLoadData(mapDirectory);
+	strcpy(thisMainMenu->rootMapDirectory, mapDirectory);
+
+	setUpSaveLoadData();
 }
 
 void reinitializeMainMenu(){
@@ -343,6 +349,8 @@ void reinitializeMainMenu(){
 
 	thisMainMenu->load->selectedData = 0;
 	thisMainMenu->load->scrollCount = 0;
+
+	setUpSaveLoadData();
 }
 
 void disableMainMenuMode(){
@@ -952,11 +960,49 @@ void addAbilityToNewGameAbilityMode(ability * newAbility){
 	thisMainMenu->newGame->inAbilityEditMode = 0;
 }
 
+void loadMenuInterpretHorizontal(int goingRight){
+	if(thisMainMenu->load->inConfirmationMode){
+		if(thisMainMenu->selectedDecision == CONFIRMATION_YES){
+			thisMainMenu->selectedDecision = CONFIRMATION_NO;
+		}else{
+			thisMainMenu->selectedDecision = CONFIRMATION_YES;
+		}
+	}
+}
+
 void loadMenuInterpretEnter(){
 	if(thisMainMenu->load->mode == LOAD_MODE && thisMainMenu->load->saves[thisMainMenu->load->selectedData] != NULL){
-		thisMainMenu->load->readyToLoad = 1;
+		if(thisMainMenu->load->inGameLoadMode){
+			if(thisMainMenu->load->inConfirmationMode){
+				if(thisMainMenu->selectedDecision == CONFIRMATION_YES){
+					thisMainMenu->load->readyToLoad = 1;
+				}
+
+				thisMainMenu->load->inConfirmationMode = 0;
+			}else{
+				thisMainMenu->selectedDecision = CONFIRMATION_NO;
+				thisMainMenu->load->inConfirmationMode = 1;
+			}
+		}else{
+			thisMainMenu->selectedDecision = CONFIRMATION_NO;
+			thisMainMenu->load->readyToLoad = 1;
+		}
 	}else if(thisMainMenu->load->mode == SAVE_MODE){
-		thisMainMenu->load->readyToSave = 1;
+		if(thisMainMenu->load->saves[thisMainMenu->load->selectedData] != NULL){
+			if(thisMainMenu->load->inConfirmationMode){
+				if(thisMainMenu->selectedDecision == CONFIRMATION_YES){
+					thisMainMenu->load->readyToSave = 1;
+				}
+
+				thisMainMenu->load->inConfirmationMode = 0;
+			}else{
+				thisMainMenu->selectedDecision = CONFIRMATION_NO;
+				thisMainMenu->load->inConfirmationMode = 1;
+			}
+		}else{
+			thisMainMenu->selectedDecision = CONFIRMATION_NO;
+			thisMainMenu->load->readyToSave = 1;
+		}
 	}
 
 }
@@ -964,14 +1010,22 @@ void loadMenuInterpretEnter(){
 void loadMenuInterpretEscape(){
 	if(thisMainMenu->load->mode == LOAD_MODE){
 		if(thisMainMenu->load->inGameLoadMode){
-			disableMainMenuMode();
+			if(thisMainMenu->load->inConfirmationMode){
+				thisMainMenu->load->inConfirmationMode = 0;
+			}else{
+				disableMainMenuMode();
+			}
 		}else{
 			thisMainMenu->currentMenu = MENU_TITLE;
 			thisMainMenu->load->selectedData = 0;
 			thisMainMenu->load->scrollCount = 0;
 		}
 	}else if(thisMainMenu->load->mode == SAVE_MODE){
-		disableMainMenuMode();
+		if(thisMainMenu->load->inConfirmationMode){
+			thisMainMenu->load->inConfirmationMode = 0;
+		}else{
+			disableMainMenuMode();
+		}
 	}
 }
 
@@ -1134,6 +1188,9 @@ void mainMenuInterpretRight(){
 	case MENU_NEW_GAME:
 		newGameCreateMenuInterpretRight();
 		break;
+	case MENU_LOAD:
+		loadMenuInterpretHorizontal(1);
+		break;
 	}
 }
 
@@ -1141,6 +1198,9 @@ void mainMenuInterpretLeft(){
 	switch(thisMainMenu->currentMenu){
 	case MENU_NEW_GAME:
 		newGameCreateMenuInterpretLeft();
+		break;
+	case MENU_LOAD:
+		loadMenuInterpretHorizontal(0);
 		break;
 	}
 }
@@ -1747,6 +1807,38 @@ void drawLoadMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 			sprintf(outStr, "Level: %d", tmpLoadSaveData->level);
 			drawNewGameText(hdcBuffer, &textBoxRect, xOff + 69, yOff + 120 + (i - thisMainMenu->load->scrollCount) * 135, outStr);
 		}
+	}
+
+	if(thisMainMenu->load->inConfirmationMode){
+		SetTextColor(hdcBuffer, RGB(0, 0, 0));
+
+		int confirmXOff = xOff + (thisMainMenu->load->loadView->fixedWidth / 2) - (thisMainMenu->confirmationDialog->fixedWidth / 2);
+		int confirmYOff = yOff + (thisMainMenu->load->loadView->fixedHeight / 2) - (thisMainMenu->confirmationDialog->fixedHeight / 2);
+
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, confirmXOff, confirmYOff, thisMainMenu->confirmationDialog);
+
+		if(thisMainMenu->selectedDecision == CONFIRMATION_YES){
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, confirmXOff + 43, confirmYOff + 119, thisMainMenu->confirmationDialogSelect);
+		}else{
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, confirmXOff + 162, confirmYOff + 119, thisMainMenu->confirmationDialogSelect);
+		}
+
+		SetTextColor(hdcBuffer, RGB(255, 200, 0));
+
+		textBoxRect.top = confirmYOff + 46;
+		textBoxRect.left = confirmXOff + 8;
+		textBoxRect.right = textBoxRect.left + 271;
+		textBoxRect.bottom = textBoxRect.top + 50;
+
+		if(thisMainMenu->load->mode == LOAD_MODE){
+			DrawText(hdcBuffer, "Quit and load?", -1, &textBoxRect, DT_CENTER);
+		}else if(thisMainMenu->load->mode == SAVE_MODE){
+			DrawText(hdcBuffer, "Overwrite save?", -1, &textBoxRect, DT_CENTER);
+		}
+
+		drawNewGameFormText(hdcBuffer, &textBoxRect, confirmXOff + 43 + 42, confirmYOff + 119, "YES");
+		drawNewGameFormText(hdcBuffer, &textBoxRect, confirmXOff + 162 + 42, confirmYOff + 119, "NO");
+
 	}
 
 	SelectObject(hdcBuffer, oldFont);

@@ -1020,6 +1020,8 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					space * tmpSpace = getSpaceFromField(main_field, player->playerCharacter->x + dx, player->playerCharacter->y + dy);
 					if(tmpSpace != NULL && tmpSpace->isPassable  && !tmpSpace->spaceIsReserved && canPassThroughInteractableObject(tmpSpace->interactableObject)){
 						if (tmpSpace->currentIndividual == NULL) {
+							tmpSpace->spaceIsReserved = 1;
+
 							player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
 							player->thisMoveNodeMeta->sum = 0;
 							player->thisMoveNodeMeta->pathLength = 0;
@@ -1044,6 +1046,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 							if(tmpIndividual->currentGroupType == GROUP_ALLIES){
 								swapPositionWithAlly(main_field, thisGroupContainer->movingIndividuals, player, tmpIndividual, animateMoveSpeed);
+								postMoveMode = 1;
 							}
 						}
 					}

@@ -585,6 +585,14 @@ void swapPositionWithAlly(field * thisField, individualGroup * movingGroup, indi
 	player->thisMoveNodeMeta->pathLength = 1;
 	ally->thisMoveNodeMeta->pathLength = 1;
 
+	player->thisMoveNodeMeta->sum = 0;
+	ally->thisMoveNodeMeta->sum = 0;
+
+	player->thisMoveNodeMeta->rootMoveNode = malloc(sizeof(moveNode));
+	player->thisMoveNodeMeta->rootMoveNode->x = playerX;
+	player->thisMoveNodeMeta->rootMoveNode->y = playerY;
+	player->thisMoveNodeMeta->rootMoveNode->hasTraversed = 1;
+
 	moveNode * tmpMoveNode = malloc(sizeof(moveNode));
 	tmpMoveNode->hasTraversed = 0;
 	tmpMoveNode->x = allyX;
@@ -597,41 +605,16 @@ void swapPositionWithAlly(field * thisField, individualGroup * movingGroup, indi
 	allyMoveNode->y = playerY;
 	allyMoveNode->nextMoveNode = NULL;
 
-	player->thisMoveNodeMeta->rootMoveNode = tmpMoveNode;
+	player->thisMoveNodeMeta->rootMoveNode->nextMoveNode = tmpMoveNode;
 	ally->thisMoveNodeMeta->rootMoveNode = allyMoveNode;
 
-	player->thisMoveNodeMeta->useDummyCords = 1;
-	player->thisMoveNodeMeta->dummyCord->x = playerX;
-	player->thisMoveNodeMeta->dummyCord->y = playerY;
+	playerSpace->spaceIsReserved = 1;
+	allySpace->spaceIsReserved = 1;
 
-	ally->thisMoveNodeMeta->useDummyCords = 1;
-	ally->thisMoveNodeMeta->dummyCord->x = allyX;
-	ally->thisMoveNodeMeta->dummyCord->y = allyY;
+	playerSpace->currentIndividual = NULL;
+	allySpace->currentIndividual = NULL;
 
-	playerSpace->currentIndividual = ally;
-	allySpace->currentIndividual = player;
-
-	ally->playerCharacter->x = playerX;
-	ally->playerCharacter->y = playerY;
-
-	player->playerCharacter->x = allyX;
-	player->playerCharacter->y = allyY;
-
-	addIndividualToGroup(movingGroup, player);
 	addIndividualToGroup(movingGroup, ally);
-
-	//initialize offsets
-	xChange = ally->thisMoveNodeMeta->dummyCord->x - ally->playerCharacter->x;
-	yChange = ally->thisMoveNodeMeta->dummyCord->y - ally->playerCharacter->y;
-
-	ally->playerCharacter->xOff = (((animateMoveSpeed*1.0) - (ally->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * xChange;
-	ally->playerCharacter->yOff = (((animateMoveSpeed*1.0) - (ally->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * yChange;
-
-	xChange = player->thisMoveNodeMeta->dummyCord->x - player->playerCharacter->x;
-	yChange = player->thisMoveNodeMeta->dummyCord->y - player->playerCharacter->y;
-
-	player->playerCharacter->xOff = (((animateMoveSpeed*1.0) - (player->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * xChange;
-	player->playerCharacter->yOff = (((animateMoveSpeed*1.0) - (player->thisMoveNodeMeta->sum*1.0)) / (animateMoveSpeed*1.0)) * yChange;
 }
 
 int isGreaterThanPercentage(int numerator, int devisor, int percentToBeat){

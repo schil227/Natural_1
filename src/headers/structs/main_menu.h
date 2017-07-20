@@ -18,6 +18,7 @@ typedef enum {CREATE_NAME, CREATE_SPREAD, CREATE_STR, CREATE_DEX, CREATE_CON, CR
 typedef enum {SPREAD_12_4, SPREAD_10_6, SPREAD_8_8, SPREAD_6_10, SPREAD_4_12} newGameSpread;
 typedef enum {NEW_GAME_CREATE, NEW_GAME_ABILITIES, NEW_GAME_FINALIZE} newGameForm;
 typedef enum {LOAD_MODE, SAVE_MODE} loadSaveMode;
+typedef enum {CONFIRMATION_YES, CONFIRMATION_NO} confirmationDecision;
 
 typedef struct {
 	int saveNumber;
@@ -107,6 +108,7 @@ typedef struct{
 	int scrollCount;
 	int savesPerScreen;
 	int inGameLoadMode;
+	int inConfirmationMode;
 
 	fixedCharacter * loadView;
 	fixedCharacter * loadSelect;
@@ -119,13 +121,16 @@ typedef struct{
 	int waitingForNameMode;
 	int reloadBaseGame;
 	mainMenuMode currentMenu;
-
+	confirmationDecision selectedDecision;
+	char rootMapDirectory[256];
 	titleMenu * title;
 	newGameMenu * newGame;
 	loadMenu * load;
 
 	fixedCharacter * rightSelectArrow;
 	fixedCharacter * leftSelectArrow;
+	fixedCharacter * confirmationDialog;
+	fixedCharacter * confirmationDialogSelect;
 }mainMenu;
 
 #endif /* SRC_HEADERS_STRUCTS_MAIN_MENU_H_ */
