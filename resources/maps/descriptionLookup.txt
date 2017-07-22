@@ -12,3 +12,6 @@
 7512;Cobblestone path
 7513;Hard wooden floor
 7514;A lovely tree
+7515;Stairs leading up
+7516;Stairs leading down
+7517;Dark stone floor

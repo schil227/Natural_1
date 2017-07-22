@@ -211,6 +211,14 @@ interactable * loadInteractableObjectFromLine(char * line){
 	value = strtok_r(NULL, ";", &strtok_save_pointer);
 	parseInteractableInventoryFromLine(thisInteractableObject, value);
 
+	value  = strtok_r(NULL, ";", &strtok_save_pointer);
+
+	if(strlen(value) > 1 && value[strlen(value) - 1] == '\n'){
+		value[strlen(value) - 1] = '\0';
+	}
+
+	strcpy(thisInteractableObject->lookDescription, value);
+
 	return thisInteractableObject;
 }
 
@@ -250,6 +258,8 @@ char * getInteractableObjectAsLine(interactable * thisObject){
 			}
 		}
 	}
+
+	i += sprintf(line + i, "%s", thisObject->lookDescription);
 
 	return line;
 }

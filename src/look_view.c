@@ -107,6 +107,7 @@ void drawLookData(HDC hdc, HDC hdcBuffer, RECT * rect, int top, int left){
 				drawIndividualDefaultByPixels(hdc, hdcBuffer, thisLookView->thisLookData[index]->thisIndividual, xOff, adjustedY, 0);
 				break;
 			case LOOK_ITEM:
+			case LOOK_INTERACTABLE:
 				drawUnboundCharacterByPixels(hdc, hdcBuffer,
 									xOff + 25,
 									adjustedY + 25,
@@ -235,6 +236,11 @@ void populateLookDataInstance(field * thisField, individual * player, int x, int
 	space * tmpSpace = getSpaceFromField(thisField, x, y);
 
 	if(tmpSpace != NULL){
+
+		if(tmpSpace->interactableObject != NULL && tmpSpace->interactableObject->isEnabled && tmpSpace->interactableObject->shouldDraw){
+			addLookDataToInstance(LOOK_INTERACTABLE, tmpSpace->interactableObject->thisCharacter, NULL, tmpSpace->interactableObject->lookDescription);
+		}
+
 		int id = tmpSpace->background->thisAnimationContainer->animations[tmpSpace->background->thisAnimationContainer->defaultAnimation]->imageID;
 		char * spaceDescription = getDescriptionFromID(id);
 

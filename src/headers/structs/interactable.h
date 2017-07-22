@@ -27,6 +27,8 @@ typedef struct{
 	int inFinalMode;
 	interactType type;
 
+	char lookDescription[64];
+
 	inventory * objectInventory;
 	character * thisCharacter;
 } interactable;

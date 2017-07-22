@@ -9,7 +9,7 @@
 #define SRC_HEADERS_STRUCTS_LOOK_VIEW_H_
 #include "../field_pub_methods.h"
 
-typedef enum {LOOK_INDIVIDUAL, LOOK_ITEM, LOOK_SPACE} lookType;
+typedef enum {LOOK_INDIVIDUAL, LOOK_ITEM, LOOK_SPACE, LOOK_INTERACTABLE} lookType;
 
 typedef struct{
 	lookType thisType;

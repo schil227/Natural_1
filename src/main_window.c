@@ -933,6 +933,9 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				populateLookDataInstance(main_field, player, player->playerCharacter->x, player->playerCharacter->y);
 
+				viewShift->xShiftOld = viewShift->xShift;
+				viewShift->yShiftOld = viewShift->yShift;
+
 				enableLookMode();
 			}
 			break;

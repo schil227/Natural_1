@@ -3,7 +3,6 @@
 ===================
 - (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
-- (6/26/17) update look function to display intractable objects
 - (6/27/17) Develop a map transition animation (fade to/from black?)
 - (7/11/17) Character info should show proper damageoutput and fate tokens
 - (7/17/17) Rebalance mana value for attributes (e.g. 2 mana for +1 WIS outstrips 2 mana for +1 attack... 3 mana for stat?)
@@ -70,3 +69,4 @@
 - (7/17/17 - 7/17/17) Make sure allied players don't occupy the same space as player, especially in free move. (DONE)
 - (7/17/17 - 7/18/17) Handle case where Ally cannot fit on map (omit from field?), also handle field transit while ally is moving (DONE)
 - (7/17/17 - 7/17/19) Add confirmation dialog when overriding saves or doing something that would destroy the game (DONE)
+- (6/26/17 - 7/21/17) update look function to display intractable objects (DONE)
