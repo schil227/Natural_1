@@ -1287,7 +1287,6 @@ char * getDurationAbilityAsLine(ability * thisAbility){
 
 	i = sprintf(line, "%d;", thisAbility->ID);
 	i += sprintf(line + i, "%s;", thisAbility->name);
-	i += sprintf(line + i, "%d;", thisAbility->damageType->selectedIndex);
 
 	i += appendAbilityIndexToline(line, i, thisAbility->range->selectedIndex, thisAbility->range->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->diceDamage->selectedIndex, thisAbility->diceDamage->defaultStartingIndex);
@@ -1344,9 +1343,6 @@ ability * createDurationAbilityFromLine(char * line){
 
 	value = strtok(NULL, ";");
 	strcpy(durationAbility->name,value);
-
-	value = strtok(NULL, ";");
-	durationAbility->damageType->selectedIndex = atoi(value);
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
@@ -1819,6 +1815,7 @@ char * getInstantAbilityAsLine(ability * thisAbility){
 	i += sprintf(line + i, "%s;", thisAbility->name);
 	i += sprintf(line + i, "%d;", thisAbility->damageType->selectedIndex);
 
+	i += appendAbilityIndexToline(line, i, thisAbility->range->selectedIndex, thisAbility->range->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->diceDamage->selectedIndex, thisAbility->diceDamage->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->diceDamageMultiplier->selectedIndex, thisAbility->diceDamageMultiplier->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->damage->selectedIndex, thisAbility->damage->defaultStartingIndex);
@@ -1850,6 +1847,11 @@ ability * createInstantAbilityFromLine(char * line) {
 
 	value = strtok(NULL, ";");
 	instantAbility->damageType->selectedIndex = atoi(value);
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		instantAbility->range->selectedIndex = atoi(value);
+	}
 
 	value = strtok(NULL, ";");
 	if (*value != 'd') {

@@ -10,6 +10,133 @@
 
 static abilityCreationInstance * thisAbilityCreationInstance;
 
+void setUpDescriptions(){
+	strcpy(thisAbilityCreationInstance->descriptionPermanent,"A Permanent ability is always active. The total mana cost is equal to the level of the ability.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentRange,"The physical attack range of the player; added to the base attack range of their weapon.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentSTR,"The Strength of the player; added to the player's base STR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentDEX,"The Dexterity of the player; added to the player's base DEX.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentCON,"The Constitution of the player; added to the player's base CON.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentWIS,"The Wisdom of the player; added to the player's base WIS.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentINT,"The Intelligence of the player; added to the player's base INT.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentWILL,"The Willpower of the player; added to the player's base WILL.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentCHR,"The Charisma of the player; added to the player's base CHR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentLUCK,"The Luck of the player; added to the player's base LUCK.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentAC,"The Armor Class of the player; added to the player's base AC.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentAttack,"The Attack of the player; added to the player's base Attack.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentDamageMod,"Extra damage done by the player; added to the player's base Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentMvmt,"How far the player can move; added to the player's base Mvmt.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentBaseHp,"The total number of hit points the player has; added to the player's baseHP.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentBaseMana,"The total number of mana points the player has; added to the player's baseMana.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentBluntDR,"The player's resistance to blunt damage; added to the player's BluntDR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentChopDR,"The player's resistance to chop damage; added to the player's ChopDR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentPierceDR,"The player's resistance to pierce damage; added to the player's PierceDR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentSlashDR,"The player's resistance to slash damage; added to the player's SlashDR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentEarthDR,"The player's resistance to earth damage; added to the player's EarthDR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentFireDR,"The player's resistance to fire damage; added to the player's FireDR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentWaterDR,"The player's resistance to water damage; added to the player's WaterDR.");
+	strcpy(thisAbilityCreationInstance->descriptionPermanentLightningDR,"The player's resistance to lightning damage; added to the player's LightningDR.");
+
+	strcpy(thisAbilityCreationInstance->descriptionDuration,"The effects of the duration ability are applied to the player and any individuals within it's area of effect (AOE)");
+	strcpy(thisAbilityCreationInstance->descriptionDurationRange,"The physical attack range of the player; temporarily added to the base attack range of their weapon.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDiceDamage,"Random damage that only the player receives when casting the spell. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDiceDamageMult,"Multiplies the random damage. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with Damage. Cumulative with Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDamage,"Damage that only the player receives when casting the spell. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with DiceDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationStatus,"Status affliction that only the player receives when casting the spell.  Can be used to lessen the cost of the ability at the risk of a harmful status.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationStatusDiceDamage,"Random damage that only the player receives for the duration of the status when casting the spell. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with StatusDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationStatusDamage,"Damage that only the player receives for the duration of the status when casting the spell. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with StatusDiceDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationStatusDiceDuration,"The random number of turns the status will last. Cumulative with StatusDiceDuration.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationStatusDuration,"The number of turns the status will last. Cumulative with StatusDuration.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationAOE,"The area of affect of the spell.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDiceDuration,"How long the ability will last by random dice roll. Cumulative with Duration.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDuration,"How long the ability will last. Cumulative with DiceDuration. ");
+	strcpy(thisAbilityCreationInstance->descriptionDurationActions,"The number of actions the player forfeits by using the ability. Useful to reduce the cost of the ability at the risk of not being able to move afterwords.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationSTR,"Additional points of Strength; temporarily added to the individual's base STR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDEX,"Additional points of Dexterity; temporarily added to the individual's base DEX.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationCON,"Additional points of Constitution; temporarily added to the individual's base CON.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationWIS,"Additional points of Wisdom; temporarily added to the individual's base WIS.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationINT,"Additional points of Intelligence; temporarily added to the individual's base INT.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationWILL,"Additional points of WillPower; temporarily added to the individual's base WILL.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationCHR,"Additional points of Charisma; temporarily added to the individual's base CHR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationLUCK,"Additional points of luck; temporarily added to the individual's base LUCK.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationAC,"Additional points of Armor Class; temporarily added to the individual's base AC.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationAttack,"Additional points of Attack; temporarily added to the individual's base Attack.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDamageMod,"Extra damage done by the individual; temporarily added to the individual's base Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationMvmt,"How far the individual can move; added to the individual's base Mvmt.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationDiceHp,"Heals the individual a random number of Hp.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationHp,"Heals the individual a set number of Hp.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationBaseHp,"Increases the individual's total HP; temporarily added to the individual's base HP (Does not heal the individual).");
+	strcpy(thisAbilityCreationInstance->descriptionDurationBaseMana,"Increases the individual's total mana; temporarily added to the individual's base mana (Does not restore the individual's mana).");
+	strcpy(thisAbilityCreationInstance->descriptionDurationBluntDR,"The individual's resistance to blunt damage; temporarily added to the player's BluntDR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationChopDR,"The individual's resistance to chop damage; temporarily added to the player's ChopDR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationPierceDR,"The individual's resistance to pierce damage; temporarily added to the player's PierceDR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationSlashDR,"The individual's resistance to slash damage; temporarily added to the player's SlashDR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationEarthDR,"The individual's resistance to earth damage; temporarily added to the player's EarthDR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationFireDR,"The individual's resistance to fire damage; temporarily added to the player's FireDR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationWaterDR,"The individual's resistance to water damage; temporarily added to the player's WaterDR.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationLightningDR,"The individual's resistance to lightning damage; temporarily added to the player's LightningDR.");
+
+	strcpy(thisAbilityCreationInstance->descriptionTargeted,"The affects of the targeted ability are on the individuals within range.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDamageType,"The damage type individuals will receive from the ability: Earth, Fire, Water or Lightning. Does not apply to status damage.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedRange,"The distance in spaces from the player that the ability can be cast.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedTargeted,"If the ability is targeted, it will auto-hit all individuals within its area of effect (AOE). Otherwise, individuals will roll to see if they are affected by it.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDiceDamage,"The random amount of damage the targeted individuals will receive. Cumulative with Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDiceDamageMult,"Multiplies the random damage.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDamage,"The amount of damage the targeted individuals will receive. Cumulative with DiceDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedStatus,"The Status the targeted individual will be afflicted with.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedStatusDiceDamage,"The random amount of damage the targeted individuals will receive from the status. Cumulative with StatusDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedStatusDamage,"The amount of damage the targeted individuals will receive from the status. Cumulative with StatusDiceDamag");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedStatusDiceDuration,"The random duration of the status afflicted on the target individual. Cumulative with StatusDuration.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedStatusDuration,"The duration of the status afflicted on the target individual. Cumulative with StatusDiceDuration.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedAOE,"The area of affect of the ability.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDiceDuration,"How long the ability will last by random dice roll. Cumulative with Duration.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDuration,"How long the ability will last. Cumulative with DiceDuration. ");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedActions,"The number of actions the player forfeits by using the ability. Useful to reduce the cost of the ability at the risk of not being able to move afterwords.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedSTR,"Additional points of Strength; temporarily added to the individual's base STR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDEX,"Additional points of Dexterity; temporarily added to the individual's base DEX.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedCON,"Additional points of Constitution; temporarily added to the individual's base CON.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedWIS,"Additional points of Wisdom; temporarily added to the individual's base WIS.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedINT,"Additional points of Intelligence; temporarily added to the individual's base INT.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedWILL,"Additional points of WillPower; temporarily added to the individual's base WILL.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedCHR,"Additional points of Charisma; temporarily added to the individual's base CHR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedLUCK,"Additional points of luck; temporarily added to the individual's base LUCK.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedAC,"Additional points of Armor Class; temporarily added to the individual's base AC.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedAttack,"Additional points of Attack; temporarily added to the individual's base Attack.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDamageMod,"Extra damage done by the individual; temporarily added to the individual's base Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedMvmt,"How far the individual can move; temporarily added to the individual's base Mvmt.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedDiceHp,"Heals the individual a random number of Hp.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedHp,"Heals the individual a set number of Hp.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedBaseHp,"Increases the individual's total HP; temporarily added to the individual's base HP (Does not heal the individual).");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedBaseMana,"Increases the individual's total mana; temporarily added to the individual's base mana (Does not restore the individual's mana).");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedBluntDR,"The individual's resistance to blunt damage; temporarily added to the player's BluntDR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedChopDR,"The individual's resistance to chop damage; temporarily added to the player's ChopDR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedPierceDR,"The individual's resistance to pierce damage; temporarily added to the player's PierceDR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedSlashDR,"The individual's resistance to slash damage; temporarily added to the player's SlashDR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedEarthDR,"The individual's resistance to earth damage; temporarily added to the player's EarthDR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedFireDR,"The individual's resistance to fire damage; temporarily added to the player's FireDR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedWaterDR,"The individual's resistance to lightning damage; temporarily added to the player's LightningDR.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedLightningDR,"The individual's resistance to lightning damage; temporarily added to the player's LightningDR.");
+
+	strcpy(thisAbilityCreationInstance->descriptionInstant,"Instant abilities only affect the player for the turn they're cast. They don't require mana to cast.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantDamageType,"The damage type the player will receive from the ability: Earth, Fire, Water or Lightning. Does not apply to status damage.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantRange,"The physical attack range of the player; temporarily added to the base attack range of their weapon.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantExtraAttack,"The number of physical attacks the player will do.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantDiceDamage,"Random damage that the player receives when casting the ability. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantDiceDamageMult,"Multiplies the random damage.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantDamage,"Damage that the player receives when casting the ability. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with DiceDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantStatus,"Status affliction that only the player receives when casting the ability.  Can be used to lessen the cost of the ability at the risk of a harmful status.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantStatusDiceDamage,"Random damage that only the player receives for the duration of the status when casting the ability. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with StatusDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantStatusDamage,"Damage that only the player receives for the duration of the status when casting the ability. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with StatusDiceDamage.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantStatusDiceDuration,"The random number of turns the status will last. Cumulative with StatusDiceDuration.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantStatusDuration,"The number of turns the status will last. Cumulative with StatusDuration.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantActions,"The number of actions the player forfeits by using the ability. Useful to reduce the cost of the ability at the risk of not being able to move afterwords.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantAttack,"Additional points of Attack; temporarily added to the player's base Attack.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantDamageMod,"Extra damage done by the player; temporarily added to the player's base Damage.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantMvmt,"How far the player can move; temporarily added to the player's base Mvmt.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantDiceHp,"Heals the player a random number of Hp.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantHp,"Heals the player a set number of Hp.");
+	strcpy(thisAbilityCreationInstance->descriptionInstantBaseHp,"Increases the player's total HP; temporarily added to the player's base HP (Does not heal the player).");
+}
+
 void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* directory, char* effectsFileNam){
 	int i;
 
@@ -41,6 +168,8 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->scrollDownArrow = createCharacter(1507, rgb, x, y);
 
 	loadTemplateAbilities(directory, effectsFileNam);
+
+	setUpDescriptions();
 
 	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
 }
@@ -155,11 +284,18 @@ void drawManaCost(HDC hdcBuffer, ability * thisAbility, RECT * manaRect){
 void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	int effectIndex;
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	RECT textRect;
+	RECT textRect, descriptionRect;
+
 	textRect.top = thisAbilityCreationInstance->creationWindow->y + 40;
 	textRect.left = thisAbilityCreationInstance->creationWindow->x + 30;
 	textRect.bottom = textRect.top + 40;
 	textRect.right = textRect.left + 240;
+
+	descriptionRect.top = thisAbilityCreationInstance->creationWindow->y + 355;
+	descriptionRect.left = thisAbilityCreationInstance->creationWindow->x + 10;
+	descriptionRect.bottom = descriptionRect.top + 100;
+	descriptionRect.right = descriptionRect.left + 310;
+
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 
 	//draw create window
@@ -337,9 +473,537 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->lightningDR);
 
+	drawAbilityCreateDesciption(hdcBuffer, &descriptionRect);
+
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 
 	DeleteDC(hdcMem);
+}
+
+void drawAbilityCreateDesciption(HDC hdcBuffer, RECT * descriptionRect){
+	if(thisAbilityCreationInstance->effectCurrentIndex == -1){
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanent, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargeted, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstant, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+
+		return;
+	}
+
+
+	switch(thisAbilityCreationInstance->selectedType){
+	case ABILITY_DAMAGE_TYPE:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDamageType, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantDamageType, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_RANGE:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentRange, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationRange, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedRange, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantRange, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_TARGETED:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedTargeted, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_EXTRA_ATTACK:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantExtraAttack, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DICE_DAMAGE:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDiceDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDiceDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantDiceDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DICE_DAMAGE_MULTIPLIER:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDiceDamageMult, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDiceDamageMult, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantDiceDamageMult, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DAMAGE:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_STATUS:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationStatus, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedStatus, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantStatus, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_STATUS_DAMAGE:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationStatusDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedStatusDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantStatusDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_STATUS_DICE_DAMAGE:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationStatusDiceDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedStatusDiceDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantStatusDiceDamage, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_STATUS_DICE_DURATION:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationStatusDiceDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedStatusDiceDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantStatusDiceDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_STATUS_DURATION:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationStatusDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedStatusDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantStatusDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_AOE:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationAOE, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedAOE, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DURATION:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DURATION_MOD:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDiceDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDiceDuration, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_ACTIONS:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationActions, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedActions, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantActions, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_STR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentSTR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationSTR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedSTR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DEX:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentDEX, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDEX, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDEX, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_CON:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentCON, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationCON, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedCON, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_WILL:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentWILL, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationWILL, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedWILL, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_INT:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentINT, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationINT, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedINT, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_WIS:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentWIS, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationWIS, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedWIS, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_CHR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentCHR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationCHR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedCHR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_LUCK:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentLUCK, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationLUCK, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedLUCK, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_AC:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentAC, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationAC, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedAC, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_ATTACK:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentAttack, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationAttack, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedAttack, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantAttack, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DAMAGE_MOD:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentDamageMod, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDamageMod, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDamageMod, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantDamageMod, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_MVMT:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+		case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentMvmt, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationMvmt, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedMvmt, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'i':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantMvmt, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_DICE_HP:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDiceHp, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDiceHp, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_HP:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationHp, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedHp, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_BASE_HP:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentBaseHp, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationBaseHp, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedBaseHp, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_BASE_MANA:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentBaseMana, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationBaseMana, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedBaseMana, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_BLUNT_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentBluntDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationBluntDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedBluntDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_CHOP_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentChopDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationChopDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedChopDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_PIERCE_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentPierceDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationPierceDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedPierceDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_SLASH_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentSlashDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationSlashDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedSlashDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_EARTH_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentEarthDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationEarthDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedEarthDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}break;
+	case ABILITY_FIRE_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentFireDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationFireDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedFireDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_WATER_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentWaterDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationWaterDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedWaterDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	case ABILITY_LIGHTNING_DR:
+		switch(thisAbilityCreationInstance->abilityInsance->type){
+			case 'p':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentLightningDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 'd':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationLightningDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+			case 't':
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedLightningDR, -1, descriptionRect, DT_WORDBREAK);
+				break;
+		}
+		break;
+	}
 }
 
 void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, RECT * textRect, effect_types type, char * fieldName, int isDR, effectAndManaMapList * mapList){

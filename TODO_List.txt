@@ -1,16 +1,16 @@
 ===================
 ==== TODO LIST ====
 ===================
-- (2/13/17) Make the ability creator more intuitive & remove stuff that doesnt have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
+- (2/13/17) Make the ability creator more intuitive & remove stuff that doesn't have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage)
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (6/27/17) Develop a map transition animation (fade to/from black?)
-- (7/11/17) Character info should show proper damageoutput and fate tokens
+- (7/11/17) Character info should show proper damageoutput ([x-y] + z, z includes strmod, etc.) and fate tokens
 - (7/17/17) Rebalance mana value for attributes (e.g. 2 mana for +1 WIS outstrips 2 mana for +1 attack... 3 mana for stat?)
-
+- (7/22/17) Add expierence and Level up functionality
+- (7/24/17) Update abilities to remove Stat modification, include remaning features (LoS, dark LoS)
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
--(6/20/17) In map 5, sometimes the grass spaces by the lake become impassable; not sure why. Could be from other undefined behavior.
--(6/28/17) add lock around ability create logic, getting race condition when done creating ability and drawing current create view 
+- (6/28/17) add lock around ability create logic, getting race condition when done creating ability and drawing current create view 
 
 ==BACK BURNER==
 - (11/12/16) Add casting animations
@@ -70,3 +70,4 @@
 - (7/17/17 - 7/18/17) Handle case where Ally cannot fit on map (omit from field?), also handle field transit while ally is moving (DONE)
 - (7/17/17 - 7/17/19) Add confirmation dialog when overriding saves or doing something that would destroy the game (DONE)
 - (6/26/17 - 7/21/17) update look function to display intractable objects (DONE)
+-(6/20/17 - 7/17/17) In map 5, sometimes the grass spaces by the lake become impassable; not sure why. Could be from other undefined behavior. (DONE)

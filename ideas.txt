@@ -1,8 +1,14 @@
 Natural 1 Ideas:
 
 Story:
--man so strong he loses dominant hand when punching
--Sinus infection cause person to go insane
+Overall Theme: Morality
+An entity will wipe out the land every 3 thousand years. The reason being all humans will eventually succumb to greed, quality and value of life become severely imbalanced. 
+	The player can argue that good people will save this land, reflected upon their good deeds/
+	The entity was once a human like the player, however after 'policing' humanity for aeons(?), they have grown old and weary, and thus are ready to be dethroned by the player
+	The entity watched the rise and fall of humanity, tasked with swallowing up the towns they created
+		-"I will admit... it hurts. Every time I must bring the apocalypse, I always see something that gives me doubt. A woman cradling her baby as the walls come crumbling down... a mortally wounded soldier pulling in vein to lift their comrade hanging over the abyss... Elderly lovers watching the sun set one last time."
+
+
 
 -depressed guy in some town joins the player; 
 	"You forget most days you're alive. I just want to go anywhere, be anything. I cant stay here any longer". Depression doesn't get resolved.
@@ -12,6 +18,8 @@ Music:
 Rip of song Riki plays w/ leaf
 
 Ideas:
+-man so strong he loses dominant hand when punching
+-Sinus infection cause person to go insane
 -in final area (auchtend) there will be an inn with the ghost of an inn keeper ("They took my wife... my children... hero... kill this corruption)
 -"Its easy to be the good guy when you haven't lost anything"
 -Instead of going procedurally through each town, branch to go to other villages/towns on way to final area
