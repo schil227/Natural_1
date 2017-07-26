@@ -171,14 +171,6 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificEffect(hdcBuffer, thisAbility->duration, thisAbility->durationEnabled, "duration", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->durationMod, thisAbility->durationModEnabled, "durationMod", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->actions, thisAbility->actionsEnabled, "Actions", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->STR, thisAbility->STREnabled, "STR", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->DEX, thisAbility->DEXEnabled, "DEX", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->CON, thisAbility->CONEnabled, "CON", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->WILL, thisAbility->WILLEnabled, "WILL", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->INT, thisAbility->INTEnabled, "INT", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->WIS, thisAbility->WISEnabled, "WIS", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->CHR, thisAbility->CHREnabled, "CHR", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->LUCK, thisAbility->LUCKEnabled, "LUCK", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->ac, thisAbility->acEnabled, "ac", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->attack, thisAbility->attackEnabled, "attack", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->damageMod, thisAbility->damageModEnabled, "damageMod", effectRect);

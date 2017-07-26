@@ -669,46 +669,6 @@ int abilityIsBuffing(ability * thisAbility){
 		}
 	}
 
-	if (thisAbility->STREnabled
-			&& thisAbility->STR->effectAndManaArray[thisAbility->STR->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
-	if (thisAbility->DEXEnabled
-			&& thisAbility->DEX->effectAndManaArray[thisAbility->DEX->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
-	if (thisAbility->CONEnabled
-			&& thisAbility->CON->effectAndManaArray[thisAbility->CON->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
-	if (thisAbility->WILLEnabled
-			&& thisAbility->WILL->effectAndManaArray[thisAbility->WILL->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
-	if (thisAbility->INTEnabled
-			&& thisAbility->INT->effectAndManaArray[thisAbility->INT->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
-	if (thisAbility->WISEnabled
-			&& thisAbility->WIS->effectAndManaArray[thisAbility->WIS->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
-	if (thisAbility->CHREnabled
-			&& thisAbility->CHR->effectAndManaArray[thisAbility->CHR->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
-	if (thisAbility->LUCKEnabled
-			&& thisAbility->LUCK->effectAndManaArray[thisAbility->LUCK->selectedIndex]->effectMagnitude > 0) {
-		return 1;
-	}
-
 	if (thisAbility->acEnabled
 			&& thisAbility->ac->effectAndManaArray[thisAbility->ac->selectedIndex]->effectMagnitude > 0) {
 		return 1;
@@ -794,46 +754,6 @@ int abilityIsOffensive(ability * thisAbility){
 		}
 		if (thisAbility->damageEnabled
 				&& thisAbility->damage->effectAndManaArray[thisAbility->damage->selectedIndex]->effectMagnitude > 0) {
-			return 1;
-		}
-
-		if (thisAbility->STREnabled
-				&& thisAbility->STR->effectAndManaArray[thisAbility->STR->selectedIndex]->effectMagnitude < 0) {
-			return 1;
-		}
-
-		if (thisAbility->DEXEnabled
-				&& thisAbility->DEX->effectAndManaArray[thisAbility->DEX->selectedIndex]->effectMagnitude < 0) {
-			return 1;
-		}
-
-		if (thisAbility->CONEnabled
-				&& thisAbility->CON->effectAndManaArray[thisAbility->CON->selectedIndex]->effectMagnitude < 0) {
-			return 1;
-		}
-
-		if (thisAbility->WILLEnabled
-				&& thisAbility->WILL->effectAndManaArray[thisAbility->WILL->selectedIndex]->effectMagnitude < 0) {
-			return 1;
-		}
-
-		if (thisAbility->INTEnabled
-				&& thisAbility->INT->effectAndManaArray[thisAbility->INT->selectedIndex]->effectMagnitude < 0) {
-			return 1;
-		}
-
-		if (thisAbility->WISEnabled
-				&& thisAbility->WIS->effectAndManaArray[thisAbility->WIS->selectedIndex]->effectMagnitude < 0) {
-			return 1;
-		}
-
-		if (thisAbility->CHREnabled
-				&& thisAbility->CHR->effectAndManaArray[thisAbility->CHR->selectedIndex]->effectMagnitude < 0) {
-			return 1;
-		}
-
-		if (thisAbility->LUCKEnabled
-				&& thisAbility->LUCK->effectAndManaArray[thisAbility->LUCK->selectedIndex]->effectMagnitude < 0) {
 			return 1;
 		}
 
@@ -2196,18 +2116,9 @@ int attemptToBuyItem(item * thisItem, individual * thisIndividual){
 
 }
 
-void handlePureStats(individual * thisIndividual, ability * newAbility){
-	int conStat = newAbility->CON->effectAndManaArray[newAbility->CON->selectedIndex]->effectMagnitude;
-
-	if(conStat != 0){
-		thisIndividual->totalFood = 300 + (thisIndividual->CON + conStat) * 50;
-	}
-}
-
 void addAbilityToIndividual(individual * thisIndividual, ability * newAbility){
 	if (newAbility->type == 'p') {
 		addActiveAbilityToIndividual(thisIndividual, newAbility, 0);
-		handlePureStats(thisIndividual, newAbility);
 	}
 
 	if (thisIndividual->abilities->numAbilities == thisIndividual->abilities->MAX_ABILITIES) {
@@ -3429,53 +3340,21 @@ int getAttributeFromItem(item * thisItem, item * activeItem, char * attribute){
 
 int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 	if(strcmp("STR",attribute) == 0 ){
-		if(activeAbility->STREnabled){
-			return activeAbility->STR->effectAndManaArray[activeAbility->STR->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("DEX",attribute) == 0){
-		if(activeAbility->DEXEnabled){
-			return activeAbility->DEX->effectAndManaArray[activeAbility->DEX->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("CON",attribute) == 0){
-		if(activeAbility->CONEnabled){
-			return activeAbility->CON->effectAndManaArray[activeAbility->CON->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("WILL",attribute) == 0){
-		if(activeAbility->WILLEnabled){
-			return activeAbility->WILL->effectAndManaArray[activeAbility->WILL->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("INT",attribute) == 0){
-		if(activeAbility->INTEnabled){
-			return activeAbility->INT->effectAndManaArray[activeAbility->INT->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("WIS",attribute) == 0){
-		if(activeAbility->WISEnabled){
-			return activeAbility->WIS->effectAndManaArray[activeAbility->WIS->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("CHR",attribute) == 0){
-		if(activeAbility->CHREnabled){
-			return activeAbility->CHR->effectAndManaArray[activeAbility->CHR->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("LUCK",attribute) == 0){
-		if(activeAbility->LUCKEnabled){
-			return activeAbility->LUCK->effectAndManaArray[activeAbility->LUCK->selectedIndex]->effectMagnitude;
-		}else{
-			return 0;
-		}
+		return 0;
 	}else if(strcmp("baseHP",attribute) == 0 ){
 		if(activeAbility->baseHPEnabled){
 			return activeAbility->baseHP->effectAndManaArray[activeAbility->baseHP->selectedIndex]->effectMagnitude;

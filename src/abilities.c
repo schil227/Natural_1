@@ -96,22 +96,6 @@ int calculateManaCost(ability * thisAbility, int bonusMana){
 	updateElementSummation(&sum, &hasEffect, thisAbility->actionsEnabled, thisAbility->actions);
 
 	if(!(thisAbility->type == 't' && duration == 0)){
-		updateElementSummation(&sum, &hasEffect, thisAbility->STREnabled, thisAbility->STR);
-
-		updateElementSummation(&sum, &hasEffect, thisAbility->DEXEnabled, thisAbility->DEX);
-
-		updateElementSummation(&sum, &hasEffect, thisAbility->CONEnabled, thisAbility->CON);
-
-		updateElementSummation(&sum, &hasEffect, thisAbility->WILLEnabled, thisAbility->WILL);
-
-		updateElementSummation(&sum, &hasEffect, thisAbility->INTEnabled, thisAbility->INT);
-
-		updateElementSummation(&sum, &hasEffect, thisAbility->WISEnabled, thisAbility->WIS);
-
-		updateElementSummation(&sum, &hasEffect, thisAbility->CHREnabled, thisAbility->CHR);
-
-		updateElementSummation(&sum, &hasEffect, thisAbility->LUCKEnabled, thisAbility->LUCK);
-
 		updateElementSummation(&sum, &hasEffect, thisAbility->acEnabled, thisAbility->ac);
 
 		updateElementSummation(&sum, &hasEffect, thisAbility->attackEnabled, thisAbility->attack);
@@ -580,117 +564,6 @@ ability * createAbilityFromLine(char line[2048]){
 		newAbility->actions = NULL;
 	}
 
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->STREnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->STREnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->STR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->STR = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->DEXEnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->DEXEnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->DEX = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->DEX = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->CONEnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->CONEnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->CON = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->CON = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->WILLEnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->WILLEnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->WILL = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->WILL = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->INTEnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->INTEnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->INT = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->INT = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->WISEnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->WISEnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->WIS = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->WIS = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->CHREnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->CHREnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->CHR = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->CHR = NULL;
-	}
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->LUCKEnabled = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	startingIndex = atoi(value);
-
-	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->LUCKEnabled){
-		newAbility->numEnabledEffects++;
-		newAbility->LUCK = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
-	}else{
-		newAbility->LUCK = NULL;
-	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->acEnabled = atoi(value);
@@ -1031,30 +904,6 @@ ability * cloneAbility(ability * thisAbility){
 	newAbility->actionsEnabled = thisAbility->actionsEnabled;
 	newAbility->actions = cloneEffectAndManaMapList(thisAbility->actions);
 
-	newAbility->STREnabled = thisAbility->STREnabled;
-	newAbility->STR = cloneEffectAndManaMapList(thisAbility->STR);
-
-	newAbility->DEXEnabled = thisAbility->DEXEnabled;
-	newAbility->DEX = cloneEffectAndManaMapList(thisAbility->DEX);
-
-	newAbility->CONEnabled = thisAbility->CONEnabled;
-	newAbility->CON = cloneEffectAndManaMapList(thisAbility->CON);
-
-	newAbility->WILLEnabled = thisAbility->WILLEnabled;
-	newAbility->WILL = cloneEffectAndManaMapList(thisAbility->WILL);
-
-	newAbility->INTEnabled = thisAbility->INTEnabled;
-	newAbility->INT = cloneEffectAndManaMapList(thisAbility->INT);
-
-	newAbility->WISEnabled = thisAbility->WISEnabled;
-	newAbility->WIS = cloneEffectAndManaMapList(thisAbility->WIS);
-
-	newAbility->CHREnabled = thisAbility->CHREnabled;
-	newAbility->CHR = cloneEffectAndManaMapList(thisAbility->CHR);
-
-	newAbility->LUCKEnabled = thisAbility->LUCKEnabled;
-	newAbility->LUCK = cloneEffectAndManaMapList(thisAbility->LUCK);
-
 	newAbility->acEnabled = thisAbility->acEnabled;
 	newAbility->ac = cloneEffectAndManaMapList(thisAbility->ac);
 
@@ -1123,15 +972,6 @@ char * getPermenantAbilityAsLine(ability * thisAbility){
 	i += sprintf(line + i, "%s;", thisAbility->name);
 	i += sprintf(line + i, "%d;", thisAbility->range->selectedIndex);
 
-	i += appendAbilityIndexToline(line, i, thisAbility->STR->selectedIndex, thisAbility->STR->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->DEX->selectedIndex, thisAbility->DEX->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->CON->selectedIndex, thisAbility->CON->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->WILL->selectedIndex, thisAbility->WILL->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->INT->selectedIndex, thisAbility->INT->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->WIS->selectedIndex, thisAbility->WIS->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->CHR->selectedIndex, thisAbility->CHR->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->LUCK->selectedIndex, thisAbility->LUCK->defaultStartingIndex);
-
 	i += appendAbilityIndexToline(line, i, thisAbility->ac->selectedIndex, thisAbility->ac->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->attack->selectedIndex, thisAbility->attack->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->damageMod->selectedIndex, thisAbility->damageMod->defaultStartingIndex);
@@ -1164,46 +1004,6 @@ ability * createPermenantAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		permenantAbility->range->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->STR->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->DEX->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->CON->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->WILL->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->INT->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->WIS->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->CHR->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		permenantAbility->LUCK->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");
@@ -1302,15 +1102,6 @@ char * getDurationAbilityAsLine(ability * thisAbility){
 	i += appendAbilityIndexToline(line, i, thisAbility->durationMod->selectedIndex, thisAbility->durationMod->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->actions->selectedIndex, thisAbility->actions->defaultStartingIndex);
 
-	i += appendAbilityIndexToline(line, i, thisAbility->STR->selectedIndex, thisAbility->STR->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->DEX->selectedIndex, thisAbility->DEX->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->CON->selectedIndex, thisAbility->CON->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->WILL->selectedIndex, thisAbility->WILL->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->INT->selectedIndex, thisAbility->INT->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->WIS->selectedIndex, thisAbility->WIS->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->CHR->selectedIndex, thisAbility->CHR->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->LUCK->selectedIndex, thisAbility->LUCK->defaultStartingIndex);
-
 	i += appendAbilityIndexToline(line, i, thisAbility->ac->selectedIndex, thisAbility->ac->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->attack->selectedIndex, thisAbility->attack->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->damageMod->selectedIndex, thisAbility->damageMod->defaultStartingIndex);
@@ -1407,46 +1198,6 @@ ability * createDurationAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if (*value != 'd') {
 		durationAbility->actions->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->STR->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->DEX->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->CON->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->WILL->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->INT->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->WIS->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->CHR->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if (*value != 'd') {
-		durationAbility->LUCK->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");
@@ -1562,15 +1313,6 @@ char * getTargetAbilityAsLine(ability * thisAbility){
 	i += appendAbilityIndexToline(line, i, thisAbility->durationMod->selectedIndex, thisAbility->durationMod->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->actions->selectedIndex, thisAbility->actions->defaultStartingIndex);
 
-	i += appendAbilityIndexToline(line, i, thisAbility->STR->selectedIndex, thisAbility->STR->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->DEX->selectedIndex, thisAbility->DEX->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->CON->selectedIndex, thisAbility->CON->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->WILL->selectedIndex, thisAbility->WILL->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->INT->selectedIndex, thisAbility->INT->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->WIS->selectedIndex, thisAbility->WIS->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->CHR->selectedIndex, thisAbility->CHR->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->LUCK->selectedIndex, thisAbility->LUCK->defaultStartingIndex);
-
 	i += appendAbilityIndexToline(line, i, thisAbility->ac->selectedIndex, thisAbility->ac->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->attack->selectedIndex, thisAbility->attack->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->damageMod->selectedIndex, thisAbility->damageMod->defaultStartingIndex);
@@ -1675,46 +1417,6 @@ ability * createTargetedAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
 		targetedAbility->actions->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->STR->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->DEX->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->CON->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->WILL->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->INT->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->WIS->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->CHR->selectedIndex = atoi(value);
-	}
-
-	value = strtok(NULL, ";");
-	if(*value != 'd'){
-		targetedAbility->LUCK->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");

@@ -632,8 +632,8 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	//verify tmpNPC was killed by the multiple attacks
 	assert(tryAttackEnemies(testGroupContainer->enemies, testPlayer, main_test_field, tmpNPC->playerCharacter->x, tmpNPC->playerCharacter->y));
 
-	//tmpNPC has -12 hp after barrage of attacks
-	assert(tmpNPC->hp == -12);
+	//tmpNPC has -6 hp after barrage of attacks
+	assert(tmpNPC->hp == -6);
 
 	//after decreasing the turns, the ability is no longer selected, player has action debt
 	testGroupContainer->groupActionMode = 0;
@@ -654,11 +654,11 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	//reduce food, lose well-fed bonus
 	decreaseFood(testPlayer, 100.0);
-	assert(getAttributeSum(testPlayer, "STR") == 3);
+	assert(getAttributeSum(testPlayer, "STR") == 1);
 
 	//reduce food more, gain hunger negative
 	decreaseFood(testPlayer, 225.0);
-	assert(getAttributeSum(testPlayer, "STR") == 2);
+	assert(getAttributeSum(testPlayer, "STR") == 0);
 
 	//restore back to normal
 	testPlayer->food = 300;
@@ -670,17 +670,14 @@ void createPermanentAbiltyTest(individual * testPlayer){
 	//try create ability, fail (mana = -2)
 	assert(!canCreateAbility());
 
-	//down to STR
+	//down to AC
+	setAbilityCreationSelectedType(ABILITY_AC);
 	selectNextEffect();
-
-	//increase STR (+1)
-	setAbilityCreationSelectedType(ABILITY_STR);
-	interpretRightAbilityCreation();
 
 	//try create ability, fail (mana = -1)
 	assert(!canCreateAbility());
 
-	//increase STR (+2)
+	//increase AC by 1
 	interpretRightAbilityCreation();
 
 	//try create ability, succeed (mana = 0)
@@ -710,11 +707,11 @@ void createPermanentAbiltyTest(individual * testPlayer){
 	//the name's been reset
 	assert(nameEmpty());
 
-	//player now has a perminant ability granting +2 strength
+	//player now has a perminant ability granting +2 AC
 	assert(testPlayer->activeAbilities->numAbilities == 1);
 	assert(testPlayer->abilities->numAbilities == 1);
 	assert(strcmp(testPlayer->abilities->abilitiesList[0]->name,"ABCBA") == 0);
-	assert(getAttributeSum(testPlayer, "STR") == 4);
+	assert(getAttributeSum(testPlayer, "ac") == 15);
 
 	//return to abilityType
 	selectPreviousEffect();

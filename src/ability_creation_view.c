@@ -401,30 +401,6 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->actionsEnabled,
 					 hdc, hdcBuffer, &textRect, ABILITY_ACTIONS, "Actions", 0, thisAbilityCreationInstance->abilityInsance->actions);
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->STREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_STR, "STR", 0, thisAbilityCreationInstance->abilityInsance->STR);
-
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->DEXEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_DEX, "DEX", 0, thisAbilityCreationInstance->abilityInsance->DEX);
-
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CONEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_CON, "CON", 0, thisAbilityCreationInstance->abilityInsance->CON);
-
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WILLEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_WILL, "WILL", 0, thisAbilityCreationInstance->abilityInsance->WILL);
-
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->INTEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_INT, "INT", 0, thisAbilityCreationInstance->abilityInsance->INT);
-
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->WISEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_WIS, "WIS", 0, thisAbilityCreationInstance->abilityInsance->WIS);
-
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->CHREnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_CHR, "CHR", 0, thisAbilityCreationInstance->abilityInsance->CHR);
-
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->LUCKEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_LUCK, "LUCK", 0, thisAbilityCreationInstance->abilityInsance->LUCK);
-
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->acEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_AC, "ac", 0, thisAbilityCreationInstance->abilityInsance->ac);
 
@@ -499,7 +475,6 @@ void drawAbilityCreateDesciption(HDC hdcBuffer, RECT * descriptionRect){
 
 		return;
 	}
-
 
 	switch(thisAbilityCreationInstance->selectedType){
 	case ABILITY_DAMAGE_TYPE:
@@ -686,110 +661,6 @@ void drawAbilityCreateDesciption(HDC hdcBuffer, RECT * descriptionRect){
 				break;
 			case 'i':
 				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstantActions, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_STR:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentSTR, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationSTR, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedSTR, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_DEX:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentDEX, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationDEX, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedDEX, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_CON:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentCON, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationCON, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedCON, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_WILL:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentWILL, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationWILL, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedWILL, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_INT:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentINT, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationINT, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedINT, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_WIS:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentWIS, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationWIS, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedWIS, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_CHR:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentCHR, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationCHR, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedCHR, -1, descriptionRect, DT_WORDBREAK);
-				break;
-		}
-		break;
-	case ABILITY_LUCK:
-		switch(thisAbilityCreationInstance->abilityInsance->type){
-			case 'p':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanentLUCK, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationLUCK, -1, descriptionRect, DT_WORDBREAK);
-				break;
-			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedLUCK, -1, descriptionRect, DT_WORDBREAK);
 				break;
 		}
 		break;
@@ -1198,22 +1069,6 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->durationMod;
 	case ABILITY_ACTIONS:
 		return thisAbilityCreationInstance->abilityInsance->actions;
-	case ABILITY_STR:
-		return thisAbilityCreationInstance->abilityInsance->STR;
-	case ABILITY_DEX:
-		return thisAbilityCreationInstance->abilityInsance->DEX;
-	case ABILITY_CON:
-		return thisAbilityCreationInstance->abilityInsance->CON;
-	case ABILITY_WILL:
-		return thisAbilityCreationInstance->abilityInsance->WILL;
-	case ABILITY_INT:
-		return thisAbilityCreationInstance->abilityInsance->INT;
-	case ABILITY_WIS:
-		return thisAbilityCreationInstance->abilityInsance->WIS;
-	case ABILITY_CHR:
-		return thisAbilityCreationInstance->abilityInsance->CHR;
-	case ABILITY_LUCK:
-		return thisAbilityCreationInstance->abilityInsance->LUCK;
 	case ABILITY_AC:
 		return thisAbilityCreationInstance->abilityInsance->ac;
 	case ABILITY_ATTACK:
@@ -1267,20 +1122,11 @@ int canDecreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, i
 				return 0;
 			}
 		break;
-		case ABILITY_BASE_HP:
-		case ABILITY_CON:{
+		case ABILITY_BASE_HP:{
 			int abilityBaseHP = 0, abilityCON = 0;
-
-			if(thisAbilityCreationInstance->abilityInsance->CONEnabled){
-				abilityCON = thisAbilityCreationInstance->abilityInsance->CON->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->CON->selectedIndex]->effectMagnitude;
-			}
 
 			if(thisAbilityCreationInstance->abilityInsance->baseHPEnabled){
 				abilityBaseHP = thisAbilityCreationInstance->abilityInsance->baseHP->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->baseHP->selectedIndex]->effectMagnitude;
-			}
-
-			if(thisAbilityCreationInstance->selectedType == ABILITY_CON){
-				abilityCON -= 1;
 			}
 
 			if(thisAbilityCreationInstance->selectedType == ABILITY_BASE_HP){
@@ -1294,20 +1140,11 @@ int canDecreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, i
 			}
 		}
 		break;
-		case ABILITY_BASE_MANA:
-		case ABILITY_WILL:{
+		case ABILITY_BASE_MANA:{
 			int abilityBaseMana = 0, abilityWill = 0;
-
-			if(thisAbilityCreationInstance->abilityInsance->WILLEnabled){
-				abilityWill = 2 * thisAbilityCreationInstance->abilityInsance->WILL->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->WILL->selectedIndex]->effectMagnitude;
-			}
 
 			if(thisAbilityCreationInstance->abilityInsance->baseManaEnabled){
 				abilityBaseMana = thisAbilityCreationInstance->abilityInsance->baseMana->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->baseMana->selectedIndex]->effectMagnitude;
-			}
-
-			if(thisAbilityCreationInstance->selectedType == ABILITY_WILL){
-				abilityWill -= 1;
 			}
 
 			if(thisAbilityCreationInstance->selectedType == ABILITY_BASE_MANA){

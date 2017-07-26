@@ -1,9 +1,0 @@
-1;.\resources\sounds\music\GoTankGo.WAV
-2;.\resources\sounds\soundEffects\smallExplosions2.WAV
-3;.\resources\sounds\soundEffects\arrow.WAV
-4;.\resources\sounds\soundEffects\bash.WAV
-5;.\resources\sounds\soundEffects\chop.WAV
-6;.\resources\sounds\soundEffects\pierce.WAV
-7;.\resources\sounds\soundEffects\slash.WAV
-8;.\resources\sounds\soundEffects\slice.WAV
-9;.\resources\sounds\soundEffects\speak.WAV
