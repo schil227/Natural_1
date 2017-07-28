@@ -167,7 +167,8 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificEffect(hdcBuffer, thisAbility->statusDamage, thisAbility->statusDamageEnabled, "statusDamage", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->diceStatusDuration, thisAbility->diceStatusDurationEnabled, "statusDiceDuration", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->statusDuration, thisAbility->statusDurationEnabled, "statusDuration", effectRect);
-	drawSpecificEffect(hdcBuffer, thisAbility->aoe, thisAbility->aoeEnabled, "aoe", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->aoeNova, thisAbility->aoeNovaEnabled, "AoE Nova", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->aoeLine, thisAbility->aoeLineEnabled, "AoE Line", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->duration, thisAbility->durationEnabled, "duration", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->durationMod, thisAbility->durationModEnabled, "durationMod", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->actions, thisAbility->actionsEnabled, "Actions", effectRect);
@@ -179,6 +180,9 @@ void drawAbilityEffects(HDC hdcBuffer, ability * thisAbility,RECT * effectRect){
 	drawSpecificEffect(hdcBuffer, thisAbility->hp, thisAbility->hpEnabled, "hp", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->baseHP, thisAbility->baseHPEnabled, "baseHP", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->baseMana, thisAbility->baseManaEnabled, "baseMana", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->food, thisAbility->foodEnabled, "food", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->baseFood, thisAbility->baseFoodEnabled, "baseFood", effectRect);
+	drawSpecificEffect(hdcBuffer, thisAbility->LoS, thisAbility->LoSEnabled, "Line of Sight", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->bluntDR, thisAbility->bluntDREnabled, "bluntDR", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->chopDR, thisAbility->chopDREnabled, "chopDR", effectRect);
 	drawSpecificEffect(hdcBuffer, thisAbility->pierceDR, thisAbility->pierceDREnabled, "pierceDR", effectRect);

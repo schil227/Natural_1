@@ -108,6 +108,12 @@ int calculateManaCost(ability * thisAbility, int bonusMana){
 
 		updateElementSummation(&sum, &hasEffect, thisAbility->baseManaEnabled, thisAbility->baseMana);
 
+		updateElementSummation(&sum, &hasEffect, thisAbility->foodEnabled, thisAbility->food);
+
+		updateElementSummation(&sum, &hasEffect, thisAbility->baseFoodEnabled, thisAbility->baseFood);
+
+		updateElementSummation(&sum, &hasEffect, thisAbility->LoSEnabled, thisAbility->LoS);
+
 		//DR: ceil( sum(<allDRMagnitudes>)/2.0 )
 		if(thisAbility->type == 't'){
 			dummyInt = 0;
@@ -172,7 +178,8 @@ int calculateManaCost(ability * thisAbility, int bonusMana){
 		sum  = sum * duration;
 	}
 
-	updateElementSummation(&aoeRange, &dummyInt, thisAbility->aoeEnabled, thisAbility->aoe);
+	updateElementSummation(&aoeRange, &dummyInt, thisAbility->aoeNovaEnabled, thisAbility->aoeNova);
+	updateElementSummation(&aoeRange, &dummyInt, thisAbility->aoeLineEnabled, thisAbility->aoeLine);
 
 	if (aoeRange > 1) {
 		sum = sum * aoeRange;
@@ -509,17 +516,31 @@ ability * createAbilityFromLine(char line[2048]){
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	newAbility->aoeEnabled = atoi(value);
+	newAbility->aoeNovaEnabled = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	startingIndex = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
-	if(newAbility->aoeEnabled){
+	if(newAbility->aoeNovaEnabled){
 		newAbility->numEnabledEffects++;
-		newAbility->aoe = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
+		newAbility->aoeNova = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
-		newAbility->aoe = NULL;
+		newAbility->aoeNova = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->aoeLineEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	startingIndex = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->aoeLineEnabled){
+		newAbility->numEnabledEffects++;
+		newAbility->aoeLine = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
+	}else{
+		newAbility->aoeLine = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -563,7 +584,6 @@ ability * createAbilityFromLine(char line[2048]){
 	}else{
 		newAbility->actions = NULL;
 	}
-
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	newAbility->acEnabled = atoi(value);
@@ -675,6 +695,48 @@ ability * createAbilityFromLine(char line[2048]){
 		newAbility->baseMana = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
 	}else{
 		newAbility->baseMana = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->foodEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	startingIndex = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->foodEnabled){
+		newAbility->numEnabledEffects++;
+		newAbility->food = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
+	}else{
+		newAbility->food = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->baseFoodEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	startingIndex = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->baseFoodEnabled){
+		newAbility->numEnabledEffects++;
+		newAbility->baseFood = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
+	}else{
+		newAbility->baseFood = NULL;
+	}
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	newAbility->LoSEnabled = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	startingIndex = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	if(newAbility->LoSEnabled){
+		newAbility->numEnabledEffects++;
+		newAbility->LoS = makeEffectManaMapList(value, startingIndex, newAbility->typeName);
+	}else{
+		newAbility->LoS = NULL;
 	}
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
@@ -892,8 +954,11 @@ ability * cloneAbility(ability * thisAbility){
 	newAbility->statusDurationEnabled = thisAbility->statusDurationEnabled;
 	newAbility->statusDuration = cloneEffectAndManaMapList(thisAbility->statusDuration);
 
-	newAbility->aoeEnabled = thisAbility->aoeEnabled;
-	newAbility->aoe = cloneEffectAndManaMapList(thisAbility->aoe);
+	newAbility->aoeNovaEnabled = thisAbility->aoeNovaEnabled;
+	newAbility->aoeNova = cloneEffectAndManaMapList(thisAbility->aoeNova);
+
+	newAbility->aoeLineEnabled = thisAbility->aoeLineEnabled;
+	newAbility->aoeLine = cloneEffectAndManaMapList(thisAbility->aoeLine);
 
 	newAbility->durationEnabled = thisAbility->durationEnabled;
 	newAbility->duration = cloneEffectAndManaMapList(thisAbility->duration);
@@ -927,6 +992,15 @@ ability * cloneAbility(ability * thisAbility){
 
 	newAbility->baseManaEnabled = thisAbility->baseManaEnabled;
 	newAbility->baseMana = cloneEffectAndManaMapList(thisAbility->baseMana);
+
+	newAbility->foodEnabled = thisAbility->foodEnabled;
+	newAbility->food = cloneEffectAndManaMapList(thisAbility->food);
+
+	newAbility->baseFoodEnabled = thisAbility->baseFoodEnabled;
+	newAbility->baseFood= cloneEffectAndManaMapList(thisAbility->baseFood);
+
+	newAbility->LoSEnabled = thisAbility->LoSEnabled;
+	newAbility->LoS = cloneEffectAndManaMapList(thisAbility->LoS);
 
 	newAbility->bluntDREnabled = thisAbility->bluntDREnabled;
 	newAbility->bluntDR = cloneEffectAndManaMapList(thisAbility->bluntDR);
@@ -978,6 +1052,8 @@ char * getPermenantAbilityAsLine(ability * thisAbility){
 	i += appendAbilityIndexToline(line, i, thisAbility->mvmt->selectedIndex, thisAbility->mvmt->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->baseHP->selectedIndex, thisAbility->baseHP->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->baseMana->selectedIndex, thisAbility->baseMana->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->baseFood->selectedIndex, thisAbility->baseFood->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->LoS->selectedIndex, thisAbility->LoS->defaultStartingIndex);
 
 	i += appendAbilityIndexToline(line, i, thisAbility->bluntDR->selectedIndex, thisAbility->bluntDR->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->chopDR->selectedIndex, thisAbility->chopDR->defaultStartingIndex);
@@ -1034,6 +1110,16 @@ ability * createPermenantAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if (*value != 'd') {
 		permenantAbility->baseMana->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->baseFood->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		permenantAbility->LoS->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");
@@ -1097,7 +1183,8 @@ char * getDurationAbilityAsLine(ability * thisAbility){
 	i += appendAbilityIndexToline(line, i, thisAbility->statusDamage->selectedIndex, thisAbility->statusDamage->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->diceStatusDuration->selectedIndex, thisAbility->diceStatusDuration->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->statusDuration->selectedIndex, thisAbility->statusDuration->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->aoe->selectedIndex, thisAbility->aoe->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->aoeNova->selectedIndex, thisAbility->aoeNova->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->aoeLine->selectedIndex, thisAbility->aoeLine->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->duration->selectedIndex, thisAbility->duration->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->durationMod->selectedIndex, thisAbility->durationMod->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->actions->selectedIndex, thisAbility->actions->defaultStartingIndex);
@@ -1110,6 +1197,8 @@ char * getDurationAbilityAsLine(ability * thisAbility){
 	i += appendAbilityIndexToline(line, i, thisAbility->hp->selectedIndex, thisAbility->hp->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->baseHP->selectedIndex, thisAbility->baseHP->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->baseMana->selectedIndex, thisAbility->baseMana->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->food->selectedIndex, thisAbility->food->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->LoS->selectedIndex, thisAbility->LoS->defaultStartingIndex);
 
 	i += appendAbilityIndexToline(line, i, thisAbility->bluntDR->selectedIndex, thisAbility->bluntDR->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->chopDR->selectedIndex, thisAbility->chopDR->defaultStartingIndex);
@@ -1182,7 +1271,12 @@ ability * createDurationAbilityFromLine(char * line){
 
 	value = strtok(NULL, ";");
 	if (*value != 'd') {
-		durationAbility->aoe->selectedIndex = atoi(value);
+		durationAbility->aoeNova->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->aoeLine->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");
@@ -1238,6 +1332,16 @@ ability * createDurationAbilityFromLine(char * line){
 	value = strtok(NULL, ";");
 	if (*value != 'd') {
 		durationAbility->baseMana->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->food->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if (*value != 'd') {
+		durationAbility->LoS->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");
@@ -1308,7 +1412,8 @@ char * getTargetAbilityAsLine(ability * thisAbility){
 	i += appendAbilityIndexToline(line, i, thisAbility->statusDamage->selectedIndex, thisAbility->statusDamage->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->diceStatusDuration->selectedIndex, thisAbility->diceStatusDuration->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->statusDuration->selectedIndex, thisAbility->statusDuration->defaultStartingIndex);
-	i += appendAbilityIndexToline(line, i, thisAbility->aoe->selectedIndex, thisAbility->aoe->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->aoeNova->selectedIndex, thisAbility->aoeNova->defaultStartingIndex);
+	i += appendAbilityIndexToline(line, i, thisAbility->aoeLine->selectedIndex, thisAbility->aoeLine->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->duration->selectedIndex, thisAbility->duration->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->durationMod->selectedIndex, thisAbility->durationMod->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->actions->selectedIndex, thisAbility->actions->defaultStartingIndex);
@@ -1401,7 +1506,12 @@ ability * createTargetedAbilityFromLine(char * line){
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
-		targetedAbility->aoe->selectedIndex = atoi(value);
+		targetedAbility->aoeNova->selectedIndex = atoi(value);
+	}
+
+	value = strtok(NULL, ";");
+	if(*value != 'd'){
+		targetedAbility->aoeLine->selectedIndex = atoi(value);
 	}
 
 	value = strtok(NULL, ";");

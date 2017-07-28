@@ -46,7 +46,8 @@ void setUpDescriptions(){
 	strcpy(thisAbilityCreationInstance->descriptionDurationStatusDamage,"Damage that only the player receives for the duration of the status when casting the spell. Can be used to lessen the cost of the ability at the risk hp loss. Cumulative with StatusDiceDamage.");
 	strcpy(thisAbilityCreationInstance->descriptionDurationStatusDiceDuration,"The random number of turns the status will last. Cumulative with StatusDiceDuration.");
 	strcpy(thisAbilityCreationInstance->descriptionDurationStatusDuration,"The number of turns the status will last. Cumulative with StatusDuration.");
-	strcpy(thisAbilityCreationInstance->descriptionDurationAOE,"The area of affect of the spell.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationAOENova,"The area of affect of the spell around the player.");
+	strcpy(thisAbilityCreationInstance->descriptionDurationAOELine,"The area of affect of the spell from the player to the target spot.");
 	strcpy(thisAbilityCreationInstance->descriptionDurationDiceDuration,"How long the ability will last by random dice roll. Cumulative with Duration.");
 	strcpy(thisAbilityCreationInstance->descriptionDurationDuration,"How long the ability will last. Cumulative with DiceDuration. ");
 	strcpy(thisAbilityCreationInstance->descriptionDurationActions,"The number of actions the player forfeits by using the ability. Useful to reduce the cost of the ability at the risk of not being able to move afterwords.");
@@ -87,7 +88,8 @@ void setUpDescriptions(){
 	strcpy(thisAbilityCreationInstance->descriptionTargetedStatusDamage,"The amount of damage the targeted individuals will receive from the status. Cumulative with StatusDiceDamag");
 	strcpy(thisAbilityCreationInstance->descriptionTargetedStatusDiceDuration,"The random duration of the status afflicted on the target individual. Cumulative with StatusDuration.");
 	strcpy(thisAbilityCreationInstance->descriptionTargetedStatusDuration,"The duration of the status afflicted on the target individual. Cumulative with StatusDiceDuration.");
-	strcpy(thisAbilityCreationInstance->descriptionTargetedAOE,"The area of affect of the ability.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedAOENova,"The area of affect of the spell around the targeted spot.");
+	strcpy(thisAbilityCreationInstance->descriptionTargetedAOELine,"The area of affect of the spell between two targeted spots.");
 	strcpy(thisAbilityCreationInstance->descriptionTargetedDiceDuration,"How long the ability will last by random dice roll. Cumulative with Duration.");
 	strcpy(thisAbilityCreationInstance->descriptionTargetedDuration,"How long the ability will last. Cumulative with DiceDuration. ");
 	strcpy(thisAbilityCreationInstance->descriptionTargetedActions,"The number of actions the player forfeits by using the ability. Useful to reduce the cost of the ability at the risk of not being able to move afterwords.");
@@ -389,8 +391,11 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 			textRect.left -= 20;
 		}
 	}
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeEnabled,
-				 hdc, hdcBuffer, &textRect, ABILITY_AOE, "aoe", 0, thisAbilityCreationInstance->abilityInsance->aoe);
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_AOE_NOVA, "AoE Nova", 0, thisAbilityCreationInstance->abilityInsance->aoeNova);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeLineEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_AOE_LINE, "AoE Line", 0, thisAbilityCreationInstance->abilityInsance->aoeLine);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_DURATION, "duration", 0, thisAbilityCreationInstance->abilityInsance->duration);
@@ -424,6 +429,15 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->baseManaEnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_BASE_MANA, "baseMana", 0, thisAbilityCreationInstance->abilityInsance->baseMana);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->foodEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_FOOD, "food", 0, thisAbilityCreationInstance->abilityInsance->food);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->baseFoodEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_BASE_FOOD, "baseFood", 0, thisAbilityCreationInstance->abilityInsance->baseFood);
+
+	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->LoSEnabled,
+				 hdc, hdcBuffer, &textRect, ABILITY_LOS, "Line of Sight", 0, thisAbilityCreationInstance->abilityInsance->LoS);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->bluntDREnabled,
 				 hdc, hdcBuffer, &textRect, ABILITY_BLUNT_DR, "bluntDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->bluntDR);
@@ -621,16 +635,26 @@ void drawAbilityCreateDesciption(HDC hdcBuffer, RECT * descriptionRect){
 				break;
 		}
 		break;
-	case ABILITY_AOE:
+	case ABILITY_AOE_NOVA:
 		switch(thisAbilityCreationInstance->abilityInsance->type){
 			case 'd':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationAOE, -1, descriptionRect, DT_WORDBREAK);
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationAOENova, -1, descriptionRect, DT_WORDBREAK);
 				break;
 			case 't':
-				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedAOE, -1, descriptionRect, DT_WORDBREAK);
+				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedAOENova, -1, descriptionRect, DT_WORDBREAK);
 				break;
 		}
 		break;
+		case ABILITY_AOE_LINE:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+					DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionDurationAOELine, -1, descriptionRect, DT_WORDBREAK);
+					break;
+				case 't':
+					DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionTargetedAOELine, -1, descriptionRect, DT_WORDBREAK);
+					break;
+			}
+			break;
 	case ABILITY_DURATION:
 		switch(thisAbilityCreationInstance->abilityInsance->type){
 			case 'd':
@@ -1061,8 +1085,10 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->diceStatusDuration;
 	case ABILITY_STATUS_DURATION:
 		return thisAbilityCreationInstance->abilityInsance->statusDuration;
-	case ABILITY_AOE:
-		return thisAbilityCreationInstance->abilityInsance->aoe;
+	case ABILITY_AOE_NOVA:
+		return thisAbilityCreationInstance->abilityInsance->aoeNova;
+	case ABILITY_AOE_LINE:
+		return thisAbilityCreationInstance->abilityInsance->aoeLine;
 	case ABILITY_DURATION:
 		return thisAbilityCreationInstance->abilityInsance->duration;
 	case ABILITY_DURATION_MOD:
@@ -1085,6 +1111,12 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->baseHP;
 	case ABILITY_BASE_MANA:
 		return thisAbilityCreationInstance->abilityInsance->baseMana;
+	case ABILITY_FOOD:
+		return thisAbilityCreationInstance->abilityInsance->food;
+	case ABILITY_BASE_FOOD:
+		return thisAbilityCreationInstance->abilityInsance->baseFood;
+	case ABILITY_LOS:
+		return thisAbilityCreationInstance->abilityInsance->LoS;
 	case ABILITY_BLUNT_DR:
 		return thisAbilityCreationInstance->abilityInsance->bluntDR;
 	case ABILITY_CHOP_DR:

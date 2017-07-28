@@ -13,9 +13,9 @@
 
 typedef enum {ABILITY_DAMAGE_TYPE, ABILITY_RANGE, ABILITY_TARGETED, ABILITY_EXTRA_ATTACK, ABILITY_DICE_DAMAGE, ABILITY_DICE_DAMAGE_MULTIPLIER,
 	ABILITY_DAMAGE, ABILITY_STATUS, ABILITY_STATUS_DAMAGE, ABILITY_STATUS_DICE_DAMAGE, ABILITY_STATUS_DICE_DURATION,
-	ABILITY_STATUS_DURATION, ABILITY_AOE, ABILITY_DURATION, ABILITY_DURATION_MOD, ABILITY_ACTIONS, ABILITY_AC, ABILITY_ATTACK,
-	ABILITY_DAMAGE_MOD, ABILITY_MVMT, ABILITY_DICE_HP, ABILITY_HP, ABILITY_BASE_HP, ABILITY_BASE_MANA, ABILITY_BLUNT_DR,
-	ABILITY_CHOP_DR, ABILITY_PIERCE_DR, ABILITY_SLASH_DR, ABILITY_EARTH_DR,	ABILITY_FIRE_DR, ABILITY_WATER_DR, ABILITY_LIGHTNING_DR
+	ABILITY_STATUS_DURATION, ABILITY_AOE_NOVA, ABILITY_AOE_LINE, ABILITY_DURATION, ABILITY_DURATION_MOD, ABILITY_ACTIONS, ABILITY_AC, ABILITY_ATTACK,
+	ABILITY_DAMAGE_MOD, ABILITY_MVMT, ABILITY_DICE_HP, ABILITY_HP, ABILITY_BASE_HP, ABILITY_BASE_MANA, ABILITY_FOOD, ABILITY_BASE_FOOD, ABILITY_LOS,
+	ABILITY_BLUNT_DR, ABILITY_CHOP_DR, ABILITY_PIERCE_DR, ABILITY_SLASH_DR, ABILITY_EARTH_DR,	ABILITY_FIRE_DR, ABILITY_WATER_DR, ABILITY_LIGHTNING_DR
 } effect_types;
 
 typedef enum {ABILITY_CREATE_DEFAULT, ABILITY_CREATE_PERMENANT_ONLY, ABILITY_CREATE_EXCEPT_PERMENANT} abilityCreationMode;
@@ -86,8 +86,10 @@ typedef struct{
 	short int statusDurationEnabled;
 	effectAndManaMapList * statusDuration;
 
-	short int aoeEnabled;
-	effectAndManaMapList * aoe;
+	short int aoeNovaEnabled;
+	effectAndManaMapList * aoeNova;
+	short int aoeLineEnabled;
+	effectAndManaMapList * aoeLine;
 	short int durationEnabled;
 	effectAndManaMapList * duration;
 	short int durationModEnabled;
@@ -111,6 +113,13 @@ typedef struct{
 	effectAndManaMapList * baseHP;
 	short int baseManaEnabled;
 	effectAndManaMapList * baseMana;
+
+	short int foodEnabled;
+	effectAndManaMapList * food;
+	short int baseFoodEnabled;
+	effectAndManaMapList * baseFood;
+	short int LoSEnabled;
+	effectAndManaMapList * LoS;
 
 	short int bluntDREnabled;
 	effectAndManaMapList * bluntDR;
@@ -201,7 +210,8 @@ typedef struct {
 	char descriptionDurationStatusDamage[256];
 	char descriptionDurationStatusDiceDuration[256];
 	char descriptionDurationStatusDuration[256];
-	char descriptionDurationAOE[256];
+	char descriptionDurationAOENova[256];
+	char descriptionDurationAOELine[256];
 	char descriptionDurationDiceDuration[256];
 	char descriptionDurationDuration[256];
 	char descriptionDurationActions[256];
@@ -242,7 +252,8 @@ typedef struct {
 	char descriptionTargetedStatusDamage[256];
 	char descriptionTargetedStatusDiceDuration[256];
 	char descriptionTargetedStatusDuration[256];
-	char descriptionTargetedAOE[256];
+	char descriptionTargetedAOENova[256];
+	char descriptionTargetedAOELine[256];
 	char descriptionTargetedDiceDuration[256];
 	char descriptionTargetedDuration[256];
 	char descriptionTargetedActions[256];

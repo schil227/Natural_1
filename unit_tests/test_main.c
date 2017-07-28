@@ -531,7 +531,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	rand();
 
 	//use duration ability on everyone within range
-	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
+	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y, testPlayer->playerCharacter->x, testPlayer->playerCharacter->y);
 
 	//clear selectedAbility
 	testPlayer->activeAbilities->selectedAbility = NULL;
@@ -593,7 +593,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	srand(7);
 
 	//use ability on selected space,  harming skelly4
-	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
 
 	//skelly was killed by a 11 damage roll (2d8)
 	assert(tmpIndividual->hp == -5);
@@ -751,7 +751,7 @@ void createSelfDurationAbility(individual * testPlayer){
 	interpretRightAbilityCreation();
 
 	//+1 AOE
-	setAbilityCreationSelectedType(ABILITY_AOE);
+	setAbilityCreationSelectedType(ABILITY_AOE_NOVA);
 	interpretRightAbilityCreation();
 
 	//down to AC

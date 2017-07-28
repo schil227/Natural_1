@@ -6,6 +6,8 @@
  */
 #include "./headers/cursor_pub_methods.h"
 
+#define ATTACK_SPACE_MARKER_IMAGE_ID 10002
+
 static cursor * thisCursorInstance;
 
 void initThisCursor(int imageID) {
@@ -17,11 +19,24 @@ void initThisCursor(int imageID) {
 	thisCursorInstance->cursorCharacter->yOff = 0;
 	thisCursorInstance->cursorCharacter->direction = 0;
 
+	thisCursorInstance->tmpCord = malloc(sizeof(cord));
+	thisCursorInstance->tmpCord->x = 0;
+	thisCursorInstance->tmpCord->y = 0;
+
+	thisCursorInstance->aoeSpaceCoordinates = initCordArr();
+	thisCursorInstance->attackSpace = createCharacterFromAnimation(cloneAnimationFromRegistry(ATTACK_SPACE_MARKER_IMAGE_ID));
+
 	thisCursorInstance->inCursorMode = 0;
 }
 
 void drawCursor(HDC hdc, HDC hdcBuffer, shiftData * viewData){
+	int i;
+
 	drawCharacterAnimation(hdc, hdcBuffer, thisCursorInstance->cursorCharacter, viewData, 0);
+
+	for(i = 0; i < thisCursorInstance->aoeSpaceCoordinates->numCords; i++){
+		drawUnboundAnimation(hdc, hdcBuffer, thisCursorInstance->aoeSpaceCoordinates->cords[i]->x, thisCursorInstance->aoeSpaceCoordinates->cords[i]->y, thisCursorInstance->attackSpace, viewData, 0);
+	}
 }
 
 void toggleInCursorMode(){
@@ -58,11 +73,35 @@ void setCursorCoords(int x, int y){
 	thisCursorInstance->cursorCharacter->y = y;
 }
 
+int getCursorTmpX(){
+	return thisCursorInstance->tmpCord->x;
+}
+
+int getCursorTmpY(){
+	return thisCursorInstance->tmpCord->y;
+}
+
+void setCursorTmpCord(int x, int y){
+	thisCursorInstance->tmpCord->x = x;
+	thisCursorInstance->tmpCord->y = y;
+}
+
 int canMoveCursor(individual * thisIndividual){
+	ability * tmpAbility = thisIndividual->activeAbilities->selectedAbility;
+
 	//If it's a self-duration ability, dont move cursor from player position
-	if(thisCursorInstance->thisMode == CURSOR_ABILITY && thisIndividual->activeAbilities->selectedAbility != NULL
-			&&  thisIndividual->activeAbilities->selectedAbility->type == 'd'){
+	if(thisCursorInstance->thisMode == CURSOR_ABILITY && tmpAbility != NULL
+			&&  tmpAbility->type == 'd'){
 		return 0;
+	}
+
+	//stay within the line length when moving
+	if(thisCursorInstance->thisMode == CURSOR_ABILITY_AOE_LINE && tmpAbility != NULL){
+		int lineLength = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
+
+		if(lineLength < max(abs(thisCursorInstance->cursorCharacter->x - thisCursorInstance->tmpCord->x), abs(thisCursorInstance->cursorCharacter->y - thisCursorInstance->tmpCord->y))){
+			return 0;
+		}
 	}
 
 	return 1;
@@ -86,5 +125,25 @@ void destroyThisCursor(){
 	if(thisCursorInstance->cursorCharacter){
 		destroyCharacter(thisCursorInstance->cursorCharacter);
 	}
+
+	free(thisCursorInstance->tmpCord);
+	destroyCordArr(thisCursorInstance->aoeSpaceCoordinates);
+
 	free(thisCursorInstance);
+}
+
+void updateCursorAOESpaces(cordArr * newCords){
+	if(newCords == NULL){
+		return;
+	}
+
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	destroyCordArr(thisCursorInstance->aoeSpaceCoordinates);
+
+	thisCursorInstance->aoeSpaceCoordinates = newCords;
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
 }

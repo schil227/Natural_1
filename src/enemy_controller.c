@@ -762,7 +762,7 @@ ability * getRandomHPRestoringAbility(individual * thisIndividual){
 	}
 }
 
-cordArr * getAttackableCordsInRay(int startingX, int startingY, cord *endCord, int range, field * thisField){
+cordArr * getCordsBetweenPoints(int startingX, int startingY, cord *endCord, int range, int attackOnly, field * thisField){
 	double slope;
 	int wrtY = 1, startingGreaterThanEnding = 0;
 
@@ -815,7 +815,7 @@ cordArr * getAttackableCordsInRay(int startingX, int startingY, cord *endCord, i
 			break;
 		}
 
-		if(!tmpSpace->canAttackThrough || !canAttackThroughInteractableObject(tmpSpace->interactableObject)){
+		if(attackOnly && (!tmpSpace->canAttackThrough || !canAttackThroughInteractableObject(tmpSpace->interactableObject))){
 			break;
 		}
 
@@ -855,7 +855,7 @@ cordArr * generateAttackSpaces(individual * thisIndividual, field * thisField){
 	}
 
 	for(i = 0; i < perimeterCords->numCords; i++){
-		cordArr * accessableCords = getAttackableCordsInRay(startingX, startingY, perimeterCords->cords[i], range, thisField);
+		cordArr * accessableCords = getCordsBetweenPoints(startingX, startingY, perimeterCords->cords[i], range, 1, thisField);
 
 		if(accessableCords == NULL){
 			continue;
@@ -1949,7 +1949,7 @@ int tryHeal(individual * thisIndividual, individual * player, groupContainer * t
 	if (selectedHealingMethod == 2) {
 		if(hpRestoringAbility->type == 'd' || hpRestoringAbility->type == 't'){
 			thisIndividual->activeAbilities->selectedAbility = hpRestoringAbility;
-			useAbilityOnIndividualsInAOERange(thisIndividual, player, thisGroupContainer, thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
+			useAbilityOnIndividualsInAOERange(thisIndividual, player, thisGroupContainer, thisField, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y, thisIndividual->playerCharacter->x, thisIndividual->playerCharacter->y);
 			thisIndividual->activeAbilities->selectedAbility = NULL;
 			thisIndividual->remainingActions--;
 			return 1;
@@ -1966,7 +1966,7 @@ int tryHeal(individual * thisIndividual, individual * player, groupContainer * t
 int useAbilityOnTargetedSpace(individual * enemy, individual * player, groupContainer * thisGroupContainer, field * thisField, int x, int y){
 	int numActions = 1;
 
-	useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, x, y);
+	useAbilityOnIndividualsInAOERange(enemy, player, thisGroupContainer, thisField, x, y, x, y);
 
 	if(enemy->activeAbilities->selectedAbility->actionsEnabled){
 		numActions += enemy->activeAbilities->selectedAbility->actions->effectAndManaArray[enemy->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;

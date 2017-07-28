@@ -346,12 +346,12 @@ void drawGameMode(HDC hdc, RECT* prc) {
 		drawSpecial(hdc, hdcBuffer, main_field, viewShift);
 	}
 
-	releaseFieldReadLock();
-	printf("RELEASED: dark\n"); fflush(stdout);
-
 	if (inCursorMode()) {
 		drawCursor(hdc, hdcBuffer, viewShift);
 	}
+
+	releaseFieldReadLock();
+	printf("RELEASED: dark\n"); fflush(stdout);
 
 	if (moveMode){
 		moveNode * tmp = player->thisMoveNodeMeta->rootMoveNode;

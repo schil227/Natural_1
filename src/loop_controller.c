@@ -46,6 +46,17 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 				if(getCursorMode() == CURSOR_LOOK){
 					populateLookDataInstance(main_field, player, getCursorX(), getCursorY());
+				}else if(getCursorMode() == CURSOR_ABILITY_AOE_LINE){
+					ability * tmpAbility = player->activeAbilities->selectedAbility;
+
+					cord tmpCord;
+					tmpCord.x = getCursorX();
+					tmpCord.y = getCursorY();
+
+					int lineLength = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
+
+					cordArr * newAOECords = getCordsBetweenPoints(getCursorTmpX(), getCursorTmpY(), &tmpCord, lineLength, 0, main_field);
+					updateCursorAOESpaces(newAOECords);
 				}
 			}
 			break;
@@ -55,6 +66,9 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				player->activeAbilities->selectedAbility = NULL;
 			}else if(getCursorMode() == CURSOR_LOOK){
 				disableLookMode();
+			}else if(getCursorMode() == CURSOR_ABILITY_AOE_LINE){
+				refreshCursor(CURSOR_ABILITY, getCursorTmpX(), getCursorTmpY());
+				break;
 			}
 
 			toggleInCursorMode();
@@ -121,9 +135,80 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 					decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
 					toggleInCursorMode();
 				}
+			}else if (getCursorMode() == CURSOR_ABILITY_AOE_LINE){
+				ability * tmpAbility = player->activeAbilities->selectedAbility;
+
+				if(hasActiveStatusEffect(player, STATUS_CONFUSED) && isGreaterThanPercentage(rand() % 100, 100, 50)){
+					player->thisBehavior->gotConfused = 1;
+
+					char logOut[128];
+					sprintf(logOut, "%s is confused!", player->name);
+					cwrite(logOut);
+
+					individual * target = getIndiscriminateIndividualInRange(player, main_field, getSelectedAbilityRange(player));
+
+					// player successfully cast ability on self 75% of the time
+					if(target == NULL || (target->isPlayer && isGreaterThanPercentage(rand() % 100, 100, 75))){
+						player->activeAbilities->selectedAbility = NULL;
+						decreaseTurns(player, thisGroupContainer, 1, *inActionMode);
+						viewShift->xShift = viewShift->xShiftOld;
+						viewShift->yShift = viewShift->yShiftOld;
+
+						toggleInCursorMode();
+						player->thisBehavior->gotConfused = 0;
+						break;
+					}
+
+					break;
+					//TODO: set tmpCords to target, randomize cursorCords to be within range
+//					setCursorCoords(target->playerCharacter->x, target->playerCharacter->y);
+				}
+
+				int numActions = 1;
+
+				useAbilityOnIndividualsInAOERange(player, player, thisGroupContainer, main_field, getCursorTmpX(), getCursorTmpY(), getCursorX(), getCursorY());
+
+				if(tmpAbility->actionsEnabled){
+					numActions += tmpAbility->actions->effectAndManaArray[tmpAbility->actions->selectedIndex]->effectMagnitude;
+				}
+
+				player->activeAbilities->selectedAbility = NULL;
+				viewShift->xShift = viewShift->xShiftOld;
+				viewShift->yShift = viewShift->yShiftOld;
+
+				decreaseTurns(player, thisGroupContainer, numActions, *inActionMode);
+				decreaseFood(player, 0.5);
+
+				player->thisBehavior->gotConfused = 0;
+
+				if(hasActiveStatusEffect(player, STATUS_BERZERK)){
+					*playerControlMode = 1;
+				}
+
+				*inActionMode = shouldEnableActionMode();
+
+				toggleInCursorMode();
 
 			}else if (getCursorMode() == CURSOR_ABILITY){
 				if(!cursorWithinAbilityRange(player, getCursorX(), getCursorY())){
+					break;
+				}
+
+				ability * tmpAbility = player->activeAbilities->selectedAbility;
+
+				//If the selected ability has a line AOE, get second cord
+				if(tmpAbility->aoeLineEnabled && tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude > 0){
+					setCursorTmpCord(getCursorX(), getCursorY());
+					refreshCursor(CURSOR_ABILITY_AOE_LINE, getCursorX(), getCursorY());
+
+					cord tmpCord;
+					tmpCord.x = getCursorX();
+					tmpCord.y = getCursorY();
+
+					int lineLength = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
+
+					cordArr * newAOECords = getCordsBetweenPoints(getCursorTmpX(), getCursorTmpY(), &tmpCord, lineLength, 0, main_field);
+					updateCursorAOESpaces(newAOECords);
 					break;
 				}
 
@@ -153,10 +238,10 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 				int numActions = 1;
 
-				useAbilityOnIndividualsInAOERange(player, player, thisGroupContainer, main_field, getCursorX(), getCursorY());
+				useAbilityOnIndividualsInAOERange(player, player, thisGroupContainer, main_field, getCursorX(), getCursorY(), getCursorX(), getCursorY());
 
-				if(player->activeAbilities->selectedAbility->actionsEnabled){
-					numActions += player->activeAbilities->selectedAbility->actions->effectAndManaArray[player->activeAbilities->selectedAbility->actions->selectedIndex]->effectMagnitude;
+				if(tmpAbility->actionsEnabled){
+					numActions += tmpAbility->actions->effectAndManaArray[tmpAbility->actions->selectedIndex]->effectMagnitude;
 				}
 
 				player->activeAbilities->selectedAbility = NULL;
@@ -173,9 +258,6 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				}
 
 				*inActionMode = shouldEnableActionMode();
-//				char outLog[12];
-//				sprintf(outLog, "AM ability: %d", *inActionMode);
-//				cwrite(outLog);
 
 				toggleInCursorMode();
 
@@ -188,9 +270,6 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 				viewShift->yShift = viewShift->yShiftOld;
 
 				*inActionMode = shouldEnableActionMode();
-//				char outLog[12];
-//				sprintf(outLog, "AM pickpocket: %d", *inActionMode);
-//				cwrite(outLog);
 
 				toggleInCursorMode();
 			}else if(getCursorMode() == CURSOR_LOOK){

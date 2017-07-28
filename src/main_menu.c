@@ -174,6 +174,12 @@ void cloneNewGameIndividual(){
 	newGameClone->thisBehavior->isSurrounded = basePlayer->thisBehavior->isSurrounded;
 	newGameClone->thisBehavior->respawns = basePlayer->thisBehavior->respawns;
 
+	newGameClone->thisMoveNodeMeta = malloc(sizeof(moveNodeMeta));
+	newGameClone->thisMoveNodeMeta->sum = 0;
+	newGameClone->thisMoveNodeMeta->pathLength = 0;
+	newGameClone->thisMoveNodeMeta->useDummyCords = 0;
+	newGameClone->thisMoveNodeMeta->dummyCord = malloc(sizeof(cord));
+
 	thisMainMenu->newGame->newPlayer = newGameClone;
 }
 
@@ -1049,6 +1055,13 @@ void newGameAbilityMenuInterpretEnter(){
 			thisMainMenu->newGame->newPlayer->playerCharacter->y = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar]->y;
 			thisMainMenu->newGame->newPlayer->playerCharacter->xOff = 0;
 			thisMainMenu->newGame->newPlayer->playerCharacter->yOff = 0;
+
+			character * shadowCharacter = malloc(sizeof(character));
+			shadowCharacter->thisAnimationContainer = cloneAnimationContainer(thisMainMenu->newGame->newPlayer->playerCharacter->thisAnimationContainer);
+			shadowCharacter->secondaryAnimationContainer = cloneAnimationContainer(thisMainMenu->newGame->newPlayer->playerCharacter->secondaryAnimationContainer);
+			shadowCharacter->darkAnimationContainer = NULL;
+
+			thisMainMenu->newGame->newPlayer->thisMoveNodeMeta->shadowCharacter = shadowCharacter;
 
 			for(i = 0; i < thisMainMenu->newGame->newAbilities->MAX_ABILITIES; i++){
 				if(thisMainMenu->newGame->newAbilities->abilitiesList[i] != NULL){

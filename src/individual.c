@@ -1528,6 +1528,7 @@ void disableSleepStatusOnAttack(individual * attackedIndividual){
 
 void useActiveAbility(individual * thisIndividual, ability * thisAbility){
 	int amountHealed = 0;
+	int food = 0;
 
 	if(thisAbility->hpEnabled){
 		amountHealed += thisAbility->hp->effectAndManaArray[thisAbility->hp->selectedIndex]->effectMagnitude;
@@ -1548,6 +1549,18 @@ void useActiveAbility(individual * thisIndividual, ability * thisAbility){
 		char * tmp[64];
 		sprintf(tmp, "%s healed %d hp from %s", thisIndividual->name, amountHealed, thisAbility->name);
 		cwrite(tmp);
+	}
+
+	if(thisAbility->foodEnabled){
+		food += thisAbility->food->effectAndManaArray[thisAbility->food->selectedIndex]->effectMagnitude;
+
+		restoreFood(thisIndividual, food);
+
+		if(food > 0){
+			char * tmp[64];
+			sprintf(tmp, "%s restored %d food from %s", thisIndividual->name, food, thisAbility->name);
+			cwrite(tmp);
+		}
 	}
 }
 
@@ -2247,6 +2260,18 @@ double calcSlope(int x1, int y1, int x2, int y2){
 	return slope;
 }
 
+int containsCordXY(cordArr * thisCordArr, int x, int y){
+	int i;
+
+	for(i = 0; i < thisCordArr->numCords; i++){
+		if(thisCordArr->cords[i]->x == x && thisCordArr->cords[i]->y == y){
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 int containsCord(cordArr * thisCordArr, cord * thisCord){
 	int i;
 
@@ -2254,6 +2279,20 @@ int containsCord(cordArr * thisCordArr, cord * thisCord){
 		if(thisCordArr->cords[i]->x == thisCord->x && thisCordArr->cords[i]->y == thisCord->y){
 			return 1;
 		}
+	}
+
+	return 0;
+}
+
+int addNewCordIfUnique(cordArr * thisCordArr, int x, int y){
+	if(thisCordArr->numCords < thisCordArr->MAX_CORDS && !containsCordXY(thisCordArr, x, y)){
+		cord * newCord = malloc(sizeof(cord));
+		newCord->x = x;
+		newCord->y = y;
+
+		thisCordArr->cords[thisCordArr->numCords] = newCord;
+		thisCordArr->numCords++;
+		return 1;
 	}
 
 	return 0;
@@ -3369,6 +3408,12 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 		}else{
 			return 0;
 		}
+	} else if(strcmp("baseFood",attribute) == 0 ){
+		if(activeAbility->baseFoodEnabled){
+			return activeAbility->baseFood->effectAndManaArray[activeAbility->baseFood->selectedIndex]->effectMagnitude;
+		}else{
+			return 0;
+		}
 	} else if(strcmp("mana",attribute) == 0 ){
 			return 0;
 	} else if(strcmp("ac",attribute) == 0 ){
@@ -3407,12 +3452,12 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 		}else{
 			return 0;
 		}
-	} else if(strcmp("darkLoS",attribute) == 0 ){
-//		if(activeAbility->rangeEnabled && (activeAbility->type == 'p' || activeAbility->type == 'd')){ //only applicable to perminant abilities
-//			return activeAbility->range->effectAndManaArray[activeAbility->range->selectedIndex]->effectMagnitude;
-//		}else{
+	} else if(strcmp("darkLoS",attribute) == 0 || strcmp("LoS",attribute) == 0 ){
+		if(activeAbility->LoSEnabled){
+			return activeAbility->LoS->effectAndManaArray[activeAbility->LoS->selectedIndex]->effectMagnitude;
+		}else{
 			return 0;
-//		}
+		}
 	} else if(strcmp("bluntDR",attribute) == 0 ){
 		if(activeAbility->bluntDREnabled){
 			return activeAbility->bluntDR->effectAndManaArray[activeAbility->bluntDR->selectedIndex]->effectMagnitude;

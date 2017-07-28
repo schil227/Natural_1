@@ -10,13 +10,17 @@
 
 #include"../individual_pub_methods.h"
 
-typedef enum {CURSOR_ATTACK, CURSOR_TALK, CURSOR_ABILITY, CURSOR_PICKPOCKET, CURSOR_LOOK, CURSOR_INTERACT} cursorModes;
+typedef enum {CURSOR_ATTACK, CURSOR_TALK, CURSOR_ABILITY, CURSOR_ABILITY_AOE_LINE, CURSOR_PICKPOCKET, CURSOR_LOOK, CURSOR_INTERACT} cursorModes;
 
 typedef struct {
 	int inCursorMode;
 	cursorModes thisMode;
 
-	character* cursorCharacter;
+	cord * tmpCord;
+	cordArr * aoeSpaceCoordinates;
+
+	character * cursorCharacter;
+	character * attackSpace;
 } cursor;
 
 

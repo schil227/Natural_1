@@ -333,9 +333,10 @@ int cursorWithinAbilityRange(individual * player, int x, int y){
 	}
 }
 
-void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int x, int y){
-	int aoe = 0,  minX, maxX, minY, maxY;
+void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField, int targetX, int targetY, int targetX2, int targetY2){
+	int aoe = 0, i, j, minX, maxX, minY, maxY;
 	ability * tmpAbility = thisIndividual->activeAbilities->selectedAbility;
+	cordArr * targetedCords = NULL;
 
 	decreaseMana(thisIndividual, tmpAbility->totalManaCost);
 
@@ -350,33 +351,55 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 		removeIndividualFromExistance(thisIndividual->ID);
 	}
 
-	if(tmpAbility->aoeEnabled){
-		aoe = tmpAbility->aoe->effectAndManaArray[tmpAbility->aoe->selectedIndex]->effectMagnitude;
+	if(tmpAbility->aoeNovaEnabled && tmpAbility->aoeNova->effectAndManaArray[tmpAbility->aoeNova->selectedIndex]->effectMagnitude > 0){
+		targetedCords = initCordArr();
+
+		aoe = tmpAbility->aoeNova->effectAndManaArray[tmpAbility->aoeNova->selectedIndex]->effectMagnitude;
+
+		minX = targetX - aoe;
+		maxX = targetX + aoe;
+		minY = targetY - aoe;
+		maxY = targetY + aoe;
+
+		for(i = minX; i <= maxX; i++){
+			for(j = minY; j <= maxY; j++){
+				addNewCordIfUnique(targetedCords, i, j);
+			}
+		}
 	}
 
-	minX = x - aoe;
-	maxX = x + aoe;
-	minY = y - aoe;
-	maxY = y + aoe;
+	if(tmpAbility->aoeLineEnabled && tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude > 0){
+		cord endCord;
+		endCord.x = targetX2;
+		endCord.y = targetY2;
+
+		aoe = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
+
+		targetedCords = getCordsBetweenPoints(targetX, targetY, &endCord, aoe, 0, thisField);
+	}
+
+	if(targetedCords == NULL){
+		targetedCords = initCordArr();
+	}
+
+	addNewCordIfUnique(targetedCords, targetX, targetY);
 
 	//Only Player may trigger attack on interactables
 	if(thisIndividual->isPlayer){
-		processInteractablesInAOE(thisIndividual, thisField, minX, maxX, minY, maxY);
+		processInteractablesInAOE(thisIndividual, thisField, targetedCords);
 	}
 
-	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, minX, maxX, minY, maxY);
-	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, minX, maxX, minY, maxY);
-	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->guards, thisField, minX, maxX, minY, maxY);
-	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->beasts, thisField, minX, maxX, minY, maxY);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, targetedCords);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, targetedCords);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->guards, thisField, targetedCords);
+	preprocessIndividalGroupsInAOE(thisIndividual, thisGroupContainer->beasts, thisField, targetedCords);
 
-	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, minX, maxX, minY, maxY);
-	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, minX, maxX, minY, maxY);
-	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->guards, thisField, minX, maxX, minY, maxY);
-	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->beasts, thisField, minX, maxX, minY, maxY);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->enemies, thisField, targetedCords);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->npcs, thisField, targetedCords);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->guards, thisField, targetedCords);
+	useAbilityOnIndividualGroupsInAOE(thisIndividual, thisGroupContainer->beasts, thisField, targetedCords);
 
-	if(player->hp > 0 && player->playerCharacter->x >= minX && player->playerCharacter->x <= maxX &&
-		player->playerCharacter->y >= minY && player->playerCharacter->y <= maxY ){
-
+	if(player->hp > 0 && containsCordXY(targetedCords, player->playerCharacter->x, player->playerCharacter->y)){
 		if(tmpAbility->type == 't'){
 			if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, player))
 					|| useDurationAbilityOnIndividual(player, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
@@ -391,29 +414,27 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 	}
 }
 
-void processInteractablesInAOE(individual * player, field * thisField, int minX, int maxX, int minY, int maxY){
+void processInteractablesInAOE(individual * player, field * thisField, cordArr * targetedCords){
 	int i, j;
 	space * tmpSpace;
 
-	for(i = minX; i < maxX; i++){
-		for(j = minY; j < maxY; j++){
+	for(i = 0; i < targetedCords->numCords; i++){
 
-			tmpSpace = getSpaceFromField(thisField, i, j);
+		tmpSpace = getSpaceFromField(thisField, targetedCords->cords[i]->x, targetedCords->cords[i]->y);
 
-			if(tmpSpace != NULL && tmpSpace->interactableObject != NULL){
-				if(player->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(player->activeAbilities->selectedAbility)){
-					int attackEventID = tmpSpace->interactableObject->onAttackEventID;
-					if(attackEventID  != -1){
-						player->currentInteractableObject = tmpSpace->interactableObject;
-						triggerEvent(attackEventID);
-					}
+		if(tmpSpace != NULL && tmpSpace->interactableObject != NULL){
+			if(player->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(player->activeAbilities->selectedAbility)){
+				int attackEventID = tmpSpace->interactableObject->onAttackEventID;
+				if(attackEventID  != -1){
+					player->currentInteractableObject = tmpSpace->interactableObject;
+					triggerEvent(attackEventID);
 				}
 			}
 		}
 	}
 }
 
-void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField, int minX, int maxX, int minY, int maxY){
+void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField, cordArr * targetedCords){
 	int i, individualsPassed = 0;
 
 		for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
@@ -422,10 +443,7 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 			if(tmp != NULL && tmp->hp > 0){
 				individualsPassed++;
 
-				if(tmp->playerCharacter->x >= minX &&
-						tmp->playerCharacter->x <= maxX &&
-						tmp->playerCharacter->y >= minY &&
-						tmp->playerCharacter->y <= maxY ){
+				if(containsCordXY(targetedCords, tmp->playerCharacter->x, tmp->playerCharacter->y)){
 					if(thisIndividual->activeAbilities->selectedAbility->type == 't' && abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility)){
 						triggerEventOnAttack(tmp->ID, thisIndividual->isPlayer);
 						onAttackedChecks(thisIndividual, tmp);
@@ -452,7 +470,7 @@ void preprocessIndividalGroupsInAOE(individual * thisIndividual, individualGroup
 		}
 }
 
-void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField,int minX, int maxX, int minY, int maxY){
+void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGroup * thisGroup, field * thisField, cordArr * targetedCords){
 	int i, individualsPassed = 0;
 
 	for(i = 0; i < thisGroup->MAX_INDIVIDUALS; i++){
@@ -461,10 +479,7 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 		if(tmp != NULL && tmp->hp > 0){
 			individualsPassed++;
 
-			if(tmp->playerCharacter->x >= minX &&
-					tmp->playerCharacter->x <= maxX &&
-					tmp->playerCharacter->y >= minY &&
-					tmp->playerCharacter->y <= maxY ){
+			if(containsCordXY(targetedCords, tmp->playerCharacter->x, tmp->playerCharacter->y)){
 				if(thisIndividual->activeAbilities->selectedAbility->type == 't'){
 					if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, tmp))
 							|| useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
