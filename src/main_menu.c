@@ -123,7 +123,7 @@ void cloneNewGameIndividual(){
 	newGameClone->totalActions = basePlayer->totalActions;
 	newGameClone->remainingActions = basePlayer->remainingActions;
 	newGameClone->hasAttacked = basePlayer->hasAttacked;
-	newGameClone->totalFood = basePlayer->totalFood;
+	newGameClone->baseFood = basePlayer->baseFood;
 	newGameClone->food = basePlayer->food;
 	newGameClone->foodBonusActive = basePlayer->foodBonusActive;
 	newGameClone->foodNegativeActive = basePlayer->foodNegativeActive;
@@ -791,7 +791,7 @@ void newGameMenuIncreaseField(){
 	case CREATE_CON:
 		if(newPlayer->CON < 3){
 			newPlayer->CON++;
-			newPlayer->totalFood += 50;
+			newPlayer->baseFood += 50;
 			newPlayer->hp = newPlayer->baseHP + newPlayer->CON * 2;
 			thisMainMenu->newGame->statPoints--;
 		}
@@ -890,7 +890,7 @@ void newGameCreateMenuDecreaseField(){
 	case CREATE_CON:
 		if(newPlayer->CON > -2 && newPlayer->hp > 2){
 			newPlayer->CON--;
-			newPlayer->totalFood -= 50;
+			newPlayer->baseFood -= 50;
 			newPlayer->hp = newPlayer->baseHP + newPlayer->CON * 2;
 			thisMainMenu->newGame->statPoints++;
 		}
@@ -1068,6 +1068,10 @@ void newGameAbilityMenuInterpretEnter(){
 					addAbilityToIndividual(thisMainMenu->newGame->newPlayer, thisMainMenu->newGame->newAbilities->abilitiesList[i]);
 				}
 			}
+
+			thisMainMenu->newGame->newPlayer->hp = getAttributeSum(thisMainMenu->newGame->newPlayer, "baseHP");
+			thisMainMenu->newGame->newPlayer->mana = getAttributeSum(thisMainMenu->newGame->newPlayer, "baseMana");
+			thisMainMenu->newGame->newPlayer->food = getAttributeSum(thisMainMenu->newGame->newPlayer, "baseFood");
 
 			thisMainMenu->newGame->newPlayer->ID = 1;
 			setPlayer(thisMainMenu->newGame->newPlayer);
@@ -1667,7 +1671,7 @@ void drawNewGameCreateMenu(HDC hdc, HDC hdcBuffer, RECT * rect){
 	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 156 + 22, yOff + 174 + 42 * 7, newPlayer->LUCK);
 	drawNewGameFormText(hdcBuffer, &textBoxRect, xOff + 80 + 42, yOff + 521, "DONE");
 
-	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 404 + 30, yOff + 215, newPlayer->totalFood);
+	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 404 + 30, yOff + 215, newPlayer->baseFood);
 	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 344 + 22, yOff + 258, newPlayer->attack);
 	drawNewGameFormNumber(hdcBuffer, &textBoxRect, xOff + 302 + 22, yOff + 300, newPlayer->AC);
 

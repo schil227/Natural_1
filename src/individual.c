@@ -196,10 +196,10 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 		thisIndividual->mana = mana;
 	}
 
-	thisIndividual->totalFood = 300 + CON * 50;
+	thisIndividual->baseFood = 300 + CON * 50;
 
 	if(food == -1){
-		thisIndividual->food = thisIndividual->totalFood;
+		thisIndividual->food = thisIndividual->baseFood;
 	}else if(food < 50){
 		thisIndividual->food = 50;
 	}else{
@@ -2088,8 +2088,8 @@ void restoreMana(individual * thisIndividual, int mana){
 }
 
 void restoreFood(individual * thisIndividual, int food){
-	if(thisIndividual->food + food >= thisIndividual->totalFood){
-		thisIndividual->food = thisIndividual->totalFood;
+	if(thisIndividual->food + food >= getAttributeSum(thisIndividual, "baseFood")){
+		thisIndividual->food = getAttributeSum(thisIndividual, "baseFood");
 	}else{
 		thisIndividual->food += food;
 	}
@@ -3174,6 +3174,8 @@ int getAttributeFromIndividual(individual * thisIndividual, char * attribute){
 		return thisIndividual->LoS;
 	}else if(strcmp("darkLoS", attribute) == 0){
 		return thisIndividual->darkLoS;
+	}else if(strcmp("baseFood", attribute) == 0){
+		return thisIndividual->baseFood;
 	}
 
 	return toReturn;

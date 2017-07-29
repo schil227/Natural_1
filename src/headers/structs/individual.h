@@ -169,7 +169,7 @@ struct individual{
 	short int totalActions;
 	short int remainingActions;
 	short int hasAttacked;
-	short int totalFood;
+	short int baseFood;
 	double food;
 	short int foodBonusActive;
 	short int foodNegativeActive;

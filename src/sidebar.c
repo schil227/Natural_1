@@ -28,7 +28,7 @@ void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 	int y = 0;
 	int width = thisSidebarInstance->thisCharacter->fixedWidth;
 	int height = prc->bottom - 200;
-
+	int totalFood = 0;
 
 	SelectObject(hdcMem, thisSidebarInstance->thisCharacter->fixedImage);
 
@@ -131,8 +131,10 @@ void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 
+	totalFood = getAttributeSum(player, "baseFood");
+
 	foodStr[0] = '\0';
-	sprintf(foodStr, "/%d", player->totalFood);
+	sprintf(foodStr, "/%d", totalFood);
 	DrawText(hdcBuffer, foodStr, strlen(foodStr), &rect, DT_SINGLELINE);
 
 	rect.top += textYStep;

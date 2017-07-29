@@ -497,7 +497,7 @@ void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 16;
 
-	sprintf(value, "Food: %d/%d", ((int)tmpIndividual->food), tmpIndividual->totalFood);
+	sprintf(value, "Food: %d/%d", ((int)tmpIndividual->food), getAttributeSum(tmpIndividual, "baseFood"));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
 	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 16;
