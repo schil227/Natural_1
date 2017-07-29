@@ -375,7 +375,7 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 
 		aoe = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
 
-		targetedCords = getCordsBetweenPoints(targetX, targetY, &endCord, aoe, 0, thisField);
+		targetedCords = getCordsBetweenPoints(targetX, targetY, &endCord, aoe, 0, 0.95, thisField);
 	}
 
 	if(targetedCords == NULL){

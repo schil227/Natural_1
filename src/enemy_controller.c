@@ -762,7 +762,7 @@ ability * getRandomHPRestoringAbility(individual * thisIndividual){
 	}
 }
 
-cordArr * getCordsBetweenPoints(int startingX, int startingY, cord *endCord, int range, int attackOnly, field * thisField){
+cordArr * getCordsBetweenPoints(int startingX, int startingY, cord *endCord, int range, int attackOnly, double step, field * thisField){
 	double slope;
 	int wrtY = 1, startingGreaterThanEnding = 0;
 
@@ -792,7 +792,7 @@ cordArr * getCordsBetweenPoints(int startingX, int startingY, cord *endCord, int
 		}
 	}
 
-	double i, step = 0.25;
+	double i;//, step = 0.25;
 
 	if(startingGreaterThanEnding){
 		step = step * -1;
@@ -855,7 +855,7 @@ cordArr * generateAttackSpaces(individual * thisIndividual, field * thisField){
 	}
 
 	for(i = 0; i < perimeterCords->numCords; i++){
-		cordArr * accessableCords = getCordsBetweenPoints(startingX, startingY, perimeterCords->cords[i], range, 1, thisField);
+		cordArr * accessableCords = getCordsBetweenPoints(startingX, startingY, perimeterCords->cords[i], range, 1, 0.25, thisField);
 
 		if(accessableCords == NULL){
 			continue;

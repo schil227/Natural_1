@@ -41,7 +41,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			RECT rect;
 			GetClientRect(hwnd, &rect);
 
-			if(canMoveCursor(player)){
+			if(canMoveCursor(player, direction)){
 				moveCursor(main_field,direction, viewShift, &rect);
 
 				if(getCursorMode() == CURSOR_LOOK){
@@ -55,7 +55,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 					int lineLength = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
 
-					cordArr * newAOECords = getCordsBetweenPoints(getCursorTmpX(), getCursorTmpY(), &tmpCord, lineLength, 0, main_field);
+					cordArr * newAOECords = getCordsBetweenPoints(getCursorTmpX(), getCursorTmpY(), &tmpCord, lineLength, 0, 0.95, main_field);
 					updateCursorAOESpaces(newAOECords);
 				}
 			}
@@ -67,6 +67,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			}else if(getCursorMode() == CURSOR_LOOK){
 				disableLookMode();
 			}else if(getCursorMode() == CURSOR_ABILITY_AOE_LINE){
+				clearCursorAOESpaces();
 				refreshCursor(CURSOR_ABILITY, getCursorTmpX(), getCursorTmpY());
 				break;
 			}
@@ -166,6 +167,8 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 				int numActions = 1;
 
+				clearCursorAOESpaces();
+
 				useAbilityOnIndividualsInAOERange(player, player, thisGroupContainer, main_field, getCursorTmpX(), getCursorTmpY(), getCursorX(), getCursorY());
 
 				if(tmpAbility->actionsEnabled){
@@ -207,7 +210,7 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 
 					int lineLength = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
 
-					cordArr * newAOECords = getCordsBetweenPoints(getCursorTmpX(), getCursorTmpY(), &tmpCord, lineLength, 0, main_field);
+					cordArr * newAOECords = getCordsBetweenPoints(getCursorTmpX(), getCursorTmpY(), &tmpCord, lineLength, 0, 0.95, main_field);
 					updateCursorAOESpaces(newAOECords);
 					break;
 				}
@@ -488,7 +491,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 	return 0;
 }
 
-int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, field * thisField){
+int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individual * player, shiftData * viewShift, field * thisField){
 	switch(msg){
 	case WM_KEYDOWN:{
 
@@ -509,6 +512,8 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 
 					if(player->activeAbilities->selectedAbility != NULL && (player->activeAbilities->selectedAbility->type == 't' || player->activeAbilities->selectedAbility->type == 'd')){
 						toggleInCursorMode();
+						viewShift->xShiftOld = viewShift->xShift;
+						viewShift->yShiftOld = viewShift->yShift;
 						refreshCursor(CURSOR_ABILITY, player->playerCharacter->x, player->playerCharacter->y);
 					}
 

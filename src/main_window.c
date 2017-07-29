@@ -1379,7 +1379,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
 		return 0;
 	}else if(inAbilityViewMode()){
-		return abilityViewLoop(hwnd, msg, wParam, lParam, player, main_field);
+		return abilityViewLoop(hwnd, msg, wParam, lParam, player, viewShift, main_field);
 	}else if (inLookViewScrollMode()) {
 		return lookViewScrollLoop(hwnd, msg, wParam, lParam);
 	}else if (inCharacterInfoView()){

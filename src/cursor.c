@@ -32,11 +32,13 @@ void initThisCursor(int imageID) {
 void drawCursor(HDC hdc, HDC hdcBuffer, shiftData * viewData){
 	int i;
 
-	drawCharacterAnimation(hdc, hdcBuffer, thisCursorInstance->cursorCharacter, viewData, 0);
-
-	for(i = 0; i < thisCursorInstance->aoeSpaceCoordinates->numCords; i++){
-		drawUnboundAnimation(hdc, hdcBuffer, thisCursorInstance->aoeSpaceCoordinates->cords[i]->x, thisCursorInstance->aoeSpaceCoordinates->cords[i]->y, thisCursorInstance->attackSpace, viewData, 0);
+	if(thisCursorInstance->thisMode == CURSOR_ABILITY_AOE_LINE){
+		for(i = 0; i < thisCursorInstance->aoeSpaceCoordinates->numCords; i++){
+			drawUnboundAnimation(hdc, hdcBuffer, thisCursorInstance->aoeSpaceCoordinates->cords[i]->x, thisCursorInstance->aoeSpaceCoordinates->cords[i]->y, thisCursorInstance->attackSpace, viewData, 0);
+		}
 	}
+
+	drawCharacterAnimation(hdc, hdcBuffer, thisCursorInstance->cursorCharacter, viewData, 0);
 }
 
 void toggleInCursorMode(){
@@ -86,25 +88,49 @@ void setCursorTmpCord(int x, int y){
 	thisCursorInstance->tmpCord->y = y;
 }
 
-int canMoveCursor(individual * thisIndividual){
+int canMoveCursor(individual * thisIndividual, int direction){
 	ability * tmpAbility = thisIndividual->activeAbilities->selectedAbility;
 
 	//If it's a self-duration ability, dont move cursor from player position
-	if(thisCursorInstance->thisMode == CURSOR_ABILITY && tmpAbility != NULL
-			&&  tmpAbility->type == 'd'){
-		return 0;
+	if(thisCursorInstance->thisMode == CURSOR_ABILITY && tmpAbility != NULL){
+		if(tmpAbility->type == 'd'){
+			return 0;
+		}
+
+		if(tmpAbility->type == 't'){
+			int range = tmpAbility->range->effectAndManaArray[tmpAbility->range->selectedIndex]->effectMagnitude;
+
+			int newX = getNewCursorX(direction);
+			int newY = getNewCursorY(direction);
+
+			if(range < max(abs(newX - thisIndividual->playerCharacter->x), abs(newY - thisIndividual->playerCharacter->y))){
+				return 0;
+			}
+		}
 	}
 
 	//stay within the line length when moving
 	if(thisCursorInstance->thisMode == CURSOR_ABILITY_AOE_LINE && tmpAbility != NULL){
 		int lineLength = tmpAbility->aoeLine->effectAndManaArray[tmpAbility->aoeLine->selectedIndex]->effectMagnitude;
 
-		if(lineLength < max(abs(thisCursorInstance->cursorCharacter->x - thisCursorInstance->tmpCord->x), abs(thisCursorInstance->cursorCharacter->y - thisCursorInstance->tmpCord->y))){
+		int newX = getNewCursorX(direction);
+		int newY = getNewCursorY(direction);
+
+		if(!cordArrContainsCoordinates(thisCursorInstance->aoeSpaceCoordinates, newX, newY) &&
+				lineLength < max(abs(newX - thisCursorInstance->tmpCord->x), abs(newY - thisCursorInstance->tmpCord->y))){
 			return 0;
 		}
 	}
 
 	return 1;
+}
+
+int getNewCursorX(int direction){
+	return thisCursorInstance->cursorCharacter->x + xMoveChange(direction);
+}
+
+int getNewCursorY(int direction){
+	return thisCursorInstance->cursorCharacter->y + yMoveChange(direction);
 }
 
 int moveCursor(field *thisField, int direction, shiftData * viewShift, RECT * rect){
@@ -143,6 +169,18 @@ void updateCursorAOESpaces(cordArr * newCords){
 	destroyCordArr(thisCursorInstance->aoeSpaceCoordinates);
 
 	thisCursorInstance->aoeSpaceCoordinates = newCords;
+
+	releaseFieldWriteLock();
+	releaseFieldReadLock();
+}
+
+void clearCursorAOESpaces(){
+	while(!tryGetFieldReadLock()){}
+	while(!tryGetFieldWriteLock()){}
+
+	destroyCordArr(thisCursorInstance->aoeSpaceCoordinates);
+
+	thisCursorInstance->aoeSpaceCoordinates = initCordArr();
 
 	releaseFieldWriteLock();
 	releaseFieldReadLock();
