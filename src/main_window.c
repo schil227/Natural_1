@@ -644,7 +644,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	initSidebarInstance(1502,0,0,185,400);
 	initThisDialogBox(1501,10,10,RGB(255, 70, 255));
 	initThisInventoryView(1503, 100, 100, 4, player->backpack);
-	initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
+	initAbilityCreationInstance(1424,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
 	initThisAbilityView(9504, RGB(255, 0, 255), 10, 10);
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	initSpecialDrawInstance();
@@ -738,7 +738,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initSidebarInstance(1502,0,0,185,400);
 		initThisDialogBox(1501,10,10,RGB(255, 70, 255));
 		initThisInventoryView(1503, 100, 100, 4, player->backpack);
-		initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
+		initAbilityCreationInstance(1424,RGB(255, 0, 255), 10, 10, mapDirectory, "effects_template.txt");
 		initThisAbilityView(9504, RGB(255, 0, 255), 10, 10);
 		initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 		initSpecialDrawInstance();
@@ -1539,7 +1539,7 @@ void runTests(){
 	initLockAuth();
 	initalizeTheGlobalRegister();
 	initEventHandlers();
-	initAbilityCreationInstance(9500,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
+	initAbilityCreationInstance(1424,RGB(255, 0, 255), 10, 10, mapTestDirectory, "test_effects_template.txt");
 	initThisAbilityView(9504, RGB(255, 0, 255), 10, 10);
 	initNameBoxInstance(9503, RGB(255,0,255), 20, 20);
 	loadTriggerMaps(mapTestDirectory, "test_onAttackTriggerMap.txt","test_onHarmTriggerMap.txt","test_onDeathTriggerMap.txt", "test_onPickupTriggerMap.txt");

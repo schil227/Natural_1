@@ -158,6 +158,7 @@ typedef struct {
 	int effectCurrentIndex;
 	int effectEndingIndex;
 	int MAX_FIELDS_ON_WINDOW;
+	int EFFECT_FIELD_DRAW_HEIGHT;
 	int idCounter;
 	int waitingForName;
 
@@ -173,6 +174,22 @@ typedef struct {
 	fixedCharacter * leftRightArrow;
 	fixedCharacter * scrollUpArrow;
 	fixedCharacter * scrollDownArrow;
+
+	fixedCharacter * abilityEntrySelect;
+	fixedCharacter * abilityEntryEdit;
+	fixedCharacter * abilityTypeBox;
+	fixedCharacter * abilitySlider2Un;
+	fixedCharacter * abilitySlider4Un;
+	fixedCharacter * abilitySlider5B;
+	fixedCharacter * abilitySlider6B2R;
+	fixedCharacter * abilitySlider6UnB;
+	fixedCharacter * abilitySlider6UnR;
+	fixedCharacter * abilitySlider7B;
+	fixedCharacter * abilitySlider9B3R;
+	fixedCharacter * abilitySlider10B4R;
+	fixedCharacter * abilitySlider11B;
+	fixedCharacter * abilitySlider11Un;
+
 	ability * abilityTemplates[4];
 
 	char descriptionPermanent[256];
