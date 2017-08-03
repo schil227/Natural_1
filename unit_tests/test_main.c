@@ -672,7 +672,7 @@ void createPermanentAbiltyTest(individual * testPlayer){
 
 	//down to AC
 	setAbilityCreationSelectedType(ABILITY_AC);
-	selectNextEffect();
+//	selectNextEffect();
 
 	//try create ability, fail (mana = -1)
 	assert(!canCreateAbility());
@@ -815,6 +815,8 @@ void createSelfDurationAbility(individual * testPlayer){
 }
 
 void createTargetedAbility(individual * testPlayer){
+	setAbilityCreationSelectedType(ABILITY_TYPE);
+
 	//go to targeted ability
 	interpretRightAbilityCreation();
 

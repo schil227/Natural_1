@@ -95,6 +95,7 @@ END
 1434 BITMAP DISCARDABLE "../images/ability_slider_11_unbalanced_blue.bmp"
 1435 BITMAP DISCARDABLE "../images/ability_type_box.bmp"
 1436 BITMAP DISCARDABLE "../images/ability_slider_6_balanced_2red.bmp"
+1437 BITMAP DISCARDABLE "../images/ability_type_box_selected.bmp"
 
 //Menu images 1500 - 2000
 1500 BITMAP DISCARDABLE "../images/console_bg.bmp" //2010

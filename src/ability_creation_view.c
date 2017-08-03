@@ -125,15 +125,20 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 
 	thisAbilityCreationInstance->waitingForName = 0;
 	thisAbilityCreationInstance->createMode = ABILITY_CREATE_DEFAULT;
+	thisAbilityCreationInstance->selectedType = ABILITY_TYPE;
 
 	thisAbilityCreationInstance->currentTemplateIndex = 0;
 	thisAbilityCreationInstance->MAX_ABILITY_TEMPLATES = 4;
 	thisAbilityCreationInstance->numAbilityTemplates = 0;
 
-	thisAbilityCreationInstance->effectCurrentIndex = 0;
-	thisAbilityCreationInstance->effectStartingIndex = 0;
 	thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW = 4;
 	thisAbilityCreationInstance->EFFECT_FIELD_DRAW_HEIGHT = 386;
+
+	thisAbilityCreationInstance->effectIndex = 0;
+	thisAbilityCreationInstance->effectIndexOffset = 0;
+
+	thisAbilityCreationInstance->effectCurrentIndex = 0;
+	thisAbilityCreationInstance->effectStartingIndex = 0;
 	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
 	thisAbilityCreationInstance->mode = DEFAULT_ABILITY;
 	thisAbilityCreationInstance->idCounter = 0;
@@ -145,6 +150,7 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->abilityEntrySelect = createCharacter(1422, rgb, x, y);
 	thisAbilityCreationInstance->abilityEntryEdit = createCharacter(1423, rgb, x, y);
 	thisAbilityCreationInstance->abilityTypeBox = createCharacter(1435, rgb, x, y);
+	thisAbilityCreationInstance->abilityTypeBoxSelected = createCharacter(1437, rgb, x, y);
 	thisAbilityCreationInstance->abilitySlider2Un = createCharacter(1425, rgb, x, y);
 	thisAbilityCreationInstance->abilitySlider4Un = createCharacter(1426, rgb, x, y);
 	thisAbilityCreationInstance->abilitySlider5B = createCharacter(1427, rgb, x, y);
@@ -156,7 +162,6 @@ void initAbilityCreationInstance(int imageID, COLORREF rgb, int x, int y, char* 
 	thisAbilityCreationInstance->abilitySlider10B4R = createCharacter(1432, rgb, x, y);
 	thisAbilityCreationInstance->abilitySlider11B = createCharacter(1433, rgb, x, y);
 	thisAbilityCreationInstance->abilitySlider11Un = createCharacter(1434, rgb, x, y);
-
 
 	thisAbilityCreationInstance->selector = createCharacter(1504, rgb, x, y);
 	thisAbilityCreationInstance->leftRightArrow = createCharacter(9502, rgb, x, y);
@@ -286,13 +291,14 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	int yOff = thisAbilityCreationInstance->creationWindow->y;
 
 	int currentDrawHeight = 52;
+	int typeBoxOffset = 0;
 
-	descriptionRect.top = yOff + 445;
+	descriptionRect.top = yOff + 470;
 	descriptionRect.left = xOff + 10;
-	descriptionRect.bottom = descriptionRect.top + 136;
+	descriptionRect.bottom = descriptionRect.top + 250;
 	descriptionRect.right = descriptionRect.left + 310;
 
-	textTmp.top = yOff + 105;
+	textTmp.top = yOff + 84;
 	textTmp.left = xOff + 20;
 	textTmp.bottom = textTmp.top + 200;
 	textTmp.right = textTmp.left + 240;
@@ -310,7 +316,13 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	GetTextExtentPoint32(hdcBuffer, tmpLine, strlen(tmpLine), &size);
 
-	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 60 + size.cx, yOff + 82, thisAbilityCreationInstance->abilityTypeBox);
+	if(thisAbilityCreationInstance->selectedType == ABILITY_TYPE){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 60 + size.cx, yOff + 82, thisAbilityCreationInstance->abilityTypeBoxSelected);
+		typeBoxOffset = (thisAbilityCreationInstance->abilityTypeBoxSelected->fixedWidth / 2);
+	}else{
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 60 + size.cx, yOff + 82, thisAbilityCreationInstance->abilityTypeBox);
+		typeBoxOffset = (thisAbilityCreationInstance->abilityTypeBox->fixedWidth / 2);
+	}
 
 	HFONT hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "System");
 	HFONT oldFont = SelectObject(hdcBuffer, hFont);
@@ -319,7 +331,11 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 
 	DrawText(hdcBuffer, tmpLine, -1, &textTmp, DT_SINGLELINE);
 
-	drawNewGameFormText(hdcBuffer, &textTmp, xOff + 60 + size.cx + (thisAbilityCreationInstance->abilityTypeBox->fixedWidth / 2), yOff + 85, thisAbilityCreationInstance->abilityInsance->typeName);
+	textTmp.top = yOff + 105;
+	textTmp.bottom = textTmp.top + 200;
+
+
+	drawNewGameFormText(hdcBuffer, &textTmp, xOff + 60 + size.cx + typeBoxOffset, yOff + 85, thisAbilityCreationInstance->abilityInsance->typeName);
 
 	drawNewGameFormNumber(hdcBuffer, &textTmp, xOff + 175, yOff + 39, thisAbilityCreationInstance->abilityInsance->totalManaCost);
 
@@ -328,10 +344,6 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	DeleteObject(hFont);
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 
-	if(thisAbilityCreationInstance->effectCurrentIndex == -1){
-//		drawUnboundCharacterByPixels(hdc,hdcBuffer,textRect.left - 20,textRect.top,thisAbilityCreationInstance->selector);
-	}
-
 	//scroll up arrow
 	if(thisAbilityCreationInstance->effectStartingIndex > 0){
 //		drawUnboundCharacterByPixels(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
@@ -339,140 +351,148 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 	}
 
 	//scroll down arrow
-	if(thisAbilityCreationInstance->effectEndingIndex < thisAbilityCreationInstance->abilityInsance->numEnabledEffects){
+	if(thisAbilityCreationInstance->effectEndingIndex < totalVisableFields()){
 //		drawUnboundCharacterByPixels(hdc, hdcBuffer,thisAbilityCreationInstance->creationWindow->x + 40,
 //				thisAbilityCreationInstance->creationWindow->y + 148 + 17 * thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW,
 //				thisAbilityCreationInstance->scrollDownArrow);
 	}
 
+	yOff += 80;
+
 	effectIndex = 0;
 
-	processTypeMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageTypeEnabled,
-				 hdc, hdcBuffer, ABILITY_DAMAGE_TYPE, "Damage Type", 0, thisAbilityCreationInstance->abilityInsance->damageType, &currentDrawHeight);
-
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->rangeEnabled,
-			 hdc, hdcBuffer, ABILITY_RANGE, "Range", 0, thisAbilityCreationInstance->abilityInsance->range, &currentDrawHeight);
+			 hdc, hdcBuffer, ABILITY_RANGE, xOff, yOff, "Range", 0, thisAbilityCreationInstance->abilityInsance->range, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->targetedEnabled,
-			 hdc, hdcBuffer, ABILITY_TARGETED, "Target", 0, thisAbilityCreationInstance->abilityInsance->targeted, &currentDrawHeight);
+			 hdc, hdcBuffer, ABILITY_TARGETED, xOff, yOff, "Target", 0, thisAbilityCreationInstance->abilityInsance->targeted, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->extraAttackEnabled,
-			 hdc, hdcBuffer, ABILITY_EXTRA_ATTACK, "Extra Attack", 0, thisAbilityCreationInstance->abilityInsance->extraAttack, &currentDrawHeight);
+			 hdc, hdcBuffer, ABILITY_EXTRA_ATTACK, xOff, yOff, "Extra Attack", 0, thisAbilityCreationInstance->abilityInsance->extraAttack, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageEnabled,
-			 hdc, hdcBuffer, ABILITY_DICE_DAMAGE, "Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->diceDamage, &currentDrawHeight);
+			 hdc, hdcBuffer, ABILITY_DICE_DAMAGE, xOff, yOff, "Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->diceDamage, &currentDrawHeight);
 
 	if(thisAbilityCreationInstance->abilityInsance->diceDamageEnabled
 			&& thisAbilityCreationInstance->abilityInsance->diceDamage->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->diceDamage->selectedIndex]->effectMagnitude > 0){
 //		textRect.left += 20;
 		processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplierEnabled,
-					 hdc, hdcBuffer, ABILITY_DICE_DAMAGE_MULTIPLIER, "Dice Damage Multiplier", 0, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplier, &currentDrawHeight);
+					 hdc, hdcBuffer, ABILITY_DICE_DAMAGE_MULTIPLIER, xOff, yOff, "Dice Damage Multiplier", 0, thisAbilityCreationInstance->abilityInsance->diceDamageMultiplier, &currentDrawHeight);
 //		textRect.left -= 20;
 	}
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageEnabled,
-			 hdc, hdcBuffer, ABILITY_DAMAGE, "damage", 0, thisAbilityCreationInstance->abilityInsance->damage, &currentDrawHeight);
+			 hdc, hdcBuffer, ABILITY_DAMAGE, xOff, yOff, "damage", 0, thisAbilityCreationInstance->abilityInsance->damage, &currentDrawHeight);
+
+	if((thisAbilityCreationInstance->abilityInsance->diceDamageEnabled
+			&& thisAbilityCreationInstance->abilityInsance->diceDamage->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->diceDamage->selectedIndex]->effectMagnitude > 0)
+			|| (thisAbilityCreationInstance->abilityInsance->damageEnabled
+			&& thisAbilityCreationInstance->abilityInsance->damage->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->damage->selectedIndex]->effectMagnitude > 0)){
+		processTypeMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageTypeEnabled,
+			 hdc, hdcBuffer, ABILITY_DAMAGE_TYPE, xOff + 20, yOff, "Damage Type", 0, thisAbilityCreationInstance->abilityInsance->damageType, &currentDrawHeight);
+	}
 
 	if(thisAbilityCreationInstance->abilityInsance->statusEnabled){
 		processTypeMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusEnabled,
-				hdc, hdcBuffer, ABILITY_STATUS, "Status", 0, thisAbilityCreationInstance->abilityInsance->status, &currentDrawHeight);
+				hdc, hdcBuffer, ABILITY_STATUS, xOff, yOff, "Status", 0, thisAbilityCreationInstance->abilityInsance->status, &currentDrawHeight);
 
 		char type[16];
 		strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
 
 		//Dont show status options when status is type 'None'
 		if(strcmp(type, "None") != 0){
-//			textRect.left += 20;
 			processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceStatusDurationEnabled,
-					 hdc, hdcBuffer, ABILITY_STATUS_DICE_DURATION, "Status Dice Duration", 0, thisAbilityCreationInstance->abilityInsance->diceStatusDuration, &currentDrawHeight);
+					 hdc, hdcBuffer, ABILITY_STATUS_DICE_DURATION, xOff + 20, yOff, "Dice Duration", 0, thisAbilityCreationInstance->abilityInsance->diceStatusDuration, &currentDrawHeight);
 
 			processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDurationEnabled,
-					 hdc, hdcBuffer, ABILITY_STATUS_DURATION, "Status Duration", 0, thisAbilityCreationInstance->abilityInsance->statusDuration, &currentDrawHeight);
+					 hdc, hdcBuffer, ABILITY_STATUS_DURATION, xOff + 20, yOff, "Duration", 0, thisAbilityCreationInstance->abilityInsance->statusDuration, &currentDrawHeight);
 
 			//only show damage options for damaging statuses.
 			if(strcmp(type, "Poison") == 0 || strcmp(type, "Burn") == 0 || strcmp(type, "Bleed") == 0){
 				processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDiceDamageEnabled,
-						 hdc, hdcBuffer, ABILITY_STATUS_DICE_DAMAGE, "Status Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDiceDamage, &currentDrawHeight);
+						 hdc, hdcBuffer, ABILITY_STATUS_DICE_DAMAGE, xOff + 20, yOff, "Dice Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDiceDamage, &currentDrawHeight);
 
 				processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->statusDamageEnabled,
-						 hdc, hdcBuffer, ABILITY_STATUS_DAMAGE, "Status Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDamage, &currentDrawHeight);
+						 hdc, hdcBuffer, ABILITY_STATUS_DAMAGE, xOff + 20, yOff, "Damage", 0, thisAbilityCreationInstance->abilityInsance->statusDamage, &currentDrawHeight);
 			}
-
-//			textRect.left -= 20;
 		}
 	}
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled,
-				 hdc, hdcBuffer, ABILITY_AOE_NOVA, "AoE Nova", 0, thisAbilityCreationInstance->abilityInsance->aoeNova, &currentDrawHeight);
+	if(!thisAbilityCreationInstance->abilityInsance->aoeLineEnabled || thisAbilityCreationInstance->abilityInsance->aoeLine->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->aoeLine->selectedIndex]->effectMagnitude == 0){
+		processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled,
+				hdc, hdcBuffer, ABILITY_AOE_NOVA, xOff, yOff, "AoE Nova", 0, thisAbilityCreationInstance->abilityInsance->aoeNova, &currentDrawHeight);
+	}
 
-	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeLineEnabled,
-				 hdc, hdcBuffer, ABILITY_AOE_LINE, "AoE Line", 0, thisAbilityCreationInstance->abilityInsance->aoeLine, &currentDrawHeight);
+	if(!thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled || thisAbilityCreationInstance->abilityInsance->aoeNova->effectAndManaArray[thisAbilityCreationInstance->abilityInsance->aoeNova->selectedIndex]->effectMagnitude == 0){
+		processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->aoeLineEnabled,
+				 hdc, hdcBuffer, ABILITY_AOE_LINE, xOff, yOff, "AoE Line", 0, thisAbilityCreationInstance->abilityInsance->aoeLine, &currentDrawHeight);
+	}
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationEnabled,
-				 hdc, hdcBuffer, ABILITY_DURATION, "duration", 0, thisAbilityCreationInstance->abilityInsance->duration, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_DURATION, xOff, yOff, "duration", 0, thisAbilityCreationInstance->abilityInsance->duration, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->durationModEnabled,
-				 hdc, hdcBuffer, ABILITY_DURATION_MOD, "durationMod", 0, thisAbilityCreationInstance->abilityInsance->durationMod, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_DURATION_MOD, xOff, yOff, "durationMod", 0, thisAbilityCreationInstance->abilityInsance->durationMod, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->actionsEnabled,
-					 hdc, hdcBuffer, ABILITY_ACTIONS, "Actions", 0, thisAbilityCreationInstance->abilityInsance->actions, &currentDrawHeight);
+					 hdc, hdcBuffer, ABILITY_ACTIONS, xOff, yOff, "Actions", 0, thisAbilityCreationInstance->abilityInsance->actions, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->acEnabled,
-				 hdc, hdcBuffer, ABILITY_AC, "ac", 0, thisAbilityCreationInstance->abilityInsance->ac, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_AC, xOff, yOff, "ac", 0, thisAbilityCreationInstance->abilityInsance->ac, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->attackEnabled,
-					 hdc, hdcBuffer, ABILITY_ATTACK, "attack", 0, thisAbilityCreationInstance->abilityInsance->attack, &currentDrawHeight);
+					 hdc, hdcBuffer, ABILITY_ATTACK, xOff, yOff, "attack", 0, thisAbilityCreationInstance->abilityInsance->attack, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->damageModEnabled,
-				 hdc, hdcBuffer, ABILITY_DAMAGE_MOD, "damageMod", 0, thisAbilityCreationInstance->abilityInsance->damageMod, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_DAMAGE_MOD, xOff, yOff, "damageMod", 0, thisAbilityCreationInstance->abilityInsance->damageMod, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->mvmtEnabled,
-				 hdc, hdcBuffer, ABILITY_MVMT, "movement", 0, thisAbilityCreationInstance->abilityInsance->mvmt, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_MVMT, xOff, yOff, "movement", 0, thisAbilityCreationInstance->abilityInsance->mvmt, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->diceHPEnabled,
-				 hdc, hdcBuffer, ABILITY_DICE_HP, "diceHP", 0, thisAbilityCreationInstance->abilityInsance->diceHP, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_DICE_HP, xOff, yOff, "diceHP", 0, thisAbilityCreationInstance->abilityInsance->diceHP, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->hpEnabled,
-				 hdc, hdcBuffer, ABILITY_HP, "hp", 0, thisAbilityCreationInstance->abilityInsance->hp, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_HP, xOff, yOff, "hp", 0, thisAbilityCreationInstance->abilityInsance->hp, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->baseHPEnabled,
-				 hdc, hdcBuffer, ABILITY_BASE_HP, "baseHP", 0, thisAbilityCreationInstance->abilityInsance->baseHP, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_BASE_HP, xOff, yOff, "baseHP", 0, thisAbilityCreationInstance->abilityInsance->baseHP, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->baseManaEnabled,
-				 hdc, hdcBuffer, ABILITY_BASE_MANA, "baseMana", 0, thisAbilityCreationInstance->abilityInsance->baseMana, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_BASE_MANA, xOff, yOff, "baseMana", 0, thisAbilityCreationInstance->abilityInsance->baseMana, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->foodEnabled,
-				 hdc, hdcBuffer, ABILITY_FOOD, "food", 0, thisAbilityCreationInstance->abilityInsance->food, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_FOOD, xOff, yOff, "food", 0, thisAbilityCreationInstance->abilityInsance->food, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->baseFoodEnabled,
-				 hdc, hdcBuffer, ABILITY_BASE_FOOD, "baseFood", 0, thisAbilityCreationInstance->abilityInsance->baseFood, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_BASE_FOOD, xOff, yOff, "baseFood", 0, thisAbilityCreationInstance->abilityInsance->baseFood, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->LoSEnabled,
-				 hdc, hdcBuffer, ABILITY_LOS, "Line of Sight", 0, thisAbilityCreationInstance->abilityInsance->LoS, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_LOS, xOff, yOff, "Line of Sight", 0, thisAbilityCreationInstance->abilityInsance->LoS, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->bluntDREnabled,
-				 hdc, hdcBuffer, ABILITY_BLUNT_DR, "bluntDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->bluntDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_BLUNT_DR, xOff, yOff, "bluntDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->bluntDR, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->chopDREnabled,
-				 hdc, hdcBuffer, ABILITY_CHOP_DR, "chopDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->chopDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_CHOP_DR, xOff, yOff, "chopDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->chopDR, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->pierceDREnabled,
-				 hdc, hdcBuffer, ABILITY_PIERCE_DR, "pierceDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->pierceDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_PIERCE_DR, xOff, yOff, "pierceDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->pierceDR, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->slashDREnabled,
-				 hdc, hdcBuffer, ABILITY_SLASH_DR, "slashDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->slashDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_SLASH_DR, xOff, yOff, "slashDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->slashDR, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->earthDREnabled,
-				 hdc, hdcBuffer, ABILITY_EARTH_DR, "earthDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->earthDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_EARTH_DR, xOff, yOff, "earthDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->earthDR, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->fireDREnabled,
-				 hdc, hdcBuffer, ABILITY_FIRE_DR, "fireDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->fireDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_FIRE_DR, xOff, yOff, "fireDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->fireDR, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->waterDREnabled,
-				 hdc, hdcBuffer, ABILITY_WATER_DR, "waterDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->waterDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_WATER_DR, xOff, yOff, "waterDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->waterDR, &currentDrawHeight);
 
 	processEffectMapListRendering(&effectIndex, thisAbilityCreationInstance->abilityInsance->lightningDREnabled,
-				 hdc, hdcBuffer, ABILITY_LIGHTNING_DR, "lightningDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->lightningDR, &currentDrawHeight);
+				 hdc, hdcBuffer, ABILITY_LIGHTNING_DR, xOff, yOff, "lightningDR", thisAbilityCreationInstance->abilityInsance->type == 't'? 2:1, thisAbilityCreationInstance->abilityInsance->lightningDR, &currentDrawHeight);
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 	SetBkMode(hdcBuffer, TRANSPARENT);
@@ -485,7 +505,8 @@ void drawAbilityCreateWindow(HDC hdc, HDC hdcBuffer, RECT * prc){
 }
 
 void drawAbilityCreateDesciption(HDC hdcBuffer, RECT * descriptionRect){
-	if(thisAbilityCreationInstance->effectCurrentIndex == -1){
+	switch(thisAbilityCreationInstance->selectedType){
+	case ABILITY_TYPE:
 		switch(thisAbilityCreationInstance->abilityInsance->type){
 			case 'p':
 				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionPermanent, -1, descriptionRect, DT_WORDBREAK);
@@ -500,11 +521,7 @@ void drawAbilityCreateDesciption(HDC hdcBuffer, RECT * descriptionRect){
 				DrawText(hdcBuffer, thisAbilityCreationInstance->descriptionInstant, -1, descriptionRect, DT_WORDBREAK);
 				break;
 		}
-
-		return;
-	}
-
-	switch(thisAbilityCreationInstance->selectedType){
+		break;
 	case ABILITY_DAMAGE_TYPE:
 		switch(thisAbilityCreationInstance->abilityInsance->type){
 			case 't':
@@ -1002,12 +1019,9 @@ fixedCharacter * getSliderFromType(effect_types type){
 	return NULL;
 }
 
-void drawTextEffectMapListSlider(HDC hdc, HDC hdcBuffer, char * fieldName, effect_types type, int isDR, int currentDrawHeight, typeAndManaMapList * mapList, int isActive){
-	int xOff = thisAbilityCreationInstance->creationWindow->x;
-	int yOff = thisAbilityCreationInstance->creationWindow->y + 80;
+void drawTextEffectMapListSlider(HDC hdc, HDC hdcBuffer, int xOff, int yOff, char * fieldName, effect_types type, int isDR, int currentDrawHeight, typeAndManaMapList * mapList){
 	char fullField[256];
-	SIZE size;
-
+	int typeBoxOffset = 0;
 	RECT textBox;
 	textBox.top = yOff + currentDrawHeight;
 	textBox.left = xOff + 20;
@@ -1018,9 +1032,13 @@ void drawTextEffectMapListSlider(HDC hdc, HDC hdcBuffer, char * fieldName, effec
 
 	sprintf(fullField, "%s:", fieldName);
 
-	GetTextExtentPoint32(hdcBuffer, fullField, strlen(fullField), &size);
-
-	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 50 + size.cx, yOff + currentDrawHeight, thisAbilityCreationInstance->abilityTypeBox);
+	if(thisAbilityCreationInstance->selectedType == type){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 34, yOff + currentDrawHeight + 33, thisAbilityCreationInstance->abilityTypeBoxSelected);
+		typeBoxOffset = (thisAbilityCreationInstance->abilityTypeBoxSelected->fixedWidth / 2);
+	}else{
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 34, yOff + currentDrawHeight + 33, thisAbilityCreationInstance->abilityTypeBox);
+		typeBoxOffset = (thisAbilityCreationInstance->abilityTypeBox->fixedWidth / 2);
+	}
 
 	HFONT hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "System");
 	HFONT oldFont = SelectObject(hdcBuffer, hFont);
@@ -1029,16 +1047,14 @@ void drawTextEffectMapListSlider(HDC hdc, HDC hdcBuffer, char * fieldName, effec
 
 	DrawText(hdcBuffer, fullField, -1, &textBox, DT_SINGLELINE);
 
-	drawNewGameText(hdcBuffer, &textBox, xOff + 30 + size.cx + (thisAbilityCreationInstance->abilityTypeBox->fixedWidth / 2) + 5, yOff + currentDrawHeight + 5, effect->type);
+	drawNewGameFormText(hdcBuffer, &textBox, xOff + 34 + typeBoxOffset, yOff + currentDrawHeight + 38, effect->type);
 
 	SelectObject(hdcBuffer, oldFont);
 	DeleteObject(hFont);
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
-void drawEffectMapListSlider(HDC hdc, HDC hdcBuffer, char * fieldName, effect_types type, int isDR, int currentDrawHeight, effectAndManaMapList * mapList, int isActive){
-	int xOff = thisAbilityCreationInstance->creationWindow->x;
-	int yOff = thisAbilityCreationInstance->creationWindow->y + 80;
+void drawEffectMapListSlider(HDC hdc, HDC hdcBuffer, int xOff, int yOff, char * fieldName, effect_types type, int isDR, int currentDrawHeight, effectAndManaMapList * mapList){
 	char fullField[256];
 
 	RECT textBox;
@@ -1072,38 +1088,28 @@ void drawEffectMapListSlider(HDC hdc, HDC hdcBuffer, char * fieldName, effect_ty
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 34, yOff + currentDrawHeight + 33, slider);
 	}
 
-	if(isActive){
+	if(thisAbilityCreationInstance->selectedType == type){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 41 + (27 * mapList->selectedIndex), yOff + currentDrawHeight + 33, thisAbilityCreationInstance->abilityEntryEdit);
 	}else{
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 41 + (27 * mapList->selectedIndex), yOff + currentDrawHeight + 33, thisAbilityCreationInstance->abilityEntrySelect);
 	}
-
 }
 
-void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, effect_types type, char * fieldName, int isDR, effectAndManaMapList * mapList, int * currentDrawHeight){
+void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, effect_types type, int xOff, int yOff, char * fieldName, int isDR, effectAndManaMapList * mapList, int * currentDrawHeight){
 	if(isEnabled){
 		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex && (*currentDrawHeight + 82) < thisAbilityCreationInstance->EFFECT_FIELD_DRAW_HEIGHT){
-			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
-				setAbilityCreationSelectedType(type);
-			}
-
-			drawEffectMapListSlider(hdc, hdcBuffer, fieldName, type, isDR, *currentDrawHeight, mapList, (thisAbilityCreationInstance->effectCurrentIndex == *effectIndex));
-
+			drawEffectMapListSlider(hdc, hdcBuffer, xOff, yOff, fieldName, type, isDR, *currentDrawHeight, mapList);
 			*currentDrawHeight += 82;
 		}
 		(*effectIndex)++;
 	}
 }
 
-void processTypeMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, effect_types type, char * fieldName, int isDR, typeAndManaMapList * mapList, int * currentDrawHeight){
+void processTypeMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, effect_types type, int xOff, int yOff, char * fieldName, int isDR, typeAndManaMapList * mapList, int * currentDrawHeight){
 	if(isEnabled){
-		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex && (*currentDrawHeight + 56) < thisAbilityCreationInstance->EFFECT_FIELD_DRAW_HEIGHT){
-			if(thisAbilityCreationInstance->effectCurrentIndex == *effectIndex){
-				setAbilityCreationSelectedType(type);
-			}
-
-			drawTextEffectMapListSlider(hdc, hdcBuffer, fieldName, type, isDR, *currentDrawHeight, mapList, (thisAbilityCreationInstance->effectCurrentIndex == *effectIndex));
-			*currentDrawHeight += 56;
+		if(*effectIndex >= thisAbilityCreationInstance->effectStartingIndex && *effectIndex < thisAbilityCreationInstance->effectEndingIndex && (*currentDrawHeight + 82) < thisAbilityCreationInstance->EFFECT_FIELD_DRAW_HEIGHT){
+			drawTextEffectMapListSlider(hdc, hdcBuffer, xOff, yOff, fieldName, type, isDR, *currentDrawHeight, mapList);
+			*currentDrawHeight += 82;
 		}
 		(*effectIndex)++;
 	}
@@ -1162,20 +1168,509 @@ char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map){
 	return toReturn;
 }
 
+int abilityEffectValue(effectAndManaMapList * effect){
+	if(effect != NULL){
+		return effect->effectAndManaArray[effect->selectedIndex]->effectMagnitude;
+	}
+
+	return 0;
+}
+
+void updateAbilityCreateSelectedType(int goingUp){
+	switch(thisAbilityCreationInstance->selectedType){
+	case ABILITY_TYPE:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_RANGE;
+					break;
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_RANGE;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_RANGE;
+					break;
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_RANGE;
+					break;
+			}
+		break;
+	case ABILITY_RANGE:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_AC;
+					break;
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_DICE_DAMAGE;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_TARGETED;
+					break;
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_TYPE : ABILITY_EXTRA_ATTACK;
+					break;
+			}
+		break;
+	case ABILITY_TARGETED:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_RANGE : ABILITY_DICE_DAMAGE;
+					break;
+			}
+		break;
+	case ABILITY_EXTRA_ATTACK:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_RANGE : ABILITY_DICE_DAMAGE;
+					break;
+			}
+		break;
+	case ABILITY_DICE_DAMAGE:
+			if(!goingUp){
+				if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->diceDamage) > 0){
+					thisAbilityCreationInstance->selectedType = ABILITY_DICE_DAMAGE_MULTIPLIER;
+				}else{
+					thisAbilityCreationInstance->selectedType = ABILITY_DAMAGE;
+				}
+				break;
+			}
+
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+					thisAbilityCreationInstance->selectedType = ABILITY_RANGE;
+					break;
+				case 'i':
+					thisAbilityCreationInstance->selectedType = ABILITY_EXTRA_ATTACK;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = ABILITY_TARGETED;
+					break;
+			}
+		break;
+	case ABILITY_DICE_DAMAGE_MULTIPLIER:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DICE_DAMAGE : ABILITY_DAMAGE;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DICE_DAMAGE : ABILITY_DAMAGE;
+					break;
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DICE_DAMAGE : ABILITY_DAMAGE;
+					break;
+			}
+		break;
+	case ABILITY_DAMAGE:
+			if(goingUp){
+				if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->diceDamage) > 0){
+					thisAbilityCreationInstance->selectedType = ABILITY_DICE_DAMAGE_MULTIPLIER;
+				}else{
+					thisAbilityCreationInstance->selectedType = ABILITY_DICE_DAMAGE;
+				}
+				break;
+			}
+
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+					thisAbilityCreationInstance->selectedType = ABILITY_STATUS;
+					break;
+				case 't':
+				case 'i':
+					if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->diceDamage) > 0 || abilityEffectValue(thisAbilityCreationInstance->abilityInsance->damage) > 0){
+						thisAbilityCreationInstance->selectedType = ABILITY_DAMAGE_TYPE;
+					}else{
+						thisAbilityCreationInstance->selectedType = ABILITY_STATUS;
+					}
+					break;
+			}
+		break;
+	case ABILITY_DAMAGE_TYPE:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DAMAGE : ABILITY_STATUS;
+					break;
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DAMAGE : ABILITY_STATUS;
+					break;
+			}
+		break;
+	case ABILITY_STATUS:
+			if(goingUp){
+				switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+					thisAbilityCreationInstance->selectedType = ABILITY_DAMAGE;
+					break;
+				case 't':
+				case 'i':
+					if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->diceDamage) > 0 || abilityEffectValue(thisAbilityCreationInstance->abilityInsance->damage) > 0){
+						thisAbilityCreationInstance->selectedType = ABILITY_DAMAGE_TYPE;
+					}else{
+						thisAbilityCreationInstance->selectedType = ABILITY_DAMAGE;
+					}
+					break;
+				}
+			}else{
+				char type[16];
+				strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
+
+				if(strcmp(type, "None") != 0){
+					thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DICE_DURATION;
+				}else{
+					if(thisAbilityCreationInstance->abilityInsance->type == 'i'){
+						thisAbilityCreationInstance->selectedType = ABILITY_ACTIONS;
+					}else{
+						if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeLine) > 0){
+							thisAbilityCreationInstance->selectedType = ABILITY_AOE_LINE;
+						}else{
+							thisAbilityCreationInstance->selectedType = ABILITY_AOE_NOVA;
+						}
+					}
+				}
+			}
+
+		break;
+	case ABILITY_STATUS_DICE_DURATION:
+		if(goingUp){
+			thisAbilityCreationInstance->selectedType = ABILITY_STATUS;
+		}else{
+			thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DURATION;
+		}
+		break;
+	case ABILITY_STATUS_DURATION:
+		if(goingUp){
+			thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DICE_DURATION;
+		}else{
+			char type[16];
+			strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
+
+
+			if(strcmp(type, "Poison") == 0 || strcmp(type, "Burn") == 0 || strcmp(type, "Bleed") == 0){
+				thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DICE_DAMAGE;
+			}else{
+				if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeLine) > 0){
+					thisAbilityCreationInstance->selectedType = ABILITY_AOE_LINE;
+				}else{
+					thisAbilityCreationInstance->selectedType = ABILITY_AOE_NOVA;
+				}
+			}
+		}
+		break;
+	case ABILITY_STATUS_DICE_DAMAGE:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_STATUS_DURATION : ABILITY_STATUS_DAMAGE;
+		break;
+	case ABILITY_STATUS_DAMAGE:
+		if(goingUp){
+			thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DICE_DAMAGE;
+		}else{
+			if(thisAbilityCreationInstance->abilityInsance->type == 'i'){
+				thisAbilityCreationInstance->selectedType = ABILITY_ACTIONS;
+			}else{
+				if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeLine) > 0){
+					thisAbilityCreationInstance->selectedType = ABILITY_AOE_LINE;
+				}else{
+					thisAbilityCreationInstance->selectedType = ABILITY_AOE_NOVA;
+				}
+			}
+		}
+
+		break;
+	case ABILITY_AOE_NOVA:
+		if(!goingUp){
+			if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeNova) > 0){
+				thisAbilityCreationInstance->selectedType = ABILITY_DURATION;
+			}else{
+				thisAbilityCreationInstance->selectedType = ABILITY_AOE_LINE;
+			}
+		}else{
+			char type[16];
+			strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
+			if(strcmp(type, "None") != 0){
+				if(strcmp(type, "Poison") == 0 || strcmp(type, "Burn") == 0 || strcmp(type, "Bleed") == 0){
+					thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DAMAGE;
+				}else{
+					thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DURATION;
+				}
+			}else{
+				thisAbilityCreationInstance->selectedType = ABILITY_STATUS;
+			}
+		}
+		break;
+	case ABILITY_AOE_LINE:
+		if(!goingUp){
+			thisAbilityCreationInstance->selectedType = ABILITY_DURATION;
+		}else{
+			if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeLine) > 0){
+				char type[16];
+				strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
+				if(strcmp(type, "None") != 0){
+					if(strcmp(type, "Poison") == 0 || strcmp(type, "Burn") == 0 || strcmp(type, "Bleed") == 0){
+						thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DAMAGE;
+					}else{
+						thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DURATION;
+					}
+				}else{
+					thisAbilityCreationInstance->selectedType = ABILITY_STATUS;
+				}
+			}else{
+				thisAbilityCreationInstance->selectedType = ABILITY_AOE_NOVA;
+			}
+		}
+		break;
+	case ABILITY_DURATION:
+		if(goingUp){
+			if(abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeNova) > 0){
+				thisAbilityCreationInstance->selectedType = ABILITY_AOE_NOVA;
+			}else{
+				thisAbilityCreationInstance->selectedType = ABILITY_AOE_LINE;
+			}
+		}else{
+			thisAbilityCreationInstance->selectedType = ABILITY_DURATION_MOD;
+		}
+		break;
+	case ABILITY_DURATION_MOD:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DURATION : ABILITY_ACTIONS;
+		break;
+	case ABILITY_ACTIONS:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DURATION_MOD : ABILITY_AC;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DURATION_MOD : ABILITY_AC;
+					break;
+				case 'i':
+					if(goingUp){
+						char type[16];
+						strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
+
+						if(strcmp(type, "None") != 0){
+							if(strcmp(type, "Poison") == 0 || strcmp(type, "Burn") == 0 || strcmp(type, "Bleed") == 0){
+								thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DAMAGE;
+							}else{
+								thisAbilityCreationInstance->selectedType = ABILITY_STATUS_DURATION;
+							}
+						}else{
+							thisAbilityCreationInstance->selectedType = ABILITY_STATUS;
+						}
+					}else{
+						thisAbilityCreationInstance->selectedType = ABILITY_ATTACK;
+					}
+					break;
+			}
+		break;
+	case ABILITY_AC:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_RANGE : ABILITY_ATTACK;
+					break;
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_ACTIONS : ABILITY_ATTACK;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_ACTIONS : ABILITY_ATTACK;
+					break;
+			}
+		break;
+	case ABILITY_ATTACK:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+				case 'd':
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_AC : ABILITY_DAMAGE_MOD;
+					break;
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_ACTIONS : ABILITY_DAMAGE_MOD;
+					break;
+			}
+		break;
+	case ABILITY_DAMAGE_MOD:
+			thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_ATTACK : ABILITY_MVMT;
+		break;
+	case ABILITY_MVMT:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DAMAGE_MOD : ABILITY_BASE_HP;
+					break;
+				case 'd':
+				case 't':
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DAMAGE_MOD : ABILITY_DICE_HP;
+					break;
+			}
+		break;
+	case ABILITY_DICE_HP:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+				case 't':
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_MVMT : ABILITY_HP;
+					break;
+			}
+		break;
+	case ABILITY_HP:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'd':
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DICE_HP : ABILITY_BASE_HP;
+					break;
+				case 'i':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_DICE_HP : ABILITY_HP;
+					break;
+			}
+		break;
+	case ABILITY_BASE_HP:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_MVMT : ABILITY_BASE_MANA;
+					break;
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_HP : ABILITY_BASE_MANA;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_HP : ABILITY_BASE_MANA;
+					break;
+			}
+		break;
+	case ABILITY_BASE_MANA:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BASE_HP : ABILITY_BASE_FOOD;
+					break;
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BASE_HP : ABILITY_FOOD;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BASE_HP : ABILITY_BLUNT_DR;
+					break;
+			}
+		break;
+	case ABILITY_FOOD:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BASE_MANA : ABILITY_LOS;
+		break;
+	case ABILITY_BASE_FOOD:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BASE_MANA : ABILITY_LOS;
+		break;
+	case ABILITY_LOS:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BASE_FOOD : ABILITY_BLUNT_DR;
+					break;
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_FOOD : ABILITY_BLUNT_DR;
+					break;
+			}
+		break;
+	case ABILITY_BLUNT_DR:
+			switch(thisAbilityCreationInstance->abilityInsance->type){
+				case 'p':
+				case 'd':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_LOS : ABILITY_CHOP_DR;
+					break;
+				case 't':
+					thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BASE_MANA : ABILITY_CHOP_DR;
+					break;
+			}
+		break;
+	case ABILITY_CHOP_DR:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_BLUNT_DR : ABILITY_PIERCE_DR;
+		break;
+	case ABILITY_PIERCE_DR:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_CHOP_DR : ABILITY_SLASH_DR;
+		break;
+	case ABILITY_SLASH_DR:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_PIERCE_DR : ABILITY_EARTH_DR;
+		break;
+	case ABILITY_EARTH_DR:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_SLASH_DR : ABILITY_FIRE_DR;
+		break;
+	case ABILITY_FIRE_DR:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_EARTH_DR : ABILITY_WATER_DR;
+		break;
+	case ABILITY_WATER_DR:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_FIRE_DR : ABILITY_LIGHTNING_DR;
+		break;
+	case ABILITY_LIGHTNING_DR:
+		thisAbilityCreationInstance->selectedType = (goingUp) ? ABILITY_WATER_DR : ABILITY_LIGHTNING_DR;
+		break;
+	}
+}
+
+int totalVisableFields(){
+	int numFields = thisAbilityCreationInstance->abilityInsance->numEnabledEffects;
+
+	//check for damage type
+	if(((thisAbilityCreationInstance->abilityInsance->diceDamageEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->diceDamage) == 0)
+			&& (thisAbilityCreationInstance->abilityInsance->damageEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->damage) == 0))
+			&& thisAbilityCreationInstance->abilityInsance->type != 'd'){
+		numFields--;
+	}
+
+	//check for dice damage multiplier
+	if(thisAbilityCreationInstance->abilityInsance->diceDamageEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->diceDamage) == 0){
+		numFields--;
+	}
+
+	//check for status sub options
+	if(thisAbilityCreationInstance->abilityInsance->statusEnabled ){
+		char type[16];
+		strcpy(type, thisAbilityCreationInstance->abilityInsance->status->typeAndManaArray[thisAbilityCreationInstance->abilityInsance->status->selectedIndex]->type);
+
+		if(strcmp(type, "None") != 0){
+			if(strcmp(type, "Poison") != 0 && strcmp(type, "Burn") != 0 && strcmp(type, "Bleed") != 0){
+				numFields -= 2;
+			}
+		}else{
+			numFields -= 4;
+		}
+	}
+
+	//check for one aoe field disabled
+	if((thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeNova) > 0) || (thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeLine) > 0)){
+		numFields--;
+	}
+
+	return numFields;
+}
+
+//void abilityCreateMoveUp(){
+//	updateAbilityCreateSelectedType(1);
+//
+//	if(thisAbilityCreationInstance->effectIndex - 1 < thisAbilityCreationInstance->effectIndexOffset && thisAbilityCreationInstance->effectIndexOffset - 1 >= 0){
+//		thisAbilityCreationInstance->effectIndexOffset--;
+//		thisAbilityCreationInstance->effectIndex--;
+//	}else if(thisAbilityCreationInstance->effectIndex - 1 >= thisAbilityCreationInstance->effectIndexOffset){
+//		thisAbilityCreationInstance->effectIndex--;
+//	}
+//}
+//
+//void abilityCreateMoveDown(){
+//	updateAbilityCreateSelectedType(0);
+//
+//	int upperIndex = thisAbilityCreationInstance->effectIndexOffset + thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
+//
+//	if(thisAbilityCreationInstance->effectIndex + 1 > upperIndex && upperIndex + 1 < totalVisableFields()){
+//		thisAbilityCreationInstance->effectIndexOffset++;
+//		thisAbilityCreationInstance->effectIndex++;
+//	}else if(thisAbilityCreationInstance->effectIndex + 1 < upperIndex){
+//		thisAbilityCreationInstance->effectIndex++;
+//	}
+//}
+
 void selectNextEffect(){
-	if(thisAbilityCreationInstance->effectCurrentIndex + 1 == thisAbilityCreationInstance->effectEndingIndex &&
-			thisAbilityCreationInstance->effectEndingIndex + 1< thisAbilityCreationInstance->abilityInsance->numEnabledEffects){
+	updateAbilityCreateSelectedType(0);
+
+	if(thisAbilityCreationInstance->effectCurrentIndex + 1 > thisAbilityCreationInstance->effectEndingIndex && thisAbilityCreationInstance->effectEndingIndex + 1 <= totalVisableFields()){
 		shiftEffectListUp();
-	} else if(thisAbilityCreationInstance->effectCurrentIndex + 1 < thisAbilityCreationInstance->effectEndingIndex){
+	} else if(thisAbilityCreationInstance->effectCurrentIndex + 1 <= thisAbilityCreationInstance->effectEndingIndex){
 		thisAbilityCreationInstance->effectCurrentIndex++;
 	}
 }
 
 void selectPreviousEffect(){
-	if(thisAbilityCreationInstance->effectCurrentIndex == thisAbilityCreationInstance->effectStartingIndex &&
-			thisAbilityCreationInstance->effectStartingIndex  > 0){
+	updateAbilityCreateSelectedType(1);
+
+	if(thisAbilityCreationInstance->effectCurrentIndex - 1 <= thisAbilityCreationInstance->effectStartingIndex && thisAbilityCreationInstance->effectStartingIndex - 1 >= 0){
 		shiftEffectListDown();
-	} else if(thisAbilityCreationInstance->effectCurrentIndex > -1){
+	}else if(thisAbilityCreationInstance->effectCurrentIndex - 1 >= thisAbilityCreationInstance->effectStartingIndex){
 		thisAbilityCreationInstance->effectCurrentIndex--;
 	}
 }
@@ -1202,7 +1697,7 @@ typeAndManaMapList * getTypeMapListFromEffectType(){
 }
 
 void interpretRightAbilityCreation(){
-	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
+	if(thisAbilityCreationInstance->selectedType != ABILITY_TYPE){
 		effectAndManaMapList * tmpMap = getMapListFromEffectType();
 
 		if(tmpMap == NULL){
@@ -1218,7 +1713,7 @@ void interpretRightAbilityCreation(){
 			increaseEffect(tmpMap);
 		}
 
-	}else if(thisAbilityCreationInstance->effectCurrentIndex == -1){
+	}else{
 		changeAbilityTemplate(1);
 	}
 }
@@ -1228,7 +1723,7 @@ void setAbilityName(char * newName){
 }
 
 void interpretLeftAbilityCreation(int range, int mvmt, int totalHP, int totalMana){
-	if(thisAbilityCreationInstance->effectCurrentIndex >= 0){
+	if(thisAbilityCreationInstance->selectedType != ABILITY_TYPE){
 		effectAndManaMapList * tmpMap = getMapListFromEffectType();
 		if(tmpMap == NULL){
 			typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
@@ -1236,7 +1731,7 @@ void interpretLeftAbilityCreation(int range, int mvmt, int totalHP, int totalMan
 		}else{
 			decreaseEffect(tmpMap, range, mvmt, totalHP, totalMana);
 		}
-	}else if(thisAbilityCreationInstance->effectCurrentIndex == -1){
+	}else{
 		changeAbilityTemplate(-1);
 	}
 }

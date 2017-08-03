@@ -13,7 +13,7 @@ effectAndManaMapList * cloneEffectAndManaMapList(effectAndManaMapList * thisMap)
 ability * createAbilityFromLine(char line[2048]);
 ability * cloneAbility(ability * thisAbility);
 char * getEffectAndManaString(char * propertyName, effectAndManaMapList * map);
-void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, effect_types type, char * fieldName, int isDR, effectAndManaMapList * mapList, int * startingPixelHeight);
+void processEffectMapListRendering(int * effectIndex, int isEnabled, HDC hdc, HDC hdcBuffer, effect_types type, int xOff, int yOff, char * fieldName, int isDR, effectAndManaMapList * mapList, int * startingPixelHeight);
 effectAndManaMapList * getMapListFromEffectType();
 void clearAblitiesView();
 

@@ -11,7 +11,7 @@
 #include<stdlib.h>
 #include"../character_pub_methods.h"
 
-typedef enum {ABILITY_DAMAGE_TYPE, ABILITY_RANGE, ABILITY_TARGETED, ABILITY_EXTRA_ATTACK, ABILITY_DICE_DAMAGE, ABILITY_DICE_DAMAGE_MULTIPLIER,
+typedef enum {ABILITY_TYPE, ABILITY_DAMAGE_TYPE, ABILITY_RANGE, ABILITY_TARGETED, ABILITY_EXTRA_ATTACK, ABILITY_DICE_DAMAGE, ABILITY_DICE_DAMAGE_MULTIPLIER,
 	ABILITY_DAMAGE, ABILITY_STATUS, ABILITY_STATUS_DAMAGE, ABILITY_STATUS_DICE_DAMAGE, ABILITY_STATUS_DICE_DURATION,
 	ABILITY_STATUS_DURATION, ABILITY_AOE_NOVA, ABILITY_AOE_LINE, ABILITY_DURATION, ABILITY_DURATION_MOD, ABILITY_ACTIONS, ABILITY_AC, ABILITY_ATTACK,
 	ABILITY_DAMAGE_MOD, ABILITY_MVMT, ABILITY_DICE_HP, ABILITY_HP, ABILITY_BASE_HP, ABILITY_BASE_MANA, ABILITY_FOOD, ABILITY_BASE_FOOD, ABILITY_LOS,
@@ -154,6 +154,9 @@ typedef struct {
 	int MAX_ABILITY_TEMPLATES;
 	int currentTemplateIndex;
 
+	int effectIndex;
+	int effectIndexOffset;
+
 	int effectStartingIndex;
 	int effectCurrentIndex;
 	int effectEndingIndex;
@@ -178,6 +181,7 @@ typedef struct {
 	fixedCharacter * abilityEntrySelect;
 	fixedCharacter * abilityEntryEdit;
 	fixedCharacter * abilityTypeBox;
+	fixedCharacter * abilityTypeBoxSelected;
 	fixedCharacter * abilitySlider2Un;
 	fixedCharacter * abilitySlider4Un;
 	fixedCharacter * abilitySlider5B;
