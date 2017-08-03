@@ -68,6 +68,7 @@ int freeTimer = 0;
 int inActionMode = 0;
 int actionModeTimer = 0;
 int actionModeTimerTrigger = 5;
+int inOptionalActionMode = 0;
 int drawLock = 0;
 
 int animateMoveSpeed = 5;
@@ -135,10 +136,24 @@ void tryUpdateYShift(shiftData * viewShift, int newY, int gameFieldAreaY){
 	}
 }
 
+void tryEnableOptionalActionMode(){
+	inOptionalActionMode = 1;
+	inActionMode = 1;
+}
+
+void tryDisableOptionalActionMode(){
+	inOptionalActionMode = 0;
+	inActionMode = shouldEnableActionMode();
+}
+
 int shouldEnableActionMode(){
 	int i, individualsPassed = 0;
 	int bounty = getCurrentBounty(player);
 	individual * tmpIndividual;
+
+	if(inOptionalActionMode){
+		return 1;
+	}
 
 	if(thisGroupContainer->enemies->numIndividuals > 0){
 		for(i = 0; i < thisGroupContainer->enemies->MAX_INDIVIDUALS; i++){
@@ -987,6 +1002,13 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case 0x57: //w key (wait)
 			decreaseTurns(player, thisGroupContainer, 1, inActionMode);
 			decreaseFood(player, 0.1);
+			break;
+		case 0x58: //x key (optional action mode)
+			if(inOptionalActionMode){
+				tryDisableOptionalActionMode();
+			}else{
+				tryEnableOptionalActionMode();
+			}
 			break;
 		case 0x5A: //z key (interact)
 			{

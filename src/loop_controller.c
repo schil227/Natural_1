@@ -503,6 +503,8 @@ int abilityViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individua
 			break;
 			case 0x0D: { //enter
 				if(canUseAbility(player,getAbilityToActivate())){
+					tryEnableOptionalActionMode();
+
 					if(useAbility(player,getAbilityToActivate())){
 						removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
 						triggerEventOnDeath(player->ID, player->isPlayer);

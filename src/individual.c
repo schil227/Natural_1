@@ -179,6 +179,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->faction = faction;
 
 	thisIndividual->jumpTarget = 0;
+	thisIndividual->numTurnsInOptionalAction = 0;
 
 	thisIndividual->baseHP = baseHP;
 
@@ -1564,11 +1565,19 @@ void useActiveAbility(individual * thisIndividual, ability * thisAbility){
 	}
 }
 
-
 void endTurn(individual *thisIndividual){
 	printf("player turn ended\n");
 	thisIndividual->hasAttacked = 0;
 	thisIndividual->remainingActions += thisIndividual->totalActions;
+
+	if(thisIndividual->isPlayer){
+		if(thisIndividual->numTurnsInOptionalAction == 1){
+			tryDisableOptionalActionMode();
+			thisIndividual->numTurnsInOptionalAction = 0;
+		}else{
+			thisIndividual->numTurnsInOptionalAction++;
+		}
+	}
 }
 
 int decreaseFood(individual * thisIndividual, double food){
@@ -3449,7 +3458,7 @@ int getAttributeFromActiveAbility(ability * activeAbility, char * attribute){
 			return 0;
 		}
 	} else if(strcmp("range",attribute) == 0 ){
-		if(activeAbility->rangeEnabled && (activeAbility->type == 'p' || activeAbility->type == 'd')){ //only applicable to perminant abilities
+		if(activeAbility->rangeEnabled && (activeAbility->type == 'p' || activeAbility->type == 'd' || activeAbility->type == 'i')){
 			return activeAbility->range->effectAndManaArray[activeAbility->range->selectedIndex]->effectMagnitude;
 		}else{
 			return 0;

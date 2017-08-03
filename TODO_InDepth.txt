@@ -1,7 +1,5 @@
 == TODO In Depth ==
-
 == minor todos ==
--add dark LoS stat to ability
 -make an onDeath function for individuals in general to clear out stuff only they use, such as active items, etc.
 	--Note that on save, active abilities/items wont exist
 	

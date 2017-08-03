@@ -205,6 +205,7 @@ struct individual{
 	int gold;
 
 	int jumpTarget;
+	int numTurnsInOptionalAction;
 
 	int faction;
 	int targetedDuration;
