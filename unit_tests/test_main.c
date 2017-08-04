@@ -150,12 +150,12 @@ actionAITest(individual* testPlayer, groupContainer * testGroupContainer, field*
 
 	testEnemy->activeAbilities->selectedAbility = randOffensiveAbility;
 
-	assert(testPlayer->hp == 18);
+	assert(testPlayer->hp == 15);
 
 	//Fireball player on their space
 	useAbilityOnTargetedSpace(testEnemy, testPlayer, testGroupContainer, testField, 4,1);
 
-	assert(testPlayer->hp == 16);
+	assert(testPlayer->hp == 12);
 
 	testEnemy->targetedIndividual = testPlayer;
 	testEnemy->targetedDuration = 3;
@@ -596,7 +596,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	useAbilityOnIndividualsInAOERange(testPlayer, testPlayer, testGroupContainer, main_test_field, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
 
 	//skelly was killed by a 11 damage roll (2d8)
-	assert(tmpIndividual->hp == -5);
+	assert(tmpIndividual->hp == -7);
 
 	/*
  	 * use instant ability to strike NPC several times, pay with several turns
@@ -621,7 +621,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(!useAbility(testPlayer, getAbilityToActivate()));
 
 	//player healed from diceHP
-	assert(testPlayer->hp == 18);
+	assert(testPlayer->hp == 15);
 
 	srand(8);
 	//consume more rand() to get better throws

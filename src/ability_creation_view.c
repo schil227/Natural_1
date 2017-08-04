@@ -958,7 +958,7 @@ fixedCharacter * getSliderFromType(effect_types type){
 		return thisAbilityCreationInstance->abilitySlider5B;
 
 	case ABILITY_ATTACK:
-		return thisAbilityCreationInstance->abilitySlider7B;
+		return thisAbilityCreationInstance->abilitySlider4Un;
 
 	case ABILITY_DAMAGE_MOD:
 		if(thisAbilityCreationInstance->abilityInsance->type == 'p' || thisAbilityCreationInstance->abilityInsance->type == 't'){
@@ -1070,7 +1070,11 @@ void drawEffectMapListSlider(HDC hdc, HDC hdcBuffer, int xOff, int yOff, char * 
 	if(mapList->selectedIndex == mapList->defaultStartingIndex){
 		sprintf(fullField, "%s", fieldName);
 	}else{
-		sprintf(fullField, "%s: %d, Mana: %d", fieldName, effect->effectMagnitude, effect->manaCost);
+		if(isDR){
+			sprintf(fullField, "%s: %d, Mana: (%.1f)", fieldName, effect->effectMagnitude, ((mapList->selectedIndex - mapList->defaultStartingIndex) / 2.0));
+		}else{
+			sprintf(fullField, "%s: %d, Mana: %d", fieldName, effect->effectMagnitude, effect->manaCost);
+		}
 	}
 
 	HFONT hFont = CreateFont(30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, DEFAULT_QUALITY, 0, "System");

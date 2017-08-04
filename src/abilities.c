@@ -160,7 +160,6 @@ int calculateManaCost(ability * thisAbility, int bonusMana){
 		}
 
 		sum += ceil(DRSum/2.0);
-
 	}
 
 	updateElementSummation(&sum, &hasEffect, thisAbility->diceHPEnabled, thisAbility->diceHP);
@@ -171,8 +170,6 @@ int calculateManaCost(ability * thisAbility, int bonusMana){
 //	if(!hasEffect){
 //		return (-1 - thisAbility->level);
 //	}
-
-
 
 	if(duration > 1){
 		sum  = sum * duration;

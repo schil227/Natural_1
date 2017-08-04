@@ -7,7 +7,6 @@
 - (7/17/17) Rebalance mana value for attributes (e.g. 2 mana for +1 WIS outstrips 2 mana for +1 attack... 3 mana for stat?)
 - (7/22/17) Add expierence and Level up functionality
 - (8/3/17) Minimizing window doesn't come back up
-- (8/3/17) Instant ability: XOR movement with conflicting actions (e.g. attacking)
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
