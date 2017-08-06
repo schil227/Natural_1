@@ -310,6 +310,16 @@ void handleUpOnCharacterInfoView(){
 	if(!inInfoView()){
 		selectNextActiveEffectUp();
 		calculateSkipIndex();
+	}else{
+		if(playerCanLevelUp(thisCharacterInfoView->thisIndividual)){
+			enableLevelUpView(thisCharacterInfoView->thisIndividual);
+		}
+	}
+}
+
+void handleEnterOnCharacterInfoView(){
+	if(inInfoView() && playerCanLevelUp(thisCharacterInfoView->thisIndividual)){
+		enableLevelUpView(thisCharacterInfoView->thisIndividual);
 	}
 }
 
@@ -423,6 +433,10 @@ void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 	drawIndividualDefaultByPixels(hdc, hdcBuffer, tmpIndividual, xOff, yOff + 5, 0);
 
+	if(playerCanLevelUp(tmpIndividual)){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 180, yOff + 5, thisCharacterInfoView->levelUpArrow);
+	}
+
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 	textBox.left = xOff + 20;
 
@@ -497,7 +511,7 @@ void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 16;
 
-	sprintf(value, "Food: %d/%d", ((int)tmpIndividual->food), getAttributeSum(tmpIndividual, "baseFood"));
+	sprintf(value, "Food: %d/%d", ((int)tmpIndividual->food), getTotalFood(tmpIndividual));
 	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
 	textBox.top = textBox.top + 16;
 	textBox.bottom = textBox.top + 16;

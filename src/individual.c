@@ -112,8 +112,8 @@ individual *initIndividual(){
 	return toReturn;
 }
 
-int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x,
-		int y, int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int hp, int mana, int food, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
+int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x, int y, int level, int exp, int spread,
+		int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int hp, int mana, int food, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR, int waterDR, int lightningDR,
 		int dialogID, int dialogPortraitID, int fateTokens, int gold, int faction, groupType defaultType, groupType currentType,  int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
 		int isHostileToPlayer, int isFocusedOnPlayer, int isSurrounded, int respawns, int desiredLocationX, int desiredLocationY,
@@ -133,6 +133,10 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 
 	thisIndividual->playerCharacter->thisAnimationContainer = thisAnimationContainer;
 	thisIndividual->playerCharacter->secondaryAnimationContainer = secondaryAnimationContainer;
+
+	thisIndividual->level = level;
+	thisIndividual->exp = exp;
+	thisIndividual->spread = (diceSpread) spread;
 
 	thisIndividual->STR = STR;
 	thisIndividual->DEX = DEX;
@@ -312,6 +316,9 @@ char * getIndividualAsLine(individual * thisIndividual){
 	i += sprintf(line + i, "%d;", thisIndividual->playerCharacter->direction);
 	i += sprintf(line + i, "%d;", thisIndividual->playerCharacter->x);
 	i += sprintf(line + i, "%d;", thisIndividual->playerCharacter->y);
+	i += sprintf(line + i, "%d;", thisIndividual->level);
+	i += sprintf(line + i, "%d;", thisIndividual->exp);
+	i += sprintf(line + i, "%d;", (int) thisIndividual->spread);
 
 	i += sprintf(line + i, "%d;", thisIndividual->STR);
 	i += sprintf(line + i, "%d;", thisIndividual->DEX);
@@ -2097,8 +2104,9 @@ void restoreMana(individual * thisIndividual, int mana){
 }
 
 void restoreFood(individual * thisIndividual, int food){
-	if(thisIndividual->food + food >= getAttributeSum(thisIndividual, "baseFood")){
-		thisIndividual->food = getAttributeSum(thisIndividual, "baseFood");
+	int total = getTotalFood(thisIndividual);
+	if(thisIndividual->food + food >= total){
+		thisIndividual->food = total;
 	}else{
 		thisIndividual->food += food;
 	}
@@ -2114,6 +2122,10 @@ void restoreFood(individual * thisIndividual, int food){
 
 int getTotalMana(individual * thisIndividual){
 	return getAttributeSum(thisIndividual, "baseMana") + 2 * getAttributeSum(thisIndividual, "WILL");
+}
+
+int getTotalFood(individual * thisIndividual){
+	return getAttributeSum(thisIndividual, "baseFood") + 50 *  getAttributeSum(thisIndividual, "CON");
 }
 
 int attemptToBuyItem(item * thisItem, individual * thisIndividual){
@@ -3090,6 +3102,38 @@ int tryPickPocketIndividualShowView(individual * player, individual * targetIndi
 
 		return 0;
 	}
+}
+
+int getDiceSpread(individual * thisIndiviudal, char type){
+	int toReturn;
+
+	switch(thisIndiviudal->spread){
+		case SPREAD_12_4:
+			toReturn = (type == 'h') ? 12 : 4;
+			break;
+		case SPREAD_10_6:
+			toReturn = (type == 'h') ? 10 : 6;
+			break;
+		case SPREAD_8_8:
+			toReturn = (type == 'h') ? 8 : 8;
+			break;
+		case SPREAD_6_10:
+			toReturn = (type == 'h') ? 6 : 10;
+			break;
+		case SPREAD_4_12:
+			toReturn = (type == 'h') ? 4 : 12;
+			break;
+	}
+
+	return toReturn;
+}
+
+int playerCanLevelUp(individual * player){
+	return player->exp >= player->level * 100;
+}
+
+void addExpToPlayer(int exp, individual * player){
+	player->exp += exp;
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

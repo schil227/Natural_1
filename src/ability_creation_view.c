@@ -958,7 +958,11 @@ fixedCharacter * getSliderFromType(effect_types type){
 		return thisAbilityCreationInstance->abilitySlider5B;
 
 	case ABILITY_ATTACK:
-		return thisAbilityCreationInstance->abilitySlider4Un;
+		if(thisAbilityCreationInstance->abilityInsance->type == 'i'){
+			return thisAbilityCreationInstance->abilitySlider4Un;
+		}else{
+			return thisAbilityCreationInstance->abilitySlider7B;
+		}
 
 	case ABILITY_DAMAGE_MOD:
 		if(thisAbilityCreationInstance->abilityInsance->type == 'p' || thisAbilityCreationInstance->abilityInsance->type == 't'){

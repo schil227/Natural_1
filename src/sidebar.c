@@ -131,7 +131,7 @@ void drawThisSideBar(HDC hdc, HDC hdcBuffer, RECT * prc, individual * player){
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 
-	totalFood = getAttributeSum(player, "baseFood");
+	totalFood = getTotalFood(player);
 
 	foodStr[0] = '\0';
 	sprintf(foodStr, "/%d", totalFood);

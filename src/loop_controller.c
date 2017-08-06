@@ -644,6 +644,9 @@ int characterInfoViewLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 			handleDownOnCharacterInfoView();
 		}
 			break;
+		case 0x0D: //enter
+			handleEnterOnCharacterInfoView();
+			break;
 		case 0x1B: //escape
 		{
 			disableCharacterInfoView();
@@ -1267,3 +1270,46 @@ int mainMenuLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 
 	return 0;
 }
+
+int levelUpLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	switch (msg) {
+		case WM_KEYDOWN:{
+			switch(LOWORD(wParam)){
+			case 0x0D://enter
+				interpretLevelUpViewEnter();
+				break;
+			case 0x1B:
+				interpretLevelUpViewEscape();
+				break;
+			case 0x38:
+			case 0x68: //'8'
+				interpretLevelUpViewVertical(1);
+				break;
+			case 0x32:
+			case 0x62: //'2' key
+				interpretLevelUpViewVertical(0);
+				break;
+			case 0x34:
+			case 0x64: //'4'
+				interpretLevelUpViewHorizontal(1);
+				break;
+			case 0x36:
+			case 0x66: //'6' key
+				interpretLevelUpViewHorizontal(0);
+				break;
+			}
+			break;
+		}
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+
+	return 0;
+}
+

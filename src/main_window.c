@@ -429,6 +429,10 @@ void drawGameMode(HDC hdc, RECT* prc) {
 		drawPauseWindow(hdc, hdcBuffer, prc);
 	}
 
+	if(inLevelUpView()){
+		drawLevelUpView(hdc, hdcBuffer, prc);
+	}
+
 	if(inGameMenuMode()){
 		drawGameMenu(hdc, hdcBuffer, prc);
 	}
@@ -677,6 +681,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	initThisCursor(1508);
 	initLookView(1519, 1520);
 	initCharacterInfoView();
+	initLevelUpView();
 	initPauseView(1523);
 	initWorldMapController(10003);
 
@@ -771,6 +776,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initThisCursor(1508);
 		initLookView(1519, 1520);
 		initCharacterInfoView();
+		initLevelUpView();
 		initPauseView(1523);
 		initWorldMapController(10003);
 
@@ -895,7 +901,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x46: //f key
 			{
-				destroyAndLoad(hwnd, 0, 0);
+				addExpToPlayer(50, player);
 			}
 			break;
 		case 0x47://g key (get)
@@ -1386,6 +1392,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		return gameMenuLoop(hwnd, msg, wParam, lParam);
 	}
 
+	if(inLevelUpView()){
+		return levelUpLoop(hwnd, msg, wParam, lParam);
+	}
 
 	//Ignore inputs until drawing is finished.
 	if(postMoveMode){
@@ -1574,8 +1583,10 @@ void runTests(){
 	initSoundPlayerInstance();
 	initLookView(1519, 1520);
 	initCharacterInfoView();
+	initLevelUpView();
 	initPauseView(1523);
 	initWorldMapController(10003);
+
 
 	animationContainer * playerAnimationContainer = initAnimationContainer();
 	animationContainer * secondaryAnimationContainer = NULL;

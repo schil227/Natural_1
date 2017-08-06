@@ -23,6 +23,8 @@ typedef enum { CRIME_NONE, CRIME_STEALING, CRIME_PICKPOCKETING, CRIME_ASSULT, CR
 
 typedef enum {DIALOG_DEFAULT, DIALOG_CRIME_WITNESS, DIALOG_HOSTILE_TO_PLAYER, DIALOG_ATTACKED_BY_PLAYER, DIALOG_STOLEN_FROM_BY_PLAYER, DIALOG_AFRAID_OF_PLAYER} dialogType;
 
+typedef enum {SPREAD_12_4, SPREAD_10_6, SPREAD_8_8, SPREAD_6_10, SPREAD_4_12} diceSpread;
+
 typedef struct{
 	cord * cords[300];
 	int numCords;
@@ -140,6 +142,10 @@ struct individual{
 	char name[32];
 	int ID;
 	int isPlayer;
+	int level;
+	int exp;
+
+	diceSpread spread;
 
 	inventory * backpack;
 	activeItemList * activeItems;

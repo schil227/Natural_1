@@ -65,7 +65,7 @@ void nextAvailableIndividualIndex(individualGroup * thisGroup){
 }
 
 void createIndividualFromLine(individual * newIndividual, char * line){
-	int ID,isPlayer,r,g,b,direction,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
+	int ID,isPlayer,r,g,b,direction,level,exp,spread,x,y,baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,range,mvmt,los,darkLos,isSneaking,
 	bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR,dialogID,dialogPortraitID,fateTokens,gold,
 	STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,baseDam,faction,hp,mana,food;
 	int offensiveness, abilityAffinity, tacticalness, cowardness, isHostileToPlayer, isFocusedOnPlayer, isSurrounded, respawns, desiredLocationX, desiredLocationY;
@@ -104,6 +104,13 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	x = atoi(value);
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	y = atoi(value);
+
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	level = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	exp = atoi(value);
+	value = strtok_r(NULL,";",&strtok_save_pointer);
+	spread = atoi(value);
 
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	STR = atoi(value);
@@ -286,7 +293,7 @@ void createIndividualFromLine(individual * newIndividual, char * line){
 	secondaryAnimationContainer = cloneAnimationContainer(thisAnimationContainer);
 
 	dialogID = loadOrAddIndividualDialog(ID, dialogID, 0);
-	if(defineIndividual(newIndividual,ID,isPlayer,RGB(r,g,b),name,direction,x,y,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,hp, mana, food, baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
+	if(defineIndividual(newIndividual,ID,isPlayer,RGB(r,g,b),name,direction,x,y,level,exp,spread,STR,DEX,CON,WILL,INT,WIS,CHR,LUCK,hp, mana, food, baseHP,totalActions,baseMana,ac,attack,maxDam,minDam,baseDam,critType,range,mvmt,los,darkLos,isSneaking,
 			bluntDR,chopDR,slashDR,pierceDR,earthDR,fireDR,waterDR,lightningDR, dialogID, dialogPortraitID, fateTokens, gold, faction, defaultType, currentType, offensiveness, abilityAffinity, tacticalness, cowardness,
 			isHostileToPlayer, isFocusedOnPlayer, isSurrounded, respawns, desiredLocationX, desiredLocationY, thisDialog, &loadedAbilities, thisAnimationContainer, secondaryAnimationContainer)){
 		printf("failed making new individual\n");

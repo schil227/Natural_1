@@ -107,6 +107,10 @@ void cloneNewGameIndividual(){
 	strcpy(newGameClone->name, basePlayer->name);
 	newGameClone->isPlayer = 1;
 
+	newGameClone->level = 1;
+	newGameClone->exp = 0;
+	newGameClone->spread = basePlayer->spread;
+
 	newGameClone->STR = basePlayer->STR;
 	newGameClone->DEX = basePlayer->DEX;
 	newGameClone->CON = basePlayer->CON;
@@ -1069,9 +1073,10 @@ void newGameAbilityMenuInterpretEnter(){
 				}
 			}
 
-			thisMainMenu->newGame->newPlayer->hp = getAttributeSum(thisMainMenu->newGame->newPlayer, "baseHP");
-			thisMainMenu->newGame->newPlayer->mana = getAttributeSum(thisMainMenu->newGame->newPlayer, "baseMana");
-			thisMainMenu->newGame->newPlayer->food = getAttributeSum(thisMainMenu->newGame->newPlayer, "baseFood");
+			thisMainMenu->newGame->newPlayer->hp = getTotalHP(thisMainMenu->newGame->newPlayer);
+			thisMainMenu->newGame->newPlayer->mana = getTotalMana(thisMainMenu->newGame->newPlayer);
+			thisMainMenu->newGame->newPlayer->food =  getTotalFood(thisMainMenu->newGame->newPlayer);
+			thisMainMenu->newGame->newPlayer->spread = thisMainMenu->newGame->currentSpread;
 
 			thisMainMenu->newGame->newPlayer->ID = 1;
 			setPlayer(thisMainMenu->newGame->newPlayer);
@@ -1340,7 +1345,7 @@ void drawNewGameFormText(HDC hdcBuffer, RECT * rect, int startX, int startY, cha
 	rect->top = startY;
 	rect->left = startX - (size.cx / 2);
 	rect->bottom = rect->top + 30;
-	rect->right = rect->left + 150;
+	rect->right = rect->left + 300;
 
 	DrawText(hdcBuffer, text, -1, rect, DT_SINGLELINE);
 }
