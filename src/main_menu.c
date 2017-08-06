@@ -1344,7 +1344,7 @@ void drawNewGameFormText(HDC hdcBuffer, RECT * rect, int startX, int startY, cha
 
 	rect->top = startY;
 	rect->left = startX - (size.cx / 2);
-	rect->bottom = rect->top + 30;
+	rect->bottom = rect->top + 50;
 	rect->right = rect->left + 300;
 
 	DrawText(hdcBuffer, text, -1, rect, DT_SINGLELINE);
