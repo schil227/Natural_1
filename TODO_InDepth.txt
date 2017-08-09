@@ -1,4 +1,10 @@
 == TODO In Depth ==
+abiltiy upgrading:
+-destroy levelUpAbilityOriginal where applicable
+-only upgrade abilities once, allow re-editing and adding of bonus mana.
+
+
+
 == minor todos ==
 -make an onDeath function for individuals in general to clear out stuff only they use, such as active items, etc.
 	--Note that on save, active abilities/items wont exist

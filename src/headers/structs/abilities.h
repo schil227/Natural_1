@@ -324,6 +324,7 @@ typedef struct {
 	char descriptionInstantBaseHp[256];
 
 	ability * abilityInsance;
+	ability * abilityLevelUpOriginal;
 } abilityCreationInstance;
 
 typedef struct{

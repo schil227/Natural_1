@@ -221,7 +221,7 @@ ability * getTemplateAbility(int ID){
 	return NULL;
 }
 
-void enableAbilityCreateMode(int bonusMana, abilityCreationMode createMode, creation_modes createModeType){
+void enableAbilityCreateMode(int bonusMana, abilityCreationMode createMode, creation_modes createModeType, ability * abilityToUpgrade){
 	thisAbilityCreationInstance->createMode = createMode;
 	thisAbilityCreationInstance->mode = createModeType;
 	thisAbilityCreationInstance->bonusMana = bonusMana;
@@ -233,7 +233,15 @@ void enableAbilityCreateMode(int bonusMana, abilityCreationMode createMode, crea
 		free(thisAbilityCreationInstance->abilityInsance);
 	}
 
-	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]);
+	if(createModeType == LEVELUP_ABILITY){
+		thisAbilityCreationInstance->abilityInsance = abilityToUpgrade;
+		thisAbilityCreationInstance->abilityLevelUpOriginal = cloneAbility(abilityToUpgrade);
+	}else{
+		thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]);
+	}
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+
 	thisAbilityCreationInstance->inCreateMode = 1;
 }
 
@@ -1632,7 +1640,7 @@ int totalVisableFields(){
 	}
 
 	//check for one aoe field disabled
-	if((thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeNova) > 0) || (thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeLine) > 0)){
+	if((thisAbilityCreationInstance->abilityInsance->aoeNovaEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeNova) > 0) || (thisAbilityCreationInstance->abilityInsance->aoeLineEnabled && abilityEffectValue(thisAbilityCreationInstance->abilityInsance->aoeLine) > 0)){
 		numFields--;
 	}
 
@@ -1704,25 +1712,56 @@ typeAndManaMapList * getTypeMapListFromEffectType(){
 	}
 }
 
+typeAndManaMapList * getTypeMapListFromEffectTypeUpgradeClone(){
+	switch(thisAbilityCreationInstance->selectedType){
+	case ABILITY_DAMAGE_TYPE:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->damageType;
+	case ABILITY_STATUS:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->status;
+	}
+}
+
 void interpretRightAbilityCreation(){
 	if(thisAbilityCreationInstance->selectedType != ABILITY_TYPE){
-		effectAndManaMapList * tmpMap = getMapListFromEffectType();
+		if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
 
-		if(tmpMap == NULL){
-			typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
+			effectAndManaMapList * tmpMap = getMapListFromEffectType();
 
-			if(tmpTypeMap == NULL){
-				cwrite("!! selectedType NOT FOUND !!");
+			if(tmpMap == NULL){
+				if(thisAbilityCreationInstance->selectedType != ABILITY_DAMAGE_TYPE){
+					typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
+
+					if(tmpTypeMap == NULL){
+						cwrite("!! selectedType NOT FOUND !!");
+					}else{
+						selectNextType(tmpTypeMap);
+	//					trySelectNextTypeUpgrade(tmpTypeMap, getTypeMapListFromEffectTypeUpgradeClone());
+					}
+				}
 			}else{
-				selectNextType(tmpTypeMap);
+				tryIncreaseUpgradeEffect(tmpMap, getMapListFromEffectTypeUpgradeClone());
 			}
 
 		}else{
-			increaseEffect(tmpMap);
-		}
+			effectAndManaMapList * tmpMap = getMapListFromEffectType();
 
+			if(tmpMap == NULL){
+				typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
+
+				if(tmpTypeMap == NULL){
+					cwrite("!! selectedType NOT FOUND !!");
+				}else{
+					selectNextType(tmpTypeMap);
+				}
+
+			}else{
+				increaseEffect(tmpMap);
+			}
+		}
 	}else{
-		changeAbilityTemplate(1);
+		if(thisAbilityCreationInstance->mode != LEVELUP_ABILITY){
+			changeAbilityTemplate(1);
+		}
 	}
 }
 
@@ -1732,15 +1771,32 @@ void setAbilityName(char * newName){
 
 void interpretLeftAbilityCreation(int range, int mvmt, int totalHP, int totalMana){
 	if(thisAbilityCreationInstance->selectedType != ABILITY_TYPE){
-		effectAndManaMapList * tmpMap = getMapListFromEffectType();
-		if(tmpMap == NULL){
-			typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
-			selectPreviousType(tmpTypeMap);
+		if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
+			effectAndManaMapList * tmpMap = getMapListFromEffectType();
+
+			if(tmpMap == NULL){
+				if(thisAbilityCreationInstance->selectedType != ABILITY_DAMAGE_TYPE){
+					typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
+//					trySelectPreviousTypeUpgrade(tmpTypeMap, getTypeMapListFromEffectTypeUpgradeClone());
+					selectPreviousType(tmpTypeMap);
+				}
+			}else{
+				tryDecreaseUpgradeEffect(tmpMap, getMapListFromEffectTypeUpgradeClone(), range, mvmt, totalHP, totalMana);
+			}
 		}else{
-			decreaseEffect(tmpMap, range, mvmt, totalHP, totalMana);
+			effectAndManaMapList * tmpMap = getMapListFromEffectType();
+
+			if(tmpMap == NULL){
+				typeAndManaMapList * tmpTypeMap = getTypeMapListFromEffectType();
+				selectPreviousType(tmpTypeMap);
+			}else{
+				decreaseEffect(tmpMap, range, mvmt, totalHP, totalMana);
+			}
 		}
 	}else{
-		changeAbilityTemplate(-1);
+		if(thisAbilityCreationInstance->mode != LEVELUP_ABILITY){
+			changeAbilityTemplate(-1);
+		}
 	}
 }
 
@@ -1814,6 +1870,81 @@ effectAndManaMapList * getMapListFromEffectType(){
 		return thisAbilityCreationInstance->abilityInsance->waterDR;
 	case ABILITY_LIGHTNING_DR:
 		return thisAbilityCreationInstance->abilityInsance->lightningDR;
+	}
+
+	return NULL;
+}
+
+effectAndManaMapList * getMapListFromEffectTypeUpgradeClone(){
+	switch(thisAbilityCreationInstance->selectedType){
+	case ABILITY_RANGE:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->range;
+	case ABILITY_TARGETED:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->targeted;
+	case ABILITY_EXTRA_ATTACK:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->extraAttack;
+	case ABILITY_DICE_DAMAGE:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->diceDamage;
+	case ABILITY_DICE_DAMAGE_MULTIPLIER:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->diceDamageMultiplier;
+	case ABILITY_DAMAGE:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->damage;
+	case ABILITY_STATUS_DICE_DAMAGE:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->statusDiceDamage;
+	case ABILITY_STATUS_DAMAGE:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->statusDamage;
+	case ABILITY_STATUS_DICE_DURATION:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->diceStatusDuration;
+	case ABILITY_STATUS_DURATION:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->statusDuration;
+	case ABILITY_AOE_NOVA:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->aoeNova;
+	case ABILITY_AOE_LINE:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->aoeLine;
+	case ABILITY_DURATION:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->duration;
+	case ABILITY_DURATION_MOD:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->durationMod;
+	case ABILITY_ACTIONS:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->actions;
+	case ABILITY_AC:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->ac;
+	case ABILITY_ATTACK:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->attack;
+	case ABILITY_DAMAGE_MOD:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->damageMod;
+	case ABILITY_MVMT:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->mvmt;
+	case ABILITY_HP:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->hp;
+	case ABILITY_DICE_HP:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->diceHP;
+	case ABILITY_BASE_HP:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->baseHP;
+	case ABILITY_BASE_MANA:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->baseMana;
+	case ABILITY_FOOD:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->food;
+	case ABILITY_BASE_FOOD:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->baseFood;
+	case ABILITY_LOS:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->LoS;
+	case ABILITY_BLUNT_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->bluntDR;
+	case ABILITY_CHOP_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->chopDR;
+	case ABILITY_PIERCE_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->pierceDR;
+	case ABILITY_SLASH_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->slashDR;
+	case ABILITY_EARTH_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->earthDR;
+	case ABILITY_FIRE_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->fireDR;
+	case ABILITY_WATER_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->waterDR;
+	case ABILITY_LIGHTNING_DR:
+		return thisAbilityCreationInstance->abilityLevelUpOriginal->lightningDR;
 	}
 
 	return NULL;
@@ -1908,7 +2039,14 @@ void increaseEffect(effectAndManaMapList * selectedMap){
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
+void tryIncreaseUpgradeEffect(effectAndManaMapList * selectedMap, effectAndManaMapList * baseMap){
+	if(selectedMap->selectedIndex + 1 < selectedMap->size
+	 && selectedMap->effectAndManaArray[selectedMap->selectedIndex + 1]->manaCost >= baseMap->effectAndManaArray[baseMap->selectedIndex]->manaCost){
+		selectedMap->selectedIndex++;
+	}
 
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+}
 
 void decreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, int totalHP, int totalMana){
 	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, range, mvmt, totalHP, totalMana)){
@@ -1918,6 +2056,14 @@ void decreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, int
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
+void tryDecreaseUpgradeEffect(effectAndManaMapList * selectedMap, effectAndManaMapList * baseMap, int range, int mvmt, int totalHP, int totalMana){
+	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, range, mvmt, totalHP, totalMana)
+	 && selectedMap->effectAndManaArray[selectedMap->selectedIndex - 1]->manaCost >= baseMap->effectAndManaArray[baseMap->selectedIndex]->manaCost){
+		selectedMap->selectedIndex--;
+	}
+
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+}
 
 void selectNextType(typeAndManaMapList * thisMapList){
 	if(thisMapList->selectedIndex +1 < thisMapList->size){
@@ -1951,6 +2097,18 @@ int canCreateAbility(){
 	return 0;
 }
 
+void interpretCreateAbilityEnter(){
+	if(canCreateAbility()){
+		if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
+			thisAbilityCreationInstance->abilityInsance = NULL;
+			disableAbilityCreateMode();
+		}else{
+			toggleNameMode();
+			toggleAbilityWaitForNameMode();
+		}
+	}
+}
+
 void toggleAbilityWaitForNameMode(){
 	thisAbilityCreationInstance->waitingForName = (thisAbilityCreationInstance->waitingForName + 1) % 2;
 }
@@ -1960,7 +2118,13 @@ int inAbilityWaitForNameMode(){
 }
 
 ability * getNewAbility(){
-	ability * newAbility = cloneAbility(thisAbilityCreationInstance->abilityInsance);
+	ability * newAbility;
+
+	if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
+		return thisAbilityCreationInstance->abilityInsance;
+	}
+
+	newAbility = cloneAbility(thisAbilityCreationInstance->abilityInsance);
 	newAbility->ID = thisAbilityCreationInstance->idCounter;
 	thisAbilityCreationInstance->idCounter++;
 

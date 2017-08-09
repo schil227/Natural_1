@@ -407,6 +407,14 @@ void drawGameMode(HDC hdc, RECT* prc) {
 		drawThisAbilityView(hdc, hdcBuffer, prc);
 	}
 
+	if(inCharacterInfoView()){
+		drawCharacterInfoView();
+	}
+
+	if(inLevelUpView()){
+		drawLevelUpView(hdc, hdcBuffer, prc);
+	}
+
 	if (inAbilityCreateMode()){
 		drawAbilityCreateWindow(hdc, hdcBuffer, prc);
 	}
@@ -421,17 +429,11 @@ void drawGameMode(HDC hdc, RECT* prc) {
 	}
 	releaseDialogReadLock();
 
-	if(inCharacterInfoView()){
-		drawCharacterInfoView();
-	}
 
 	if(isPaused()){
 		drawPauseWindow(hdc, hdcBuffer, prc);
 	}
 
-	if(inLevelUpView()){
-		drawLevelUpView(hdc, hdcBuffer, prc);
-	}
 
 	if(inGameMenuMode()){
 		drawGameMenu(hdc, hdcBuffer, prc);
@@ -606,9 +608,9 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 		ElapsedMicroseconds.QuadPart *= 1000000;
 		ElapsedMicroseconds.QuadPart /= Frequency.QuadPart;
 
-		char outLog[256];
-		sprintf(outLog, "draw: %llu",ElapsedMicroseconds.QuadPart);
-		cwrite(outLog);
+//		char outLog[256];
+//		sprintf(outLog, "draw: %llu",ElapsedMicroseconds.QuadPart);
+//		cwrite(outLog);
 	}
 
 	if(sampleSpacer > 30){
@@ -990,7 +992,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x43://c key (ability create)
 			{
-				enableAbilityCreateMode(0, ABILITY_CREATE_DEFAULT, DEFAULT_ABILITY);
+				enableAbilityCreateMode(0, ABILITY_CREATE_DEFAULT, DEFAULT_ABILITY, NULL);
 			}
 			break;
 		case 0x52://r key (ability view)
@@ -1333,9 +1335,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				setAbilityName(getNameFromInstance());
 				ability * newAbility = getNewAbility();
 
-
 				if(inMainMenuMode()){
 					addAbilityToNewGameAbilityMode(newAbility);
+					addAbilityToRegistryByType(newAbility);
+					disableAbilityCreateMode();
+				}else if(inLevelUpCreateAbilityMode()){
+					addAbilityToLevelUpUpgrade(newAbility);
+					disableLevelUpCreateAbilityMode();
 					disableAbilityCreateMode();
 				}else{
 					addAbilityToIndividual(player, newAbility);
@@ -1393,6 +1399,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}
 
 	if(inLevelUpView()){
+		if(inLevelUpCreateAbilityMode()){
+			disableLevelUpCreateAbilityMode();
+
+		}
 		return levelUpLoop(hwnd, msg, wParam, lParam);
 	}
 

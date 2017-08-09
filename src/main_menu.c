@@ -1043,9 +1043,9 @@ void newGameAbilityMenuInterpretEnter(){
 	switch(thisMainMenu->newGame->currentField){
 		case CREATE_ABILITY_SELECT:
 			if(thisMainMenu->newGame->selectedAbility == 0){
-				enableAbilityCreateMode(0, ABILITY_CREATE_PERMENANT_ONLY, DEFAULT_ABILITY);
+				enableAbilityCreateMode(0, ABILITY_CREATE_PERMENANT_ONLY, DEFAULT_ABILITY, NULL);
 			}else{
-				enableAbilityCreateMode(thisMainMenu->newGame->bonusMana, ABILITY_CREATE_EXCEPT_PERMENANT, DEFAULT_ABILITY);
+				enableAbilityCreateMode(thisMainMenu->newGame->bonusMana, ABILITY_CREATE_EXCEPT_PERMENANT, DEFAULT_ABILITY, NULL);
 			}
 
 			thisMainMenu->newGame->inAbilityEditMode = 1;
@@ -1077,6 +1077,8 @@ void newGameAbilityMenuInterpretEnter(){
 			thisMainMenu->newGame->newPlayer->mana = getTotalMana(thisMainMenu->newGame->newPlayer);
 			thisMainMenu->newGame->newPlayer->food =  getTotalFood(thisMainMenu->newGame->newPlayer);
 			thisMainMenu->newGame->newPlayer->spread = thisMainMenu->newGame->currentSpread;
+
+			thisMainMenu->newGame->newPlayer->bonusMana = thisMainMenu->newGame->bonusMana;
 
 			thisMainMenu->newGame->newPlayer->ID = 1;
 			setPlayer(thisMainMenu->newGame->newPlayer);

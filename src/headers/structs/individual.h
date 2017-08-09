@@ -215,6 +215,7 @@ struct individual{
 
 	int faction;
 	int targetedDuration;
+	int bonusMana;
 
 	behavior * thisBehavior;
 	specialDialogs * specialDialog;

@@ -433,10 +433,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 				break;
 			}
 			case 0x0D: { //enter
-				if(canCreateAbility()){
-					toggleNameMode();
-					toggleAbilityWaitForNameMode();
-				}
+				interpretCreateAbilityEnter();
 				break;
 			}
 			case 0x38:

@@ -101,6 +101,7 @@ END
 1439 BITMAP DISCARDABLE "../images/spread_roll_view.bmp"
 1440 BITMAP DISCARDABLE "../images/levelup_field_select.bmp"
 1441 BITMAP DISCARDABLE "../images/levelup_field_edit.bmp"
+1442 BITMAP DISCARDABLE "../images/upgrade_abilities_view.bmp"
 
 //Menu images 1500 - 2000
 1500 BITMAP DISCARDABLE "../images/console_bg.bmp" //2010

@@ -115,7 +115,7 @@ individual *initIndividual(){
 int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF rgb, char * name, int direction, int x, int y, int level, int exp, int spread,
 		int STR, int DEX, int CON, int WILL, int INT, int WIS, int CHR, int LUCK, int hp, int mana, int food, int baseHP, int totalActions, int baseMana, int baseAC, int attack, int maxDam, int minDam, int baseDam,  char critType[3],
 		int range, int mvmt, int LoS, int darkLoS, int isSneaking, int bluntDR, int chopDR, int slashDR, int pierceDR, int earthDR, int fireDR, int waterDR, int lightningDR,
-		int dialogID, int dialogPortraitID, int fateTokens, int gold, int faction, groupType defaultType, groupType currentType,  int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
+		int dialogID, int dialogPortraitID, int fateTokens, int bonusMana, int gold, int faction, groupType defaultType, groupType currentType,  int offensiveness, int abilityAffinity, int tacticalness, int cowardness,
 		int isHostileToPlayer, int isFocusedOnPlayer, int isSurrounded, int respawns, int desiredLocationX, int desiredLocationY,
 		specialDialogs * thisDialog, abilityList * loadedAbilities, animationContainer * thisAnimationContainer, animationContainer * secondaryAnimationContainer){
 	int i;
@@ -179,6 +179,7 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 	thisIndividual->specialDialog = thisDialog;
 
 	thisIndividual->fateTokens = fateTokens;
+	thisIndividual->bonusMana = bonusMana;
 	thisIndividual->gold = gold;
 	thisIndividual->faction = faction;
 
@@ -372,6 +373,7 @@ char * getIndividualAsLine(individual * thisIndividual){
 	i += sprintf(line + i, "%d;", thisIndividual->specialDialog->playerIsMarkedForDeath);
 	i += sprintf(line + i, "%d;", thisIndividual->dialogPortraitID);
 	i += sprintf(line + i, "%d;", thisIndividual->fateTokens);
+	i += sprintf(line + i, "%d;", thisIndividual->bonusMana);
 	i += sprintf(line + i, "%d;", thisIndividual->gold);
 	i += sprintf(line + i, "%d;", thisIndividual->faction);
 	i += sprintf(line + i, "%d;", thisIndividual->defaultGroupType);
