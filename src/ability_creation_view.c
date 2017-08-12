@@ -234,19 +234,31 @@ void enableAbilityCreateMode(int bonusMana, abilityCreationMode createMode, crea
 	}
 
 	if(createModeType == LEVELUP_ABILITY){
-		thisAbilityCreationInstance->abilityInsance = abilityToUpgrade;
-		thisAbilityCreationInstance->abilityLevelUpOriginal = cloneAbility(abilityToUpgrade);
+		thisAbilityCreationInstance->abilityInsance = cloneAbility(abilityToUpgrade);
+		thisAbilityCreationInstance->abilityLevelUpOriginal = abilityToUpgrade;
+
+		thisAbilityCreationInstance->abilityInsance->ID = thisAbilityCreationInstance->idCounter;
+		thisAbilityCreationInstance->idCounter++;
+
+		thisAbilityCreationInstance->abilityInsance->level++;
 	}else{
 		thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]);
 	}
 
 	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 
+	thisAbilityCreationInstance->selectedType = ABILITY_TYPE;
 	thisAbilityCreationInstance->inCreateMode = 1;
 }
 
 void disableAbilityCreateMode(){
+	while(tryGetAbilityCreationReadLock()){}
+	while(tryGetAbilityCreationWriteLock()){}
+
 	thisAbilityCreationInstance->inCreateMode = 0;
+
+	releaseAbilityCreationWriteLock();
+	releaseAbilityCreationReadLock();
 }
 
 int inAbilityCreateMode(){
@@ -277,6 +289,9 @@ void changeAbilityTemplate(int shift){
 
 	if(thisAbilityCreationInstance->mode == DEFAULT_ABILITY){
 		free(thisAbilityCreationInstance->abilityInsance);
+	}else if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
+//		free(thisAbilityCreationInstance->abilityLevelUpOriginal);
+		thisAbilityCreationInstance->abilityLevelUpOriginal = NULL;
 	}
 
 	thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]) ;
@@ -2100,13 +2115,25 @@ int canCreateAbility(){
 void interpretCreateAbilityEnter(){
 	if(canCreateAbility()){
 		if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
-			thisAbilityCreationInstance->abilityInsance = NULL;
 			disableAbilityCreateMode();
 		}else{
 			toggleNameMode();
 			toggleAbilityWaitForNameMode();
 		}
 	}
+}
+
+void interpretCreateAbilityEscape(){
+	if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
+//		free(thisAbilityCreationInstance->abilityInsance);
+//		thisAbilityCreationInstance->abilityInsance = NULL;
+		//dont want to save it
+		disableLevelUpCreateAbilityMode();
+	}
+
+	disableAbilityCreateMode();
+	free(thisAbilityCreationInstance->abilityInsance);
+	thisAbilityCreationInstance->abilityInsance = NULL;
 }
 
 void toggleAbilityWaitForNameMode(){

@@ -415,9 +415,11 @@ void drawGameMode(HDC hdc, RECT* prc) {
 		drawLevelUpView(hdc, hdcBuffer, prc);
 	}
 
+	while(tryGetAbilityCreationReadLock()){}
 	if (inAbilityCreateMode()){
 		drawAbilityCreateWindow(hdc, hdcBuffer, prc);
 	}
+	releaseAbilityCreationReadLock();
 
 	if(inNameBoxMode()){
 		drawNameBoxInstance(hdc, hdcBuffer, prc);
@@ -478,9 +480,11 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 
 		drawMainMenu(hdc, hdcBuffer, &rect);
 
+		while(tryGetAbilityCreationReadLock()){}
 		if (inAbilityCreateMode()){
 			drawAbilityCreateWindow(hdc, hdcBuffer, &rect);
 		}
+		releaseAbilityCreationReadLock();
 
 		if(inNameBoxMode()){
 			drawNameBoxInstance(hdc, hdcBuffer, &rect);
@@ -1334,15 +1338,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if(!nameEmpty()){
 				setAbilityName(getNameFromInstance());
 				ability * newAbility = getNewAbility();
+				disableAbilityCreateMode();
 
 				if(inMainMenuMode()){
 					addAbilityToNewGameAbilityMode(newAbility);
 					addAbilityToRegistryByType(newAbility);
-					disableAbilityCreateMode();
 				}else if(inLevelUpCreateAbilityMode()){
 					addAbilityToLevelUpUpgrade(newAbility);
 					disableLevelUpCreateAbilityMode();
-					disableAbilityCreateMode();
 				}else{
 					addAbilityToIndividual(player, newAbility);
 					addAbilityToRegistryByType(newAbility);
@@ -1359,6 +1362,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			createAbilityLoop(hwnd, msg, wParam, lParam, player);
 			if(!inAbilityCreateMode() && inMainMenuMode()){
 				disableNewGameAbilityEditMode();
+			}else if(!inAbilityCreateMode() && inLevelUpCreateAbilityMode()){
+				ability * newAbility = getNewAbility();
+				addAbilityToLevelUpUpgrade(newAbility);
+				disableLevelUpCreateAbilityMode();
+				changeAbilityTemplate(0);
 			}
 
 			return 0;

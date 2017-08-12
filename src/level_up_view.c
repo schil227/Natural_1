@@ -40,6 +40,7 @@ void initLevelUpView(){
 	thisLevelUpView->abilitiesView->currentMode = UPGRADE_ABILITY_ABILITIES;
 	thisLevelUpView->abilitiesView->upgradeAbilitiesView = createCharacter(1442, RGB(255,0,255), 0, 0);
 	thisLevelUpView->abilitiesView->entryAddAbility = createCharacter(1417, RGB(255,0,255), 0, 0);
+	thisLevelUpView->abilitiesView->numUpgradedAbilities = 0;
 }
 
 void destroyLevelUpView(){
@@ -73,7 +74,7 @@ int inLevelUpView(){
 	return thisLevelUpView->inLevelUpMode;
 }
 
-int disableLevelUpCreateAbilityMode(){
+void disableLevelUpCreateAbilityMode(){
 	thisLevelUpView->abilitiesView->inCreateAbilityMode = 0;
 }
 
@@ -92,6 +93,10 @@ void levelUpReRoll(){
 		thisLevelUpView->bonusHP = rand() % getDiceSpread(thisLevelUpView->player, 'h') + 1;
 	}else{
 		thisLevelUpView->bonusMana = rand() % getDiceSpread(thisLevelUpView->player, 'm') + 1;
+	}
+
+	if(thisLevelUpView->rollsRemaining == 0){
+		thisLevelUpView->rollChoice = ROLLMODE_ACCEPT;
 	}
 }
 
@@ -135,19 +140,32 @@ void initializeAbilityUpgradeMode(){
 	thisLevelUpView->abilitiesView->upgradePoints = thisLevelUpView->player->INT + 1;
 	thisLevelUpView->abilitiesView->bonusMana = thisLevelUpView->player->INT + thisLevelUpView->player->bonusMana;
 	thisLevelUpView->abilitiesView->numAbilities = thisLevelUpView->player->abilities->numAbilities + 1;
+	thisLevelUpView->abilitiesView->numUpgradedAbilities = 0;
 	thisLevelUpView->abilitiesView->selectedAbilityIndex = 0;
+	thisLevelUpView->abilitiesView->currentMode = UPGRADE_ABILITY_ABILITIES;
 	thisLevelUpView->currentMode = LEVELUP_MODE_ABLITIES;
 }
 
 void addAbilityToLevelUpUpgrade(ability * newAbility){
-	//if adding the ability
+	addAbilityToRegistryByType(newAbility);
+
 	if(thisLevelUpView->abilitiesView->selectedAbilityIndex == thisLevelUpView->abilitiesView->numAbilities - 1){
-		addAbilityToRegistryByType(newAbility);
 		addAbilityToIndividual(thisLevelUpView->player, newAbility);
-		thisLevelUpView->abilitiesView->upgradePoints--;
 		thisLevelUpView->abilitiesView->numAbilities++;
+	}else{
+		//old ability must also be removed from registry before freeing.
+//		ability * old =thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex];
+		thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex] = newAbility;
+//		free(old);
+
+		if(thisLevelUpView->abilitiesView->upgradePoints - 1 == 0 && thisLevelUpView->abilitiesView->abilitiesPerScreen + thisLevelUpView->abilitiesView->abilitiesOffset >= thisLevelUpView->abilitiesView->numAbilities){
+			thisLevelUpView->abilitiesView->abilitiesOffset--;
+		}
 	}
 
+	thisLevelUpView->abilitiesView->upgradedAbilities[thisLevelUpView->abilitiesView->numUpgradedAbilities] = newAbility->ID;
+	thisLevelUpView->abilitiesView->numUpgradedAbilities++;
+	thisLevelUpView->abilitiesView->upgradePoints--;
 	thisLevelUpView->abilitiesView->bonusMana -= getSpentBonusMana();
 }
 
@@ -157,7 +175,10 @@ void interpretLevelUpUpdateAbilitesVertical(int goingUp){
 		if(goingUp){
 			if(thisLevelUpView->abilitiesView->selectedAbilityIndex > 0){
 				thisLevelUpView->abilitiesView->selectedAbilityIndex--;
-				thisLevelUpView->abilitiesView->abilitiesOffset = max(0, thisLevelUpView->abilitiesView->selectedAbilityIndex - thisLevelUpView->abilitiesView->abilitiesPerScreen);
+
+				if(thisLevelUpView->abilitiesView->selectedAbilityIndex < thisLevelUpView->abilitiesView->abilitiesOffset){
+					thisLevelUpView->abilitiesView->abilitiesOffset--;
+				}
 			}
 		}else{
 			if(thisLevelUpView->abilitiesView->selectedAbilityIndex + 1 == thisLevelUpView->abilitiesView->numAbilities
@@ -165,7 +186,10 @@ void interpretLevelUpUpdateAbilitesVertical(int goingUp){
 				thisLevelUpView->abilitiesView->currentMode = UPGRADE_ABILITY_POINTS;
 			}else{
 				thisLevelUpView->abilitiesView->selectedAbilityIndex++;
-				thisLevelUpView->abilitiesView->abilitiesOffset = max(0, thisLevelUpView->abilitiesView->selectedAbilityIndex - thisLevelUpView->abilitiesView->abilitiesPerScreen);
+
+				if(thisLevelUpView->abilitiesView->selectedAbilityIndex - thisLevelUpView->abilitiesView->abilitiesOffset >= thisLevelUpView->abilitiesView->abilitiesPerScreen){
+					thisLevelUpView->abilitiesView->abilitiesOffset++;
+				}
 			}
 		}
 		break;
@@ -179,7 +203,7 @@ void interpretLevelUpUpdateAbilitesVertical(int goingUp){
 				thisLevelUpView->abilitiesView->selectedAbilityIndex = thisLevelUpView->abilitiesView->numAbilities - 1;
 			}
 
-			thisLevelUpView->abilitiesView->abilitiesOffset = max(0, thisLevelUpView->abilitiesView->selectedAbilityIndex - thisLevelUpView->abilitiesView->abilitiesPerScreen);
+			thisLevelUpView->abilitiesView->abilitiesOffset = max(0, thisLevelUpView->abilitiesView->selectedAbilityIndex + 1 - thisLevelUpView->abilitiesView->abilitiesPerScreen);
 			thisLevelUpView->abilitiesView->currentMode = UPGRADE_ABILITY_ABILITIES;
 		}
 		break;
@@ -241,7 +265,9 @@ void interpretLevelUpViewVertical(int goingUp){
 void interpretLevelUpRollHorizontal(int goingLeft){
 	switch(thisLevelUpView->rollChoice){
 	case ROLLMODE_ACCEPT:
-		thisLevelUpView->rollChoice = ROLLMODE_ROLL;
+		if(thisLevelUpView->rollsRemaining > 0){
+			thisLevelUpView->rollChoice = ROLLMODE_ROLL;
+		}
 		break;
 	case ROLLMODE_ROLL:
 		thisLevelUpView->rollChoice = ROLLMODE_ACCEPT;
@@ -316,18 +342,27 @@ void interpretLevelUpUpgradeAbilitiesEnter(){
 
 			if(thisLevelUpView->abilitiesView->selectedAbilityIndex == thisLevelUpView->abilitiesView->numAbilities - 1){
 				thisLevelUpView->abilitiesView->inCreateAbilityMode = 1;
-
 				enableAbilityCreateMode(thisLevelUpView->abilitiesView->bonusMana, ABILITY_CREATE_EXCEPT_PERMENANT, DEFAULT_ABILITY, NULL);
 			}else{
-				//level up effects take place immediately
-				thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex]->level++;
-				thisLevelUpView->abilitiesView->upgradePoints--;
-				enableAbilityCreateMode(thisLevelUpView->abilitiesView->bonusMana, ABILITY_CREATE_EXCEPT_PERMENANT, LEVELUP_ABILITY, thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex]);
+				int i;
+				ability * upgradedAbility = thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex];
+
+				//dissallow upgrading abilities twice
+				for(i = 0; i < thisLevelUpView->abilitiesView->numUpgradedAbilities; i++){
+					if(thisLevelUpView->abilitiesView->upgradedAbilities[i] == upgradedAbility->ID){
+						return;
+					}
+				}
+
+				thisLevelUpView->abilitiesView->inCreateAbilityMode = 1;
+				enableAbilityCreateMode(thisLevelUpView->abilitiesView->bonusMana, ABILITY_CREATE_DEFAULT, LEVELUP_ABILITY, thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex]);
 			}
 			break;
 		case UPGRADE_ABILITY_DONE:
-			disableLevelUpView();
-			reInitializeLevelUpView();
+			if(thisLevelUpView->abilitiesView->upgradePoints == 0){
+				disableLevelUpView();
+				reInitializeLevelUpView();
+			}
 		break;
 	}
 }
@@ -400,16 +435,16 @@ void drawLevelUpUpgradeAbilitiesView(HDC hdc, HDC hdcBuffer, RECT * rect, int xO
 	for(i = 0; i < numAbilitiesToDraw; i++){
 		int index = i + thisLevelUpView->abilitiesView->abilitiesOffset;
 
-		if(i + 1 == numAbilitiesToDraw && thisLevelUpView->abilitiesView->upgradePoints == 0){
-			break;
-		}
+//		if(i + 1 == numAbilitiesToDraw && thisLevelUpView->abilitiesView->upgradePoints == 0 && thisLevelUpView->player->abilities->numAbilities < i + 1){
+//			break;
+//		}
 
 		if(thisLevelUpView->abilitiesView->selectedAbilityIndex == index && thisLevelUpView->abilitiesView->currentMode == UPGRADE_ABILITY_ABILITIES){
 			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 57, yOff + 61 + 46 * i, thisLevelUpView->abilitiesView->entryAddAbility);
 		}
 
 		//reserve last one for [Add Ability]
-		if(i + 1 == numAbilitiesToDraw + thisLevelUpView->abilitiesView->abilitiesOffset){
+		if(index == thisLevelUpView->abilitiesView->numAbilities - 1 && thisLevelUpView->abilitiesView->upgradePoints != 0){
 			drawNewGameFormText(hdcBuffer, &textRect,  xOff + 57 + 81, yOff + 63 + 46 * i, "[Add Ability]");
 		}else{
 			drawNewGameFormText(hdcBuffer, &textRect,  xOff + 57 + 81, yOff + 63 + 46 * i, thisLevelUpView->player->abilities->abilitiesList[index]->name);
@@ -418,7 +453,7 @@ void drawLevelUpUpgradeAbilitiesView(HDC hdc, HDC hdcBuffer, RECT * rect, int xO
 
 	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 226 + 22, yOff + 411, thisLevelUpView->abilitiesView->upgradePoints);
 	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 189 + 22, yOff + 453, thisLevelUpView->abilitiesView->bonusMana);
-	drawNewGameFormText(hdcBuffer, &textRect, xOff + 100 + 42, yOff + 498, "DONE");
+	drawNewGameFormText(hdcBuffer, &textRect, xOff + 100 + 42, yOff + 499, "DONE");
 
 	SelectObject(hdcBuffer, oldFont);
 	DeleteObject(hFont);
@@ -431,12 +466,15 @@ void drawLevelUpRollView(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff
 
 	drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisLevelUpView->spreadRollView);
 
-	if(thisLevelUpView->rollChoice == ROLLMODE_ROLL){
+	if(thisLevelUpView->rollsRemaining == 0){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 105, yOff + 123, thisLevelUpView->rollEnter);
+	}else if(thisLevelUpView->rollChoice == ROLLMODE_ROLL){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 38, yOff + 123, thisLevelUpView->rollEnter);
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 173, yOff + 123, thisLevelUpView->rollSelect);
 	}else{
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 38, yOff + 123, thisLevelUpView->rollSelect);
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 173, yOff + 123, thisLevelUpView->rollEnter);
+
 	}
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
@@ -456,8 +494,12 @@ void drawLevelUpRollView(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff
 	sprintf(outText, "Re-rolls remaining: %d", thisLevelUpView->rollsRemaining);
 	drawNewGameFormText(hdcBuffer, &textRect, xOff + (thisLevelUpView->spreadRollView->fixedWidth / 2), yOff + 68, outText);
 
-	drawNewGameFormText(hdcBuffer, &textRect, xOff + 38 + 57, yOff + 123, "Re-roll");
-	drawNewGameFormText(hdcBuffer, &textRect, xOff + 173 + 57, yOff + 123, "Accept");
+	if(thisLevelUpView->rollsRemaining == 0){
+		drawNewGameFormText(hdcBuffer, &textRect, xOff + 105 + 57, yOff + 123, "Accept");
+	}else{
+		drawNewGameFormText(hdcBuffer, &textRect, xOff + 38 + 57, yOff + 123, "Re-roll");
+		drawNewGameFormText(hdcBuffer, &textRect, xOff + 173 + 57, yOff + 123, "Accept");
+	}
 
 	SelectObject(hdcBuffer, oldFont);
 	DeleteObject(hFont);
@@ -472,7 +514,7 @@ void drawLevelUpStatArrow(HDC hdc, HDC hdcBuffer, levelUpField thisStatField, in
 	if(thisLevelUpView->bonusStatPoints > 0){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 50, yOff + 10, thisLevelUpView->selectArrowRight);
 	}else if(thisStatField == thisLevelUpView->selectedStatField){
-		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff - 20, yOff + 10, thisLevelUpView->selectArrowLeft);
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff - 21, yOff + 10, thisLevelUpView->selectArrowLeft);
 	}
 }
 
@@ -499,6 +541,8 @@ void drawLevelUpView(HDC hdc, HDC hdcBuffer, RECT * rect){
 		}else{
 			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 202, yOff + 54, thisLevelUpView->fieldSelect);
 		}
+	}else if(thisLevelUpView->currentField == LEVELUP_HP){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 202 + 22, yOff + 55, thisLevelUpView->statFieldEdit);
 	}
 
 	if(thisLevelUpView->bonusMana == -1){
@@ -507,6 +551,8 @@ void drawLevelUpView(HDC hdc, HDC hdcBuffer, RECT * rect){
 		}else{
 			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 202, yOff + 97, thisLevelUpView->fieldSelect);
 		}
+	}else if(thisLevelUpView->currentField == LEVELUP_MANA){
+		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 202 + 22, yOff + 95, thisLevelUpView->statFieldEdit);
 	}
 
 	if(thisLevelUpView->currentField == LEVELUP_NEXT){
@@ -521,7 +567,7 @@ void drawLevelUpView(HDC hdc, HDC hdcBuffer, RECT * rect){
 	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_INT, xOff + 199, yOff + 182 + 42 * 3);
 	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_WIS, xOff + 199, yOff + 182 + 42 * 4);
 	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_WILL, xOff + 199, yOff + 182 + 42 * 5);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_CHR, xOff + 200, yOff + 182 + 42 * 6);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_CHR, xOff + 199, yOff + 182 + 42 * 6);
 	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_LUCK, xOff + 199, yOff + 182 + 42 * 7);
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
@@ -542,19 +588,19 @@ void drawLevelUpView(HDC hdc, HDC hdcBuffer, RECT * rect){
 		drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 202 + 44, yOff + 97, thisLevelUpView->bonusMana);
 	}
 
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182, thisLevelUpView->player->STR);
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182 + 42, thisLevelUpView->player->DEX);
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182 + 42 * 2, thisLevelUpView->player->CON);
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182 + 42 * 3, thisLevelUpView->player->INT);
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182 + 42 * 4, thisLevelUpView->player->WIS);
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182 + 42 * 5, thisLevelUpView->player->WILL);
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182 + 42 * 6, thisLevelUpView->player->CHR);
-	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 182 + 42 * 7, thisLevelUpView->player->LUCK);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184, thisLevelUpView->player->STR);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184 + 42, thisLevelUpView->player->DEX);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184 + 42 * 2, thisLevelUpView->player->CON);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184 + 42 * 3, thisLevelUpView->player->INT);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184 + 42 * 4, thisLevelUpView->player->WIS);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184 + 42 * 5, thisLevelUpView->player->WILL);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184 + 42 * 6, thisLevelUpView->player->CHR);
+	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 199 + 22, yOff + 184 + 42 * 7, thisLevelUpView->player->LUCK);
 
 //	if(thisLevelUpView->player->INT + 1 <= 0){
 //		drawNewGameFormText(hdcBuffer, &textRect, xOff + 122 + 44, yOff + 529, "DONE");
 //	}else{
-	drawNewGameFormText(hdcBuffer, &textRect, xOff + 122 + 44, yOff + 529, "NEXT");
+	drawNewGameFormText(hdcBuffer, &textRect, xOff + 119 + 44, yOff + 531, "NEXT");
 //	}
 
 

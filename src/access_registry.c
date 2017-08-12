@@ -24,6 +24,8 @@ void initLockAuth(){
 	thisLockAuth->dialogWriteLock = 0;
 	thisLockAuth->lookReadLock = 0;
 	thisLockAuth->lookWriteLock = 0;
+	thisLockAuth->abilityCreationReadLock = 0;
+	thisLockAuth->abilityCreationWriteLock = 0;
 	thisLockAuth->worldMapReadLock = 0;
 	thisLockAuth->worldMapWriteLock = 0;
 }
@@ -234,6 +236,33 @@ void releaseWorldMapReadLock(){
 
 void releaseWorldMapWriteLock(){
 	thisLockAuth->worldMapWriteLock = 0;
+}
+
+
+int tryGetAbilityCreationReadLock(){
+	if(thisLockAuth->abilityCreationReadLock == 0){
+		thisLockAuth->abilityCreationReadLock = 1;
+		return 1;
+	}
+
+	return 0;
+}
+
+int tryGetAbilityCreationWriteLock(){
+	if(thisLockAuth->abilityCreationWriteLock == 0){
+		thisLockAuth->abilityCreationWriteLock = 1;
+		return 1;
+	}
+
+	return 0;
+}
+
+void releaseAbilityCreationReadLock(){
+	thisLockAuth->abilityCreationReadLock = 0;
+}
+
+void releaseAbilityCreationWriteLock(){
+	thisLockAuth->abilityCreationWriteLock = 0;
 }
 
 lockAuthority * getLockAuthDEBUG(){

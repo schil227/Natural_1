@@ -22,6 +22,8 @@ typedef struct{
 	int numAbilities;
 	int abilitiesPerScreen;
 	int inCreateAbilityMode;
+	int upgradedAbilities[256];
+	int numUpgradedAbilities;
 	upgradeAbilityMode currentMode;
 
 	fixedCharacter * upgradeAbilitiesView;

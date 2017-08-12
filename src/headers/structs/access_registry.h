@@ -9,29 +9,32 @@
 #define SRC_HEADERS_STRUCTS_ACCESS_REGISTRY_H_
 
 typedef struct{
-	volatile int fieldReadLock;
-	volatile int fieldWriteLock;
+	int fieldReadLock;
+	int fieldWriteLock;
 
-	volatile int consoleReadLock;
-	volatile int consoleWriteLock;
+	int consoleReadLock;
+	int consoleWriteLock;
 
-	volatile int hudReadLock;
-	volatile int hudWriteLock;
+	int hudReadLock;
+	int hudWriteLock;
 
-	volatile int fieldInventoryReadLock;
-	volatile int fieldInventoryWriteLock;
+	int fieldInventoryReadLock;
+	int fieldInventoryWriteLock;
 
-	volatile int individualGroupReadLock;
-	volatile int individualGroupWriteLock;
+	int individualGroupReadLock;
+	int individualGroupWriteLock;
 
-	volatile int dialogReadLock;
-	volatile int dialogWriteLock;
+	int dialogReadLock;
+	int dialogWriteLock;
 
-	volatile int lookReadLock;
-	volatile int lookWriteLock;
+	int lookReadLock;
+	int lookWriteLock;
 
-	volatile int worldMapReadLock;
-	volatile int worldMapWriteLock;
+	int abilityCreationReadLock;
+	int abilityCreationWriteLock;
+
+	int worldMapReadLock;
+	int worldMapWriteLock;
 } lockAuthority;
 
 #endif /* SRC_HEADERS_STRUCTS_ACCESS_REGISTRY_H_ */

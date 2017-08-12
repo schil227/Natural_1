@@ -429,7 +429,7 @@ int createAbilityLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, individ
 
 		switch (LOWORD(wParam)) {
 			case 0x1B:{ //esc
-				disableAbilityCreateMode();
+				interpretCreateAbilityEscape();
 				break;
 			}
 			case 0x0D: { //enter
