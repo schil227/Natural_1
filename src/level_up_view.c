@@ -41,6 +41,17 @@ void initLevelUpView(){
 	thisLevelUpView->abilitiesView->upgradeAbilitiesView = createCharacter(1442, RGB(255,0,255), 0, 0);
 	thisLevelUpView->abilitiesView->entryAddAbility = createCharacter(1417, RGB(255,0,255), 0, 0);
 	thisLevelUpView->abilitiesView->numUpgradedAbilities = 0;
+
+	strcpy(thisLevelUpView->abilitiesView->descriptionPermenantAbilityUpgrade, "Upgrade permanent ability by one mana.\n\nBonus mana can not be used, however negatives may slightly increase to compensate.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionDurationAbilityUpgrade, "Upgrade duration ability by one mana.\n\nNegatives cannot be increased, however bonus mana can be used.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionTargetedAbilityUpgrade, "Upgrade targeted ability by one mana.\n\nNegatives cannot be increased, however bonus mana can be used.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionInstantAbilityUpgrade, "Upgrade instant ability by one mana.\n\nNegatives cannot be increased, however bonus mana can be used.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionAbilityAlreadyUpgraded, "Abilty upgraded.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionNewAbility, "Create a new Duration, Targeted, or Instant ability.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionUpgradePoints, "The number of points available to upgrade or make new abilities.\n\nUpgrade points do not roll over to the next level.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionBonusPoints, "Bonus points of mana that can be used while upgrading abilites to make to decrease the total mana.\n\nUnused bonus points will roll over to the next level.");
+	strcpy(thisLevelUpView->abilitiesView->descriptionFinshed, "Finalize leveling up.");
+
 }
 
 void destroyLevelUpView(){
@@ -157,10 +168,6 @@ void addAbilityToLevelUpUpgrade(ability * newAbility){
 //		ability * old =thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex];
 		thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex] = newAbility;
 //		free(old);
-
-		if(thisLevelUpView->abilitiesView->upgradePoints - 1 == 0 && thisLevelUpView->abilitiesView->abilitiesPerScreen + thisLevelUpView->abilitiesView->abilitiesOffset >= thisLevelUpView->abilitiesView->numAbilities){
-			thisLevelUpView->abilitiesView->abilitiesOffset--;
-		}
 	}
 
 	thisLevelUpView->abilitiesView->upgradedAbilities[thisLevelUpView->abilitiesView->numUpgradedAbilities] = newAbility->ID;
@@ -217,6 +224,16 @@ void interpretLevelUpUpdateAbilitesVertical(int goingUp){
 		break;
 	}
 }
+
+//void interpretLevelUpUpdateAbilitesHorizontal(int goingLeft){
+//	if(thisLevelUpView->abilitiesView->currentMode == UPGRADE_ABILITY_ABILITIES && thisLevelUpView->abilitiesView->selectedAbilityIndex < thisLevelUpView->player->abilities->numAbilities){
+//		ability * tmpAbility = thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex];
+//
+//		if(tmpAbility->totalManaCost - 1 > 0){
+//			tmpAbility->
+//		}
+//	}
+//}
 
 void interpretLevelUpViewVertical(int goingUp){
 	if(	thisLevelUpView->currentMode == LEVELUP_MODE_ROLL){
@@ -409,6 +426,63 @@ void interpretLevelUpViewEnter(){
 	}
 }
 
+void drawLevelUpUpgradeAbilitiesDescriptionText(HDC hdcBuffer, char * text, int xOff, int yOff){
+	RECT textBox;
+
+	textBox.top = yOff + 557;
+	textBox.bottom = yOff + 557 + 100;
+	textBox.left = xOff + 12;
+	textBox.right = xOff + 12 + 259;
+
+	DrawText(hdcBuffer, text, -1, &textBox, DT_WORDBREAK);
+}
+
+void drawLevelUpUpgradeAbilitiesDescription(HDC hdcBuffer, RECT * rect, int xOff, int yOff){
+	switch(thisLevelUpView->abilitiesView->currentMode){
+	case UPGRADE_ABILITY_ABILITIES:
+		if(thisLevelUpView->abilitiesView->selectedAbilityIndex == thisLevelUpView->abilitiesView->numAbilities - 1){
+			drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionNewAbility, xOff, yOff);
+			break;
+		}else{
+			int i;
+			ability * tmpAbility = thisLevelUpView->player->abilities->abilitiesList[thisLevelUpView->abilitiesView->selectedAbilityIndex];
+
+			for(i = 0; i < thisLevelUpView->abilitiesView->numUpgradedAbilities; i++){
+				if(thisLevelUpView->abilitiesView->upgradedAbilities[i] == tmpAbility->ID){
+					drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionAbilityAlreadyUpgraded, xOff, yOff);
+					return;
+				}
+			}
+
+
+			switch(tmpAbility->type){
+			case 'p':
+				drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionPermenantAbilityUpgrade, xOff, yOff);
+				break;
+			case 'd':
+				drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionDurationAbilityUpgrade, xOff, yOff);
+				break;
+			case 't':
+				drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionTargetedAbilityUpgrade, xOff, yOff);
+				break;
+			case 'i':
+				drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionInstantAbilityUpgrade, xOff, yOff);
+				break;
+			}
+		}
+		break;
+	case UPGRADE_ABILITY_POINTS:
+		drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionUpgradePoints, xOff, yOff);
+		break;
+	case UPGRADE_ABILITY_BONUS:
+		drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionBonusPoints, xOff, yOff);
+		break;
+	case UPGRADE_ABILITY_DONE:
+		drawLevelUpUpgradeAbilitiesDescriptionText(hdcBuffer, thisLevelUpView->abilitiesView->descriptionFinshed, xOff, yOff);
+		break;
+	}
+}
+
 void drawLevelUpUpgradeAbilitiesView(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 	RECT textRect;
 	int i;
@@ -444,8 +518,10 @@ void drawLevelUpUpgradeAbilitiesView(HDC hdc, HDC hdcBuffer, RECT * rect, int xO
 		}
 
 		//reserve last one for [Add Ability]
-		if(index == thisLevelUpView->abilitiesView->numAbilities - 1 && thisLevelUpView->abilitiesView->upgradePoints != 0){
-			drawNewGameFormText(hdcBuffer, &textRect,  xOff + 57 + 81, yOff + 63 + 46 * i, "[Add Ability]");
+		if(index == thisLevelUpView->abilitiesView->numAbilities - 1){
+			if(thisLevelUpView->abilitiesView->upgradePoints != 0){
+				drawNewGameFormText(hdcBuffer, &textRect,  xOff + 57 + 81, yOff + 63 + 46 * i, "[Add Ability]");
+			}
 		}else{
 			drawNewGameFormText(hdcBuffer, &textRect,  xOff + 57 + 81, yOff + 63 + 46 * i, thisLevelUpView->player->abilities->abilitiesList[index]->name);
 		}
@@ -454,9 +530,11 @@ void drawLevelUpUpgradeAbilitiesView(HDC hdc, HDC hdcBuffer, RECT * rect, int xO
 	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 226 + 22, yOff + 411, thisLevelUpView->abilitiesView->upgradePoints);
 	drawNewGameFormNumber(hdcBuffer, &textRect, xOff + 189 + 22, yOff + 453, thisLevelUpView->abilitiesView->bonusMana);
 	drawNewGameFormText(hdcBuffer, &textRect, xOff + 100 + 42, yOff + 499, "DONE");
-
 	SelectObject(hdcBuffer, oldFont);
 	DeleteObject(hFont);
+
+	//draw with regular font size
+	drawLevelUpUpgradeAbilitiesDescription(hdcBuffer, rect, xOff, yOff);
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 

@@ -57,6 +57,7 @@ typedef struct{
 	char description[128];
 	int totalManaCost;
 	int level;
+	int bonusMana;
 	int numEnabledEffects;
 
 	short int damageTypeEnabled;

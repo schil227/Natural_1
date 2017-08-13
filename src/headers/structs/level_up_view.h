@@ -28,6 +28,16 @@ typedef struct{
 
 	fixedCharacter * upgradeAbilitiesView;
 	fixedCharacter * entryAddAbility;
+
+	char descriptionPermenantAbilityUpgrade[256];
+	char descriptionDurationAbilityUpgrade[256];
+	char descriptionTargetedAbilityUpgrade[256];
+	char descriptionInstantAbilityUpgrade[256];
+	char descriptionAbilityAlreadyUpgraded[256];
+	char descriptionNewAbility[256];
+	char descriptionUpgradePoints[256];
+	char descriptionBonusPoints[256];
+	char descriptionFinshed[256];
 } levelUpAbilitiesView;
 
 typedef struct{

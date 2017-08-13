@@ -245,8 +245,10 @@ void enableAbilityCreateMode(int bonusMana, abilityCreationMode createMode, crea
 		thisAbilityCreationInstance->abilityInsance = cloneAbility(thisAbilityCreationInstance->abilityTemplates[thisAbilityCreationInstance->templateIndex]);
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
-
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+	thisAbilityCreationInstance->effectStartingIndex = 0;
+	thisAbilityCreationInstance->effectEndingIndex = thisAbilityCreationInstance->MAX_FIELDS_ON_WINDOW;
+	thisAbilityCreationInstance->effectCurrentIndex = 0;
 	thisAbilityCreationInstance->selectedType = ABILITY_TYPE;
 	thisAbilityCreationInstance->inCreateMode = 1;
 }
@@ -267,6 +269,10 @@ int inAbilityCreateMode(){
 	}else{
 		return 0;
 	}
+}
+
+int isUpgradingAbility(){
+	return thisAbilityCreationInstance->mode == LEVELUP_ABILITY;
 }
 
 void changeAbilityTemplate(int shift){
@@ -1754,7 +1760,7 @@ void interpretRightAbilityCreation(){
 					}
 				}
 			}else{
-				tryIncreaseUpgradeEffect(tmpMap, getMapListFromEffectTypeUpgradeClone());
+				tryIncreaseUpgradeEffect(tmpMap, getMapListFromEffectTypeUpgradeClone(), thisAbilityCreationInstance->abilityInsance->type == 'p');
 			}
 
 		}else{
@@ -1796,7 +1802,7 @@ void interpretLeftAbilityCreation(int range, int mvmt, int totalHP, int totalMan
 					selectPreviousType(tmpTypeMap);
 				}
 			}else{
-				tryDecreaseUpgradeEffect(tmpMap, getMapListFromEffectTypeUpgradeClone(), range, mvmt, totalHP, totalMana);
+				tryDecreaseUpgradeEffect(tmpMap, getMapListFromEffectTypeUpgradeClone(), range, mvmt, totalHP, totalMana, thisAbilityCreationInstance->abilityInsance->type == 'p');
 			}
 		}else{
 			effectAndManaMapList * tmpMap = getMapListFromEffectType();
@@ -2023,23 +2029,25 @@ int canDecreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, i
 }
 
 void addBonusMana(){
-	if(thisAbilityCreationInstance->bonusMana == 0){
+	if(thisAbilityCreationInstance->bonusMana == 0 || thisAbilityCreationInstance->abilityInsance->type == 'p'){
 		return;
 	}
 
 	thisAbilityCreationInstance->bonusMana--;
+	thisAbilityCreationInstance->abilityInsance->bonusMana++;
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 }
 
 void removeBonusMana(){
-	if(thisAbilityCreationInstance->bonusMana == thisAbilityCreationInstance->totalBonusMana){
+	if(thisAbilityCreationInstance->bonusMana == thisAbilityCreationInstance->totalBonusMana || thisAbilityCreationInstance->abilityInsance->type == 'p'){
 		return;
 	}
 
 	thisAbilityCreationInstance->bonusMana++;
+	thisAbilityCreationInstance->abilityInsance->bonusMana--;
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 }
 
 int getSpentBonusMana(){
@@ -2049,35 +2057,52 @@ int getSpentBonusMana(){
 void increaseEffect(effectAndManaMapList * selectedMap){
 	if(selectedMap->selectedIndex + 1 < selectedMap->size){
 		selectedMap->selectedIndex++;
+		thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 	}
-
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
-void tryIncreaseUpgradeEffect(effectAndManaMapList * selectedMap, effectAndManaMapList * baseMap){
-	if(selectedMap->selectedIndex + 1 < selectedMap->size
-	 && selectedMap->effectAndManaArray[selectedMap->selectedIndex + 1]->manaCost >= baseMap->effectAndManaArray[baseMap->selectedIndex]->manaCost){
-		selectedMap->selectedIndex++;
+void tryIncreaseUpgradeEffect(effectAndManaMapList * selectedMap, effectAndManaMapList * baseMap, int isPermenant){
+	int canIncrease = 0;
+	if(selectedMap->selectedIndex + 1 < selectedMap->size){
+		int cost = selectedMap->effectAndManaArray[selectedMap->selectedIndex + 1]->manaCost;
+
+		if(cost >= baseMap->effectAndManaArray[baseMap->selectedIndex]->manaCost){
+			canIncrease = 1;
+		}else if(isPermenant && baseMap->selectedIndex + 1 < baseMap->size && cost >= baseMap->effectAndManaArray[baseMap->selectedIndex + 1]->manaCost){
+			canIncrease = 1;
+		}
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+	if(canIncrease){
+		selectedMap->selectedIndex++;
+		thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+	}
 }
 
 void decreaseEffect(effectAndManaMapList * selectedMap, int range, int mvmt, int totalHP, int totalMana){
 	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, range, mvmt, totalHP, totalMana)){
 		selectedMap->selectedIndex--;
+		thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 	}
-
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
 }
 
-void tryDecreaseUpgradeEffect(effectAndManaMapList * selectedMap, effectAndManaMapList * baseMap, int range, int mvmt, int totalHP, int totalMana){
-	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, range, mvmt, totalHP, totalMana)
-	 && selectedMap->effectAndManaArray[selectedMap->selectedIndex - 1]->manaCost >= baseMap->effectAndManaArray[baseMap->selectedIndex]->manaCost){
-		selectedMap->selectedIndex--;
+void tryDecreaseUpgradeEffect(effectAndManaMapList * selectedMap, effectAndManaMapList * baseMap, int range, int mvmt, int totalHP, int totalMana, int isPermenant){
+	int canDecrease = 0;
+	if(selectedMap->selectedIndex > 0 && canDecreaseEffect(selectedMap, range, mvmt, totalHP, totalMana)){
+		int cost = selectedMap->effectAndManaArray[selectedMap->selectedIndex - 1]->manaCost;
+
+		if(cost >= baseMap->effectAndManaArray[baseMap->selectedIndex]->manaCost){
+			canDecrease = 1;
+		}else if(isPermenant && baseMap->selectedIndex - 1 >= 0 && cost >= baseMap->effectAndManaArray[baseMap->selectedIndex - 1]->manaCost){
+			canDecrease = 1;
+		}
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+	if(canDecrease){
+		selectedMap->selectedIndex--;
+		thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
+	}
+
 }
 
 void selectNextType(typeAndManaMapList * thisMapList){
@@ -2087,7 +2112,7 @@ void selectNextType(typeAndManaMapList * thisMapList){
 		thisMapList->selectedIndex = 0;;
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 }
 
 void selectPreviousType(typeAndManaMapList * thisMapList){
@@ -2097,7 +2122,7 @@ void selectPreviousType(typeAndManaMapList * thisMapList){
 		thisMapList->selectedIndex = thisMapList->size - 1;
 	}
 
-	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance, thisAbilityCreationInstance->totalBonusMana - thisAbilityCreationInstance->bonusMana);
+	thisAbilityCreationInstance->abilityInsance->totalManaCost = calculateManaCost(thisAbilityCreationInstance->abilityInsance);
 }
 
 int canCreateAbility(){
@@ -2124,13 +2149,12 @@ void interpretCreateAbilityEnter(){
 }
 
 void interpretCreateAbilityEscape(){
-	if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
-//		free(thisAbilityCreationInstance->abilityInsance);
-//		thisAbilityCreationInstance->abilityInsance = NULL;
-		//dont want to save it
-		disableLevelUpCreateAbilityMode();
-	}
+//	if(thisAbilityCreationInstance->mode == LEVELUP_ABILITY){
+//		dont want to save it
+//		disableLevelUpCreateAbilityMode();
+//	}
 
+	disableLevelUpCreateAbilityMode();
 	disableAbilityCreateMode();
 	free(thisAbilityCreationInstance->abilityInsance);
 	thisAbilityCreationInstance->abilityInsance = NULL;

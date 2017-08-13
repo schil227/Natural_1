@@ -731,7 +731,7 @@ void newGameCreateMenuMoveHorizontal(int goingLeft){
 }
 
 void newGameMenuIncreaseField(){
-	if(thisMainMenu->newGame->statPoints <= 0){
+	if(thisMainMenu->newGame->currentField != CREATE_SPREAD && thisMainMenu->newGame->statPoints <= 0){
 		return;
 	}
 

@@ -1360,9 +1360,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return 0;
 		}else{
 			createAbilityLoop(hwnd, msg, wParam, lParam, player);
+
 			if(!inAbilityCreateMode() && inMainMenuMode()){
 				disableNewGameAbilityEditMode();
-			}else if(!inAbilityCreateMode() && inLevelUpCreateAbilityMode()){
+			}else if(!inAbilityCreateMode() && inLevelUpCreateAbilityMode() && isUpgradingAbility()){
 				ability * newAbility = getNewAbility();
 				addAbilityToLevelUpUpgrade(newAbility);
 				disableLevelUpCreateAbilityMode();

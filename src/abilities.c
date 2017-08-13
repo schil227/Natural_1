@@ -54,7 +54,7 @@ int calcAbilityDuration(ability * thisAbility){
 	}
 }
 
-int calculateManaCost(ability * thisAbility, int bonusMana){
+int calculateManaCost(ability * thisAbility){
 	int sum = 0; //Ability = -1
 	int diceDam = 0;
 	int duration = 0;
@@ -62,8 +62,6 @@ int calculateManaCost(ability * thisAbility, int bonusMana){
 	int aoeRange = 0;
 	int hasEffect = 0;
 	int dummyInt = 0;
-
-	sum = bonusMana * -1;
 
 	if(thisAbility->type == 't'){
 		updateElementSummation(&sum, &dummyInt, thisAbility->rangeEnabled, thisAbility->range);
@@ -185,6 +183,7 @@ int calculateManaCost(ability * thisAbility, int bonusMana){
 	//Negatives (given)
 	sum += -1*thisAbility->level;
 	sum += -1; //ability
+	sum += -1*thisAbility->bonusMana;
 
 	//if no meaningful effect has been made, return initial cost
 	if(thisAbility->type != 'p' && !hasEffect){
@@ -329,6 +328,7 @@ ability * createAbilityFromLine(char line[2048]){
 	int startingIndex;
 	ability * newAbility = malloc(sizeof(ability));
 	newAbility->numEnabledEffects = 0;
+	newAbility->bonusMana = 0;
 
 	char * value = strtok_r(line,";",&strtok_save_pointer);
 	newAbility->ID = atoi(value);
@@ -851,7 +851,7 @@ ability * createAbilityFromLine(char line[2048]){
 	value = strtok_r(NULL,";",&strtok_save_pointer);
 	strcpy(newAbility->description, value);
 
-	newAbility->totalManaCost = calculateManaCost(newAbility, 0);
+	newAbility->totalManaCost = calculateManaCost(newAbility);
 
 	return newAbility;
 }
@@ -913,6 +913,7 @@ ability * cloneAbility(ability * thisAbility){
 	strcpy(newAbility->description, thisAbility->description);
 	newAbility->totalManaCost = thisAbility->totalManaCost;
 	newAbility->level = thisAbility->level;
+	newAbility->bonusMana = thisAbility->bonusMana;
 	newAbility->numEnabledEffects = thisAbility->numEnabledEffects;
 
 	newAbility->damageTypeEnabled = thisAbility->damageTypeEnabled;
@@ -1041,6 +1042,8 @@ char * getPermenantAbilityAsLine(ability * thisAbility){
 
 	i = sprintf(line, "%d;", thisAbility->ID);
 	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->level);
+	i += sprintf(line + i, "%d;", thisAbility->bonusMana);
 	i += sprintf(line + i, "%d;", thisAbility->range->selectedIndex);
 
 	i += appendAbilityIndexToline(line, i, thisAbility->ac->selectedIndex, thisAbility->ac->defaultStartingIndex);
@@ -1073,6 +1076,12 @@ ability * createPermenantAbilityFromLine(char * line){
 
 	value = strtok(NULL, ";");
 	strcpy(permenantAbility->name,value);
+
+	value = strtok(NULL, ";");
+	permenantAbility->level = atoi(value);
+
+	value = strtok(NULL, ";");
+	permenantAbility->bonusMana = atoi(value);
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
@@ -1170,6 +1179,8 @@ char * getDurationAbilityAsLine(ability * thisAbility){
 
 	i = sprintf(line, "%d;", thisAbility->ID);
 	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->level);
+	i += sprintf(line + i, "%d;", thisAbility->bonusMana);
 
 	i += appendAbilityIndexToline(line, i, thisAbility->range->selectedIndex, thisAbility->range->defaultStartingIndex);
 	i += appendAbilityIndexToline(line, i, thisAbility->diceDamage->selectedIndex, thisAbility->diceDamage->defaultStartingIndex);
@@ -1220,6 +1231,12 @@ ability * createDurationAbilityFromLine(char * line){
 
 	value = strtok(NULL, ";");
 	strcpy(durationAbility->name,value);
+
+	value = strtok(NULL,";");
+	durationAbility->level = atoi(value);
+
+	value = strtok(NULL,";");
+	durationAbility->bonusMana = atoi(value);
 
 	value = strtok(NULL, ";");
 	if(*value != 'd'){
@@ -1385,7 +1402,7 @@ ability * createDurationAbilityFromLine(char * line){
 	if (*value != 'd') {
 		durationAbility->totalManaCost = atoi(value);
 	}else{
-		durationAbility->totalManaCost = calculateManaCost(durationAbility, 0);
+		durationAbility->totalManaCost = calculateManaCost(durationAbility);
 	}
 
 	return durationAbility;
@@ -1397,6 +1414,8 @@ char * getTargetAbilityAsLine(ability * thisAbility){
 
 	i = sprintf(line, "%d;", thisAbility->ID);
 	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->level);
+	i += sprintf(line + i, "%d;", thisAbility->bonusMana);
 	i += sprintf(line + i, "%d;", thisAbility->damageType->selectedIndex);
 
 	i += appendAbilityIndexToline(line, i, thisAbility->range->selectedIndex, thisAbility->range->defaultStartingIndex);
@@ -1447,6 +1466,12 @@ ability * createTargetedAbilityFromLine(char * line){
 
 	value = strtok(NULL, ";");
 	strcpy(targetedAbility->name,value);
+
+	value = strtok(NULL, ";");
+	targetedAbility->level = atoi(value);
+
+	value = strtok(NULL, ";");
+	targetedAbility->bonusMana = atoi(value);
 
 	value = strtok(NULL, ";");
 	targetedAbility->damageType->selectedIndex = atoi(value);
@@ -1610,7 +1635,7 @@ ability * createTargetedAbilityFromLine(char * line){
 	if(*value != 'd'){
 		targetedAbility->totalManaCost = atoi(value);
 	}else{
-		targetedAbility->totalManaCost = calculateManaCost(targetedAbility, 0);
+		targetedAbility->totalManaCost = calculateManaCost(targetedAbility);
 	}
 
 	return targetedAbility;
@@ -1622,6 +1647,8 @@ char * getInstantAbilityAsLine(ability * thisAbility){
 
 	i = sprintf(line, "%d;", thisAbility->ID);
 	i += sprintf(line + i, "%s;", thisAbility->name);
+	i += sprintf(line + i, "%d;", thisAbility->level);
+	i += sprintf(line + i, "%d;", thisAbility->bonusMana);
 	i += sprintf(line + i, "%d;", thisAbility->damageType->selectedIndex);
 
 	i += appendAbilityIndexToline(line, i, thisAbility->range->selectedIndex, thisAbility->range->defaultStartingIndex);
@@ -1653,6 +1680,12 @@ ability * createInstantAbilityFromLine(char * line) {
 
 	value = strtok(NULL, ";");
 	strcpy(instantAbility->name, value);
+
+	value = strtok(NULL, ";");
+	instantAbility->level = atoi(value);
+
+	value = strtok(NULL, ";");
+	instantAbility->bonusMana = atoi(value);
 
 	value = strtok(NULL, ";");
 	instantAbility->damageType->selectedIndex = atoi(value);
@@ -1726,7 +1759,7 @@ ability * createInstantAbilityFromLine(char * line) {
 	if(*value != 'd'){
 		instantAbility->totalManaCost = atoi(value);
 	}else{
-		instantAbility->totalManaCost = calculateManaCost(instantAbility, 0);
+		instantAbility->totalManaCost = calculateManaCost(instantAbility);
 	}
 
 	return instantAbility;
