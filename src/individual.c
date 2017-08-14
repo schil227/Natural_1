@@ -3134,8 +3134,9 @@ int playerCanLevelUp(individual * player){
 	return player->exp >= player->level * 100;
 }
 
-void addExpToPlayer(int exp, individual * player){
+void awardExp(individual * player, int exp, char * message){
 	player->exp += exp;
+	cwrite(message);
 }
 
 int getAttributeFromIndividual(individual * thisIndividual, char * attribute){

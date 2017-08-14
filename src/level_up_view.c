@@ -153,6 +153,7 @@ void initializeAbilityUpgradeMode(){
 	thisLevelUpView->abilitiesView->numAbilities = thisLevelUpView->player->abilities->numAbilities + 1;
 	thisLevelUpView->abilitiesView->numUpgradedAbilities = 0;
 	thisLevelUpView->abilitiesView->selectedAbilityIndex = 0;
+	thisLevelUpView->abilitiesView->abilitiesOffset = 0;
 	thisLevelUpView->abilitiesView->currentMode = UPGRADE_ABILITY_ABILITIES;
 	thisLevelUpView->currentMode = LEVELUP_MODE_ABLITIES;
 }
@@ -292,18 +293,18 @@ void interpretLevelUpRollHorizontal(int goingLeft){
 	}
 }
 
-int updateLevelUpStatField(levelUpField selectedStat, int goingLeft){
+int updateLevelUpStatField(levelUpField selectedStat, short int * stat, int goingLeft){
 	if(!goingLeft){
-		if(thisLevelUpView->bonusStatPoints == 1){
+		if(thisLevelUpView->bonusStatPoints == 1 && *stat < 5){
 			thisLevelUpView->selectedStatField = selectedStat;
 			thisLevelUpView->bonusStatPoints = 0;
-			return 1;
+			*stat += 1;
 		}
 	}else{
 		if(thisLevelUpView->bonusStatPoints == 0 && thisLevelUpView->selectedStatField == selectedStat){
 			thisLevelUpView->selectedStatField = LEVELUP_NONE;
 			thisLevelUpView->bonusStatPoints = 1;
-			return -1;
+			*stat -= 1;
 		}
 	}
 
@@ -318,28 +319,28 @@ void interpretLevelUpViewHorizontal(int goingLeft){
 
 	switch(thisLevelUpView->currentField){
 	case LEVELUP_STR:
-		thisLevelUpView->player->STR += updateLevelUpStatField(LEVELUP_STR, goingLeft);
+		updateLevelUpStatField(LEVELUP_STR, &(thisLevelUpView->player->STR), goingLeft);
 		break;
 	case LEVELUP_DEX:
-		thisLevelUpView->player->DEX += updateLevelUpStatField(LEVELUP_DEX, goingLeft);
+		updateLevelUpStatField(LEVELUP_DEX, &(thisLevelUpView->player->DEX), goingLeft);
 		break;
 	case LEVELUP_CON:
-		thisLevelUpView->player->CON += updateLevelUpStatField(LEVELUP_CON, goingLeft);
+		updateLevelUpStatField(LEVELUP_CON, &(thisLevelUpView->player->CON), goingLeft);
 		break;
 	case LEVELUP_INT:
-		thisLevelUpView->player->INT += updateLevelUpStatField(LEVELUP_INT, goingLeft);
+		updateLevelUpStatField(LEVELUP_INT, &(thisLevelUpView->player->INT), goingLeft);
 		break;
 	case LEVELUP_WIS:
-		thisLevelUpView->player->WIS += updateLevelUpStatField(LEVELUP_WIS, goingLeft);
+		updateLevelUpStatField(LEVELUP_WIS, &(thisLevelUpView->player->WIS), goingLeft);
 		break;
 	case LEVELUP_WILL:
-		thisLevelUpView->player->WILL += updateLevelUpStatField(LEVELUP_WILL, goingLeft);
+		updateLevelUpStatField(LEVELUP_WILL, &(thisLevelUpView->player->WILL), goingLeft);
 		break;
 	case LEVELUP_CHR:
-		thisLevelUpView->player->CHR += updateLevelUpStatField(LEVELUP_CHR, goingLeft);
+		updateLevelUpStatField(LEVELUP_CHR, &(thisLevelUpView->player->CHR), goingLeft);
 		break;
 	case LEVELUP_LUCK:
-		thisLevelUpView->player->LUCK += updateLevelUpStatField(LEVELUP_LUCK, goingLeft);
+		updateLevelUpStatField(LEVELUP_LUCK, &(thisLevelUpView->player->LUCK), goingLeft);
 		break;
 	}
 }
@@ -377,6 +378,7 @@ void interpretLevelUpUpgradeAbilitiesEnter(){
 			break;
 		case UPGRADE_ABILITY_DONE:
 			if(thisLevelUpView->abilitiesView->upgradePoints == 0){
+				thisLevelUpView->player->bonusMana = thisLevelUpView->abilitiesView->bonusMana;
 				disableLevelUpView();
 				reInitializeLevelUpView();
 			}
@@ -584,13 +586,15 @@ void drawLevelUpRollView(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff
 	SetTextColor(hdcBuffer, RGB(0, 0, 0));
 }
 
-void drawLevelUpStatArrow(HDC hdc, HDC hdcBuffer, levelUpField thisStatField, int xOff, int yOff){
+void drawLevelUpStatArrow(HDC hdc, HDC hdcBuffer, levelUpField thisStatField, int xOff, int yOff, int statValue){
 	if(thisStatField == thisLevelUpView->currentField){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff, yOff, thisLevelUpView->statFieldEdit);
 	}
 
 	if(thisLevelUpView->bonusStatPoints > 0){
-		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 50, yOff + 10, thisLevelUpView->selectArrowRight);
+		if(statValue < 5){
+			drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 50, yOff + 10, thisLevelUpView->selectArrowRight);
+		}
 	}else if(thisStatField == thisLevelUpView->selectedStatField){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff - 21, yOff + 10, thisLevelUpView->selectArrowLeft);
 	}
@@ -639,14 +643,14 @@ void drawLevelUpView(HDC hdc, HDC hdcBuffer, RECT * rect){
 		drawUnboundCharacterByPixels(hdc, hdcBuffer, xOff + 122, yOff + 529, thisLevelUpView->fieldSelect);
 	}
 
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_STR, xOff + 199, yOff + 182);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_DEX, xOff + 199, yOff + 182 + 42);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_CON, xOff + 199, yOff + 182 + 42 * 2);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_INT, xOff + 199, yOff + 182 + 42 * 3);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_WIS, xOff + 199, yOff + 182 + 42 * 4);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_WILL, xOff + 199, yOff + 182 + 42 * 5);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_CHR, xOff + 199, yOff + 182 + 42 * 6);
-	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_LUCK, xOff + 199, yOff + 182 + 42 * 7);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_STR, xOff + 199, yOff + 182, thisLevelUpView->player->STR);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_DEX, xOff + 199, yOff + 182 + 42, thisLevelUpView->player->DEX);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_CON, xOff + 199, yOff + 182 + 42 * 2, thisLevelUpView->player->CON);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_INT, xOff + 199, yOff + 182 + 42 * 3, thisLevelUpView->player->INT);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_WIS, xOff + 199, yOff + 182 + 42 * 4, thisLevelUpView->player->WIS);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_WILL, xOff + 199, yOff + 182 + 42 * 5, thisLevelUpView->player->WILL);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_CHR, xOff + 199, yOff + 182 + 42 * 6, thisLevelUpView->player->CHR);
+	drawLevelUpStatArrow(hdc, hdcBuffer, LEVELUP_LUCK, xOff + 199, yOff + 182 + 42 * 7, thisLevelUpView->player->LUCK);
 
 	SetTextColor(hdcBuffer, RGB(255, 200, 0));
 	SetBkMode(hdcBuffer, TRANSPARENT);

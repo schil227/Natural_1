@@ -27,3 +27,4 @@ Ideas:
 -NPC says they would have been a master guitar player, but they could never stop biting their fingernails. On hearing this, the player can go to the local blacksmith and ask to forge finger picks for 5 gold. Return with the picks and be rewarded.
 -long faced guy: urban legend, has a huge gaping jaw, scary clown like expression (angry grin)
 -Enter a dungeon, you see the boss, he watches you progress, you know this. (think labrynth - "Within You")
+-A mini boss gets defeated in the 3rd level, says "... I will come back...". Dies, returns in a dreamscape as final boss of level 7

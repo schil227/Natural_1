@@ -907,7 +907,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case 0x46: //f key
 			{
-				addExpToPlayer(50, player);
+				awardExp(player, 50, "Here you go ya filthy cheater: 50xp!");
 			}
 			break;
 		case 0x47://g key (get)

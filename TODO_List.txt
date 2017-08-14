@@ -3,10 +3,9 @@
 ===================
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (6/27/17) Develop a map transition animation (fade to/from black?)
-- (7/11/17) Character info should show proper damageoutput ([x-y] + z, z includes strmod, etc.) and fate tokens
-- (7/17/17) Rebalance mana value for attributes (e.g. 2 mana for +1 WIS outstrips 2 mana for +1 attack... 3 mana for stat?)
-- (7/22/17) Add expierence and Level up functionality
+- (7/11/17) Character info should show proper damageoutput ([x-y] + z, z includes strmod, etc.), fate tokens, level and exp.
 - (8/3/17) Minimizing window doesn't come back up
+- (8/13/17) Make it so the program can be executed elsewhere, outside eclipse.
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
@@ -74,3 +73,5 @@
 - (7/24/17 - 8/3/17) Update abilities to remove Stat modification, include remaning features (LoS, dark LoS) (DONE)
 - (2/13/17 - 8/3/17) Make the ability creator more intuitive & remove stuff that doesn't have an effect for certain abilities from the description (e.g. sleep spell, remove dice damage) (DONE)
 - (8/3/17 - 8/3/17) Create optional action mode feature, use for casting abilities in free mode (DONE)
+- (7/17/17 - 8/3/17) Rebalance mana value for attributes (e.g. 2 mana for +1 WIS outstrips 2 mana for +1 attack... 3 mana for stat?) (DONE)
+- (7/22/17 - 8/13/17) Add expierence and Level up functionality (DONE)

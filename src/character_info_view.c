@@ -442,10 +442,19 @@ void drawInfoMode(HDC hdc, HDC hdcBuffer, RECT * rect, int xOff, int yOff){
 
 	DrawText(hdcBuffer, tmpIndividual->name, -1, &textBox, DT_SINGLELINE);
 
+	textBox.left = xOff + 100;
+	textBox.right = textBox.left + 250;
+	sprintf(value, "Exp: %d", tmpIndividual->exp);
+
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
+
+	textBox.left = xOff + 20;
 	textBox.top = textBox.top + 75;
 	textBox.bottom = textBox.top + 15;
 
-	DrawText(hdcBuffer, "Level: X", -1, &textBox, DT_SINGLELINE);
+	sprintf(value, "Level: %d", tmpIndividual->level);
+
+	DrawText(hdcBuffer, value, -1, &textBox, DT_SINGLELINE);
 
 	textBox.top = textBox.top + 20;
 	textBox.bottom = textBox.top + 15;

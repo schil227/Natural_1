@@ -1262,6 +1262,8 @@ int processEvent(int eventID, individual * player, groupContainer * thisGroupCon
 		case 39:
 			showSaveMenu();
 			return 0;
+		case 40:
+			awardExp(player, thisEvent->intA, thisEvent->message);
 		}
 }
 

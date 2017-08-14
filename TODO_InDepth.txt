@@ -1,7 +1,4 @@
 == TODO In Depth ==
-abiltiy upgrading:
--destroy levelUpAbilityOriginal where applicable
--only upgrade abilities once, allow re-editing and adding of bonus mana.
 
 
 
