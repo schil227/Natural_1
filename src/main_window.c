@@ -13,10 +13,10 @@
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
 #include "./headers/loop_controller_pub_methods.h"
-#include"./headers/console_window_pub_methods.h"
-#include"./headers/console_pub_methods.h"
-#include"./headers/dialog_pub_methods.h"
-#include"./headers/sound_pub_methods.h"
+#include "./headers/console_window_pub_methods.h"
+#include "./headers/console_pub_methods.h"
+#include "./headers/dialog_pub_methods.h"
+#include "./headers/sound_pub_methods.h"
 #include "./headers/look_view_pub_methods.h"
 
 int MAP_CREATION_MODE = 0;
@@ -45,7 +45,8 @@ int MAP_CREATION_MODE = 0;
 
 const char g_szClassName[] = "MyWindowClass";
 const char  g_szClassNameSideBar[] = "MySideBarClass";
-const char * mapDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\";//".\\resources\\maps\\";//
+const char * mapDirectory = ".\\resources\\maps\\";//".\\resources\\maps\\";//C:\\Users\\Adrian\\C\\Natural_1_new_repo\\resources\\maps\\
+
 static char * mapTestDirectory = "C:\\Users\\Adrian\\C\\Natural_1_new_repo\\unit_tests\\testMaps\\";
 
 int mainWindowWidth = 640;
@@ -117,7 +118,6 @@ void transitViewShift(shiftData * viewShift, individual * player, field * thisFi
 void tryUpdateXShift(shiftData * viewShift, int newX, int gameFieldAreaX){
 	int adjustedX = (newX - viewShift->xShift) * 50;
 
-	//adjustedX less than 25% of gameField?
 	if(!isGreaterThanPercentage(adjustedX, gameFieldAreaX, 35) && viewShift->xShift > 0){
 		viewShift->xShift--;
 	}else if(isGreaterThanPercentage(adjustedX, gameFieldAreaX, 65)){
@@ -128,7 +128,6 @@ void tryUpdateXShift(shiftData * viewShift, int newX, int gameFieldAreaX){
 void tryUpdateYShift(shiftData * viewShift, int newY, int gameFieldAreaY){
 	int adjustedY = (newY - viewShift->yShift) * 50;
 
-	//adjustedY less than 25% of gameField?
 	if(!isGreaterThanPercentage(adjustedY, gameFieldAreaY, 35) && viewShift->yShift > 0){
 		viewShift->yShift--;
 	}else if(isGreaterThanPercentage(adjustedY, gameFieldAreaY, 65)){
@@ -303,7 +302,7 @@ void forcePlayerTransit(int targetMapID, int transitID){
 void drawGameMode(HDC hdc, RECT* prc) {
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
 	HBITMAP hbmBuffer = CreateCompatibleBitmap(hdc, prc->right, prc->bottom);
-	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer); //copy of hbmBuffer
+	HBITMAP hbmOldBuffer = SelectObject(hdcBuffer, hbmBuffer);
 	int index;
 
 	printf("WANT: dark\n"); fflush(stdout);
@@ -622,6 +621,8 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	}
 
 	drawLock = 0;
+
+	return 0;
 }
 
 void destroyGame(){
@@ -837,22 +838,6 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}
 		break;
 	case WM_MOUSEMOVE:
-	{
-		break;
-	}
-//	case WM_PAINT: //NOTE: NEVER USE MESSAGES IN A WM_PAINT LOOP, AS IT WILL
-//	{			   //SPAWN MORE MESSAGES!
-//
-//		RECT rect;
-//		PAINTSTRUCT ps;
-//		HDC hdc = BeginPaint(hwnd, &ps);
-//
-//		GetClientRect(hwnd, &rect);
-//		drawAll(hdc, &rect);
-//
-//		EndPaint(hwnd, &ps);
-//		ReleaseDC(hwnd, hdc);
-//	}
 		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
@@ -1330,8 +1315,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	//Required for menu mode
 	if(inNameBoxMode()){
-		nameLoop(hwnd, msg, wParam, lParam, player);
-		return 0;
+		return nameLoop(hwnd, msg, wParam, lParam, player);
 	}else if(inAbilityCreateMode()){
 		if(inAbilityWaitForNameMode()){//Name loop finished, check for name
 			toggleAbilityWaitForNameMode();
@@ -1359,7 +1343,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 			return 0;
 		}else{
-			createAbilityLoop(hwnd, msg, wParam, lParam, player);
+			int result = createAbilityLoop(hwnd, msg, wParam, lParam, player);
 
 			if(!inAbilityCreateMode() && inMainMenuMode()){
 				disableNewGameAbilityEditMode();
@@ -1370,7 +1354,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				changeAbilityTemplate(0);
 			}
 
-			return 0;
+			return result;
 		}
 	}
 
@@ -1389,7 +1373,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			reinitializeMainMenu();
 		}
 
-		mainMenuLoop(hwnd, msg, wParam, lParam);
+		int result = mainMenuLoop(hwnd, msg, wParam, lParam);
 
 		if(mainMenuReadyToLoad()){
 			destroyAndLoad(hwnd, 0, getMainMenuLoadSlot());
@@ -1400,7 +1384,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			setupLoadMode(1);
 		}
 
-		return 0;
+		return result;
 	}
 
 	if(inGameMenuMode()){
@@ -1423,11 +1407,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if(inWorldMapMode()){
 		return worldMapLoop(hwnd, msg, wParam, lParam, &main_field, player, thisGroupContainer, viewShift, mapDirectory, &inActionMode);
 	}else if(isSpecialDrawModeEnabled()){
-		specialDrawLoop(hwnd, msg, wParam, lParam);
-		return 0;
+		return specialDrawLoop(hwnd, msg, wParam, lParam);
 	}else if(shouldDrawDialogBox()){
-		dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
-		return 0;
+		return dialogLoop(hwnd, msg, wParam, lParam, player, thisGroupContainer, main_field, &inActionMode);
 	}else if(inAbilityViewMode()){
 		return abilityViewLoop(hwnd, msg, wParam, lParam, player, viewShift, main_field);
 	}else if (inLookViewScrollMode()) {
@@ -1435,8 +1417,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}else if (inCharacterInfoView()){
 		return characterInfoViewLoop(hwnd, msg, wParam, lParam);
 	}else if (inCursorMode()) {
-		cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode, animateMoveSpeed);
-		return 0;
+		return cursorLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode, &playerControlMode, animateMoveSpeed);
 	} else if(moveMode){
 		if(initMoveMode){
 			initMoveMode = 0;
@@ -1455,11 +1436,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			viewShift->yShiftOld = viewShift->yShift;
 		}
 
-		moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisGroupContainer, &postMoveMode, viewShift, animateMoveSpeed);
-		return 0;
+		return moveLoop(hwnd, msg, wParam, lParam, &moveMode, main_field, player, thisGroupContainer, &postMoveMode, viewShift, animateMoveSpeed);
 	} else if(inInventoryViewMode()){
-		inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
-		return 0;
+		return inventoryLoop(hwnd, msg, wParam, lParam, main_field, player, thisGroupContainer, viewShift, &inActionMode);
 	}else if(thisGroupContainer != NULL && thisGroupContainer->groupMoveMode){
 		PostMessage(hwnd, WM_MOUSEACTIVATE, wParam, lParam);
 		return 0;
@@ -1671,9 +1650,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	srand(time(NULL));
-	for(i = 0; i < 10; i++){
-		printf("%d, ", rand()%100);
-	}
 
 	//step 1: registering the window class
 	wc.cbSize = sizeof(WNDCLASSEX); //Size of the structure

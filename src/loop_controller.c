@@ -307,14 +307,14 @@ int cursorLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		break;
 		}
 		case WM_CLOSE:
-		DestroyWindow(hwnd);
-		break;
+			DestroyWindow(hwnd);
+			break;
 		case WM_DESTROY:
-		destroyThisCursor();
-		PostQuitMessage(0);
-		break;
+			destroyThisCursor();
+			PostQuitMessage(0);
+			break;
 		default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
+			return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
 }
@@ -339,8 +339,10 @@ int pausedLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		PostQuitMessage(0);
 		break;
 	default:
-	return DefWindowProc(hwnd, msg, wParam, lParam);
+		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
+
+	return 0;
 }
 
 int specialDrawLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
@@ -362,7 +364,7 @@ int specialDrawLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 		PostQuitMessage(0);
 		break;
 	default:
-	return DefWindowProc(hwnd, msg, wParam, lParam);
+		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
 	return 0;
@@ -1053,20 +1055,20 @@ int moveLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, int * moveMode, 
 		break;
 		}
 		case WM_CLOSE:
-		DestroyWindow(hwnd);
-		break;
+			DestroyWindow(hwnd);
+			break;
 		case WM_DESTROY:
-
-		PostQuitMessage(0);
-		break;
+			PostQuitMessage(0);
+			break;
 		default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
+			return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
 }
 
-void processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
+int processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode, int * postMoveMode, int * playerControlMode, int * postPlayerControlMode){
+	int toReturn = 0;
 	switch (msg) {
 		case WM_KEYDOWN:{
 			switch(LOWORD(wParam)){
@@ -1084,6 +1086,8 @@ void processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
+		default:
+			toReturn = DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
 	if(controlledPlayerAction(player, thisGroupContainer, thisField, *inActionMode)){
@@ -1092,10 +1096,13 @@ void processPlayerControlledLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 	*playerControlMode = 0;
 	*postPlayerControlMode = 1;
+
+	return toReturn;
 }
 
-void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
+int processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		individual * player, groupContainer * thisGroupContainer, field * thisField, int * inActionMode, int * playerControlMode, int animateMoveSpeed){
+	int toReturn = 0;
 	switch (msg) {
 		case WM_KEYDOWN:{
 			switch(LOWORD(wParam)){
@@ -1113,6 +1120,8 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
+		default:
+			toReturn = DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
 	*inActionMode = shouldEnableActionMode();
@@ -1152,13 +1161,13 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			if(initializeEnemyTurn(thisGroupContainer->selectedGroup, player, thisField)){
 				thisGroupContainer->groupActionMode = 0;
 				thisGroupContainer->postGroupActionMode = 1;
-				return;
+				return toReturn;
 			}
 
 			if(!thisGroupContainer->selectedGroup->individuals[thisGroupContainer->selectedGroup->currentIndividualIndex]->remainingActions > 0){
 				thisGroupContainer->groupActionMode = 0;
 				thisGroupContainer->postGroupActionMode = 1;
-				return;
+				return toReturn;
 			}
 		}
 
@@ -1190,6 +1199,8 @@ void processActionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
 			}
 		}
 	}
+
+	return toReturn;
 }
 
 int gameMenuLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
@@ -1309,4 +1320,3 @@ int levelUpLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 
 	return 0;
 }
-

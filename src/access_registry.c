@@ -5,7 +5,7 @@
  *      Author: Adrian
  */
 #include "./headers/access_registry_pub_methods.h"
-
+#include<stdio.h>
 static lockAuthority * thisLockAuth;
 
 void initLockAuth(){
