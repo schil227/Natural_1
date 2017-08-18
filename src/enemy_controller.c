@@ -2375,7 +2375,7 @@ int enemyAction(individual * enemy, individual * player, groupContainer * thisGr
 
 	//Supportive
 	else{
-		cwrite("Being supportive~~ :3");
+//		cwrite("Being supportive~~ :3");
 
 		if(enemy->abilities->numAbilities == 0 || hasActiveStatusEffect(enemy, STATUS_SILENCED)){
 			return attackModule(enemy, player, thisGroupContainer, thisField);
@@ -2692,7 +2692,7 @@ int guardAction(individual * guard, individual * player, groupContainer * thisGr
 
 	//Supportive
 	else{
-		cwrite("Being supportive~~ :3");
+//		cwrite("Being supportive~~ :3");
 
 		if(guard->abilities->numAbilities == 0 || hasActiveStatusEffect(guard, STATUS_SILENCED)){
 			return attackModule(guard, player, thisGroupContainer, thisField);
@@ -3217,7 +3217,7 @@ int allyAction(individual * ally, individual * player, groupContainer * thisGrou
 
 	//Supportive
 	else{
-		cwrite("Being supportive~~ :3");
+//		cwrite("Being supportive~~ :3");
 
 		if(ally->abilities->numAbilities == 0 || hasActiveStatusEffect(ally, STATUS_SILENCED)){
 			return attackModule(ally, player, thisGroupContainer, thisField);
