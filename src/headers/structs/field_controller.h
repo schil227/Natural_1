@@ -9,6 +9,23 @@
 #define SRC_HEADERS_STRUCTS_FIELD_CONTROLLER_H_
 #include "../field_pub_methods.h"
 
+typedef enum {TRANSITION_SLOW, TRANSITION_MEDIUM, TRANSITION_FAST} windowTransitionSpeed;
+
+typedef struct{
+	int inWindowTransition;
+	int readyToTransitField;
+	int greyscaleLevel;
+	int fadingOut;
+	int fieldUnloaded;
+
+	int areaNodeId;
+	char mapDirectory[256];
+	char mapName[256];
+	windowTransitionSpeed selectedTransition;
+
+	fixedCharacter * blackCharacter;
+} windowTransition;
+
 typedef struct {
 	size_t size;
 	int MAX_INDIVIDUALS;

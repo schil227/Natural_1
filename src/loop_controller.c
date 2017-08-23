@@ -345,6 +345,21 @@ int pausedLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	return 0;
 }
 
+int windowTransitionLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
+	switch(msg){
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+
+	return 0;
+}
+
 int specialDrawLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 	switch(msg){
 	case WM_KEYDOWN:{
@@ -700,7 +715,7 @@ int worldMapLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, field ** thi
 
 		case 0x0D: //enter
 		{
-			if(transitFromAreaNode(getCurrentAreaNode(), thisField, player, thisGroupContainer, viewShift, mapDirectory)){
+			if(transitFromAreaNode(getCurrentAreaNode(), thisField, player, thisGroupContainer, viewShift, mapDirectory, 1)){
 				disableWorldMapMode();
 
 				RECT rect;

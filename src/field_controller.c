@@ -8,6 +8,100 @@
 #include "./headers/field_controller_pub_methods.h"
 #include<stdio.h>
 
+static windowTransition * thisWindowTransition;
+
+void initWindowTransition(){
+	thisWindowTransition = malloc(sizeof(windowTransition));
+
+	thisWindowTransition->inWindowTransition = 0;
+	thisWindowTransition->readyToTransitField = 0;
+	thisWindowTransition->selectedTransition = TRANSITION_MEDIUM;
+	thisWindowTransition->fadingOut = 1;
+	thisWindowTransition->greyscaleLevel = 0;
+	thisWindowTransition->fieldUnloaded = 0;
+	thisWindowTransition->blackCharacter = createCharacter(7500, RGB(255,0,255), 0, 0);
+}
+
+void enableWindowTransition(int fadingOut, int fieldUnloaded, windowTransitionSpeed speed, int areaNodeID, char * mapDirectory, char * mapName){
+	thisWindowTransition->greyscaleLevel = 0;
+	thisWindowTransition->fadingOut = fadingOut;
+	thisWindowTransition->fieldUnloaded = fieldUnloaded;
+	thisWindowTransition->inWindowTransition = 1;
+	thisWindowTransition->areaNodeId = areaNodeID;
+
+	strcpy(thisWindowTransition->mapDirectory, mapDirectory);
+	strcpy(thisWindowTransition->mapName, mapName);
+
+	if(fadingOut){
+		thisWindowTransition->selectedTransition = speed;
+	}
+}
+
+void disableWindowTransition(windowTransitionSpeed speed){
+	thisWindowTransition->inWindowTransition = 0;
+}
+
+int inWindowTransitionMode(){
+	if(thisWindowTransition != NULL){
+		return thisWindowTransition->inWindowTransition;
+	}
+
+	return 0;
+}
+
+int readyToTransit(){
+	if(thisWindowTransition != NULL){
+		return thisWindowTransition->readyToTransitField;
+	}
+
+	return 0;
+}
+
+int getWindowTransitionGreyscaleIncrement(){
+	switch(thisWindowTransition->selectedTransition){
+		case TRANSITION_SLOW:
+			return 6;
+		case TRANSITION_MEDIUM:
+			return 12;
+		case TRANSITION_FAST:
+			return 18;
+	}
+
+	return 7;
+}
+
+void drawWindowTransition(HDC hdc, HDC hdcBuffer, RECT * rect){
+	if(thisWindowTransition->fadingOut){
+		thisWindowTransition->greyscaleLevel += getWindowTransitionGreyscaleIncrement();
+	}else{
+		thisWindowTransition->greyscaleLevel -= getWindowTransitionGreyscaleIncrement();
+	}
+
+	if(thisWindowTransition->greyscaleLevel < 0){
+		thisWindowTransition->greyscaleLevel = 0;
+	}else if(thisWindowTransition->greyscaleLevel > 255){
+		thisWindowTransition->greyscaleLevel = 255;
+	}
+
+	if(thisWindowTransition->greyscaleLevel == 0){
+		printf("disabling window transition");fflush(stdin);
+		thisWindowTransition->inWindowTransition = 0;
+		return;
+	}else if(thisWindowTransition->greyscaleLevel == 255 && thisWindowTransition->fadingOut){
+		printf("ready to draw");fflush(stdin);
+		thisWindowTransition->readyToTransitField = 1;
+		thisWindowTransition->fadingOut = 0;
+	}
+
+	drawFadeOutInAnimation(hdc, hdcBuffer, rect, thisWindowTransition->blackCharacter, thisWindowTransition->greyscaleLevel);
+}
+
+
+
+
+
+
+
 individualGroup * initGroup(){
 	int index;
 
@@ -1030,7 +1124,53 @@ void setAlliesToField(individual * player, individualGroup * allies, field * thi
 	}
 }
 
-int attemptToForceTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int targetMapID, int transitID){
+int transitDuringFade(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift){
+	thisWindowTransition->readyToTransitField = 0;
+
+	if(thisWindowTransition->fieldUnloaded){
+		areaNode * thisAreaNode = getAreaNodeFromRegistry(thisWindowTransition->areaNodeId);
+
+		mapInfo * thisMapInfo = getMapInfoFromRegistry(thisAreaNode->mapID);
+		player->jumpTarget = thisAreaNode->mapTransitID;
+
+		*thisField = loadMap(thisMapInfo->mapName, thisWindowTransition->mapDirectory, player, thisGroupContainer);
+
+		setAlliesToField(player, thisGroupContainer->allies, *thisField);
+
+		disableWorldMapMode();
+		return 1;
+	}else{
+		return transit(thisField, thisWindowTransition->areaNodeId, player, thisGroupContainer, viewShift, thisWindowTransition->mapDirectory, thisWindowTransition->mapName);
+	}
+}
+
+int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int fadeOut){
+	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
+
+		if(tmpSpace->thisTransitInfo != NULL && (tmpSpace->thisTransitInfo->targetMapTransitID != 0 || tmpSpace->thisTransitInfo->areaNodeID != -1)){
+			int i;
+			int areaNodeID = tmpSpace->thisTransitInfo->areaNodeID;
+			char mapName[256];
+
+			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
+			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
+
+			if(tmpSpace->thisTransitInfo->transitEventID != -1){
+				triggerEvent(tmpSpace->thisTransitInfo->transitEventID);
+			}
+
+			if(!fadeOut){
+				return transit(thisField, areaNodeID, player, thisGroupContainer, viewShift, mapDirectory, mapName);
+			}else{
+				enableWindowTransition(fadeOut, 0, TRANSITION_MEDIUM, areaNodeID, mapDirectory, mapName);
+			}
+
+			return 1;
+		}
+	return 0;
+}
+
+int attemptToForceTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int targetMapID, int transitID, int fadeOut){
 	int i;
 	char mapName[64];
 
@@ -1038,6 +1178,41 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 
 	strcpy(mapName, targetMap->mapName);
 	player->jumpTarget = transitID;
+
+	if(!fadeOut){
+		return transit(thisField, -1, player, thisGroupContainer, viewShift, mapDirectory, mapName);
+	}else{
+		enableWindowTransition(fadeOut, 0, TRANSITION_MEDIUM, -1, mapDirectory, mapName);
+	}
+
+	return 1;
+}
+
+int transitFromAreaNode(areaNode * thisAreaNode, field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int fadeOut){
+	if(fadeOut){
+		enableWindowTransition(fadeOut, 1, TRANSITION_MEDIUM, thisAreaNode->id, mapDirectory, "");
+		return 0;
+	}else{
+		mapInfo * thisMapInfo = getMapInfoFromRegistry(thisAreaNode->mapID);
+		player->jumpTarget = thisAreaNode->mapTransitID;
+
+		printf("WANT: world transit\n");fflush(stdout);
+		while(!tryGetFieldWriteLock()){}
+		printf("GOT: world transit\n");fflush(stdout);
+
+		*thisField = loadMap(thisMapInfo->mapName, mapDirectory, player, thisGroupContainer);
+
+		releaseFieldWriteLock();
+		printf("RELEASED: world transit\n");fflush(stdout);
+
+		setAlliesToField(player, thisGroupContainer->allies, *thisField);
+
+		return 1;
+	}
+}
+
+int transit(field ** thisField, int areaNodeID, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, char * mapName){
+	int i;
 
 	while(!tryGetConsoleReadLock()){}
 	while(!tryGetConsoleWriteLock()){}
@@ -1073,10 +1248,22 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	for(i = 0; i < thisGroupContainer->movingIndividuals->numIndividuals; i++){
 		thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->xOff = 0;
 		thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->yOff = 0;
+		freeUpMovePath(thisGroupContainer->movingIndividuals->individuals[i]->thisMoveNodeMeta->rootMoveNode);
 	}
 
 	clearGroup(thisGroupContainer->movingIndividuals);
 
+	if(areaNodeID != -1){
+		if(player->thisReportedCrimes->numReportedCrimes > 0){
+			setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
+		}
+
+		enableWorldMapMode(areaNodeID);
+
+		releaseFieldWriteLock();
+		printf("RELEASED: destroy\n");fflush(stdout);
+		return 0;
+	}
 
 	*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
 
@@ -1090,105 +1277,6 @@ int attemptToForceTransit(field ** thisField, individual * player, groupContaine
 	setAlliesToField(player, thisGroupContainer->allies, *thisField);
 
 	return 1;
-}
-
-int transitFromAreaNode(areaNode * thisAreaNode, field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory){
-	mapInfo * thisMapInfo = getMapInfoFromRegistry(thisAreaNode->mapID);
-	player->jumpTarget = thisAreaNode->mapTransitID;
-
-	printf("WANT: world transit\n");fflush(stdout);
-	while(!tryGetFieldWriteLock()){}
-	printf("GOT: world transit\n");fflush(stdout);
-
-	*thisField = loadMap(thisMapInfo->mapName, mapDirectory, player, thisGroupContainer);
-
-	releaseFieldWriteLock();
-	printf("RELEASED: world transit\n");fflush(stdout);
-
-	setAlliesToField(player, thisGroupContainer->allies, *thisField);
-
-	return 1;
-}
-
-int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory){
-	space * tmpSpace = (*thisField)->grid[player->playerCharacter->x][player->playerCharacter->y];
-
-		if(tmpSpace->thisTransitInfo != NULL && (tmpSpace->thisTransitInfo->targetMapTransitID != 0 || tmpSpace->thisTransitInfo->areaNodeID != -1)){
-			int i;
-			int areaNodeID = tmpSpace->thisTransitInfo->areaNodeID;
-			char mapName[256];
-			strcpy(mapName, tmpSpace->thisTransitInfo->transitMap);
-			player->jumpTarget = tmpSpace->thisTransitInfo->targetMapTransitID;
-
-			if(tmpSpace->thisTransitInfo->transitEventID != -1){
-				triggerEvent(tmpSpace->thisTransitInfo->transitEventID);
-			}
-
-			while(!tryGetConsoleReadLock()){}
-			while(!tryGetConsoleWriteLock()){}
-
-			clearMessages();
-
-			releaseConsoleWriteLock();
-			releaseConsoleReadLock();
-
-			if(reportActiveCrimes(player)){
-				cwrite("Your crimes have been reported by witnesses!");
-				clearCrimeSpecialDialogForGroup(thisGroupContainer->npcs);
-			}
-
-			groupTransitUpdate(thisGroupContainer);
-			removeAlliesFromField(thisGroupContainer->allies, *thisField);
-
-			printf("WANT: destroy\n");fflush(stdout);
-			while(!tryGetFieldWriteLock()){}
-			printf("GOT: destroy\n");fflush(stdout);
-
-			mapInfo * thisMapInfo = getMapInfoFromRegistry((*thisField)->id);
-			thisMapInfo->isCurrentMap = 0;
-
-			addFieldToTraversedMaps(thisMapInfo->id);
-
-			destroyField(*thisField, player);
-			clearGroup(thisGroupContainer->enemies);
-			clearGroup(thisGroupContainer->npcs);
-			clearGroup(thisGroupContainer->beasts);
-			clearGroup(thisGroupContainer->guards);
-
-			for(i = 0; i < thisGroupContainer->movingIndividuals->numIndividuals; i++){
-				thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->xOff = 0;
-				thisGroupContainer->movingIndividuals->individuals[i]->playerCharacter->yOff = 0;
-				freeUpMovePath(thisGroupContainer->movingIndividuals->individuals[i]->thisMoveNodeMeta->rootMoveNode);
-			}
-
-			clearGroup(thisGroupContainer->movingIndividuals);
-
-			if(areaNodeID != -1){
-				if(player->thisReportedCrimes->numReportedCrimes > 0){
-					setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
-				}
-
-				enableWorldMapMode(areaNodeID);
-
-				releaseFieldWriteLock();
-				printf("RELEASED: destroy\n");fflush(stdout);
-				return 0;
-			}
-
-			*thisField = loadMap(mapName, mapDirectory, player, thisGroupContainer);
-
-			releaseFieldWriteLock();
-			printf("RELEASED: destroy\n");fflush(stdout);
-
-			if(player->thisReportedCrimes->numReportedCrimes > 0){
-				setGroupSpecialDialog(thisGroupContainer->guards, DIALOG_CRIME_WITNESS);
-			}
-
-			setAlliesToField(player, thisGroupContainer->allies, *thisField);
-
-			return 1;
-		}
-	return 0;
 }
 
 int tryPickPocketIndividualFromField(individual * player, field * thisField, int cursorX, int cursorY){

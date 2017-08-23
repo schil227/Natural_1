@@ -9,6 +9,7 @@
 #define SRC_HEADERS_CHARACTER_H_
 #include<stdlib.h>
 #include<windows.h>
+#include<WinGdi.h>
 
 typedef enum {
 	ANIMATION_IDLE = 0,

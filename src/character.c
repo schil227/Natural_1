@@ -809,6 +809,23 @@ void drawUnboundAnimationByPixels(HDC hdc, HDC hdcBuffer, character * thisCharac
 	DeleteDC(hdcMem);
 }
 
+void drawFadeOutInAnimation(HDC hdc, HDC hdcBuffer, RECT * rect, fixedCharacter * blackCharacter, int greyShade){
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	BLENDFUNCTION bf;
+
+	bf.AlphaFormat = 0;
+	bf.BlendFlags = 0;
+	bf.BlendOp = AC_SRC_OVER;
+	bf.SourceConstantAlpha = greyShade;
+
+	SelectObject(hdcMem, blackCharacter->fixedImage);
+
+	AlphaBlend(hdcBuffer, 0, 0, rect->right - rect->left, rect->bottom - rect->top,
+			hdcMem, 0, 0, blackCharacter->fixedWidth, blackCharacter->fixedHeight, bf);
+
+	DeleteDC(hdcMem);
+}
+
 void updateAnimation(character * thisCharacter){
 	if(!isPaused()){
 		thisCharacter->thisAnimationContainer->clockTickCount++;

@@ -2,7 +2,6 @@
 ==== TODO LIST ====
 ===================
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
-- (6/27/17) Develop a map transition animation (fade to/from black?)
 - (7/11/17) Character info should show proper damageoutput ([x-y] + z, z includes strmod, etc.), fate tokens, level and exp.
 
 ==BUGS==
@@ -75,3 +74,4 @@
 - (7/22/17 - 8/13/17) Add expierence and Level up functionality (DONE)
 - (8/3/17 - 8/17/17) Minimizing window doesn't come back up (DONE)
 - (8/13/17 - 8/17/17) Make it so the program can be executed elsewhere, outside eclipse. (DONE - exe just needs resources)
+- (6/27/17 - 8/22/17) Develop a map transition animation (fade to/from black?) (DONE)

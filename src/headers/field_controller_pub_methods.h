@@ -11,7 +11,7 @@
 #include "./structs/world_map_controller.h".h"
 
 int addIndividualToGroup(individualGroup * thisGroup, individual * thisIndividual);
-int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory);
+int attemptToTransit(field ** thisField, individual * player, groupContainer * thisGroupContainer, shiftData * viewShift, char * mapDirectory, int fadeOut);
 void clearGroup(individualGroup * thisGroup);
 
 #endif /* SRC_HEADERS_FIELD_CONTROLLER_PUB_METHODS_H_ */

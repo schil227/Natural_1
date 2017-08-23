@@ -10,6 +10,7 @@ static specialDraw * specialDrawInstance;
 
 void initSpecialDrawInstance(){
 	specialDrawInstance = malloc(sizeof(specialDraw));
+
 	specialDrawInstance->numImagesToDraw = 0;
 	specialDrawInstance->MAX_IMAGES_TO_DRAW = 50;
 
@@ -113,16 +114,13 @@ void resetSpecialDraw(){
 	specialDrawInstance->numSpecialIndividuals = 0;
 
 	for(i = 0; i < specialDrawInstance->numImagesToDraw; i++){
-//		destroyFixedCharacter(specialDrawInstance->imagesToDraw[i]->image);
 		destroyCharacter(specialDrawInstance->imagesToDraw[i]->image);
 		free(specialDrawInstance->imagesToDraw[i]);
 		specialDrawInstance->imagesToDraw[i] = NULL;
 	}
 
 	specialDrawInstance->numImagesToDraw = 0;
-
 	specialDrawInstance->currentTimerTicks = 0;
 	specialDrawInstance->durationInTimerTicks = 0;
-
 	specialDrawInstance->specialDrawModeEnabled = 0;
 }

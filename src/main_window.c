@@ -278,7 +278,7 @@ int shouldEnableActionMode(){
 void forcePlayerTransit(int targetMapID, int transitID){
 	while(!tryGetFieldReadLock()){}
 
-	if(attemptToForceTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory, targetMapID, transitID)){
+	if(attemptToForceTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory, targetMapID, transitID, 0)){
 		RECT rect;
 		GetClientRect(hwnd_global, &rect);
 		HDC hdc = GetDC(hwnd_global);
@@ -317,6 +317,10 @@ void drawGameMode(HDC hdc, RECT* prc) {
 
 		if(isPaused()){
 			drawPauseWindow(hdc, hdcBuffer, prc);
+		}
+
+		if(inWindowTransitionMode()){
+			drawWindowTransition(hdc, hdcBuffer, prc);
 		}
 
 		BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
@@ -440,6 +444,10 @@ void drawGameMode(HDC hdc, RECT* prc) {
 		drawGameMenu(hdc, hdcBuffer, prc);
 	}
 
+	if(inWindowTransitionMode()){
+		drawWindowTransition(hdc, hdcBuffer, prc);
+	}
+
 	BitBlt(hdc, 0, 0, prc->right, prc->bottom, hdcBuffer, 0, 0, SRCCOPY);
 
 	SelectObject(hdcBuffer, hbmOldBuffer);
@@ -500,6 +508,20 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 	}
 
 	drawGameMode(hdc, &rect);
+
+	if(readyToTransit()){//flag for ready to transit
+		HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+		if(transitDuringFade(&main_field, player, thisGroupContainer, viewShift)){
+			while(!tryGetFieldWriteLock()){}
+
+			updateFieldGraphics(hdc, hdcBuffer, main_field);
+			transitViewShift(viewShift, player, main_field, &rect);
+			inActionMode = shouldEnableActionMode();
+
+			releaseFieldWriteLock();
+		}
+	}
 
 	ReleaseDC(hwnd, hdc);
 
@@ -691,6 +713,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	initLevelUpView();
 	initPauseView(1523);
 	initWorldMapController(10003);
+	initWindowTransition();
 
 	player = getIndividualFromRegistry(1);
 
@@ -786,6 +809,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		initLevelUpView();
 		initPauseView(1523);
 		initWorldMapController(10003);
+		initWindowTransition();
 
 		enableSound();
 
@@ -869,7 +893,7 @@ int mainLoop(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			{
 				while(!tryGetFieldReadLock()){}
 
-				if(attemptToTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory)){
+				if(attemptToTransit(&main_field, player, thisGroupContainer, viewShift, mapDirectory, 1)){
 					RECT rect;
 					GetClientRect(hwnd, &rect);
 					HDC hdc = GetDC(hwnd);
@@ -1385,6 +1409,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 
 		return result;
+	}
+
+	//driven by the timerQueue callback
+	if(inWindowTransitionMode()){
+		return windowTransitionLoop(hwnd, msg, wParam, lParam);
 	}
 
 	if(inGameMenuMode()){

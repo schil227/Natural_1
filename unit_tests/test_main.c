@@ -438,13 +438,13 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	moveIndividualSpace(main_test_field,testPlayer,6,9);
 
 	//fails, not a transitional space
-	assert(!attemptToTransit(&main_test_field, testPlayer, testGroupContainer, testShiftData, mapTestDirectory));
+	assert(!attemptToTransit(&main_test_field, testPlayer, testGroupContainer, testShiftData, mapTestDirectory, 0));
 
 	//warping player to doorway
 	moveIndividualSpace(main_test_field,testPlayer,6,8);
 
 	//works, player is in a transitional space - new field is loaded
-	assert(attemptToTransit(&main_test_field, testPlayer, testGroupContainer, testShiftData,mapTestDirectory));
+	assert(attemptToTransit(&main_test_field, testPlayer, testGroupContainer, testShiftData,mapTestDirectory, 0));
 
 	printf("Player location %d,%d\n", testPlayer->playerCharacter->x,testPlayer->playerCharacter->y);
 
@@ -452,7 +452,7 @@ int mainTest(individual* testPlayer, groupContainer * testGroupContainer, field*
 	assert(testPlayer->playerCharacter->x == 2 && testPlayer->playerCharacter->y == 3);
 
 	//transport back
-	assert(attemptToTransit(&main_test_field, testPlayer, testGroupContainer, testShiftData,mapTestDirectory));
+	assert(attemptToTransit(&main_test_field, testPlayer, testGroupContainer, testShiftData,mapTestDirectory, 0));
 
 	//player is back at map1 doorway
 	assert(testPlayer->playerCharacter->x == 6 && testPlayer->playerCharacter->y == 8);
