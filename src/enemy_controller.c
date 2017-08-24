@@ -1803,6 +1803,10 @@ int moveCloserToTarget(individual * enemy, individual * targetIndividual, field 
 }
 
 int attackModule(individual * thisIndividual, individual * player, groupContainer * thisGroupContainer, field * thisField){
+	if(thisIndividual->targetedIndividual == NULL){
+		return 0;
+	}
+
 	if(thisIndividual->thisBehavior->isTactical && !hasActiveStatusEffect(thisIndividual, STATUS_BERZERK) && getAttributeSum(thisIndividual, "range") > getAttributeSum(thisIndividual->targetedIndividual,"range")  && isInAttackRange(thisIndividual->targetedIndividual, thisIndividual, thisField)){
 		 //&& isGreaterThanPercentage(rand() % 100, 100, 50)
 		int x, y;
@@ -1845,7 +1849,6 @@ int attackModule(individual * thisIndividual, individual * player, groupContaine
 
 			return toReturn;
 		}
-
 	}
 }
 

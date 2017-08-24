@@ -967,21 +967,20 @@ int damageIndividualWithAbility(individual *thisIndividual, individual *targetIn
 	targetIndividual->hp = targetIndividual->hp - totalDamage;
 
 	if(targetIndividual->hp <= 0){ //target is dead
-		sendDeathDialog(targetIndividual->name, thisIndividual->name);
-		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
-
-		if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
-			processCrimeEvent(CRIME_MURDER, 300, targetIndividual->ID, 0);
-		}
-
-		removeIndividualFromExistance(targetIndividual->ID);
-		addSpecialIndividual(targetIndividual);
-
-		addSpecialIndividual(targetIndividual);
-		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
-		setIndividualDelayAnimation(targetIndividual, ANIMATION_DEATH, delay);
-		int deathDelay = targetIndividual->playerCharacter->thisAnimationContainer->animations[targetIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
-		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
+//		sendDeathDialog(targetIndividual->name, thisIndividual->name);
+//		triggerEventOnDeath(targetIndividual->ID, thisIndividual->isPlayer);
+//
+//		if(thisIndividual->isPlayer && (targetIndividual->currentGroupType == GROUP_NPCS || targetIndividual->currentGroupType == GROUP_GUARDS)){
+//			processCrimeEvent(CRIME_MURDER, 300, targetIndividual->ID, 0);
+//		}
+//
+//		removeIndividualFromExistance(targetIndividual->ID);
+//
+//		addSpecialIndividual(targetIndividual);
+//		int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+//		setIndividualDelayAnimation(targetIndividual, ANIMATION_DEATH, delay);
+//		int deathDelay = targetIndividual->playerCharacter->thisAnimationContainer->animations[targetIndividual->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+//		increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 		return 1;
 	}else{ //non-fatal blow
 		return 0;

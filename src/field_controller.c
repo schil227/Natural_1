@@ -1129,7 +1129,6 @@ int transitDuringFade(field ** thisField, individual * player, groupContainer * 
 
 	if(thisWindowTransition->fieldUnloaded){
 		areaNode * thisAreaNode = getAreaNodeFromRegistry(thisWindowTransition->areaNodeId);
-
 		mapInfo * thisMapInfo = getMapInfoFromRegistry(thisAreaNode->mapID);
 		player->jumpTarget = thisAreaNode->mapTransitID;
 

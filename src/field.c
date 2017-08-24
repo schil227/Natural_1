@@ -404,11 +404,31 @@ void useAbilityOnIndividualsInAOERange(individual * thisIndividual, individual *
 			if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, player))
 					|| useDurationAbilityOnIndividual(player, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
 				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
+
+				addSpecialIndividual(player);
+				int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+				setIndividualDelayAnimation(player, ANIMATION_DEATH, delay);
+				int deathDelay = player->playerCharacter->thisAnimationContainer->animations[player->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+				increaseSpecialDrawDurationIfGreater(delay + deathDelay);
+
+				triggerEventOnDeath(player->ID, thisIndividual->isPlayer);
+
+				removeIndividualFromExistance(player->ID);
 			}
 		}else if (tmpAbility->type == 'd'){
 			//add duration ability logic here
 			if(useDurationAbilityOnIndividual(player, tmpAbility, thisIndividual->name)){
 				removeIndividualFromField(thisField, player->playerCharacter->x, player->playerCharacter->y);
+
+				addSpecialIndividual(player);
+				int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+				setIndividualDelayAnimation(player, ANIMATION_DEATH, delay);
+				int deathDelay = player->playerCharacter->thisAnimationContainer->animations[player->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+				increaseSpecialDrawDurationIfGreater(delay + deathDelay);
+
+				triggerEventOnDeath(player->ID, thisIndividual->isPlayer);
+
+				removeIndividualFromExistance(player->ID);
 			}
 		}
 	}
@@ -484,8 +504,21 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 					if((abilityIsOffensive(thisIndividual->activeAbilities->selectedAbility) && attackIndividualWithAbility(thisIndividual, tmp))
 							|| useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
+
+						triggerEventOnDeath(tmp->ID, tmp->isPlayer);
+
+						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
+							processCrimeEvent(CRIME_MURDER, 300, tmp->ID, 0);
+						}
+
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeIndividualFromExistance(tmp->ID);
+
+						addSpecialIndividual(tmp);
+						int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+						setIndividualDelayAnimation(tmp, ANIMATION_DEATH, delay);
+						int deathDelay = tmp->playerCharacter->thisAnimationContainer->animations[tmp->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+						increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 
 						individualsPassed--;
 					}
@@ -494,7 +527,7 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 					if(useDurationAbilityOnIndividual(tmp, thisIndividual->activeAbilities->selectedAbility, thisIndividual->name)){
 						deleteIndividiaulFromGroup(thisGroup, tmp);
 
-						triggerEventOnDeath(thisIndividual->ID, thisIndividual->isPlayer);
+						triggerEventOnDeath(tmp->ID, tmp->isPlayer);
 
 						if(thisIndividual->isPlayer && (tmp->currentGroupType == GROUP_NPCS || tmp->currentGroupType == GROUP_GUARDS)){
 							processCrimeEvent(CRIME_MURDER, 300, tmp->ID, 0);
@@ -502,6 +535,12 @@ void useAbilityOnIndividualGroupsInAOE(individual * thisIndividual, individualGr
 
 						removeIndividualFromField(thisField, tmp->playerCharacter->x, tmp->playerCharacter->y);
 						removeIndividualFromExistance(tmp->ID);
+
+						addSpecialIndividual(tmp);
+						int delay = thisIndividual->playerCharacter->thisAnimationContainer->animations[thisIndividual->playerCharacter->thisAnimationContainer->currentAnimation]->totalDuration;
+						setIndividualDelayAnimation(tmp, ANIMATION_DEATH, delay);
+						int deathDelay = tmp->playerCharacter->thisAnimationContainer->animations[tmp->playerCharacter->thisAnimationContainer->nextAnimationAfterDelay]->totalDuration;
+						increaseSpecialDrawDurationIfGreater(delay + deathDelay);
 
 						individualsPassed--;
 					}
