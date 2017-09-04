@@ -3,12 +3,13 @@
 ===================
 - (5/1/17) Make a Metropolis with at least 25 individuals to see how performant it is. 
 - (7/11/17) Character info should show proper damageoutput ([x-y] + z, z includes strmod, etc.), fate tokens, level and exp.
-
+- (8/23/17) Update field drawing to draw overlapping images last (e.g. tree gets drawn after rest of field/(individuals?))
+- (8/24/17) Dont show black screen when player spawns to map
+- (8/24/17) Create opening new game scene.
 
 ==BUGS==
 - (4/30/17) Got in a fight with the guard, hit 'w' a bunch of times, looked like it was stacking during the guards turn(guard was attacking over and over)
-- (6/28/17) add lock around ability create logic, getting race condition when done creating ability and drawing current create view 
-- (8/23/17) Fix animation speed problem when skelly dies
+- (9/3/17) respawned individuals may overlap the location of other individuals on the field; make sure respawning individuals yield to other individuals
 
 ==BACK BURNER==
 - (11/12/16) Add casting animations
@@ -16,6 +17,7 @@
 - (4/17/17) Larger window draws more, bigger slowdown, find optimizations. See if I should convert to DirectX to draw (maybe with sound as well)
 - (5/25/17) Make the main window run completely seperate from the tests (e.g. build/destroy everything, build resources that only need to be built once like Sound)
 - (6/1/17) Make it so events dont chain together, rather an event encapsulates several smaller independent events.
+- (8/23/17) Implement fate tokens
 
 ==FINISHED==
 - (11/12/16 - 10/22/16) Implement Crimes (DONE)
@@ -77,3 +79,5 @@
 - (8/3/17 - 8/17/17) Minimizing window doesn't come back up (DONE)
 - (8/13/17 - 8/17/17) Make it so the program can be executed elsewhere, outside eclipse. (DONE - exe just needs resources)
 - (6/27/17 - 8/22/17) Develop a map transition animation (fade to/from black?) (DONE)
+- (8/23/17 - 8/24/17) Fix animation speed problem when skelly dies (DONE)
+- (6/28/17 - ??) add lock around ability create logic, getting race condition when done creating ability and drawing current create view (DONE)

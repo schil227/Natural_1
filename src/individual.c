@@ -246,8 +246,17 @@ int defineIndividual(individual * thisIndividual, int ID, int isPlayer, COLORREF
 		}
 	}
 
-	thisIndividual->desiredLocation->x = desiredLocationX;
-	thisIndividual->desiredLocation->y = desiredLocationY;
+	if(desiredLocationX == -1){
+		thisIndividual->desiredLocation->x = x;
+	}else{
+		thisIndividual->desiredLocation->x = desiredLocationX;
+	}
+
+	if(desiredLocationY == -1){
+		thisIndividual->desiredLocation->y = y;
+	}else{
+		thisIndividual->desiredLocation->y = desiredLocationY;
+	}
 
 	character * shadowCharacter = malloc(sizeof(character));
 	shadowCharacter->thisAnimationContainer = cloneAnimationContainer(thisIndividual->playerCharacter->thisAnimationContainer);

@@ -1059,6 +1059,7 @@ void newGameAbilityMenuInterpretEnter(){
 			thisMainMenu->newGame->newPlayer->playerCharacter->y = thisMainMenu->newGame->avatars[thisMainMenu->newGame->currentAvatar]->y;
 			thisMainMenu->newGame->newPlayer->playerCharacter->xOff = 0;
 			thisMainMenu->newGame->newPlayer->playerCharacter->yOff = 0;
+			thisMainMenu->newGame->newPlayer->playerCharacter->direction = 0;
 
 			character * shadowCharacter = malloc(sizeof(character));
 			shadowCharacter->thisAnimationContainer = cloneAnimationContainer(thisMainMenu->newGame->newPlayer->playerCharacter->thisAnimationContainer);

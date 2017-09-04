@@ -438,6 +438,17 @@ void loadGroups(groupContainer * thisGroupContainer, mapInfo * thisMap, field * 
 			continue;
 		}
 
+		//in the case two individuals occoupy the same space due to respawning, yield to the non-respawning individual
+		if(getIndividualFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y) != NULL){
+			if(tmpIndividual->thisBehavior->respawns){
+				//don't add tmpIndividual
+				continue;
+			}else{
+				//remove existing individual
+				removeIndividualFromField(thisField, tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
+			}
+		}
+
 		moveIndividualSpace(thisField,tmpIndividual,tmpIndividual->playerCharacter->x, tmpIndividual->playerCharacter->y);
 
 		switch(tmpIndividual->currentGroupType){
@@ -1129,6 +1140,7 @@ int transitDuringFade(field ** thisField, individual * player, groupContainer * 
 
 	if(thisWindowTransition->fieldUnloaded){
 		areaNode * thisAreaNode = getAreaNodeFromRegistry(thisWindowTransition->areaNodeId);
+
 		mapInfo * thisMapInfo = getMapInfoFromRegistry(thisAreaNode->mapID);
 		player->jumpTarget = thisAreaNode->mapTransitID;
 
@@ -1162,9 +1174,8 @@ int attemptToTransit(field ** thisField, individual * player, groupContainer * t
 				return transit(thisField, areaNodeID, player, thisGroupContainer, viewShift, mapDirectory, mapName);
 			}else{
 				enableWindowTransition(fadeOut, 0, TRANSITION_MEDIUM, areaNodeID, mapDirectory, mapName);
+				return 0;
 			}
-
-			return 1;
 		}
 	return 0;
 }

@@ -484,7 +484,7 @@ void drawFusedAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, shift
 
 	SelectObject(hdcMem, selectedImage);
 
-	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, thisCharacter->x*50 + (int)(thisCharacter->xOff*50) - (viewShift->xShift)*50 - 25,thisCharacter->y*50 + (int)(thisCharacter->yOff*50) - (viewShift->yShift)*50 - 25,
 			100,100,
 			hdcMem,
 			shitfX,
@@ -507,7 +507,7 @@ void drawCharacterAnimationGreyscale(HDC hdc, HDC hdcBuffer, character * thisCha
 
 	SelectObject(hdcMem, selectedImageMask);
 
-	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, thisCharacter->x*50 + (int)(thisCharacter->xOff*50) - (viewShift->xShift)*50 - 25, thisCharacter->y*50 + (int)(thisCharacter->yOff*50) - (viewShift->yShift)*50 - 25,
 			100,100,
 			hdcMem,
 			shitfX,
@@ -516,7 +516,7 @@ void drawCharacterAnimationGreyscale(HDC hdc, HDC hdcBuffer, character * thisCha
 
 	SelectObject(hdcMem, selectedImage);
 
-	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, thisCharacter->x*50 + (int)(thisCharacter->xOff*50) - (viewShift->xShift)*50 - 25,thisCharacter->y*50 + (int)(thisCharacter->yOff*50) - (viewShift->yShift)*50 - 25,
 			100,100,
 			hdcMem,
 			shitfX,
@@ -567,7 +567,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 //			0,
 //			SRCPAINT);
 
-	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 + thisDrawArea->startX - 25, thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 + thisDrawArea->startY - 25,
+	BitBlt(hdcBuffer, thisCharacter->x*50 + (int)(thisCharacter->xOff*50) - (viewShift->xShift)*50 + thisDrawArea->startX - 25, thisCharacter->y*50 + (int)(thisCharacter->yOff*50) - (viewShift->yShift)*50 + thisDrawArea->startY - 25,
 			thisDrawArea->width,thisDrawArea->height,
 			hdcMem,
 			shitfX+thisDrawArea->startX,
@@ -576,7 +576,7 @@ void drawCharacterAnimation(HDC hdc, HDC hdcBuffer, character * thisCharacter, s
 
 	SelectObject(hdcMem, selectedImage);
 
-	BitBlt(hdcBuffer, thisCharacter->x*52 + (int)(thisCharacter->xOff*52) - (viewShift->xShift)*52 + thisDrawArea->startX - 25,thisCharacter->y*52 + (int)(thisCharacter->yOff*52) - (viewShift->yShift)*52 + thisDrawArea->startY - 25,
+	BitBlt(hdcBuffer, thisCharacter->x*50 + (int)(thisCharacter->xOff*50) - (viewShift->xShift)*50 + thisDrawArea->startX - 25,thisCharacter->y*50 + (int)(thisCharacter->yOff*50) - (viewShift->yShift)*50 + thisDrawArea->startY - 25,
 			thisDrawArea->width,thisDrawArea->height,
 			hdcMem,
 			shitfX+thisDrawArea->startX,
@@ -604,7 +604,7 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*52 + (int)(xOffset*52) - (viewShift->xShift)*52 - 25, yCord*52 + (int)(yOffset*52) - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*50 + (int)(xOffset*50) - (viewShift->xShift)*50 - 25, yCord*50 + (int)(yOffset*50) - (viewShift->yShift)*50 - 25,
 			thisDrawArea->width,thisDrawArea->height,
 			hdcMem,
 			shitfX+thisDrawArea->startX,
@@ -613,7 +613,7 @@ void drawLayerFromBaseAnimation(HDC hdc, HDC hdcBuffer, character * layer, anima
 
 	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*52 + (int)(xOffset*52) - (viewShift->xShift)*52 - 25, yCord*52 + (int)(yOffset*52) - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*50 + (int)(xOffset*50) - (viewShift->xShift)*50 - 25, yCord*50 + (int)(yOffset*50) - (viewShift->yShift)*50 - 25,
 			thisDrawArea->width,thisDrawArea->height,
 			hdcMem,
 			shitfX+thisDrawArea->startX,
@@ -641,7 +641,7 @@ void drawUnboundAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, characte
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -651,7 +651,7 @@ void drawUnboundAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, characte
 
 	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -678,7 +678,7 @@ void drawOverlappingAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, char
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -688,7 +688,7 @@ void drawOverlappingAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, char
 
 	SelectObject(hdcMem, image);
 
-	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
 //				thisIndividual->playerCharacter->width, thisIndividual->playerCharacter->height,
 			100,100,
 			hdcMem,
@@ -714,7 +714,7 @@ void drawUnboundShadowAnimation(HDC hdc, HDC hdcBuffer, int xCord, int yCord, ch
 
 	SelectObject(hdcMem, imageMask);
 
-	BitBlt(hdcBuffer, xCord*52 - (viewShift->xShift)*52 - 25, yCord*52 - (viewShift->yShift)*52 - 25,
+	BitBlt(hdcBuffer, xCord*50 - (viewShift->xShift)*50 - 25, yCord*50 - (viewShift->yShift)*50 - 25,
 			100,100,
 			hdcMem,
 			shitfX,
@@ -1266,7 +1266,7 @@ void makeImageGreyscale(int frameHeight, long totalWidth, char * lpPixels){
 				continue;
 			}
 
-			y = pow((tmpR/255.0),2.2)*0.2126 + pow((tmpG/255.0),2.2)*0.7152 + pow((tmpB/255.0),2.2)*0.0722;//pow(tmpR, gamma)*0.2126 + pow(tmpG, gamma)*0.7152 + pow(tmpB,gamma)*0.0722;
+			y = pow((tmpR/255.0),2.2)*0.2126 + pow((tmpG/255.0),2.2)*0.7150 + pow((tmpB/255.0),2.2)*0.0722;//pow(tmpR, gamma)*0.2126 + pow(tmpG, gamma)*0.7150 + pow(tmpB,gamma)*0.0722;
 			L = 116*pow(y,0.3333) - 16;
 
 			if(L > 255 || L < 0){

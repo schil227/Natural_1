@@ -251,7 +251,9 @@ END
 7515 BITMAP DISCARDABLE "../images/upstairs.bmp"
 7516 BITMAP DISCARDABLE "../images/downstairs.bmp"
 7517 BITMAP DISCARDABLE "../images/stone_floor.bmp"
-
+7518 BITMAP DISCARDABLE "../images/wall_front.bmp"
+7519 BITMAP DISCARDABLE "../images/shingles_red_down.bmp"
+7520 BITMAP DISCARDABLE "../images/shingles_red_corner.bmp"
 
 	//walkway
 7511 BITMAP DISCARDABLE "../images/path.bmp" //2541
@@ -262,6 +264,8 @@ END
 
 	//wilderness
 7514 BITMAP DISCARDABLE "../images/tree.bmp" //2561
+
+
 
 //item images 8500 - 9500
 8500 BITMAP DISCARDABLE "../images/sword_1_idle.bmp" //full: 3020
