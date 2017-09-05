@@ -1,0 +1,51 @@
+<map version="1.0.1">
+<!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
+<node CREATED="1503632530879" ID="ID_1400627900" MODIFIED="1503632832998" TEXT="Meta-Wizard introduction">
+<node CREATED="1503632662417" ID="ID_1128728374" MODIFIED="1503632966319" POSITION="right" STYLE="bubble" TEXT="&quot;My, it appears you&apos;ve suffered a terrible fate!&quot;">
+<arrowlink DESTINATION="ID_1128728374" ENDARROW="Default" ENDINCLINATION="0;0;" ID="Arrow_ID_1578060501" STARTARROW="None" STARTINCLINATION="0;0;"/>
+<linktarget COLOR="#b0b0b0" DESTINATION="ID_1128728374" ENDARROW="Default" ENDINCLINATION="0;0;" ID="Arrow_ID_1578060501" SOURCE="ID_1128728374" STARTARROW="None" STARTINCLINATION="0;0;"/>
+<node CREATED="1503632740877" ID="ID_994808165" MODIFIED="1503633031997" TEXT="Who are you?">
+<edge COLOR="#3399ff"/>
+<icon BUILTIN="male2"/>
+<node CREATED="1503632951989" ID="ID_1415814368" MODIFIED="1503633005167" TEXT="&quot;I... am the Meta-Wizard.&quot;">
+<edge COLOR="#000000"/>
+<node CREATED="1503633059352" ID="ID_931151546" MODIFIED="1503664483416" TEXT="&quot;I see all in this dimension and the next; from the brave adventurer standing before me to the operating system you&apos;re using to play this&quot;">
+<node CREATED="1503633300775" ID="ID_355233676" MODIFIED="1503633322689" TEXT="Huh? Keyboard?">
+<icon BUILTIN="male2"/>
+<node CREATED="1503633430649" ID="ID_449426279" MODIFIED="1503633436652" TEXT="Nevermind.">
+<node CREATED="1503633513186" HGAP="269" ID="ID_228508475" MODIFIED="1503665083538" TEXT="It&apos;s actually quite good that you&apos;re here. Now more than ever, this land needs a Champion." VSHIFT="-3">
+<linktarget COLOR="#b0b0b0" DESTINATION="ID_228508475" ENDARROW="Default" ENDINCLINATION="-14;13;" ID="Arrow_ID_1138283207" SOURCE="ID_1658338670" STARTARROW="None" STARTINCLINATION="55;-2;"/>
+<linktarget COLOR="#b0b0b0" DESTINATION="ID_228508475" ENDARROW="Default" ENDINCLINATION="-10;51;" ID="Arrow_ID_1699098949" SOURCE="ID_1099544200" STARTARROW="None" STARTINCLINATION="45;0;"/>
+<node CREATED="1503665086094" ID="ID_1263693630" MODIFIED="1503665366484" TEXT="Why&apos;s that?">
+<icon BUILTIN="male2"/>
+<node CREATED="1503665141230" HGAP="341" ID="ID_650368008" MODIFIED="1503665204325" TEXT="" VSHIFT="-5">
+<linktarget COLOR="#b0b0b0" DESTINATION="ID_650368008" ENDARROW="Default" ENDINCLINATION="-31;64;" ID="Arrow_ID_634513404" SOURCE="ID_799013138" STARTARROW="None" STARTINCLINATION="28;14;"/>
+</node>
+</node>
+<node CREATED="1503665100442" ID="ID_1828598417" MODIFIED="1503665198497" TEXT="Well, I AM the &apos;Chosen One&apos; after all.">
+<icon BUILTIN="male2"/>
+<node CREATED="1503665129992" ID="ID_799013138" MODIFIED="1503665183136" TEXT="Dont get ahead of yourself.">
+<arrowlink DESTINATION="ID_650368008" ENDARROW="Default" ENDINCLINATION="-31;64;" ID="Arrow_ID_634513404" STARTARROW="None" STARTINCLINATION="28;14;"/>
+</node>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1503633329058" ID="ID_510910940" MODIFIED="1503633359961" TEXT="Sure seems useful. Can you bring me home?">
+<icon BUILTIN="male2"/>
+<node CREATED="1503633474601" ID="ID_1658338670" MODIFIED="1503633667537" TEXT="Nope. However...">
+<arrowlink DESTINATION="ID_228508475" ENDARROW="Default" ENDINCLINATION="-14;13;" ID="Arrow_ID_1138283207" STARTARROW="None" STARTINCLINATION="55;-2;"/>
+</node>
+</node>
+<node CREATED="1503633373116" ID="ID_432240998" MODIFIED="1503633392445" TEXT="Really? breaking the fourth wall already?">
+<icon BUILTIN="male2"/>
+<node CREATED="1503633455284" ID="ID_1099544200" MODIFIED="1503633685994" TEXT="Yep. Strap in.">
+<arrowlink DESTINATION="ID_228508475" ENDARROW="Default" ENDINCLINATION="-10;51;" ID="Arrow_ID_1699098949" STARTARROW="None" STARTINCLINATION="45;0;"/>
+</node>
+</node>
+</node>
+</node>
+</node>
+</node>
+</node>
+</map>

@@ -8,7 +8,6 @@
 #include <winbase.h>
 #include<stdlib.h>
 #include<time.h>
-#include "./headers/general.h"
 #include "./headers/main_window.h"
 #include "./headers/field_controller_pub_methods.h"
 #include "./headers/cursor_pub_methods.h"
@@ -509,21 +508,27 @@ LRESULT CALLBACK TimerProc(PVOID lpParam, BOOLEAN TimerOrWaitFired){
 
 	drawGameMode(hdc, &rect);
 
-	if(readyToTransit()){//flag for ready to transit
-		HDC hdcBuffer = CreateCompatibleDC(hdc);
-
-		if(transitDuringFade(&main_field, player, thisGroupContainer, viewShift)){
-			while(!tryGetFieldWriteLock()){}
-
-			updateFieldGraphics(hdc, hdcBuffer, main_field);
-			transitViewShift(viewShift, player, main_field, &rect);
-			inActionMode = shouldEnableActionMode();
-
-			releaseFieldWriteLock();
-		}
-	}
+//	if(readyToTransit()){//flag for ready to transit
+//		HDC hdcBuffer = CreateCompatibleDC(hdc);
+//
+//		if(transitDuringFade(&main_field, player, thisGroupContainer, viewShift)){
+//			while(!tryGetFieldWriteLock()){}
+//
+//			updateFieldGraphics(hdc, hdcBuffer, main_field);
+//			transitViewShift(viewShift, player, main_field, &rect);
+//			inActionMode = shouldEnableActionMode();
+//
+//			releaseFieldWriteLock();
+//		}
+//	}
 
 	ReleaseDC(hwnd, hdc);
+
+	if(inWindowTransitionMode()){
+		if(readyToTransit()){
+			PostMessage(hwnd, WM_MOUSEACTIVATE, NULL, NULL);
+		}
+	}
 
 	if(isPaused()){
 		drawLock = 0;
@@ -668,8 +673,8 @@ void destroyGame(){
 void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	HDC hdc = GetDC(hwnd);
 	HDC hdcBuffer = CreateCompatibleDC(hdc);
-	RECT * rect;
-	GetClientRect(hwnd_global, rect);
+	RECT rect;
+	GetClientRect(hwnd, &rect);
 	char saveMapDirectory[256];
 	if(saveSlot >= 0 && saveSlot < 10){
 		sprintf(saveMapDirectory, "%ssaves\\save%d\\", mapDirectory, saveSlot);
@@ -745,7 +750,7 @@ void destroyAndLoad(HWND hwnd, int isFirstLoad, int saveSlot){
 	}
 
 	viewShift = initShiftData();
-	transitViewShift(viewShift, player, main_field, rect);
+	transitViewShift(viewShift, player, main_field, &rect);
 
 	inActionMode = shouldEnableActionMode();
 }
@@ -1412,8 +1417,36 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	}
 
 	//driven by the timerQueue callback
+//	if(inWindowTransitionMode()){
+//		return windowTransitionLoop(hwnd, msg, wParam, lParam);
+//	}
+
 	if(inWindowTransitionMode()){
-		return windowTransitionLoop(hwnd, msg, wParam, lParam);
+		if(readyToTransit()){//flag for ready to transit
+			RECT rect;
+			GetClientRect(hwnd, &rect);
+			HDC hdc = GetDC(hwnd);
+			HDC hdcBuffer = CreateCompatibleDC(hdc);
+
+			while(tryGetFieldReadLock()){}
+
+			if(transitDuringFade(&main_field, player, thisGroupContainer, viewShift)){
+				while(!tryGetFieldWriteLock()){}
+
+				updateFieldGraphics(hdc, hdcBuffer, main_field);
+				transitViewShift(viewShift, player, main_field, &rect);
+				inActionMode = shouldEnableActionMode();
+
+				releaseFieldWriteLock();
+			}
+
+			releaseFieldReadLock();
+
+			DeleteDC(hdcBuffer);
+			ReleaseDC(hwnd, hdc);
+		}else{
+			return windowTransitionLoop(hwnd, msg, wParam, lParam);
+		}
 	}
 
 	if(inGameMenuMode()){

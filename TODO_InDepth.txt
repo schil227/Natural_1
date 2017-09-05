@@ -1,6 +1,17 @@
 == TODO In Depth ==
-
-
+Opening scene:
+Art assets:
+	-meta-wizard
+	-meta-wizard portrait
+	-broken bridge
+	-rock cliff
+	-fog?
+Animation:
+	-meta-wizard popping in/out of existance
+Dialog:
+	-meta-wizard
+Code:
+	-meta-wizard initializes discussion
 
 == minor todos ==
 -make an onDeath function for individuals in general to clear out stuff only they use, such as active items, etc.
